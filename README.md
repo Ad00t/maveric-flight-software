@@ -1,7 +1,7 @@
-# La Jument Flight Software
+# MAVERIC Flight Software 
 
 ## Description
-This repository contains the flight software for the La Jument cubesat project. Two separate applications are provided within the source because the cubesat requires two separate processors or PPMs - the upper and lower PPMs. The codebase is configured, compiled, installed, and ran as a standalone, embedded application.
+This repository contains the flight software for the USC Space Engineering Research Center's CubeSat projects. Two separate applications are provided within the source because the cubesat requires two separate processors or PPMs - the upper and lower PPMs. The codebase is configured, compiled, installed, and ran as a standalone, embedded application.
 
 ## System Architecture
 The target hardware is the [PIC24FJ256GA110](https://www.microchip.com/wwwproducts/en/PIC24FJ256GA110) General Purpose 256 KB Flash Microcontroller, built by Microchip.
