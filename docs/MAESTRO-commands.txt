@@ -1,0 +1,86 @@
+r 121 (action)	Hard initialization and low-level hardware tests.
+
+r 121 0		Hard initialization.  Resets hardware and software variables.
+r 121 1		Power on the MAESTRO payload.
+r 121 2		Power off the MAESTRO payload.
+r 121 3		Drive the MAESTRO reset line low.
+r 121 4		Drive the MAESTRO reset line high
+r 121 5	(0/1)	Configure the UART for MAESTRO operations. 1==> high speed.
+r 121 6		Restore the UART for non-MAESTRO (iTAG) operations.
+r 121 7	(value)	Set the UART parity and stop bits.
+r 121 8	(0/1)	Set the UART nonblocking output mode.
+r 121 9 (char)	Send a character to the MAESTRO via the UART.
+
+===============================================================================
+r 122 (action)	Command the execution of the MAESTRO bootstrapper.
+
+r 122 0		Soft initialization, then start the current test program.
+r 122 0 (prog)	Soft initialization, set the current test program #, start it.
+r 122 1		Soft initialization.
+r 122 1 (prog)	Soft initialization, then set the current test program #.
+r 122 2		Start the current test program.
+r 122 2 (prog)	Set the current test program number,  then start it.
+r 122 3		Stop the test program running on the MAESTRO.
+r 122 4		Resume a MAESTRO test program after a stop.
+		Warning! Timeouts are not extended.
+
+===============================================================================
+r 123 (action)	Set MAESTRO bootstrapper parameters.
+
+Action letters are independent of case.
+
+r 123 F (0/1)	Set the show-program-fetches flag (low-level debugging).
+r 123 M (0-3)	Set the minimum message severity level for console debug msgs.
+r 123 O (6-digit hex) Set the current program offset.
+r 123 P (prog)	Set the current test program number.
+r 123 Q (0-3)	Set the min message severity level for packetization/queuing.
+r 123 R (0/1)	Set the show-received-chars flag (low-level debugging).
+r 123 T (0/1)	Set the trace flag (low-level debugging).
+r 123 W (wreg) (8-digit hex) Set a WREG to a value.
+r 123 Y (4-digit hex) Set the command execution yield limit.
+r 123 Z C (pwr) Set the system power threshold for continuing MAESTRO.
+r 123 Z S (pwr) Set the system power threshold for starting  MAESTRO.
+
+===============================================================================
+r 124 (action)	Show MAESTRO bootstrapping parameters.
+
+Action letters are independent of case.
+
+r 124 B		Report the MAESTRO beacons.
+r 124 C		Check the integrity of the current program.
+r 124 C (prog)	Check the integrity of the specified program.
+r 124 F		Show the show-program-fetches flag.
+r 124 I		List information about the current program.
+r 124 I (prog)	Full information about the specified program.
+r 124 J		Full information about all test programs.
+r 124 L		List the names of the test programs.
+r 124 M		Show the minimum message severity level for console debug msgs.
+r 124 N		Report the number of test programs available.
+r 124 O		Show the current program offset.
+r 124 P		Show the current program number.
+r 124 Q		Show the min message severity level for packetization/queuing.
+r 124 R		Show the show-received-chars flag.
+r 124 S		Report the status of the MAESTRO bootstrapper.
+r 124 T		Show the value of the trace flag.
+r 124 U		Report the MAESTRO UART I/O counters, if available.
+r 124 V		Print program bytes from the current program offset.
+r 124 W (reg)	Show the value in a WREG.
+r 124 X		Print program bytes from the current program offset, autoinc.
+r 124 Y		Show the command execution yield limit.
+r 124 Z		Report the system power threshold(s) and level.
+
+===============================================================================
+r 125 (action)	Manage the Payload C flash area.
+
+Action letters are independent of case.
+
+r 125 B (6-digit hex) Set the flash execution base offset.
+r 125 C (6-digit hex offset) (6-digit hex size) Clear part of flash.
+r 125 D (prog)   Delete the specified program from flash (sffs).
+r 125 F          Report the free space in flash (sffs).
+r 125 H	(6-digit offset) CR ...	Load a hex file.
+r 125 L (6-digit offset) (data) Load data from the command line.
+r 125 P (6-digit hex offset) Copy the current program into flash (raw).
+r 125 W W W W W W    Wipe the MAESTRO (PAYLOAD) flash area.
+r 125 X (prog)   Copy the specified program into flash (sffs).
+

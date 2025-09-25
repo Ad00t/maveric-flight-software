@@ -1,0 +1,433 @@
+
+/home/rogers/aeneas/maestro/TileraMDE-2.0.1.78377.tile49.20110505/src/tools/btk/comp_out/itc_chip_bringup_basic2_test/itc_chip_bringup_basic2_test.tilexe:     file format elf32-tile64
+
+Disassembly of section .text:
+
+10000200 <_start-0x10>:
+10000200:	1800aff9f0165000 	{ moveli r51, 21 }
+10000208:	3451866970165000 	{ mtspr DIAG_MUX_CTL, r51 }
+
+10000210 <_start>:
+10000210:	0833ffe080cfffc0 	{ move r0, zero ; move r1, zero }
+10000218:	0833ffe180cfffc2 	{ move r2, zero ; move r3, zero }
+10000220:	0833ffe280cfffc4 	{ move r4, zero ; move r5, zero }
+10000228:	0833ffe380cfffc6 	{ move r6, zero ; move r7, zero }
+10000230:	0833ffe480cfffc8 	{ move r8, zero ; move r9, zero }
+10000238:	0833ffe580cfffca 	{ move r10, zero ; move r11, zero }
+10000240:	0833ffe680cfffcc 	{ move r12, zero ; move r13, zero }
+10000248:	0833ffe780cfffce 	{ move r14, zero ; move r15, zero }
+10000250:	0833ffe880cfffd0 	{ move r16, zero ; move r17, zero }
+10000258:	0833ffe980cfffd2 	{ move r18, zero ; move r19, zero }
+10000260:	0833ffea80cfffd4 	{ move r20, zero ; move r21, zero }
+10000268:	0833ffeb80cfffd6 	{ move r22, zero ; move r23, zero }
+10000270:	0833ffec80cfffd8 	{ move r24, zero ; move r25, zero }
+10000278:	0833ffed80cfffda 	{ move r26, zero ; move r27, zero }
+10000280:	0833ffee80cfffdc 	{ move r28, zero ; move r29, zero }
+10000288:	0833ffef80cfffde 	{ move r30, zero ; move r31, zero }
+10000290:	0833fff080cfffe0 	{ move r32, zero ; move r33, zero }
+10000298:	0833fff180cfffe2 	{ move r34, zero ; move r35, zero }
+100002a0:	0833fff280cfffe4 	{ move r36, zero ; move r37, zero }
+100002a8:	0833fff380cfffe6 	{ move r38, zero ; move r39, zero }
+100002b0:	0833fff480cfffe8 	{ move r40, zero ; move r41, zero }
+100002b8:	0833fff580cfffea 	{ move r42, zero ; move r43, zero }
+100002c0:	0833fff680cfffec 	{ move r44, zero ; move r45, zero }
+100002c8:	0833fff780cfffee 	{ move r46, zero ; move r47, zero }
+100002d0:	0833fff880cffff0 	{ move r48, zero ; move r49, zero }
+100002d8:	0833fff980cffff2 	{ move r50, zero ; move r51, zero }
+100002e0:	0833fffa80cffff4 	{ move r52, zero ; move tp, zero }
+100002e8:	0833fffb80cffff6 	{ move sp, zero ; move lr, zero }
+100002f0:	0833ff14f0165000 	{ move r41, sn }
+100002f8:	0833ff1570165000 	{ move r42, sn }
+10000300:	0833ff15f0165000 	{ move r43, sn }
+10000308:	3451870970165000 	{ mtspr DIAG_MUX_CTL, sn }
+10000310:	34518709f0165000 	{ mtspr DIAG_TRACE_CTL, sn }
+10000318:	34504704f0165000 	{ mtspr WATCH_CTL, sn }
+10000320:	0833ff1ff0165000 	{ move zero, sn }
+10000328:	0833ff1ff0165000 	{ move zero, sn }
+10000330:	0833ff1ff0165000 	{ move zero, sn }
+10000338:	0833ff1ff0165000 	{ move zero, sn }
+10000340:	0833ff1ff0165000 	{ move zero, sn }
+10000348:	0833ff1ff0165000 	{ move zero, sn }
+10000350:	180007f9f0165000 	{ moveli r51, 0 }
+10000358:	26000679f0165000 	{ auli r51, r51, -16384 /* c0000000 <__bss_start+0xaffcf3c0> */ }
+10000360:	3051466b20078ff3 	{ moveli r51, 120 ; mtspr IDN_TILE_COORD, r51 }
+10000368:	30514669c0801ff3 	{ movei r51, 1 ; mtspr IDN_TAG_0, r51 }
+10000370:	3051466af0165000 	{ mtspr IDN_TAG_VALID, r51 }
+
+10000378 <set_coords>:
+10000378:	181007e570165000 	{ moveli r10, 512 }
+10000380:	2000214570165000 	{ auli r10, r10, 4 /* 40200 <_start-0xffc0010> */ }
+
+10000388 <debug_wr_sp_i2cm>:
+10000388:	0833fa2600cff24b 	{ move r11, r9 ; move r12, r17 }
+10000390:	30581fe740802fcd 	{ movei r13, 2 ; movei r14, 3 }
+10000398:	0833f947f0165000 	{ move r15, r10 }
+100003a0:	6006200070165000 	{ jal 100009c0 <wr_scratchpad_reg> }
+
+100003a8 <ui_sync_wr_cfg_reg_hpi1>:
+100003a8:	0833fa2600cff24b 	{ move r11, r9 ; move r12, r17 }
+100003b0:	30581fe740805fcd 	{ movei r13, 5 ; movei r14, 3 }
+100003b8:	30182147f0165000 	{ addi r15, r10, 4 }
+100003c0:	6006000070165000 	{ jal 100009c0 <wr_scratchpad_reg> }
+
+100003c8 <ui_sync_rd_cfg_reg_hpi1>:
+100003c8:	0833fa2600cff24b 	{ move r11, r9 ; move r12, r17 }
+100003d0:	30581fe740805fcd 	{ movei r13, 5 ; movei r14, 3 }
+100003d8:	6002100070165000 	{ jal 100005e8 <rd_cfg_reg_0> }
+100003e0:	2bffe9f970165000 	{ bnz r15, 100003c8 <ui_sync_rd_cfg_reg_hpi1> }
+
+100003e8 <ui_sync_wr_cfg_reg_hpi2>:
+100003e8:	0833fa2600cff24b 	{ move r11, r9 ; move r12, r17 }
+100003f0:	30581fe740805fcd 	{ movei r13, 5 ; movei r14, 3 }
+100003f8:	30182947f0165000 	{ addi r15, r10, 5 }
+10000400:	6005c00070165000 	{ jal 100009c0 <wr_scratchpad_reg> }
+
+10000408 <wr_cfg_reg_rshim>:
+10000408:	0833fa2600cff24b 	{ move r11, r9 ; move r12, r17 }
+10000410:	30581fe740800fcd 	{ movei r13, 0 ; movei r14, 3 }
+10000418:	0833ffe7f0165000 	{ move r15, zero }
+10000420:	6005a00070165000 	{ jal 100009c0 <wr_scratchpad_reg> }
+10000428:	0833fa2600cff24b 	{ move r11, r9 ; move r12, r17 }
+10000430:	18001fe740804fcd 	{ movei r13, 4 ; moveli r14, 3 }
+10000438:	1d676fe7f0165000 	{ moveli r15, -21267 }
+10000440:	206f81e7f0165000 	{ auli r15, r15, 3568 /* defaced <_start-0x2105523> */ }
+10000448:	6005780070165000 	{ jal 100009c0 <wr_scratchpad_reg> }
+10000450:	5000000070165000 	{ j 10000450 <wr_cfg_reg_rshim+0x48> }
+10000458:	400b880070166000 	{ nop ; nop }
+10000460:	400b880070166000 	{ nop ; nop }
+10000468:	400b880070166000 	{ nop ; nop }
+10000470:	400b880070166000 	{ nop ; nop }
+10000478:	400b880070166000 	{ nop ; nop }
+
+10000480 <_last_addr>:
+10000480:	301ff85a403ff073 	{ addi r51, r1, -1 ; addi r52, r2, -1 }
+10000488:	40041e79f0165000 	{ shli r51, r51, 3 }
+10000490:	081606e000cf4ccb 	{ or r11, r51, r52 ; jrp lr }
+
+10000498 <get_my_bit_0>:
+10000498:	6fffefff80cffdce 	{ move r14, lr ; jal 10000480 <_last_addr> }
+100004a0:	30210179f0165000 	{ andi r51, r11, 32 }
+100004a8:	280016615011f2cb 	{ andi r11, r11, 31 ; bnz r51, 100004b8 <use_high_word> }
+
+100004b0 <use_low_word>:
+100004b0:	081601c00120b30b 	{ shr r11, r12, r11 ; jrp r14 }
+
+100004b8 <use_high_word>:
+100004b8:	081601c00120b34b 	{ shr r11, r13, r11 ; jrp r14 }
+
+100004c0 <clear_static_route_0>:
+100004c0:	30390139f0165000 	{ mfspr r51, SNISTATE }
+100004c8:	2bfffe7970165000 	{ bnz r51, 100004c0 <clear_static_route_0> }
+100004d0:	19999ffa70165000 	{ moveli r52, 13107 }
+
+100004d8 <wait_for_snostate>:
+100004d8:	30390159f0165000 	{ mfspr r51, SNOSTATE }
+100004e0:	0883a679f0165000 	{ xor r51, r51, r52 }
+100004e8:	2bfff67970165000 	{ bnz r51, 100004d8 <wait_for_snostate> }
+100004f0:	3051066670165000 	{ mtspr SNSTATIC, r51 }
+100004f8:	081606e070165000 	{ jrp lr }
+
+10000500 <calc_src_id_0>:
+10000500:	087e299a017472f3 	{ sub r51, r11, r7 ; sub r52, r12, r5 }
+10000508:	40041e79f0165000 	{ shli r51, r51, 3 }
+10000510:	081606e000cf4ccd 	{ or r13, r51, r52 ; jrp lr }
+
+10000518 <send_msg_0>:
+10000518:	4004399a700922f3 	{ shli r51, r11, 18 ; shli r52, r12, 7 }
+10000520:	0833a679f0165000 	{ or r51, r51, r52 }
+10000528:	30182e7df0165000 	{ addi udn0, r51, 5 }
+10000530:	180327fdf0165000 	{ moveli udn0, 100 }
+10000538:	343982f9f0165000 	{ mfspr r51, TILE_COORD }
+10000540:	08066e7df0165000 	{ add udn0, r51, r13 }
+10000548:	0833f9ddf0165000 	{ move udn0, r14 }
+10000550:	0833f9fdf0165000 	{ move udn0, r15 }
+10000558:	081606e000cff43b 	{ move udn0, r16 ; jrp lr }
+
+10000560 <get_msg_0>:
+10000560:	0833ff65f0165000 	{ move r11, udn0 }
+10000568:	0833ff6670165000 	{ move r12, udn0 }
+10000570:	0833ff66f0165000 	{ move r13, udn0 }
+10000578:	081606e000cffece 	{ move r14, udn0 ; jrp lr }
+
+10000580 <wr_cfg_reg_0>:
+10000580:	6000100000cffdd0 	{ move r16, lr ; jal 10000590 <start_wr_cfg_reg_0> }
+10000588:	3039601ff0165000 	{ mfspr zero, IDN_CA_DATA }
+
+10000590 <start_wr_cfg_reg_0>:
+10000590:	4004399a700922f3 	{ shli r51, r11, 18 ; shli r52, r12, 7 }
+10000598:	0833a679f0165000 	{ or r51, r51, r52 }
+100005a0:	21000679f0165000 	{ auli r51, r51, 8192 }
+100005a8:	3018267cf0165000 	{ addi idn0, r51, 4 }
+100005b0:	184801ba7008c3b3 	{ shli r51, r14, 12 ; addli r52, r13, 2304 }
+100005b8:	0833a67cf0165000 	{ or idn0, r51, r52 }
+100005c0:	303942d9f0165000 	{ mfspr r51, IDN_TILE_COORD }
+100005c8:	0833fe7cf0165000 	{ move idn0, r51 }
+100005d0:	180007fcf0165000 	{ moveli idn0, 0 }
+100005d8:	0833f9fcf0165000 	{ move idn0, r15 }
+100005e0:	081606e070165000 	{ jrp lr }
+
+100005e8 <rd_cfg_reg_0>:
+100005e8:	6000200000cffdd0 	{ move r16, lr ; jal 10000608 <start_rd_cfg_reg_0> }
+100005f0:	3039601ff0165000 	{ mfspr zero, IDN_CA_DATA }
+100005f8:	30396007f0165000 	{ mfspr r15, IDN_CA_DATA }
+10000600:	0816020070165000 	{ jrp r16 }
+
+10000608 <start_rd_cfg_reg_0>:
+10000608:	4004399a700922f3 	{ shli r51, r11, 18 ; shli r52, r12, 7 }
+10000610:	0833a679f0165000 	{ or r51, r51, r52 }
+10000618:	21000679f0165000 	{ auli r51, r51, 8192 }
+10000620:	30181e7cf0165000 	{ addi idn0, r51, 3 }
+10000628:	184401ba7008c3b3 	{ shli r51, r14, 12 ; addli r52, r13, 2176 }
+10000630:	0833a67cf0165000 	{ or idn0, r51, r52 }
+10000638:	303942d9f0165000 	{ mfspr r51, IDN_TILE_COORD }
+10000640:	0833fe7cf0165000 	{ move idn0, r51 }
+10000648:	180007fcf0165000 	{ moveli idn0, 0 }
+10000650:	081606e070165000 	{ jrp lr }
+
+10000658 <setup_mmap_0>:
+10000658:	34518163f0165000 	{ mtspr CBOX_MMAP_0, r11 }
+10000660:	081606e070165000 	{ jrp lr }
+
+10000668 <start_a_tile_0>:
+10000668:	4004399a700922f3 	{ shli r51, r11, 18 ; shli r52, r12, 7 }
+10000670:	0833a679f0165000 	{ or r51, r51, r52 }
+10000678:	30181e7cf0165000 	{ addi idn0, r51, 3 }
+10000680:	1803c7fcf0165000 	{ moveli idn0, 120 }
+10000688:	200047fcf0165000 	{ auli idn0, zero, 8 }
+10000690:	081606e020800ff9 	{ moveli idn0, 2048 ; jrp lr }
+
+10000698 <set_result_bit_1>:
+10000698:	0833feec70165000 	{ move r24, lr }
+100006a0:	0833ffeb80cfffd6 	{ move r22, zero ; move r23, zero }
+100006a8:	280032a170165000 	{ bnz r21, 100006d8 <set_result_bit_return> }
+100006b0:	6ffdd7fff0165000 	{ jal 10000480 <_last_addr> }
+100006b8:	30580ffa501202f3 	{ andi r51, r11, 32 ; movei r52, 1 }
+100006c0:	280016615011f2f3 	{ andi r51, r11, 31 ; bnz r51, 100006d0 <result_in_high_word> }
+100006c8:	5000100001173d16 	{ shl r22, r52, r51 ; j 100006d8 <set_result_bit_return> }
+
+100006d0 <result_in_high_word>:
+100006d0:	084d9e8bf0165000 	{ shl r23, r52, r51 }
+
+100006d8 <set_result_bit_return>:
+100006d8:	0816030070165000 	{ jrp r24 }
+
+100006e0 <config_mshim_io_source_id_1>:
+100006e0:	0833feed70165000 	{ move r26, lr }
+100006e8:	0833fb2600cff60b 	{ move r11, r24 ; move r12, r25 }
+100006f0:	0833ffe6f0165000 	{ move r13, zero }
+100006f8:	180402a770165000 	{ addli r14, r21, 128 }
+10000700:	08062aeb800c7596 	{ add r22, r22, r7 ; add r23, r23, r5 }
+10000708:	40045acb20000fcf 	{ moveli r15, 0 ; shli r22, r22, 11 }
+10000710:	0832bacb300c03cf 	{ auli r15, r15, 192 /* c00000 <_start-0xf400210> */ ; or r22, r22, r23 }
+10000718:	0832b1e7f0165000 	{ or r15, r15, r22 }
+10000720:	6ffe67fff0165000 	{ jal 10000580 <wr_cfg_reg_0> }
+10000728:	0816034070165000 	{ jrp r26 }
+
+10000730 <send_sync_1>:
+10000730:	0833feec70165000 	{ move r24, lr }
+10000738:	0833f8ab80cff1d6 	{ move r22, r7 ; move r23, r5 }
+
+10000740 <send_sync_messages>:
+10000740:	087e0ad9f0165000 	{ sub r51, r22, r1 }
+10000748:	28001661017425f3 	{ sub r51, r23, r2 ; bnz r51, 10000758 <send_sync_msg> }
+10000750:	28002e6070165000 	{ bz r51, 10000778 <check_inc_x> }
+
+10000758 <send_sync_msg>:
+10000758:	0833fae600cff58b 	{ move r11, r22 ; move r12, r23 }
+10000760:	0833faa740801fcd 	{ movei r13, 1 ; move r14, r21 }
+10000768:	0833fb4870165000 	{ move r16, r26 }
+10000770:	6ffdafff80cff64f 	{ move r15, r25 ; jal 10000518 <send_msg_0> }
+
+10000778 <check_inc_x>:
+10000778:	087e42d9f0165000 	{ sub r51, r22, r8 }
+10000780:	2bffc67940301596 	{ addi r22, r22, 1 ; bnz r51, 10000740 <send_sync_messages> }
+10000788:	0833f8eb70165000 	{ move r22, r7 }
+10000790:	087e32f9f0165000 	{ sub r51, r23, r6 }
+10000798:	28001660403015d7 	{ addi r23, r23, 1 ; bz r51, 100007a8 <send_sync_ret> }
+100007a0:	5fffa7fff0165000 	{ j 10000740 <send_sync_messages> }
+
+100007a8 <send_sync_ret>:
+100007a8:	0816030070165000 	{ jrp r24 }
+
+100007b0 <start_tiles_1>:
+100007b0:	0833feec70165000 	{ move r24, lr }
+100007b8:	0833f8ab80cff1d6 	{ move r22, r7 ; move r23, r5 }
+
+100007c0 <start_tiles>:
+100007c0:	087e0ad9f0165000 	{ sub r51, r22, r1 }
+100007c8:	28001661017425f3 	{ sub r51, r23, r2 ; bnz r51, 100007d8 <send_start_pkt> }
+100007d0:	28001e6070165000 	{ bz r51, 100007e8 <start_tiles_check_inc_x> }
+
+100007d8 <send_start_pkt>:
+100007d8:	0833fae600cff58b 	{ move r11, r22 ; move r12, r23 }
+100007e0:	6ffe8ffff0165000 	{ jal 10000668 <start_a_tile_0> }
+
+100007e8 <start_tiles_check_inc_x>:
+100007e8:	087e42d9f0165000 	{ sub r51, r22, r8 }
+100007f0:	2bffd67940301596 	{ addi r22, r22, 1 ; bnz r51, 100007c0 <start_tiles> }
+100007f8:	0833f8eb70165000 	{ move r22, r7 }
+10000800:	087e32f9f0165000 	{ sub r51, r23, r6 }
+10000808:	28001660403015d7 	{ addi r23, r23, 1 ; bz r51, 10000818 <start_tiles_ret> }
+10000810:	5fffb7fff0165000 	{ j 100007c0 <start_tiles> }
+
+10000818 <start_tiles_ret>:
+10000818:	0816030070165000 	{ jrp r24 }
+
+10000820 <output_msg_1>:
+10000820:	0833feec70165000 	{ move r24, lr }
+10000828:	08068fe6000c9fcb 	{ add r11, zero, r9 ; add r12, zero, r17 }
+10000830:	181027e740800fcd 	{ movei r13, 0 ; moveli r14, 516 }
+
+10000838 <get_semaphore>:
+10000838:	6ffdb7fff0165000 	{ jal 100005e8 <rd_cfg_reg_0> }
+10000840:	2bfff9fe70165000 	{ bbs r15, 10000838 <get_semaphore> }
+10000848:	30581fe740805fcd 	{ movei r13, 5 ; movei r14, 3 }
+
+10000850 <check_flag>:
+10000850:	6ffd9ffff0165000 	{ jal 100005e8 <rd_cfg_reg_0> }
+10000858:	2bfff9f970165000 	{ bnz r15, 10000850 <check_flag> }
+10000860:	30581fe740800fcd 	{ movei r13, 0 ; movei r14, 3 }
+10000868:	6ffd1fff80cff58f 	{ move r15, r22 ; jal 10000580 <wr_cfg_reg_0> }
+10000870:	30a82ab9f0165000 	{ xori r51, r21, 5 }
+10000878:	28001e6170165000 	{ bnz r51, 10000890 <done_spi_scratchpad_write> }
+10000880:	30581fe740801fcd 	{ movei r13, 1 ; movei r14, 3 }
+10000888:	6ffcffff80cff5cf 	{ move r15, r23 ; jal 10000580 <wr_cfg_reg_0> }
+
+10000890 <done_spi_scratchpad_write>:
+10000890:	30581fe740805fcd 	{ movei r13, 5 ; movei r14, 3 }
+10000898:	343982e7f0165000 	{ mfspr r15, TILE_COORD }
+100008a0:	6ffce7ff800d53cf 	{ add r15, r15, r21 ; jal 10000580 <wr_cfg_reg_0> }
+100008a8:	181027e740800fcd 	{ movei r13, 0 ; moveli r14, 516 }
+100008b0:	6ffcd7ff80cfffcf 	{ move r15, zero ; jal 10000580 <wr_cfg_reg_0> }
+100008b8:	0816030070165000 	{ jrp r24 }
+
+100008c0 <get_sync_2>:
+100008c0:	305fffef80cffde0 	{ move r32, lr ; movei r31, -1 }
+100008c8:	087e28d081747233 	{ sub r51, r8, r7 ; sub r33, r6, r5 }
+100008d0:	30180e79c0301861 	{ addi r33, r33, 1 ; addi r51, r51, 1 }
+100008d8:	400b280000aa1ce1 	{ mulll_ss r33, r51, r33 }
+100008e0:	305ffff1403ff861 	{ addi r33, r33, -1 ; movei r34, -1 }
+
+100008e8 <get_sync_messages>:
+100008e8:	28005c2070165000 	{ bz r33, 10000940 <get_sync_ret> }
+100008f0:	28003c6070165000 	{ bz r35, 10000928 <get_sync_get_msg> }
+100008f8:	18000ffa70165000 	{ moveli r52, 1 }
+10000900:	3039a079f0165000 	{ mfspr r51, UDN_DATA_AVAIL }
+
+10000908 <get_sync_check_data_avail>:
+10000908:	28002666403ffd34 	{ addi r52, r52, -1 ; bbs r51, 10000928 <get_sync_get_msg> }
+10000910:	2800368070165000 	{ bz r52, 10000940 <get_sync_ret> }
+10000918:	3039a079f0165000 	{ mfspr r51, UDN_DATA_AVAIL }
+10000920:	5fffeffff0165000 	{ j 10000908 <get_sync_check_data_avail> }
+
+10000928 <get_sync_get_msg>:
+10000928:	6ffc3ffff0165000 	{ jal 10000560 <get_msg_0> }
+10000930:	08826c510178c7df 	{ xor r31, r31, r12 ; xor r34, r34, r13 }
+10000938:	5fffb7ffc03ff861 	{ addi r33, r33, -1 ; j 100008e8 <get_sync_messages> }
+
+10000940 <get_sync_ret>:
+10000940:	0816040070165000 	{ jrp r32 }
+
+10000948 <check_error_regs_3>:
+10000948:	28002c8070165000 	{ bz r36, 10000970 <check_mbox_status> }
+10000950:	305ffff9f0165000 	{ movei r51, -1 }
+10000958:	40072679f0165000 	{ shri r51, r51, 4 }
+10000960:	08099c9270165000 	{ and r36, r36, r51 }
+10000968:	2400049270165000 	{ auli r36, r36, -32768 }
+
+10000970 <check_mbox_status>:
+10000970:	30384159f0165000 	{ mfspr r51, MEM_ERROR_MBOX_STATUS }
+10000978:	2800166070165000 	{ bz r51, 10000988 <mbox_status_checked> }
+10000980:	2200049270165000 	{ auli r36, r36, 16384 }
+
+10000988 <mbox_status_checked>:
+10000988:	303840f9f0165000 	{ mfspr r51, MEM_ERROR_CBOX_STATUS }
+10000990:	2800166070165000 	{ bz r51, 100009a0 <cbox_status_checked> }
+10000998:	2100049270165000 	{ auli r36, r36, 8192 }
+
+100009a0 <cbox_status_checked>:
+100009a0:	303840b9f0165000 	{ mfspr r51, L1_I_ERROR }
+100009a8:	2800166070165000 	{ bz r51, 100009b8 <icache_status_checked> }
+100009b0:	2080049270165000 	{ auli r36, r36, 4096 }
+
+100009b8 <icache_status_checked>:
+100009b8:	081606e070165000 	{ jrp lr }
+
+100009c0 <wr_scratchpad_reg>:
+100009c0:	40043994f00922d0 	{ shli r16, r11, 18 ; shli r41, r12, 7 }
+100009c8:	08334a0870165000 	{ or r16, r16, r41 }
+100009d0:	2100020870165000 	{ auli r16, r16, 8192 }
+100009d8:	3018221cf0165000 	{ addi idn0, r16, 4 }
+100009e0:	184801b4f008c390 	{ shli r16, r14, 12 ; addli r41, r13, 2304 }
+100009e8:	08334a1cf0165000 	{ or idn0, r16, r41 }
+100009f0:	303942c870165000 	{ mfspr r16, IDN_TILE_COORD }
+100009f8:	0833fa1cf0165000 	{ move idn0, r16 }
+10000a00:	1803c7fcf0165000 	{ moveli idn0, 120 }
+10000a08:	0833f9fcf0165000 	{ move idn0, r15 }
+10000a10:	081606e070165000 	{ jrp lr }
+
+10000a18 <set_boot_fail_messages>:
+10000a18:	305817e570165000 	{ movei r10, 2 }
+10000a20:	181007e9f0165000 	{ moveli r19, 512 }
+10000a28:	20002269f0165000 	{ auli r19, r19, 4 /* 40200 <_start-0xffc0010> */ }
+10000a30:	081606e070165000 	{ jrp lr }
+
+10000a38 <set_boot_pass_messages>:
+10000a38:	30582fe570165000 	{ movei r10, 5 }
+10000a40:	0833ffe9f0165000 	{ move r19, zero }
+10000a48:	081606e070165000 	{ jrp lr }
+10000a50:	400b880070166000 	{ nop ; nop }
+10000a58:	400b880070166000 	{ nop ; nop }
+10000a60:	400b880070166000 	{ nop ; nop }
+10000a68:	400b880070166000 	{ nop ; nop }
+10000a70:	400b880070166000 	{ nop ; nop }
+10000a78:	400b880070166000 	{ nop ; nop }
+10000a80:	400b880070166000 	{ nop ; nop }
+10000a88:	400b880070166000 	{ nop ; nop }
+10000a90:	400b880070166000 	{ nop ; nop }
+10000a98:	400b880070166000 	{ nop ; nop }
+10000aa0:	400b880070166000 	{ nop ; nop }
+10000aa8:	400b880070166000 	{ nop ; nop }
+10000ab0:	400b880070166000 	{ nop ; nop }
+10000ab8:	400b880070166000 	{ nop ; nop }
+10000ac0:	400b880070166000 	{ nop ; nop }
+10000ac8:	400b880070166000 	{ nop ; nop }
+10000ad0:	400b880070166000 	{ nop ; nop }
+10000ad8:	400b880070166000 	{ nop ; nop }
+10000ae0:	400b880070166000 	{ nop ; nop }
+10000ae8:	400b880070166000 	{ nop ; nop }
+10000af0:	400b880070166000 	{ nop ; nop }
+10000af8:	400b880070166000 	{ nop ; nop }
+10000b00:	400b880070166000 	{ nop ; nop }
+10000b08:	400b880070166000 	{ nop ; nop }
+10000b10:	400b880070166000 	{ nop ; nop }
+10000b18:	400b880070166000 	{ nop ; nop }
+10000b20:	400b880070166000 	{ nop ; nop }
+10000b28:	400b880070166000 	{ nop ; nop }
+10000b30:	400b880070166000 	{ nop ; nop }
+10000b38:	400b880070166000 	{ nop ; nop }
+10000b40:	400b880070166000 	{ nop ; nop }
+10000b48:	400b880070166000 	{ nop ; nop }
+10000b50:	400b880070166000 	{ nop ; nop }
+10000b58:	400b880070166000 	{ nop ; nop }
+10000b60:	400b880070166000 	{ nop ; nop }
+10000b68:	400b880070166000 	{ nop ; nop }
+10000b70:	400b880070166000 	{ nop ; nop }
+10000b78:	400b880070166000 	{ nop ; nop }
+10000b80:	400b880070166000 	{ nop ; nop }
+10000b88:	400b880070166000 	{ nop ; nop }
+10000b90:	400b880070166000 	{ nop ; nop }
+10000b98:	400b880070166000 	{ nop ; nop }
+10000ba0:	400b880070166000 	{ nop ; nop }
+10000ba8:	400b880070166000 	{ nop ; nop }
+10000bb0:	400b880070166000 	{ nop ; nop }
+10000bb8:	400b880070166000 	{ nop ; nop }
+10000bc0:	400b880070166000 	{ nop ; nop }
+10000bc8:	400b880070166000 	{ nop ; nop }
+10000bd0:	400b880070166000 	{ nop ; nop }
+10000bd8:	400b880070166000 	{ nop ; nop }
+10000be0:	400b880070166000 	{ nop ; nop }
+10000be8:	400b880070166000 	{ nop ; nop }
+10000bf0:	400b880070166000 	{ nop ; nop }
+10000bf8:	400b880070166000 	{ nop ; nop }
+	...

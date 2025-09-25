@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{f39a940f-49e7-4281-81d9-33bc88cc39d6}</ProjectGuid>
+    <RootNamespace>Dodona</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(ProjectDir)..\..\src;$(IncludePath);$(ProjectDir)..\..\externals\sboot\includes</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(ProjectDir)..\..\src;$(IncludePath);$(ProjectDir)..\..\externals\sboot\includes</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(ProjectDir)..\..\src;$(IncludePath);$(ProjectDir)..\..\externals\sboot\includes</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(ProjectDir)..\..\src;$(IncludePath);$(ProjectDir)..\..\externals\sboot\includes</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);DESKTOP</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);DESKTOP</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);DESKTOP</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);DESKTOP</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\adc.c" />
+    <ClCompile Include="..\..\src\burn.c" />
+    <ClCompile Include="..\..\src\clocktest.c" />
+    <ClCompile Include="..\..\src\commandmanager.c" />
+    <ClCompile Include="..\..\src\crc.c" />
+    <ClCompile Include="..\..\src\debug.c" />
+    <ClCompile Include="..\..\src\downlinkmessage.c" />
+    <ClCompile Include="..\..\src\eps.c" />
+    <ClCompile Include="..\..\src\errors.c" />
+    <ClCompile Include="..\..\src\flashmanager.c" />
+    <ClCompile Include="..\..\src\flash_AT25DF641.c" />
+    <ClCompile Include="..\..\src\fredtime.c" />
+    <ClCompile Include="..\..\src\FSW.c" />
+    <ClCompile Include="..\..\src\geomag.c" />
+    <ClCompile Include="..\..\src\GomSpace\crc32.c" />
+    <ClCompile Include="..\..\src\GomSpace\cspHeader.c" />
+    <ClCompile Include="..\..\src\GomSpace\frame.c" />
+    <ClCompile Include="..\..\src\GomSpace\kiss.c" />
+    <ClCompile Include="..\..\src\gyro.c" />
+    <ClCompile Include="..\..\src\hyperterm.c" />
+    <ClCompile Include="..\..\src\i2c.c" />
+    <ClCompile Include="..\..\src\imi100.c" />
+    <ClCompile Include="..\..\src\inet.c" />
+    <ClCompile Include="..\..\src\itag.c" />
+    <ClCompile Include="..\..\src\labview.c" />
+    <ClCompile Include="..\..\src\linkmanager.c" />
+    <ClCompile Include="..\..\src\loader_pcd.c" />
+    <ClCompile Include="..\..\src\lower_tx.c" />
+    <ClCompile Include="..\..\src\macros.c" />
+    <ClCompile Include="..\..\src\maestro.c" />
+    <ClCompile Include="..\..\src\maestro_flash.c" />
+    <ClCompile Include="..\..\src\mag.c" />
+    <ClCompile Include="..\..\src\main.c" />
+    <ClCompile Include="..\..\src\mhx.c" />
+    <ClCompile Include="..\..\src\mystack.c" />
+    <ClCompile Include="..\..\src\Neon.c" />
+    <ClCompile Include="..\..\src\nonblock.c" />
+    <ClCompile Include="..\..\src\orbit.c" />
+    <ClCompile Include="..\..\src\payloadmanager.c" />
+    <ClCompile Include="..\..\src\payload_smartsat.c" />
+    <ClCompile Include="..\..\src\ports.c" />
+    <ClCompile Include="..\..\src\schedule.c" />
+    <ClCompile Include="..\..\src\spi.c" />
+    <ClCompile Include="..\..\src\stensat.c" />
+    <ClCompile Include="..\..\src\sunsensor.c" />
+    <ClCompile Include="..\..\src\telemetry.c" />
+    <ClCompile Include="..\..\src\time.c" />
+    <ClCompile Include="..\..\src\transceiver_gomspace.c" />
+    <ClCompile Include="..\..\src\tx_manager.c" />
+    <ClCompile Include="..\..\src\uplinkmessage.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\24FJ256GA110.h" />
+    <ClInclude Include="..\..\src\adc.h" />
+    <ClInclude Include="..\..\src\address.h" />
+    <ClInclude Include="..\..\src\address_lower.h" />
+    <ClInclude Include="..\..\src\address_upper.h" />
+    <ClInclude Include="..\..\src\burn.h" />
+    <ClInclude Include="..\..\src\commandmanager.h" />
+    <ClInclude Include="..\..\src\common.h" />
+    <ClInclude Include="..\..\src\config.h" />
+    <ClInclude Include="..\..\src\crc.h" />
+    <ClInclude Include="..\..\src\debug.h" />
+    <ClInclude Include="..\..\src\downlinkmessage.h" />
+    <ClInclude Include="..\..\src\eps.h" />
+    <ClInclude Include="..\..\src\errors.h" />
+    <ClInclude Include="..\..\src\flash.h" />
+    <ClInclude Include="..\..\src\flashmanager.h" />
+    <ClInclude Include="..\..\src\fredtime.h" />
+    <ClInclude Include="..\..\src\fsw.h" />
+    <ClInclude Include="..\..\src\geomag.h" />
+    <ClInclude Include="..\..\src\globals.h" />
+    <ClInclude Include="..\..\src\GomSpace\crc32.h" />
+    <ClInclude Include="..\..\src\GomSpace\cspHeader.h" />
+    <ClInclude Include="..\..\src\GomSpace\frame.h" />
+    <ClInclude Include="..\..\src\GomSpace\kiss.h" />
+    <ClInclude Include="..\..\src\gyro.h" />
+    <ClInclude Include="..\..\src\hyperterm.h" />
+    <ClInclude Include="..\..\src\i2c.h" />
+    <ClInclude Include="..\..\src\imi100.h" />
+    <ClInclude Include="..\..\src\inet.h" />
+    <ClInclude Include="..\..\src\itag.h" />
+    <ClInclude Include="..\..\src\labview.h" />
+    <ClInclude Include="..\..\src\linalg.h" />
+    <ClInclude Include="..\..\src\linkmanager.h" />
+    <ClInclude Include="..\..\src\lower_tx.h" />
+    <ClInclude Include="..\..\src\macros.h" />
+    <ClInclude Include="..\..\src\maestro.h" />
+    <ClInclude Include="..\..\src\maestro_flash.h" />
+    <ClInclude Include="..\..\src\mag.h" />
+    <ClInclude Include="..\..\src\menu.h" />
+    <ClInclude Include="..\..\src\mhx.h" />
+    <ClInclude Include="..\..\src\mystack.h" />
+    <ClInclude Include="..\..\src\Neon.h" />
+    <ClInclude Include="..\..\src\nonblock.h" />
+    <ClInclude Include="..\..\src\orbit.h" />
+    <ClInclude Include="..\..\src\payload.h" />
+    <ClInclude Include="..\..\src\payloadmanager.h" />
+    <ClInclude Include="..\..\src\PCD_Bootloader.h" />
+    <ClInclude Include="..\..\src\pins.h" />
+    <ClInclude Include="..\..\src\pinscustom.h" />
+    <ClInclude Include="..\..\src\pinslower.h" />
+    <ClInclude Include="..\..\src\pinsupper.h" />
+    <ClInclude Include="..\..\src\ports.h" />
+    <ClInclude Include="..\..\src\schedule.h" />
+    <ClInclude Include="..\..\src\spi.h" />
+    <ClInclude Include="..\..\src\stensat.h" />
+    <ClInclude Include="..\..\src\sunsensor.h" />
+    <ClInclude Include="..\..\src\telemetry.h" />
+    <ClInclude Include="..\..\src\time.h" />
+    <ClInclude Include="..\..\src\transceiver.h" />
+    <ClInclude Include="..\..\src\tx_manager.h" />
+    <ClInclude Include="..\..\src\unsorted.h" />
+    <ClInclude Include="..\..\src\uplinkmessage.h" />
+    <ClInclude Include="..\..\src\wmm.h" />
+    <ClInclude Include="..\..\src\wmmrows.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

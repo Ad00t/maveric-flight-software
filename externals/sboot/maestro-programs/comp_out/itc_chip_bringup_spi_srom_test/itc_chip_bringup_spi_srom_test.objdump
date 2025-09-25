@@ -1,0 +1,2315 @@
+
+/home/rogers/aeneas/maestro/TileraMDE-2.0.1.78377.tile49.20110505/src/tools/btk/comp_out/itc_chip_bringup_spi_srom_test/itc_chip_bringup_spi_srom_test.tilexe:     file format elf32-tile64
+
+Disassembly of section .text:
+
+00002000 <main>:
+    2000:	bfdfc6db1b7bfd87 	{ move r7, sp ; addi sp, sp, -8 ; sw sp, lr }
+    2008:	305827e0c0304d80 	{ addi r0, sp, 4 ; movei r1, 4 }
+    2010:	cf000fe058714fc2 	{ movei r2, 20 ; movei r0, 1 ; sw r0, r7 }
+    2018:	600a280070165000 	{ jal 2a40 <srom_test> }
+    2020:	30580fe000cff002 	{ move r2, r0 ; movei r0, 1 }
+    2028:	602ee00040804fc1 	{ movei r1, 4 ; jal 4f08 <bringup_done> }
+    2030:	5000000070165000 	{ j 2030 <main+0x30> }
+    2038:	081607e040308db6 	{ addi sp, sp, 8 ; jrp zero }
+
+00002040 <wait_for_srom_wfifo_empty>:
+    2040:	bfdf86db1b7bfd89 	{ move r9, sp ; addi sp, sp, -16 ; sw sp, lr }
+    2048:	301826c140308d84 	{ addi r4, sp, 8 ; addi r2, sp, 4 }
+    2050:	9f15f80f49e0cd83 	{ addi r3, sp, 12 ; move r30, r0 ; sw r4, r30 }
+    2058:	cf080fe19dfbf05f 	{ move r31, r1 ; movei r3, 1 ; sw r3, r31 }
+    2060:	cf0927e2189bffc2 	{ move r2, zero ; movei r4, 36 ; sw r2, r9 }
+    2068:	6027100070165000 	{ jal 4778 <send_config_read> }
+    2070:	30204002f0165000 	{ andi r5, r0, 8 }
+    2078:	280030a070165000 	{ bz r5, 20a8 <wait_for_srom_wfifo_empty+0x68> }
+    2080:	301846cf20010db7 	{ addli lr, sp, 16 ; addi r30, sp, 8 }
+    2088:	dcdd08004f70cd9f 	{ addi r31, sp, 12 ; lw lr, lr }
+    2090:	dc7d080069ea5000 	{ lw r30, r30 }
+    2098:	dc7d08004df10db6 	{ addi sp, sp, 16 ; lw r31, r31 }
+    20a0:	081606e070165000 	{ jrp lr }
+    20a8:	0833fbe080cff780 	{ move r0, r30 ; move r1, r31 }
+    20b0:	30580fe180cfffc2 	{ move r2, zero ; movei r3, 1 }
+    20b8:	6026c00040824fc4 	{ movei r4, 36 ; jal 4778 <send_config_read> }
+    20c0:	3020400070165000 	{ andi r0, r0, 8 }
+    20c8:	2bffe018f0165000 	{ bzt r0, 20a8 <wait_for_srom_wfifo_empty+0x68> }
+    20d0:	5fffb7fff0165000 	{ j 2080 <wait_for_srom_wfifo_empty+0x40> }
+    20d8:	081607e040310db6 	{ addi sp, sp, 16 ; jrp zero }
+
+000020e0 <wait_for_srom_not_busy>:
+    20e0:	bfdf86db1b7bfd89 	{ move r9, sp ; addi sp, sp, -16 ; sw sp, lr }
+    20e8:	301826c140308d84 	{ addi r4, sp, 8 ; addi r2, sp, 4 }
+    20f0:	9f15f80f49e0cd83 	{ addi r3, sp, 12 ; move r30, r0 ; sw r4, r30 }
+    20f8:	cf080fe19dfbf05f 	{ move r31, r1 ; movei r3, 1 ; sw r3, r31 }
+    2100:	cf0927e2189bffc2 	{ move r2, zero ; movei r4, 36 ; sw r2, r9 }
+    2108:	6026700070165000 	{ jal 4778 <send_config_read> }
+    2110:	2800280770165000 	{ bbns r0, 2138 <wait_for_srom_not_busy+0x58> }
+    2118:	0833fbe080cff780 	{ move r0, r30 ; move r1, r31 }
+    2120:	30580fe180cfffc2 	{ move r2, zero ; movei r3, 1 }
+    2128:	6026500040824fc4 	{ movei r4, 36 ; jal 4778 <send_config_read> }
+    2130:	2bffe81ef0165000 	{ bbst r0, 2118 <wait_for_srom_not_busy+0x38> }
+    2138:	301846cf20010db7 	{ addli lr, sp, 16 ; addi r30, sp, 8 }
+    2140:	dcdd08004f70cd9f 	{ addi r31, sp, 12 ; lw lr, lr }
+    2148:	dc7d080069ea5000 	{ lw r30, r30 }
+    2150:	dc7d08004df10db6 	{ addi sp, sp, 16 ; lw r31, r31 }
+    2158:	081606e070165000 	{ jrp lr }
+
+00002160 <wait_for_srom_rfifo_not_empty>:
+    2160:	bfdf86db1b7bfd89 	{ move r9, sp ; addi sp, sp, -16 ; sw sp, lr }
+    2168:	301826c140308d84 	{ addi r4, sp, 8 ; addi r2, sp, 4 }
+    2170:	9f15f80f49e0cd83 	{ addi r3, sp, 12 ; move r30, r0 ; sw r4, r30 }
+    2178:	cf080fe19dfbf05f 	{ move r31, r1 ; movei r3, 1 ; sw r3, r31 }
+    2180:	cf0927e2189bffc2 	{ move r2, zero ; movei r4, 36 ; sw r2, r9 }
+    2188:	6025f00070165000 	{ jal 4778 <send_config_read> }
+    2190:	30202002f0165000 	{ andi r5, r0, 4 }
+    2198:	280030a070165000 	{ bz r5, 21c8 <wait_for_srom_rfifo_not_empty+0x68> }
+    21a0:	0833fbe080cff780 	{ move r0, r30 ; move r1, r31 }
+    21a8:	30580fe180cfffc2 	{ move r2, zero ; movei r3, 1 }
+    21b0:	6025c80040824fc4 	{ movei r4, 36 ; jal 4778 <send_config_read> }
+    21b8:	3020200370165000 	{ andi r6, r0, 4 }
+    21c0:	2bffe0d9f0165000 	{ bnzt r6, 21a0 <wait_for_srom_rfifo_not_empty+0x40> }
+    21c8:	301846cf20010db7 	{ addli lr, sp, 16 ; addi r30, sp, 8 }
+    21d0:	dcdd08004f70cd9f 	{ addi r31, sp, 12 ; lw lr, lr }
+    21d8:	dc7d080069ea5000 	{ lw r30, r30 }
+    21e0:	dc7d08004df10db6 	{ addi sp, sp, 16 ; lw r31, r31 }
+    21e8:	081606e070165000 	{ jrp lr }
+
+000021f0 <srom_get_read_data>:
+    21f0:	bfdf86db1b7bfd86 	{ move r6, sp ; addi sp, sp, -16 ; sw sp, lr }
+    21f8:	30205ffff0165000 	{ info 11 }
+    2200:	301846c1c0304d82 	{ addi r2, sp, 4 ; addi r3, sp, 8 }
+    2208:	df0d0800686a5000 	{ sw r2, r6 }
+    2210:	bf0866c01f4bf034 	{ move r52, r0 ; addi r0, sp, 12 ; sw r3, r52 }
+    2218:	df050800181bfd00 	{ move r0, r52 ; sw r0, r1 }
+    2220:	6fff47fff0165000 	{ jal 2160 <wait_for_srom_rfifo_not_empty> }
+    2228:	301866c0c0801fc3 	{ movei r3, 1 ; addi r1, sp, 12 }
+    2230:	400b7020a0010db7 	{ addli lr, sp, 16 ; lw r1, r1 }
+    2238:	bcd846da1f7bfd00 	{ move r0, r52 ; addi r52, sp, 8 ; lw lr, lr }
+    2240:	30208ffff0165000 	{ info 17 }
+    2248:	9cd5ffe15b444fc4 	{ movei r4, 68 ; move r2, zero ; lw r52, r52 }
+    2250:	5025280040310db6 	{ addi sp, sp, 16 ; j 4778 <send_config_read> }
+    2258:	30209ffff0165000 	{ info 19 }
+
+00002260 <srom_do_instr>:
+    2260:	bfdf46db1b7bfd88 	{ move r8, sp ; addi sp, sp, -24 ; sw sp, lr }
+    2268:	30205ffff0165000 	{ info 11 }
+    2270:	301886c1c0304d84 	{ addi r4, sp, 4 ; addi r3, sp, 16 }
+    2278:	df15080048808d85 	{ addi r5, sp, 8 ; sw r4, r8 }
+    2280:	df0d08006c1a5000 	{ sw r3, r1 }
+    2288:	bf1066c01f4bf034 	{ move r52, r0 ; addi r0, sp, 12 ; sw r5, r52 }
+    2290:	df050800182bfd00 	{ move r0, r52 ; sw r0, r2 }
+    2298:	6ffe4ffff0165000 	{ jal 20e0 <wait_for_srom_not_busy> }
+    22a0:	30580fe1c0310d81 	{ addi r1, sp, 16 ; movei r3, 1 }
+    22a8:	9c05fe804c10cd85 	{ addi r5, sp, 12 ; move r0, r52 ; lw r1, r1 }
+    22b0:	400b70a2a0018db7 	{ addli lr, sp, 24 ; lw r5, r5 }
+    22b8:	ccda87e24f708db4 	{ addi r52, sp, 8 ; movei r4, 80 ; lw lr, lr }
+    22c0:	3020affff0165000 	{ info 21 }
+    22c8:	bcd0c6db1b4bffc2 	{ move r2, zero ; addi sp, sp, 24 ; lw r52, r52 }
+    22d0:	5022a80050117fff 	{ info 23 ; j 4578 <send_config_write> }
+    22d8:	30205ffff0165000 	{ info 11 }
+
+000022e0 <srom_read_status>:
+    22e0:	bfdf86db1b7bfd87 	{ move r7, sp ; addi sp, sp, -16 ; sw sp, lr }
+    22e8:	30205ffff0165000 	{ info 11 }
+    22f0:	301826c140308d83 	{ addi r3, sp, 8 ; addi r2, sp, 4 }
+    22f8:	bf0866c01f4bf034 	{ move r52, r0 ; addi r0, sp, 12 ; sw r3, r52 }
+    2300:	df0d080058705fc2 	{ movei r2, 5 ; sw r2, r7 }
+    2308:	df050800181bfd00 	{ move r0, r52 ; sw r0, r1 }
+    2310:	6fff57fff0165000 	{ jal 2260 <srom_do_instr> }
+    2318:	180086dbc030cd81 	{ addi r1, sp, 12 ; addli lr, sp, 16 }
+    2320:	bc0046da1c1bfd00 	{ move r0, r52 ; addi r52, sp, 8 ; lw r1, r1 }
+    2328:	dcdd080057710fff 	{ info 16 ; lw lr, lr }
+    2330:	c4d097ffcb410db6 	{ addi sp, sp, 16 ; info 18 ; lw r52, r52 }
+    2338:	30209ffff0165000 	{ info 19 }
+    2340:	5ffeb7ffd010afff 	{ info 10 ; j 21f0 <srom_get_read_data> }
+    2348:	30205ffff0165000 	{ info 11 }
+
+00002350 <srom_wait_for_wip_clear>:
+    2350:	bfdf86db1b7bfd86 	{ move r6, sp ; addi sp, sp, -16 ; sw sp, lr }
+    2358:	301846c240304d82 	{ addi r2, sp, 4 ; addi r4, sp, 8 }
+    2360:	df0d08004860cd83 	{ addi r3, sp, 12 ; sw r2, r6 }
+    2368:	df15080019ebf01e 	{ move r30, r0 ; sw r4, r30 }
+    2370:	df0d08001dfbf05f 	{ move r31, r1 ; sw r3, r31 }
+    2378:	6fff6ffff0165000 	{ jal 22e0 <srom_read_status> }
+    2380:	30200802f0165000 	{ andi r5, r0, 1 }
+    2388:	307008a2f0165000 	{ seqi r5, r5, 1 }
+    2390:	280030a170165000 	{ bnz r5, 23c0 <srom_wait_for_wip_clear+0x70> }
+    2398:	301846cf20010db7 	{ addli lr, sp, 16 ; addi r30, sp, 8 }
+    23a0:	dcdd08004f70cd9f 	{ addi r31, sp, 12 ; lw lr, lr }
+    23a8:	dc7d080069ea5000 	{ lw r30, r30 }
+    23b0:	dc7d08004df10db6 	{ addi sp, sp, 16 ; lw r31, r31 }
+    23b8:	081606e070165000 	{ jrp lr }
+    23c0:	0833fbe080cff780 	{ move r0, r30 ; move r1, r31 }
+    23c8:	6fff1ffff0165000 	{ jal 22e0 <srom_read_status> }
+    23d0:	3020080070165000 	{ andi r0, r0, 1 }
+    23d8:	3070080070165000 	{ seqi r0, r0, 1 }
+    23e0:	2bffe019f0165000 	{ bnzt r0, 23c0 <srom_wait_for_wip_clear+0x70> }
+    23e8:	5fffb7fff0165000 	{ j 2398 <srom_wait_for_wip_clear+0x48> }
+    23f0:	081607e040310db6 	{ addi sp, sp, 16 ; jrp zero }
+
+000023f8 <srom_exec_inst>:
+    23f8:	bfdf46db1b7bfd87 	{ move r7, sp ; addi sp, sp, -24 ; sw sp, lr }
+    2400:	30205ffff0165000 	{ info 11 }
+    2408:	301886c1c0304d84 	{ addi r4, sp, 4 ; addi r3, sp, 16 }
+    2410:	df15080048708d85 	{ addi r5, sp, 8 ; sw r4, r7 }
+    2418:	df0d08006c1a5000 	{ sw r3, r1 }
+    2420:	bf1066c01f4bf034 	{ move r52, r0 ; addi r0, sp, 12 ; sw r5, r52 }
+    2428:	df050800182bfd00 	{ move r0, r52 ; sw r0, r2 }
+    2430:	6fff27fff0165000 	{ jal 2350 <srom_wait_for_wip_clear> }
+    2438:	301866c140310d81 	{ addi r1, sp, 16 ; addi r2, sp, 12 }
+    2440:	400b7020a0018db7 	{ addli lr, sp, 24 ; lw r1, r1 }
+    2448:	bc0846da182bfd00 	{ move r0, r52 ; addi r52, sp, 8 ; lw r2, r2 }
+    2450:	dcdd080057714fff 	{ info 20 ; lw lr, lr }
+    2458:	c4d0b7ffcb418db6 	{ addi sp, sp, 24 ; info 22 ; lw r52, r52 }
+    2460:	3020bffff0165000 	{ info 23 }
+    2468:	5ffdffffd010afff 	{ info 10 ; j 2260 <srom_do_instr> }
+    2470:	30205ffff0165000 	{ info 11 }
+
+00002478 <srom_read_id>:
+    2478:	bfdf86db1b7bfd8a 	{ move r10, sp ; addi sp, sp, -16 ; sw sp, lr }
+    2480:	30205ffff0165000 	{ info 11 }
+    2488:	301846c240803fc5 	{ movei r5, 3 ; addi r4, sp, 8 }
+    2490:	bf1066c1c9e04d82 	{ addi r2, sp, 4 ; addi r3, sp, 12 ; sw r4, r30 }
+    2498:	9f0df82f9dfbf01e 	{ move r30, r0 ; move r31, r1 ; sw r3, r31 }
+    24a0:	cf080fe198abffc2 	{ move r2, zero ; movei r3, 1 ; sw r2, r10 }
+    24a8:	6020d0004084cfc4 	{ movei r4, 76 ; jal 4578 <send_config_write> }
+    24b0:	0833fbe080cff780 	{ move r0, r30 ; move r1, r31 }
+    24b8:	6fff47ffa009ffc2 	{ moveli r2, 159 ; jal 23f8 <srom_exec_inst> }
+    24c0:	0833fbc020010db7 	{ addli lr, sp, 16 ; move r0, r30 }
+    24c8:	9cddfbe0cf708d9e 	{ addi r30, sp, 8 ; move r1, r31 ; lw lr, lr }
+    24d0:	30208ffff0165000 	{ info 17 }
+    24d8:	c47897ffc9e0cd9f 	{ addi r31, sp, 12 ; info 18 ; lw r30, r30 }
+    24e0:	c47897ffcdf10db6 	{ addi sp, sp, 16 ; info 18 ; lw r31, r31 }
+    24e8:	5ffd0fffd010afff 	{ info 10 ; j 21f0 <srom_get_read_data> }
+    24f0:	30205ffff0165000 	{ info 11 }
+
+000024f8 <srom_write_enable>:
+    24f8:	301fc6db40806fc2 	{ movei r2, 6 ; addi sp, sp, -8 }
+    2500:	30205ffff0165000 	{ info 11 }
+    2508:	5ffef7ffc0308db6 	{ addi sp, sp, 8 ; j 23f8 <srom_exec_inst> }
+    2510:	30207ffff0165000 	{ info 15 }
+
+00002518 <srom_read_sig>:
+    2518:	bfdf86db1b7bfd8a 	{ move r10, sp ; addi sp, sp, -16 ; sw sp, lr }
+    2520:	30205ffff0165000 	{ info 11 }
+    2528:	301846c240803fc5 	{ movei r5, 3 ; addi r4, sp, 8 }
+    2530:	bf1066c1c9e04d82 	{ addi r2, sp, 4 ; addi r3, sp, 12 ; sw r4, r30 }
+    2538:	9f0df82f9dfbf01e 	{ move r30, r0 ; move r31, r1 ; sw r3, r31 }
+    2540:	cf080fe198abffc2 	{ move r2, zero ; movei r3, 1 ; sw r2, r10 }
+    2548:	602030004084cfc4 	{ movei r4, 76 ; jal 4578 <send_config_write> }
+    2550:	0833fbe080cff780 	{ move r0, r30 ; move r1, r31 }
+    2558:	6ffd0fffa00abfc2 	{ moveli r2, 171 ; jal 2260 <srom_do_instr> }
+    2560:	0833fbc020010db7 	{ addli lr, sp, 16 ; move r0, r30 }
+    2568:	9cddfbe0cf708d9e 	{ addi r30, sp, 8 ; move r1, r31 ; lw lr, lr }
+    2570:	30208ffff0165000 	{ info 17 }
+    2578:	c47897ffc9e0cd9f 	{ addi r31, sp, 12 ; info 18 ; lw r30, r30 }
+    2580:	c47897ffcdf10db6 	{ addi sp, sp, 16 ; info 18 ; lw r31, r31 }
+    2588:	5ffc6fffd010afff 	{ info 10 ; j 21f0 <srom_get_read_data> }
+    2590:	30205ffff0165000 	{ info 11 }
+
+00002598 <srom_sector_erase>:
+    2598:	bfdf46db1b7bfd85 	{ move r5, sp ; addi sp, sp, -24 ; sw sp, lr }
+    25a0:	30205ffff0165000 	{ info 11 }
+    25a8:	301886c340304d83 	{ addi r3, sp, 4 ; addi r6, sp, 16 }
+    25b0:	bf0846c24c50cd87 	{ addi r7, sp, 12 ; addi r4, sp, 8 ; sw r3, r5 }
+    25b8:	df1d080019fbf05f 	{ move r31, r1 ; sw r6, r31 }
+    25c0:	df1d08001debf01e 	{ move r30, r0 ; sw r7, r30 }
+    25c8:	df1508001b4bf0b4 	{ move r52, r2 ; sw r4, r52 }
+    25d0:	6ffd87fff0165000 	{ jal 2350 <srom_wait_for_wip_clear> }
+    25d8:	305a47e240801fc3 	{ movei r3, 1 ; movei r4, 72 }
+    25e0:	0833fbe080cfffc2 	{ move r2, zero ; move r1, r31 }
+    25e8:	0833fe8280cff780 	{ move r0, r30 ; move r5, r52 }
+    25f0:	601f880050114fff 	{ info 20 ; jal 4578 <send_config_write> }
+    25f8:	0833fbc020018db7 	{ addli lr, sp, 24 ; move r0, r30 }
+    2600:	9cddfbe0cf70cd9e 	{ addi r30, sp, 12 ; move r1, r31 ; lw lr, lr }
+    2608:	3020affff0165000 	{ info 21 }
+    2610:	bc7846da49e10d9f 	{ addi r31, sp, 16 ; addi r52, sp, 8 ; lw r30, r30 }
+    2618:	400b73efa00d8fc2 	{ moveli r2, 216 ; lw r31, r31 }
+    2620:	c4d0b7ffcb418db6 	{ addi sp, sp, 24 ; info 22 ; lw r52, r52 }
+    2628:	5ffdd7ffd010afff 	{ info 10 ; j 23f8 <srom_exec_inst> }
+    2630:	30205ffff0165000 	{ info 11 }
+
+00002638 <srom_write>:
+    2638:	bfdf46db1b7bfd89 	{ move r9, sp ; addi sp, sp, -24 ; sw sp, lr }
+    2640:	30205ffff0165000 	{ info 11 }
+    2648:	301846c2c0304d84 	{ addi r4, sp, 4 ; addi r5, sp, 8 }
+    2650:	bf10a6c348910d87 	{ addi r7, sp, 16 ; addi r6, sp, 20 ; sw r4, r9 }
+    2658:	df1508001f4bf0b4 	{ move r52, r2 ; sw r5, r52 }
+    2660:	bf1866c01debf01e 	{ move r30, r0 ; addi r0, sp, 12 ; sw r7, r30 }
+    2668:	df1d080019fbf05f 	{ move r31, r1 ; sw r6, r31 }
+    2670:	df050800183bf780 	{ move r0, r30 ; sw r0, r3 }
+    2678:	6ffcdffff0165000 	{ jal 2350 <srom_wait_for_wip_clear> }
+    2680:	305a47e240801fc3 	{ movei r3, 1 ; movei r4, 72 }
+    2688:	0833fbe080cfffc2 	{ move r2, zero ; move r1, r31 }
+    2690:	0833fe8280cff780 	{ move r0, r30 ; move r5, r52 }
+    2698:	601ee00050114fff 	{ info 20 ; jal 4578 <send_config_write> }
+    26a0:	0833fbe080cff780 	{ move r0, r30 ; move r1, r31 }
+    26a8:	30580fe180cfffc2 	{ move r2, zero ; movei r3, 1 }
+    26b0:	305827e2c084cfc4 	{ movei r4, 76 ; movei r5, 4 }
+    26b8:	601ec00050114fff 	{ info 20 ; jal 4578 <send_config_write> }
+    26c0:	0833fbe080cff780 	{ move r0, r30 ; move r1, r31 }
+    26c8:	6ffd37ffc0802fc2 	{ movei r2, 2 ; jal 23f8 <srom_exec_inst> }
+    26d0:	0833fbe080cff780 	{ move r0, r30 ; move r1, r31 }
+    26d8:	6ff96fffd0114fff 	{ info 20 ; jal 2040 <wait_for_srom_wfifo_empty> }
+    26e0:	1800c6dbc030cd85 	{ addi r5, sp, 12 ; addli lr, sp, 24 }
+    26e8:	bc1086cf1c5bf780 	{ move r0, r30 ; addi r30, sp, 16 ; lw r5, r5 }
+    26f0:	bcd8a6cf9f7bf7c1 	{ move r1, r31 ; addi r31, sp, 20 ; lw lr, lr }
+    26f8:	3020affff0165000 	{ info 21 }
+    2700:	bc7846da59e01fc3 	{ movei r3, 1 ; addi r52, sp, 8 ; lw r30, r30 }
+    2708:	9c7dffe15df40fc4 	{ movei r4, 64 ; move r2, zero ; lw r31, r31 }
+    2710:	c4d0b7ffcb418db6 	{ addi sp, sp, 24 ; info 22 ; lw r52, r52 }
+    2718:	501e60005010afff 	{ info 10 ; j 4578 <send_config_write> }
+    2720:	30205ffff0165000 	{ info 11 }
+
+00002728 <srom_write_block>:
+    2728:	bfdf06db1b7bfd85 	{ move r5, sp ; addi sp, sp, -32 ; sw sp, lr }
+    2730:	301826c340308d87 	{ addi r7, sp, 8 ; addi r6, sp, 4 }
+    2738:	bf18a6c54f10cd8c 	{ addi r12, sp, 12 ; addi r10, sp, 20 ; sw r7, r49 }
+    2740:	bf18c6c448510d8b 	{ addi r11, sp, 16 ; addi r8, sp, 24 ; sw r6, r5 }
+    2748:	9f35f86f49e1cd89 	{ addi r9, sp, 28 ; move r30, r3 ; sw r12, r30 }
+    2750:	df2d08001a0bf060 	{ move r32, r1 ; sw r10, r32 }
+    2758:	df2d08001dfbf01f 	{ move r31, r0 ; sw r11, r31 }
+    2760:	df2508001e1bf0a1 	{ move r33, r2 ; sw r9, r33 }
+    2768:	df2508001a2bf122 	{ move r34, r4 ; sw r8, r34 }
+    2770:	6ffbe7fff0165000 	{ jal 2350 <srom_wait_for_wip_clear> }
+    2778:	305a47e240801fc3 	{ movei r3, 1 ; movei r4, 72 }
+    2780:	0833fc0080cfffc2 	{ move r2, zero ; move r1, r32 }
+    2788:	0833fc2280cff7c0 	{ move r0, r31 ; move r5, r33 }
+    2790:	601de80070165000 	{ jal 4578 <send_config_write> }
+    2798:	0833fc0080cff7c0 	{ move r0, r31 ; move r1, r32 }
+    27a0:	30580fe180cfffc2 	{ move r2, zero ; movei r3, 1 }
+    27a8:	40041458c084cfc4 	{ movei r4, 76 ; shli r49, r34, 2 }
+    27b0:	601dc80000cffc45 	{ move r5, r49 ; jal 4578 <send_config_write> }
+    27b8:	0833fc0080cff7c0 	{ move r0, r31 ; move r1, r32 }
+    27c0:	6ffc3fffc0802fc2 	{ movei r2, 2 ; jal 23f8 <srom_exec_inst> }
+    27c8:	28004c40000dec61 	{ add r33, r49, r30 ; bz r34, 2810 <srom_write_block+0xe8> }
+    27d0:	0833fc0080cff7c0 	{ move r0, r31 ; move r1, r32 }
+    27d8:	6ff86ffff0165000 	{ jal 2040 <wait_for_srom_wfifo_empty> }
+    27e0:	9c7dfc00985bf7c0 	{ move r0, r31 ; move r1, r32 ; lw r5, r30 }
+    27e8:	30580fe180cfffc2 	{ move r2, zero ; movei r3, 1 }
+    27f0:	601d880040840fc4 	{ movei r4, 64 ; jal 4578 <send_config_write> }
+    27f8:	301823cf70165000 	{ addi r30, r30, 4 }
+    2800:	086d0bc6f0165000 	{ slt_u r13, r30, r33 }
+    2808:	2bffc9b9f0165000 	{ bnzt r13, 27d0 <srom_write_block+0xa8> }
+    2810:	301866cf20020db7 	{ addli lr, sp, 32 ; addi r30, sp, 12 }
+    2818:	bcd8a6d04f710d9f 	{ addi r31, sp, 16 ; addi r32, sp, 20 ; lw lr, lr }
+    2820:	bc78c6d149e1cda1 	{ addi r33, sp, 28 ; addi r34, sp, 24 ; lw r30, r30 }
+    2828:	dc7d08004df08db1 	{ addi r49, sp, 8 ; lw r31, r31 }
+    2830:	dc8508006a0a5000 	{ lw r32, r32 }
+    2838:	dc8508006e1a5000 	{ lw r33, r33 }
+    2840:	dc8d08006a2a5000 	{ lw r34, r34 }
+    2848:	dcc508004f120db6 	{ addi sp, sp, 32 ; lw r49, r49 }
+    2850:	081606e070165000 	{ jrp lr }
+
+00002858 <srom_read>:
+    2858:	bfdf46db1b7bfd85 	{ move r5, sp ; addi sp, sp, -24 ; sw sp, lr }
+    2860:	30205ffff0165000 	{ info 11 }
+    2868:	301886c340304d83 	{ addi r3, sp, 4 ; addi r6, sp, 16 }
+    2870:	bf0846c24c50cd87 	{ addi r7, sp, 12 ; addi r4, sp, 8 ; sw r3, r5 }
+    2878:	df1d080019fbf05f 	{ move r31, r1 ; sw r6, r31 }
+    2880:	df1d08001debf01e 	{ move r30, r0 ; sw r7, r30 }
+    2888:	df1508001b4bf0b4 	{ move r52, r2 ; sw r4, r52 }
+    2890:	6ffac7fff0165000 	{ jal 2350 <srom_wait_for_wip_clear> }
+    2898:	305a47e240801fc3 	{ movei r3, 1 ; movei r4, 72 }
+    28a0:	0833fbe080cfffc2 	{ move r2, zero ; move r1, r31 }
+    28a8:	0833fe8280cff780 	{ move r0, r30 ; move r5, r52 }
+    28b0:	601cc80050114fff 	{ info 20 ; jal 4578 <send_config_write> }
+    28b8:	0833fbe080cff780 	{ move r0, r30 ; move r1, r31 }
+    28c0:	30580fe180cfffc2 	{ move r2, zero ; movei r3, 1 }
+    28c8:	305827e2c084cfc4 	{ movei r4, 76 ; movei r5, 4 }
+    28d0:	601ca80050114fff 	{ info 20 ; jal 4578 <send_config_write> }
+    28d8:	0833fbe080cff780 	{ move r0, r30 ; move r1, r31 }
+    28e0:	6ffb1fffc0803fc2 	{ movei r2, 3 ; jal 23f8 <srom_exec_inst> }
+    28e8:	0833fbc020018db7 	{ addli lr, sp, 24 ; move r0, r30 }
+    28f0:	9cddfbe0cf70cd9e 	{ addi r30, sp, 12 ; move r1, r31 ; lw lr, lr }
+    28f8:	3020affff0165000 	{ info 21 }
+    2900:	bc7846da49e10d9f 	{ addi r31, sp, 16 ; addi r52, sp, 8 ; lw r30, r30 }
+    2908:	dc7d080055f16fff 	{ info 22 ; lw r31, r31 }
+    2910:	c4d0b7ffcb418db6 	{ addi sp, sp, 24 ; info 22 ; lw r52, r52 }
+    2918:	5ff8dfffd010afff 	{ info 10 ; j 21f0 <srom_get_read_data> }
+    2920:	30205ffff0165000 	{ info 11 }
+
+00002928 <srom_read_block>:
+    2928:	bfdf06db1b7bfd85 	{ move r5, sp ; addi sp, sp, -32 ; sw sp, lr }
+    2930:	301826c340308d87 	{ addi r7, sp, 8 ; addi r6, sp, 4 }
+    2938:	bf18e6c54f114d88 	{ addi r8, sp, 20 ; addi r10, sp, 28 ; sw r7, r49 }
+    2940:	bf1866c648518d8b 	{ addi r11, sp, 24 ; addi r12, sp, 12 ; sw r6, r5 }
+    2948:	9f25f8714a210d89 	{ addi r9, sp, 16 ; move r34, r3 ; sw r8, r34 }
+    2950:	df2d08001a0bf060 	{ move r32, r1 ; sw r10, r32 }
+    2958:	df2d08001dfbf01f 	{ move r31, r0 ; sw r11, r31 }
+    2960:	df2508001e1bf0a1 	{ move r33, r2 ; sw r9, r33 }
+    2968:	df35080019ebf11e 	{ move r30, r4 ; sw r12, r30 }
+    2970:	6ff9e7fff0165000 	{ jal 2350 <srom_wait_for_wip_clear> }
+    2978:	305a47e240801fc3 	{ movei r3, 1 ; movei r4, 72 }
+    2980:	0833fc0080cfffc2 	{ move r2, zero ; move r1, r32 }
+    2988:	0833fc2280cff7c0 	{ move r0, r31 ; move r5, r33 }
+    2990:	601be80070165000 	{ jal 4578 <send_config_write> }
+    2998:	0833fc0080cff7c0 	{ move r0, r31 ; move r1, r32 }
+    29a0:	30580fe180cfffc2 	{ move r2, zero ; movei r3, 1 }
+    29a8:	40041458c084cfc4 	{ movei r4, 76 ; shli r49, r34, 2 }
+    29b0:	601bc80000cffc45 	{ move r5, r49 ; jal 4578 <send_config_write> }
+    29b8:	0833fc0080cff7c0 	{ move r0, r31 ; move r1, r32 }
+    29c0:	6ffa3fffc0803fc2 	{ movei r2, 3 ; jal 23f8 <srom_exec_inst> }
+    29c8:	28003440000dec61 	{ add r33, r49, r30 ; bz r34, 29f8 <srom_read_block+0xd0> }
+    29d0:	0833fc0080cff7c0 	{ move r0, r31 ; move r1, r32 }
+    29d8:	6ff81ffff0165000 	{ jal 21f0 <srom_get_read_data> }
+    29e0:	df7d08004800479e 	{ addi r30, r30, 4 ; sw r30, r0 }
+    29e8:	086d0bc6f0165000 	{ slt_u r13, r30, r33 }
+    29f0:	2bffe1b9f0165000 	{ bnzt r13, 29d0 <srom_read_block+0xa8> }
+    29f8:	301866cf20020db7 	{ addli lr, sp, 32 ; addi r30, sp, 12 }
+    2a00:	bcd8e6d04f718d9f 	{ addi r31, sp, 24 ; addi r32, sp, 28 ; lw lr, lr }
+    2a08:	bc78a6d149e10da1 	{ addi r33, sp, 16 ; addi r34, sp, 20 ; lw r30, r30 }
+    2a10:	dc7d08004df08db1 	{ addi r49, sp, 8 ; lw r31, r31 }
+    2a18:	dc8508006a0a5000 	{ lw r32, r32 }
+    2a20:	dc8508006e1a5000 	{ lw r33, r33 }
+    2a28:	dc8d08006a2a5000 	{ lw r34, r34 }
+    2a30:	dcc508004f120db6 	{ addi sp, sp, 32 ; lw r49, r49 }
+    2a38:	081606e070165000 	{ jrp lr }
+
+00002a40 <srom_test>:
+    2a40:	bfddc6db1b7bfd87 	{ move r7, sp ; addi sp, sp, -72 ; sw sp, lr }
+    2a48:	3019e6c240304d83 	{ addi r3, sp, 4 ; addi r4, sp, 60 }
+    2a50:	bf0a26c44c740d85 	{ addi r5, sp, 64 ; addi r8, sp, 68 ; sw r3, r7 }
+    2a58:	bf10e6c54a918d89 	{ addi r9, sp, 24 ; addi r10, sp, 28 ; sw r4, r41 }
+    2a60:	bf1126c64e820d8b 	{ addi r11, sp, 32 ; addi r12, sp, 36 ; sw r5, r40 }
+    2a68:	bf21a6c84a630d8f 	{ addi r15, sp, 48 ; addi r16, sp, 52 ; sw r8, r38 }
+    2a70:	bf21c6c34e52cd8e 	{ addi r14, sp, 44 ; addi r6, sp, 56 ; sw r9, r37 }
+    2a78:	df2d08004a428d8d 	{ addi r13, sp, 40 ; sw r10, r36 }
+    2a80:	df2d08006e3a5000 	{ sw r11, r35 }
+    2a88:	df3508006a2a5000 	{ sw r12, r34 }
+    2a90:	df3d08006dfa5000 	{ sw r15, r31 }
+    2a98:	df45080069ea5000 	{ sw r16, r30 }
+    2aa0:	df3d08001a0bf020 	{ move r32, r0 ; sw r14, r32 }
+    2aa8:	df1d08001a7bf0a7 	{ move r39, r2 ; sw r6, r39 }
+    2ab0:	df3508001e1bf061 	{ move r33, r1 ; sw r13, r33 }
+    2ab8:	200017e0f0165000 	{ auli r1, zero, 2 }
+    2ac0:	6028c80025b40040 	{ addli r0, r1, 23360 /* 25b40 <print6_nolock+0x20128> */ ; jal 5388 <print> }
+    2ac8:	0833fc0000cff841 	{ move r1, r33 ; move r0, r32 }
+    2ad0:	6ffa4ffff0165000 	{ jal 2518 <srom_read_sig> }
+    2ad8:	30580fe000cff002 	{ move r2, r0 ; movei r0, 1 }
+    2ae0:	6023e80040804fc1 	{ movei r1, 4 ; jal 4ec8 <bringup_pass> }
+    2ae8:	200017e070165000 	{ auli r0, zero, 2 }
+    2af0:	6028980025b54000 	{ addli r0, r0, 23380 /* 25b54 <print6_nolock+0x2013c> */ ; jal 5388 <print> }
+    2af8:	0833fc0000cff841 	{ move r1, r33 ; move r0, r32 }
+    2b00:	6ff97ffff0165000 	{ jal 2478 <srom_read_id> }
+    2b08:	30580fe000cff002 	{ move r2, r0 ; movei r0, 1 }
+    2b10:	6023b80040804fc1 	{ movei r1, 4 ; jal 4ec8 <bringup_pass> }
+    2b18:	200017e070165000 	{ auli r0, zero, 2 }
+    2b20:	6028680025b68000 	{ addli r0, r0, 23400 /* 25b68 <print6_nolock+0x20150> */ ; jal 5388 <print> }
+    2b28:	30580fe1c0308d84 	{ addi r4, sp, 8 ; movei r3, 1 }
+    2b30:	0833fc2080cfffc2 	{ move r2, zero ; move r1, r33 }
+    2b38:	6ffdf7ff80cff800 	{ move r0, r32 ; jal 2928 <srom_read_block> }
+    2b40:	305827e0c0308d82 	{ addi r2, sp, 8 ; movei r1, 4 }
+    2b48:	dc0d080058201fc0 	{ movei r0, 1 ; lw r2, r2 }
+    2b50:	6023780070165000 	{ jal 4ec8 <bringup_pass> }
+    2b58:	301846c1f0165000 	{ addi r3, sp, 8 }
+    2b60:	dc0d08006c3a5000 	{ lw r3, r3 }
+    2b68:	3a3ff861f0165000 	{ mm r3, r3, zero, 8, 31 }
+    2b70:	2802c86170165000 	{ bnz r3, 2e38 <srom_test+0x3f8> }
+    2b78:	30580fef38000fe4 	{ auli r36, zero, -32768 ; movei r30, 1 }
+    2b80:	0833ffefc0804fe2 	{ movei r34, 4 ; move r31, zero }
+    2b88:	200017f2b0002fe3 	{ auli r35, zero, 2 ; auli r37, zero, 2 }
+    2b90:	1adc04b2a5ba08e3 	{ addli r35, r35, 23456 /* 25ba0 <print6_nolock+0x20188> */ ; addli r37, r37, 23424 /* 25b80 <print6_nolock+0x20168> */ }
+    2b98:	5000300070165000 	{ j 2bc8 <srom_test+0x188> }
+    2ba0:	6027e80000cff8c0 	{ move r0, r35 ; jal 5388 <print> }
+    2ba8:	0833ffef40801fdf 	{ movei r31, 1 ; move r30, zero }
+    2bb0:	307003fbf0165000 	{ seqi lr, r31, 0 }
+    2bb8:	0808f6fbf0165000 	{ and lr, lr, r30 }
+    2bc0:	280086e070165000 	{ bz lr, 2c40 <srom_test+0x200> }
+    2bc8:	0833fc2080cff800 	{ move r0, r32 ; move r1, r33 }
+    2bd0:	30580fe180cff882 	{ move r2, r34 ; movei r3, 1 }
+    2bd8:	6ffd57ffc0308d84 	{ addi r4, sp, 8 ; jal 2928 <srom_read_block> }
+    2be0:	30580fe040308d82 	{ addi r2, sp, 8 ; movei r0, 1 }
+    2be8:	dc0d080058204fc1 	{ movei r1, 4 ; lw r2, r2 }
+    2bf0:	6022d80070165000 	{ jal 4ec8 <bringup_pass> }
+    2bf8:	301846c3f0165000 	{ addi r7, sp, 8 }
+    2c00:	dc1d08006c7a5000 	{ lw r7, r7 }
+    2c08:	381df8e0e7bff1c3 	{ mm r3, r7, zero, 15, 15 ; mm r1, r7, zero, 0, 14 }
+    2c10:	2bff9079c1102048 	{ slti_u r8, r1, 2 ; bnzt r3, 2ba0 <srom_test+0x160> }
+    2c18:	280339016ffff1c9 	{ mm r9, r7, zero, 31, 31 ; bnz r8, 2f50 <srom_test+0x510> }
+    2c20:	08732124f0165000 	{ sne r9, r9, r36 }
+    2c28:	28001121f0165000 	{ bnzt r9, 2c38 <srom_test+0x1f8> }
+    2c30:	5fff87ffc0801fdf 	{ movei r31, 1 ; j 2bb0 <srom_test+0x170> }
+    2c38:	5fff7fff80e22062 	{ s2a r34, r1, r34 ; j 2bb0 <srom_test+0x170> }
+    2c40:	280213c1f0165000 	{ bnzt r30, 2e50 <srom_test+0x410> }
+    2c48:	200017e070165000 	{ auli r0, zero, 2 }
+    2c50:	6027380025c50000 	{ addli r0, r0, 23632 /* 25c50 <print6_nolock+0x20238> */ ; jal 5388 <print> }
+    2c58:	280314e070165000 	{ bz r39, 2f68 <srom_test+0x528> }
+    2c60:	0833fff180cfffe2 	{ move r34, zero ; move r35, zero }
+    2c68:	301886d200cfffe5 	{ move r37, zero ; addi r36, sp, 16 }
+    2c70:	190087f4aeed3fe6 	{ moveli r38, -4397 ; moveli r41, 8208 }
+    2c78:	24020534a0201fe8 	{ moveli r40, 513 ; auli r41, r41, -32704 /* 80402010 <__bss_start+0x803cc350> */ }
+    2c80:	2040251470165000 	{ auli r40, r40, 2052 /* 8040201 <__bss_start+0x800a541> */ }
+    2c88:	0833fc2080cff800 	{ move r0, r32 ; move r1, r33 }
+    2c90:	6ff86ffff0165000 	{ jal 24f8 <srom_write_enable> }
+    2c98:	0833fc2080cff800 	{ move r0, r32 ; move r1, r33 }
+    2ca0:	6ff8ffff80cfffc2 	{ move r2, zero ; jal 2598 <srom_sector_erase> }
+    2ca8:	0833fc2080cff800 	{ move r0, r32 ; move r1, r33 }
+    2cb0:	305817e180cfffc2 	{ move r2, zero ; movei r3, 2 }
+    2cb8:	6ffc77ffc0308d84 	{ addi r4, sp, 8 ; jal 2928 <srom_read_block> }
+    2cc0:	301846cf70165000 	{ addi r30, sp, 8 }
+    2cc8:	dc7d08006b7a5000 	{ lw lr, r30 }
+    2cd0:	3077fefbf0165000 	{ seqi lr, lr, -1 }
+    2cd8:	280056e170165000 	{ bnz lr, 2d28 <srom_test+0x2e8> }
+    2ce0:	305827e0c0801fc0 	{ movei r0, 1 ; movei r1, 4 }
+    2ce8:	6021e0003bade982 	{ auli r2, r38, -17698 ; jal 4ec8 <bringup_pass> }
+    2cf0:	305827e0c0801fc0 	{ movei r0, 1 ; movei r1, 4 }
+    2cf8:	6021d00000cfffc2 	{ move r2, zero ; jal 4ec8 <bringup_pass> }
+    2d00:	305827e0c0801fc0 	{ movei r0, 1 ; movei r1, 4 }
+    2d08:	6021c000408fffc2 	{ movei r2, -1 ; jal 4ec8 <bringup_pass> }
+    2d10:	cc7827e0d8201fc0 	{ movei r0, 1 ; movei r1, 4 ; lw r2, r30 }
+    2d18:	6021b00070165000 	{ jal 4ec8 <bringup_pass> }
+    2d20:	30180c5170165000 	{ addi r34, r34, 1 }
+    2d28:	301823cf70165000 	{ addi r30, r30, 4 }
+    2d30:	087323c070165000 	{ sne r0, r30, r36 }
+    2d38:	2bff9019f0165000 	{ bnzt r0, 2cc8 <srom_test+0x288> }
+    2d40:	301886c1817a88c4 	{ xor r4, r35, r40 ; addi r3, sp, 16 }
+    2d48:	bf08a6c09c4e98c2 	{ xor r2, r35, r41 ; addi r1, sp, 20 ; sw r3, r4 }
+    2d50:	9f05fc209c2bf800 	{ move r0, r32 ; move r1, r33 ; sw r1, r2 }
+    2d58:	6ff7a7fff0165000 	{ jal 24f8 <srom_write_enable> }
+    2d60:	0833fc2080cff800 	{ move r0, r32 ; move r1, r33 }
+    2d68:	301886c180cfffc2 	{ move r2, zero ; addi r3, sp, 16 }
+    2d70:	6ff9bfffc0802fc4 	{ movei r4, 2 ; jal 2728 <srom_write_block> }
+    2d78:	0833fc2080cff800 	{ move r0, r32 ; move r1, r33 }
+    2d80:	305817e180cfffc2 	{ move r2, zero ; movei r3, 2 }
+    2d88:	6ffba7ffc0308d84 	{ addi r4, sp, 8 ; jal 2928 <srom_read_block> }
+    2d90:	301886cfc0308d9e 	{ addi r30, sp, 8 ; addi r31, sp, 16 }
+    2d98:	dc7d08006c6a5000 	{ lw r6, r31 }
+    2da0:	dc7d0800685a5000 	{ lw r5, r30 }
+    2da8:	084630a2f0165000 	{ seq r5, r5, r6 }
+    2db0:	280040a070165000 	{ bz r5, 2df0 <srom_test+0x3b0> }
+    2db8:	301823efc030479e 	{ addi r30, r30, 4 ; addi r31, r31, 4 }
+    2dc0:	087323c3f0165000 	{ sne r7, r30, r36 }
+    2dc8:	2bffd0f9f0165000 	{ bnzt r7, 2d98 <srom_test+0x358> }
+    2dd0:	0831fc71c0301965 	{ addi r37, r37, 1 ; nor r35, r35, zero }
+    2dd8:	086d3ca470165000 	{ slt_u r8, r37, r39 }
+    2de0:	2bfea919f0165000 	{ bnzt r8, 2c88 <srom_test+0x248> }
+    2de8:	5000f00070165000 	{ j 2ed8 <srom_test+0x498> }
+    2df0:	305827e0c0801fc0 	{ movei r0, 1 ; movei r1, 4 }
+    2df8:	6020d0003bade982 	{ auli r2, r38, -17698 ; jal 4ec8 <bringup_pass> }
+    2e00:	305827e0c0801fc0 	{ movei r0, 1 ; movei r1, 4 }
+    2e08:	6020c00000cfffc2 	{ move r2, zero ; jal 4ec8 <bringup_pass> }
+    2e10:	cc7827e0dc201fc0 	{ movei r0, 1 ; movei r1, 4 ; lw r2, r31 }
+    2e18:	6020b00070165000 	{ jal 4ec8 <bringup_pass> }
+    2e20:	cc7827e0d8201fc0 	{ movei r0, 1 ; movei r1, 4 ; lw r2, r30 }
+    2e28:	6020a00070165000 	{ jal 4ec8 <bringup_pass> }
+    2e30:	5fff8fffc03018a2 	{ addi r34, r34, 1 ; j 2db8 <srom_test+0x378> }
+    2e38:	200017e070165000 	{ auli r0, zero, 2 }
+    2e40:	6025480025bd0000 	{ addli r0, r0, 23504 /* 25bd0 <print6_nolock+0x201b8> */ ; jal 5388 <print> }
+    2e48:	5ffe07fff0165000 	{ j 2c48 <srom_test+0x208> }
+    2e50:	200017e070165000 	{ auli r0, zero, 2 }
+    2e58:	6025300025c04000 	{ addli r0, r0, 23556 /* 25c04 <print6_nolock+0x201ec> */ ; jal 5388 <print> }
+    2e60:	3019a6cf20048db7 	{ addli lr, sp, 72 ; addi r30, sp, 52 }
+    2e68:	bcd966d04f730d9f 	{ addi r31, sp, 48 ; addi r32, sp, 44 ; lw lr, lr }
+    2e70:	bc7926d149e28da1 	{ addi r33, sp, 40 ; addi r34, sp, 36 ; lw r30, r30 }
+    2e78:	bc78e6d24df20da3 	{ addi r35, sp, 32 ; addi r36, sp, 28 ; lw r31, r31 }
+    2e80:	bc8226d34a018da5 	{ addi r37, sp, 24 ; addi r38, sp, 68 ; lw r32, r32 }
+    2e88:	bc8206d44e138da7 	{ addi r39, sp, 56 ; addi r40, sp, 64 ; lw r33, r33 }
+    2e90:	9c8dffe04a23cda9 	{ addi r41, sp, 60 ; move r0, zero ; lw r34, r34 }
+    2e98:	dc8d08006e3a5000 	{ lw r35, r35 }
+    2ea0:	dc9508006a4a5000 	{ lw r36, r36 }
+    2ea8:	dc9508006e5a5000 	{ lw r37, r37 }
+    2eb0:	dc9d08006a6a5000 	{ lw r38, r38 }
+    2eb8:	dc9d08006e7a5000 	{ lw r39, r39 }
+    2ec0:	dca508006a8a5000 	{ lw r40, r40 }
+    2ec8:	dca508004e948db6 	{ addi sp, sp, 72 ; lw r41, r41 }
+    2ed0:	081606e070165000 	{ jrp lr }
+    2ed8:	3019a6cf20048db7 	{ addli lr, sp, 72 ; addi r30, sp, 52 }
+    2ee0:	bcd966d04f730d9f 	{ addi r31, sp, 48 ; addi r32, sp, 44 ; lw lr, lr }
+    2ee8:	9c7dfc4049e28da1 	{ addi r33, sp, 40 ; move r0, r34 ; lw r30, r30 }
+    2ef0:	bc7906d1cdf24da2 	{ addi r34, sp, 36 ; addi r35, sp, 32 ; lw r31, r31 }
+    2ef8:	bc80c6d2ca01cda4 	{ addi r36, sp, 28 ; addi r37, sp, 24 ; lw r32, r32 }
+    2f00:	bc81c6d3ce144da6 	{ addi r38, sp, 68 ; addi r39, sp, 56 ; lw r33, r33 }
+    2f08:	bc89e6d4ca240da8 	{ addi r40, sp, 64 ; addi r41, sp, 60 ; lw r34, r34 }
+    2f10:	dc8d08006e3a5000 	{ lw r35, r35 }
+    2f18:	dc9508006a4a5000 	{ lw r36, r36 }
+    2f20:	dc9508006e5a5000 	{ lw r37, r37 }
+    2f28:	dc9d08006a6a5000 	{ lw r38, r38 }
+    2f30:	dc9d08006e7a5000 	{ lw r39, r39 }
+    2f38:	dca508006a8a5000 	{ lw r40, r40 }
+    2f40:	dca508004e948db6 	{ addi sp, sp, 72 ; lw r41, r41 }
+    2f48:	081606e070165000 	{ jrp lr }
+    2f50:	6024600000cff940 	{ move r0, r37 ; jal 53b0 <print2> }
+    2f58:	0833ffef40801fdf 	{ movei r31, 1 ; move r30, zero }
+    2f60:	5ffc57fff0165000 	{ j 2bb0 <srom_test+0x170> }
+    2f68:	3019a6cf20048db7 	{ addli lr, sp, 72 ; addi r30, sp, 52 }
+    2f70:	bcd966d04f730d9f 	{ addi r31, sp, 48 ; addi r32, sp, 44 ; lw lr, lr }
+    2f78:	bc7926d149e28da1 	{ addi r33, sp, 40 ; addi r34, sp, 36 ; lw r30, r30 }
+    2f80:	bc78e6d24df20da3 	{ addi r35, sp, 32 ; addi r36, sp, 28 ; lw r31, r31 }
+    2f88:	bc8226d34a018da5 	{ addi r37, sp, 24 ; addi r38, sp, 68 ; lw r32, r32 }
+    2f90:	bc8206d44e138da7 	{ addi r39, sp, 56 ; addi r40, sp, 64 ; lw r33, r33 }
+    2f98:	9c8dffe04a23cda9 	{ addi r41, sp, 60 ; move r0, zero ; lw r34, r34 }
+    2fa0:	dc8d08006e3a5000 	{ lw r35, r35 }
+    2fa8:	dc9508006a4a5000 	{ lw r36, r36 }
+    2fb0:	dc9508006e5a5000 	{ lw r37, r37 }
+    2fb8:	dc9d08006a6a5000 	{ lw r38, r38 }
+    2fc0:	dc9d08006e7a5000 	{ lw r39, r39 }
+    2fc8:	dca508006a8a5000 	{ lw r40, r40 }
+    2fd0:	dca508004e948db6 	{ addi sp, sp, 72 ; lw r41, r41 }
+    2fd8:	081606e070165000 	{ jrp lr }
+
+00002fe0 <delay>:
+    2fe0:	3439c0e2f0165000 	{ mfspr r5, CYCLE_LOW }
+    2fe8:	2800280070165000 	{ bz r0, 3010 <delay+0x30> }
+    2ff0:	3439c0e0f0165000 	{ mfspr r1, CYCLE_LOW }
+    2ff8:	087e2820f0165000 	{ sub r1, r1, r5 }
+    3000:	086c0020f0165000 	{ slt_u r1, r1, r0 }
+    3008:	2bffe839f0165000 	{ bnzt r1, 2ff0 <delay+0x10> }
+    3010:	081606e070165000 	{ jrp lr }
+
+00003018 <wait_for_fc>:
+    3018:	30396000c03f8db6 	{ addi sp, sp, -8 ; mfspr r1, IDN_CA_DATA }
+    3020:	301806c070165000 	{ addi r0, sp, 0 }
+    3028:	df05080048108db6 	{ addi sp, sp, 8 ; sw r0, r1 }
+    3030:	081606e070165000 	{ jrp lr }
+
+00003038 <wait_for_notification>:
+    3038:	303940a0403f8db6 	{ addi sp, sp, -8 ; mfspr r0, IDN_DEMUX_CA_COUNT }
+    3040:	2800180170165000 	{ bnz r0, 3058 <wait_for_notification+0x20> }
+    3048:	303940a0f0165000 	{ mfspr r1, IDN_DEMUX_CA_COUNT }
+    3050:	2bfff838f0165000 	{ bzt r1, 3048 <wait_for_notification+0x10> }
+    3058:	30396043c0300d86 	{ addi r6, sp, 0 ; mfspr r7, IDN_CA_TAG }
+    3060:	bf1826c148704d84 	{ addi r4, sp, 4 ; addi r2, sp, 4 ; sw r6, r7 }
+    3068:	30396002f0165000 	{ mfspr r5, IDN_CA_DATA }
+    3070:	df150800685a5000 	{ sw r4, r5 }
+    3078:	30396001f0165000 	{ mfspr r3, IDN_CA_DATA }
+    3080:	df0d080048308db6 	{ addi sp, sp, 8 ; sw r2, r3 }
+    3088:	081606e070165000 	{ jrp lr }
+
+00003090 <check_for_interrupt>:
+    3090:	bfdf46db1b7bfd80 	{ move r0, sp ; addi sp, sp, -24 ; sw sp, lr }
+    3098:	301846c340304d82 	{ addi r2, sp, 4 ; addi r6, sp, 8 }
+    30a0:	bf0846c3c8010d83 	{ addi r3, sp, 16 ; addi r7, sp, 8 ; sw r2, r0 }
+    30a8:	bf0846cf4de0cdb7 	{ addi lr, sp, 12 ; addi r30, sp, 8 ; sw r3, r30 }
+    30b0:	303940a0c08fffc0 	{ movei r0, -1 ; mfspr r1, IDN_DEMUX_CA_COUNT }
+    30b8:	2800e02070165000 	{ bz r1, 3198 <check_for_interrupt+0x108> }
+    30c0:	30396002f0165000 	{ mfspr r5, IDN_CA_DATA }
+    30c8:	df1d08006c5a5000 	{ sw r7, r5 }
+    30d0:	dc1d0800684a5000 	{ lw r4, r6 }
+    30d8:	4007388270165000 	{ shri r4, r4, 7 }
+    30e0:	3020788270165000 	{ andi r4, r4, 15 }
+    30e8:	dfdd080064407104 	{ seqi r4, r4, 7 ; sw lr, r4 }
+    30f0:	dc7d080069ea5000 	{ lw r30, r30 }
+    30f8:	28005881700ec79e 	{ shri r30, r30, 12 ; bnz r4, 3150 <check_for_interrupt+0xc0> }
+    3100:	30580fe040308d82 	{ addi r2, sp, 8 ; movei r0, 1 }
+    3108:	dc0d080058204fc1 	{ movei r1, 4 ; lw r2, r2 }
+    3110:	601dd80070165000 	{ jal 4ee8 <bringup_fail> }
+    3118:	30580fe04030cd82 	{ addi r2, sp, 12 ; movei r0, 1 }
+    3120:	dc0d080058204fc1 	{ movei r1, 4 ; lw r2, r2 }
+    3128:	601dc00070165000 	{ jal 4ee8 <bringup_fail> }
+    3130:	0833fbc020018db7 	{ addli lr, sp, 24 ; move r0, r30 }
+    3138:	dcdd08004f710d9e 	{ addi r30, sp, 16 ; lw lr, lr }
+    3140:	dc7d080049e18db6 	{ addi sp, sp, 24 ; lw r30, r30 }
+    3148:	081606e070165000 	{ jrp lr }
+    3150:	30580fe040308d82 	{ addi r2, sp, 8 ; movei r0, 1 }
+    3158:	dc0d080058204fc1 	{ movei r1, 4 ; lw r2, r2 }
+    3160:	601d680070165000 	{ jal 4ec8 <bringup_pass> }
+    3168:	30580fe04030cd82 	{ addi r2, sp, 12 ; movei r0, 1 }
+    3170:	dc0d080058204fc1 	{ movei r1, 4 ; lw r2, r2 }
+    3178:	601d500070165000 	{ jal 4ec8 <bringup_pass> }
+    3180:	305827e0c0801fc0 	{ movei r0, 1 ; movei r1, 4 }
+    3188:	601d400000cff782 	{ move r2, r30 ; jal 4ec8 <bringup_pass> }
+    3190:	5fffa7fff0165000 	{ j 3130 <check_for_interrupt+0xa0> }
+    3198:	301886cf20018db7 	{ addli lr, sp, 24 ; addi r30, sp, 16 }
+    31a0:	dcdd08006f7a5000 	{ lw lr, lr }
+    31a8:	dc7d080049e18db6 	{ addi sp, sp, 24 ; lw r30, r30 }
+    31b0:	081606e070165000 	{ jrp lr }
+
+000031b8 <idn_send_msg>:
+    31b8:	40043824403f0db6 	{ addi sp, sp, -16 ; shli r8, r1, 7 }
+    31c0:	301866c740308d89 	{ addi r9, sp, 8 ; addi r14, sp, 12 }
+    31c8:	dc2508004cd04d8f 	{ addi r15, sp, 4 ; lw r13, r9 }
+    31d0:	088019c030004fcb 	{ auli r11, zero, 4 ; sw r14, r3 }
+    31d8:	cf381fe7cc200d82 	{ addi r2, sp, 0 ; movei r15, 3 ; sw r15, r2 }
+    31e0:	dc0d080048e0408a 	{ addi r10, r2, 4 ; lw r14, r2 }
+    31e8:	39fe79c7661bf34d 	{ mm r13, r13, zero, 12, 6 ; mm r14, r14, r15, 7, 31 }
+    31f0:	40049006e860d2cb 	{ mm r11, r11, r13, 16, 24 ; shli r13, r0, 18 }
+    31f8:	3cb871a6ece4bfcb 	{ mm r11, zero, r11, 25, 25 ; mm r13, r13, r14, 18, 28 }
+    3200:	0880592063c4d208 	{ mm r8, r8, r13, 7, 17 ; sw r9, r11 }
+    3208:	3f7a47e440304289 	{ addi r9, r10, 4 ; mm r8, zero, r8, 29, 29 }
+    3210:	df0d080048804250 	{ addi r16, r9, 4 ; sw r2, r8 }
+    3218:	dc2d0800192bf239 	{ move idn0, r8 ; lw r18, r10 }
+    3220:	dc2508006d1a5000 	{ lw r17, r9 }
+    3228:	dc450800190bf4b9 	{ move idn0, r18 ; lw r16, r16 }
+    3230:	0833fa3cf0165000 	{ move idn0, r17 }
+    3238:	0833fa1cf0165000 	{ move idn0, r16 }
+    3240:	081606e040310db6 	{ addi sp, sp, 16 ; jrp lr }
+
+00003248 <idn1_get_msg>:
+    3248:	0833ff5ff0165000 	{ move zero, idn1 }
+    3250:	0833ff4070165000 	{ move r0, idn1 }
+    3258:	081606e070165000 	{ jrp lr }
+
+00003260 <udn_send_msg>:
+    3260:	40049000403f8db6 	{ addi sp, sp, -8 ; shli r0, r0, 18 }
+    3268:	4004382240300d85 	{ addi r5, sp, 0 ; shli r4, r1, 7 }
+    3270:	bc1046db5c580fc1 	{ movei r1, -128 ; addi sp, sp, 8 ; lw r5, r5 }
+    3278:	27000020e9705000 	{ mm r0, r0, r5, 18, 28 ; auli r1, r1, -8192 }
+    3280:	39e2008070165000 	{ mm r0, r4, r0, 7, 17 }
+    3288:	0808080070165000 	{ and r0, r0, r1 }
+    3290:	3058100070165000 	{ ori r0, r0, 2 }
+    3298:	0833f81df0165000 	{ move udn0, r0 }
+    32a0:	0833f85df0165000 	{ move udn0, r2 }
+    32a8:	0833f87df0165000 	{ move udn0, r3 }
+    32b0:	081606e070165000 	{ jrp lr }
+
+000032b8 <udn_send_msg_and_id>:
+    32b8:	40043823403f8db6 	{ addi sp, sp, -8 ; shli r6, r1, 7 }
+    32c0:	4004900440300d89 	{ addi r9, sp, 0 ; shli r8, r0, 18 }
+    32c8:	bc2046db5c980fc7 	{ movei r7, -128 ; addi sp, sp, 8 ; lw r9, r9 }
+    32d0:	270000e3e9709208 	{ mm r8, r8, r9, 18, 28 ; auli r7, r7, -8192 }
+    32d8:	39e240c370165000 	{ mm r6, r6, r8, 7, 17 }
+    32e0:	080838c370165000 	{ and r6, r6, r7 }
+    32e8:	305818c370165000 	{ ori r6, r6, 3 }
+    32f0:	0833f8ddf0165000 	{ move udn0, r6 }
+    32f8:	0833f85df0165000 	{ move udn0, r2 }
+    3300:	303942c2f0165000 	{ mfspr r5, IDN_TILE_COORD }
+    3308:	303942c2700f2145 	{ shri r5, r5, 18 ; mfspr r4, IDN_TILE_COORD }
+    3310:	3815f8a2f00e7104 	{ shri r4, r4, 7 ; mm r5, r5, zero, 0, 10 }
+    3318:	3815f88270084145 	{ shli r5, r5, 4 ; mm r4, r4, zero, 0, 10 }
+    3320:	0832288270165000 	{ or r4, r4, r5 }
+    3328:	0833f89df0165000 	{ move udn0, r4 }
+    3330:	0833f87df0165000 	{ move udn0, r3 }
+    3338:	081606e070165000 	{ jrp lr }
+
+00003340 <udn_send_pkt>:
+    3340:	dc0a3820c85f8db6 	{ addi sp, sp, -8 ; shli r1, r1, 7 ; lw r5, r2 }
+    3348:	4004900340300d87 	{ addi r7, sp, 0 ; shli r6, r0, 18 }
+    3350:	bc1810a2dc780fc4 	{ movei r4, -128 ; addi r5, r5, 2 ; lw r7, r7 }
+    3358:	3cb838c33e000104 	{ auli r4, r4, -8192 ; mm r6, r6, r7, 18, 28 }
+    3360:	3023f8a063c46041 	{ mm r1, r1, r6, 7, 17 ; andi r0, r5, 127 }
+    3368:	0833f84480184041 	{ and r1, r1, r4 ; move r9, r2 }
+    3370:	0833ffe400cc1000 	{ or r0, r0, r1 ; move r8, zero }
+    3378:	0833f81df0165000 	{ move udn0, r0 }
+    3380:	0833f87df0165000 	{ move udn0, r3 }
+    3388:	bc202124cc701208 	{ addi r8, r8, 1 ; addi r9, r9, 4 ; lw r7, r9 }
+    3390:	dc0d0800686a5000 	{ lw r6, r2 }
+    3398:	0833f8fd81406206 	{ slte_u r6, r8, r6 ; move udn0, r7 }
+    33a0:	2bffe8d9f0165000 	{ bnzt r6, 3388 <udn_send_pkt+0x48> }
+    33a8:	081606e040308db6 	{ addi sp, sp, 8 ; jrp lr }
+
+000033b0 <udn_get_pyld1>:
+    33b0:	3018200300cfff01 	{ move r1, udn1 ; addi r6, r0, 4 }
+    33b8:	cf000fe2f8101041 	{ slti_u r1, r1, 1 ; movei r5, 1 ; sw r0, r1 }
+    33c0:	2800302170165000 	{ bnz r1, 33f0 <udn_get_pyld1+0x40> }
+    33c8:	301808a280cfff03 	{ move r3, udn1 ; addi r5, r5, 1 }
+    33d0:	df1d080048304186 	{ addi r6, r6, 4 ; sw r6, r3 }
+    33d8:	dc050800682a5000 	{ lw r2, r0 }
+    33e0:	086410a170165000 	{ slte_u r2, r5, r2 }
+    33e8:	2bffe059f0165000 	{ bnzt r2, 33c8 <udn_get_pyld1+0x18> }
+    33f0:	081606e070165000 	{ jrp lr }
+
+000033f8 <udn_get_pyld2>:
+    33f8:	3018200300cfff41 	{ move r1, udn2 ; addi r6, r0, 4 }
+    3400:	cf000fe2f8101041 	{ slti_u r1, r1, 1 ; movei r5, 1 ; sw r0, r1 }
+    3408:	2800302170165000 	{ bnz r1, 3438 <udn_get_pyld2+0x40> }
+    3410:	301808a280cfff43 	{ move r3, udn2 ; addi r5, r5, 1 }
+    3418:	df1d080048304186 	{ addi r6, r6, 4 ; sw r6, r3 }
+    3420:	dc050800682a5000 	{ lw r2, r0 }
+    3428:	086410a170165000 	{ slte_u r2, r5, r2 }
+    3430:	2bffe059f0165000 	{ bnzt r2, 3410 <udn_get_pyld2+0x18> }
+    3438:	081606e070165000 	{ jrp lr }
+
+00003440 <broadcast_msg>:
+    3440:	bfde46db1b7bfd8a 	{ move r10, sp ; addi sp, sp, -56 ; sw sp, lr }
+    3448:	301866d280cff977 	{ move lr, r37 ; addi r37, sp, 12 }
+    3450:	bf9106c6cf724d8c 	{ addi r12, sp, 36 ; addi r13, sp, 32 ; sw r37, lr }
+    3458:	bf30e6c449f14d87 	{ addi r7, sp, 20 ; addi r8, sp, 28 ; sw r12, r31 }
+    3460:	bf3086c34de2cd8b 	{ addi r11, sp, 44 ; addi r6, sp, 16 ; sw r13, r30 }
+    3468:	bf18c6d1ce328d89 	{ addi r9, sp, 40 ; addi r35, sp, 24 ; sw r7, r35 }
+    3470:	df2508004a204da2 	{ addi r34, sp, 4 ; sw r8, r34 }
+    3478:	df2d08001e0bf060 	{ move r32, r1 ; sw r11, r32 }
+    3480:	df1d08004a430da4 	{ addi r36, sp, 48 ; sw r6, r36 }
+    3488:	df2508000e102021 	{ add r33, r0, r2 ; sw r9, r33 }
+    3490:	bf8ffc3098abf162 	{ move r34, r5 ; addi r33, r33, -1 ; sw r34, r10 }
+    3498:	df8d08001e7bf123 	{ move r35, r4 ; sw r35, r39 }
+    34a0:	af9404201a6bf026 	{ move r38, r0 ; slt r0, r33, r0 ; sw r36, r38 }
+    34a8:	2800e80170165000 	{ bnz r0, 3590 <broadcast_msg+0x150> }
+    34b0:	0833f873c0801fc0 	{ movei r0, 1 ; move r39, r3 }
+    34b8:	301846d2814c00f7 	{ slt lr, r3, r0 ; addi r37, sp, 8 }
+    34c0:	40041c3200b40de7 	{ mvnz r39, lr, r0 ; shli r36, r33, 3 }
+    34c8:	8f970c920e703065 	{ add r37, r1, r3 ; sub r36, r36, r33 ; sw r37, r39 }
+    34d0:	301ffcb2f0165000 	{ addi r37, r37, -1 }
+    34d8:	0863283380cff95f 	{ move r31, r37 ; slte r39, r1, r37 }
+    34e0:	5000200070165000 	{ j 3500 <broadcast_msg+0xc0> }
+    34e8:	301fcc92403ff861 	{ addi r33, r33, -1 ; addi r36, r36, -7 }
+    34f0:	0833fcaf813e1981 	{ slte r1, r38, r33 ; move r31, r37 }
+    34f8:	2800982070165000 	{ bz r1, 3590 <broadcast_msg+0x150> }
+    3500:	2bffecf8000e591e 	{ add r30, r36, r37 ; bz r39, 34e8 <broadcast_msg+0xa8> }
+    3508:	5000200070165000 	{ j 3528 <broadcast_msg+0xe8> }
+    3510:	301ffbcf403ff7df 	{ addi r31, r31, -1 ; addi r30, r30, -1 }
+    3518:	0862fc0170165000 	{ slte r2, r32, r31 }
+    3520:	2bffc85870165000 	{ bz r2, 34e8 <broadcast_msg+0xa8> }
+    3528:	303942c3403f8783 	{ addi r3, r30, -8 ; mfspr r6, IDN_TILE_COORD }
+    3530:	303942c2700f2186 	{ shri r6, r6, 18 ; mfspr r4, IDN_TILE_COORD }
+    3538:	40073882602bf186 	{ mm r6, r6, zero, 0, 10 ; shri r4, r4, 7 }
+    3540:	3815f88270083185 	{ shli r5, r6, 3 ; mm r4, r4, zero, 0, 10 }
+    3548:	087e30a2f0165000 	{ sub r5, r5, r6 }
+    3550:	0806288270165000 	{ add r4, r4, r5 }
+    3558:	301fc08270165000 	{ addi r4, r4, -8 }
+    3560:	08462061f0165000 	{ seq r3, r3, r4 }
+    3568:	2bffa879f0165000 	{ bnzt r3, 3510 <broadcast_msg+0xd0> }
+    3570:	0833fbe080cff840 	{ move r0, r33 ; move r1, r31 }
+    3578:	0833fc6180cff882 	{ move r2, r34 ; move r3, r35 }
+    3580:	6ffce7fff0165000 	{ jal 3260 <udn_send_msg> }
+    3588:	5fff8ffff0165000 	{ j 3510 <broadcast_msg+0xd0> }
+    3590:	301906cf20038db7 	{ addli lr, sp, 56 ; addi r30, sp, 32 }
+    3598:	bcd966d04f724d9f 	{ addi r31, sp, 36 ; addi r32, sp, 44 ; lw lr, lr }
+    35a0:	bc78e6d149e28da1 	{ addi r33, sp, 40 ; addi r34, sp, 28 ; lw r30, r30 }
+    35a8:	bc7886d24df14da3 	{ addi r35, sp, 20 ; addi r36, sp, 16 ; lw r31, r31 }
+    35b0:	bc8186d34a00cda5 	{ addi r37, sp, 12 ; addi r38, sp, 48 ; lw r32, r32 }
+    35b8:	dc8508004e118da7 	{ addi r39, sp, 24 ; lw r33, r33 }
+    35c0:	dc8d08006a2a5000 	{ lw r34, r34 }
+    35c8:	dc8d08006e3a5000 	{ lw r35, r35 }
+    35d0:	dc9508006a4a5000 	{ lw r36, r36 }
+    35d8:	dc9508006e5a5000 	{ lw r37, r37 }
+    35e0:	dc9d08006a6a5000 	{ lw r38, r38 }
+    35e8:	dc9d08004e738db6 	{ addi sp, sp, 56 ; lw r39, r39 }
+    35f0:	081606e070165000 	{ jrp lr }
+
+000035f8 <send_sync>:
+    35f8:	303942c3c0864fc5 	{ movei r5, 100 ; mfspr r7, IDN_TILE_COORD }
+    3600:	400790e3c03f8db6 	{ addi sp, sp, -8 ; shri r7, r7, 18 }
+    3608:	30205ffff0165000 	{ info 11 }
+    3610:	303942c2602bf1c7 	{ mm r7, r7, zero, 0, 10 ; mfspr r4, IDN_TILE_COORD }
+    3618:	400418e3700e7104 	{ shri r4, r4, 7 ; shli r6, r7, 3 }
+    3620:	087e38c3602bf104 	{ mm r4, r4, zero, 0, 10 ; sub r6, r6, r7 }
+    3628:	0806308240308db6 	{ addi sp, sp, 8 ; add r4, r4, r6 }
+    3630:	30207ffff0165000 	{ info 15 }
+    3638:	5ffe0fffc03f8104 	{ addi r4, r4, -8 ; j 3440 <broadcast_msg> }
+    3640:	30205ffff0165000 	{ info 11 }
+
+00003648 <get_sync>:
+    3648:	0833ff7ff0165000 	{ move zero, udn0 }
+    3650:	081606e070165000 	{ jrp lr }
+
+00003658 <send_result>:
+    3658:	305b27e100cff083 	{ move r3, r2 ; movei r2, 100 }
+    3660:	302057ffc03f8db6 	{ addi sp, sp, -8 ; info 10 }
+    3668:	5ffbffffc0308db6 	{ addi sp, sp, 8 ; j 3260 <udn_send_msg> }
+    3670:	30207ffff0165000 	{ info 15 }
+
+00003678 <get_results>:
+    3678:	0833f805000c200b 	{ add r11, r0, r2 ; move r10, r0 }
+    3680:	0833f884813c02c0 	{ slte r0, r11, r0 ; move r9, r4 }
+    3688:	2800c00170165000 	{ bnz r0, 3748 <get_results+0xd0> }
+    3690:	0806182000cff042 	{ move r2, r1 ; add r0, r1, r3 }
+    3698:	50002000014c0048 	{ slt r8, r1, r0 ; j 36b8 <get_results+0x40> }
+    36a0:	0833f8214030128a 	{ addi r10, r10, 1 ; move r2, r1 }
+    36a8:	086a594370165000 	{ slt r6, r10, r11 }
+    36b0:	280098c070165000 	{ bz r6, 3748 <get_results+0xd0> }
+    36b8:	2bffe91870165000 	{ bz r8, 36a0 <get_results+0x28> }
+    36c0:	5000300070165000 	{ j 36f0 <get_results+0x78> }
+    36c8:	0833ff63f0165000 	{ move r7, udn0 }
+    36d0:	08063924f0165000 	{ add r9, r9, r7 }
+    36d8:	3018084170165000 	{ addi r2, r2, 1 }
+    36e0:	086a0046f0165000 	{ slt r13, r2, r0 }
+    36e8:	2bffb9b870165000 	{ bz r13, 36a0 <get_results+0x28> }
+    36f0:	303942c770165000 	{ mfspr r14, IDN_TILE_COORD }
+    36f8:	400791c770165000 	{ shri r14, r14, 18 }
+    3700:	3815f9c770165000 	{ mm r14, r14, zero, 0, 10 }
+    3708:	0872714770165000 	{ sne r14, r10, r14 }
+    3710:	2bffb9d9f0165000 	{ bnzt r14, 36c8 <get_results+0x50> }
+    3718:	303942c7f0165000 	{ mfspr r15, IDN_TILE_COORD }
+    3720:	400739e7f0165000 	{ shri r15, r15, 7 }
+    3728:	3815f9e7f0165000 	{ mm r15, r15, zero, 0, 10 }
+    3730:	08467847f0165000 	{ seq r15, r2, r15 }
+    3738:	2bffa1f9f0165000 	{ bnzt r15, 36d8 <get_results+0x60> }
+    3740:	5fff8ffff0165000 	{ j 36c8 <get_results+0x50> }
+    3748:	081606e000cff240 	{ move r0, r9 ; jrp lr }
+
+00003750 <check_results>:
+    3750:	bfdfc6db1b7bfd89 	{ move r9, sp ; addi sp, sp, -8 ; sw sp, lr }
+    3758:	30205ffff0165000 	{ info 11 }
+    3760:	302067ffc0304d85 	{ addi r5, sp, 4 ; info 12 }
+    3768:	df1508005490cfff 	{ info 12 ; sw r5, r9 }
+    3770:	6fff0fffd010cfff 	{ info 12 ; jal 3678 <get_results> }
+    3778:	2800280000cff002 	{ move r2, r0 ; bz r0, 37a0 <check_results+0x50> }
+    3780:	30580fe020008db7 	{ addli lr, sp, 8 ; movei r0, 1 }
+    3788:	bcd846db5f704fc1 	{ movei r1, 4 ; addi sp, sp, 8 ; lw lr, lr }
+    3790:	30206ffff0165000 	{ info 13 }
+    3798:	501750005010afff 	{ info 10 ; j 4ee8 <bringup_fail> }
+    37a0:	180046dbf0165000 	{ addli lr, sp, 8 }
+    37a8:	dcdd08004f708db6 	{ addi sp, sp, 8 ; lw lr, lr }
+    37b0:	081606e070165000 	{ jrp lr }
+
+000037b8 <sync_up>:
+    37b8:	0833f84500cff0cb 	{ move r11, r3 ; move r10, r2 }
+    37c0:	303942c3f0083006 	{ shli r6, r0, 3 ; mfspr r7, IDN_TILE_COORD }
+    37c8:	400790e381740186 	{ sub r6, r6, r0 ; shri r7, r7, 18 }
+    37d0:	303942c1602bf1c7 	{ mm r7, r7, zero, 0, 10 ; mfspr r2, IDN_TILE_COORD }
+    37d8:	400418e1f00e7082 	{ shri r2, r2, 7 ; shli r3, r7, 3 }
+    37e0:	087e3861e02bf082 	{ mm r2, r2, zero, 0, 10 ; sub r3, r3, r7 }
+    37e8:	08061841000c6041 	{ add r1, r1, r6 ; add r2, r2, r3 }
+    37f0:	301fc6db015c2040 	{ sne r0, r1, r2 ; addi sp, sp, -8 }
+    37f8:	2800b00070165000 	{ bz r0, 38a8 <sync_up+0xf0> }
+    3800:	303942c3800c4288 	{ add r8, r10, r4 ; mfspr r7, IDN_TILE_COORD }
+    3808:	400790e3f0165000 	{ shri r7, r7, 18 }
+    3810:	3815f8e3f0165000 	{ mm r7, r7, zero, 0, 10 }
+    3818:	086c50e3f0165000 	{ slt_u r7, r7, r10 }
+    3820:	280080e170165000 	{ bnz r7, 38a0 <sync_up+0xe8> }
+    3828:	303942c4f0165000 	{ mfspr r9, IDN_TILE_COORD }
+    3830:	40079124f0165000 	{ shri r9, r9, 18 }
+    3838:	3815f924f0165000 	{ mm r9, r9, zero, 0, 10 }
+    3840:	0864490470165000 	{ slte_u r8, r8, r9 }
+    3848:	2800590170165000 	{ bnz r8, 38a0 <sync_up+0xe8> }
+    3850:	303942c5000c52cc 	{ add r12, r11, r5 ; mfspr r10, IDN_TILE_COORD }
+    3858:	4007394570165000 	{ shri r10, r10, 7 }
+    3860:	3815f94570165000 	{ mm r10, r10, zero, 0, 10 }
+    3868:	086c594570165000 	{ slt_u r10, r10, r11 }
+    3870:	2800314170165000 	{ bnz r10, 38a0 <sync_up+0xe8> }
+    3878:	303942c6f0165000 	{ mfspr r13, IDN_TILE_COORD }
+    3880:	400739a6f0165000 	{ shri r13, r13, 7 }
+    3888:	3815f9a6f0165000 	{ mm r13, r13, zero, 0, 10 }
+    3890:	0864698670165000 	{ slte_u r12, r12, r13 }
+    3898:	2800298070165000 	{ bz r12, 38c0 <sync_up+0x108> }
+    38a0:	081606e040308db6 	{ addi sp, sp, 8 ; jrp lr }
+    38a8:	0833f96080cff280 	{ move r0, r10 ; move r1, r11 }
+    38b0:	0833f8a180cff102 	{ move r2, r4 ; move r3, r5 }
+    38b8:	5ffd47ffc0308db6 	{ addi sp, sp, 8 ; j 35f8 <send_sync> }
+    38c0:	30207ffff0165000 	{ info 15 }
+    38c8:	5ffd87ffc0308db6 	{ addi sp, sp, 8 ; j 3648 <get_sync> }
+    38d0:	30207ffff0165000 	{ info 15 }
+
+000038d8 <do_results>:
+    38d8:	0833f86600cff10d 	{ move r13, r4 ; move r12, r3 }
+    38e0:	303942c380cff08b 	{ move r11, r2 ; mfspr r7, IDN_TILE_COORD }
+    38e8:	400790e3f0083002 	{ shli r2, r0, 3 ; shri r7, r7, 18 }
+    38f0:	303942c181740082 	{ sub r2, r2, r0 ; mfspr r3, IDN_TILE_COORD }
+    38f8:	40073861e02bf1c7 	{ mm r7, r7, zero, 0, 10 ; shri r3, r3, 7 }
+    3900:	3815f861f00831c4 	{ shli r4, r7, 3 ; mm r3, r3, zero, 0, 10 }
+    3908:	0806102101747104 	{ sub r4, r4, r7 ; add r2, r1, r2 }
+    3910:	301fc6db000c40c3 	{ add r3, r3, r4 ; addi sp, sp, -8 }
+    3918:	0872184170165000 	{ sne r2, r2, r3 }
+    3920:	2800b04070165000 	{ bz r2, 39d0 <do_results+0xf8> }
+    3928:	303942c1800cd2c4 	{ add r4, r11, r13 ; mfspr r3, IDN_TILE_COORD }
+    3930:	40079061f0165000 	{ shri r3, r3, 18 }
+    3938:	3815f861f0165000 	{ mm r3, r3, zero, 0, 10 }
+    3940:	086c5861f0165000 	{ slt_u r3, r3, r11 }
+    3948:	2800806170165000 	{ bnz r3, 39c8 <do_results+0xf0> }
+    3950:	303942c3f0165000 	{ mfspr r7, IDN_TILE_COORD }
+    3958:	400790e3f0165000 	{ shri r7, r7, 18 }
+    3960:	3815f8e3f0165000 	{ mm r7, r7, zero, 0, 10 }
+    3968:	0864388270165000 	{ slte_u r4, r4, r7 }
+    3970:	2800588170165000 	{ bnz r4, 39c8 <do_results+0xf0> }
+    3978:	303942c4000c5309 	{ add r9, r12, r5 ; mfspr r8, IDN_TILE_COORD }
+    3980:	4007390470165000 	{ shri r8, r8, 7 }
+    3988:	3815f90470165000 	{ mm r8, r8, zero, 0, 10 }
+    3990:	086c610470165000 	{ slt_u r8, r8, r12 }
+    3998:	2800310170165000 	{ bnz r8, 39c8 <do_results+0xf0> }
+    39a0:	303942c570165000 	{ mfspr r10, IDN_TILE_COORD }
+    39a8:	4007394570165000 	{ shri r10, r10, 7 }
+    39b0:	3815f94570165000 	{ mm r10, r10, zero, 0, 10 }
+    39b8:	08645124f0165000 	{ slte_u r9, r9, r10 }
+    39c0:	2800312070165000 	{ bz r9, 39f0 <do_results+0x118> }
+    39c8:	081606e040308db6 	{ addi sp, sp, 8 ; jrp lr }
+    39d0:	0833f98080cff2c0 	{ move r0, r11 ; move r1, r12 }
+    39d8:	0833f8a180cff342 	{ move r2, r13 ; move r3, r5 }
+    39e0:	301846db00cff184 	{ move r4, r6 ; addi sp, sp, 8 }
+    39e8:	5ffd6fffd010ffff 	{ info 15 ; j 3750 <check_results> }
+    39f0:	30205ffff0165000 	{ info 11 }
+    39f8:	301846db00cff182 	{ move r2, r6 ; addi sp, sp, 8 }
+    3a00:	5ffc5fffd010ffff 	{ info 15 ; j 3658 <send_result> }
+    3a08:	30205ffff0165000 	{ info 11 }
+
+00003a10 <sync_and_check>:
+    3a10:	bfdec6db1b7bfd8b 	{ move r11, sp ; addi sp, sp, -40 ; sw sp, lr }
+    3a18:	30205ffff0165000 	{ info 11 }
+    3a20:	301906c640304d8d 	{ addi r13, sp, 4 ; addi r12, sp, 32 }
+    3a28:	bf30c6c4ccb1cd8a 	{ addi r10, sp, 28 ; addi r9, sp, 24 ; sw r13, r11 }
+    3a30:	bf3086c3c8114d88 	{ addi r8, sp, 20 ; addi r7, sp, 16 ; sw r12, r1 }
+    3a38:	df2d080048208d8e 	{ addi r14, sp, 8 ; sw r10, r2 }
+    3a40:	df2508006c3a5000 	{ sw r9, r3 }
+    3a48:	df250800684a5000 	{ sw r8, r4 }
+    3a50:	df1d08006c5a5000 	{ sw r7, r5 }
+    3a58:	bf3866c01b4bf034 	{ move r52, r0 ; addi r0, sp, 12 ; sw r14, r52 }
+    3a60:	df050800186bfd00 	{ move r0, r52 ; sw r0, r6 }
+    3a68:	6ffd57fff0165000 	{ jal 37b8 <sync_up> }
+    3a70:	3018e6c140320d81 	{ addi r1, sp, 32 ; addi r2, sp, 28 }
+    3a78:	bc00a6c24c118d83 	{ addi r3, sp, 24 ; addi r4, sp, 20 ; lw r1, r1 }
+    3a80:	bc0866c348210d85 	{ addi r5, sp, 16 ; addi r6, sp, 12 ; lw r2, r2 }
+    3a88:	400b7061a0028db7 	{ addli lr, sp, 40 ; lw r3, r3 }
+    3a90:	bc1046da184bfd00 	{ move r0, r52 ; addi r52, sp, 8 ; lw r4, r4 }
+    3a98:	dc1508005451cfff 	{ info 28 ; lw r5, r5 }
+    3aa0:	dc1d08005061cfff 	{ info 28 ; lw r6, r6 }
+    3aa8:	dcdd08005771cfff 	{ info 28 ; lw lr, lr }
+    3ab0:	c4d0f7ffcb428db6 	{ addi sp, sp, 40 ; info 30 ; lw r52, r52 }
+    3ab8:	3020fffff0165000 	{ info 31 }
+    3ac0:	5ffe1fffd010afff 	{ info 10 ; j 38d8 <do_results> }
+    3ac8:	30205ffff0165000 	{ info 11 }
+
+00003ad0 <setup_static_sync>:
+    3ad0:	303942c3f0083008 	{ shli r8, r0, 3 ; mfspr r7, IDN_TILE_COORD }
+    3ad8:	400790e381740208 	{ sub r8, r8, r0 ; shri r7, r7, 18 }
+    3ae0:	303942c2e02bf1c7 	{ mm r7, r7, zero, 0, 10 ; mfspr r5, IDN_TILE_COORD }
+    3ae8:	400418e3700e7145 	{ shri r5, r5, 7 ; shli r6, r7, 3 }
+    3af0:	087e38c3602bf145 	{ mm r5, r5, zero, 0, 10 ; sub r6, r6, r7 }
+    3af8:	080630a2800c1204 	{ add r4, r8, r1 ; add r5, r5, r6 }
+    3b00:	301fc0a2c03f8104 	{ addi r4, r4, -8 ; addi r5, r5, -8 }
+    3b08:	0872288223028fc9 	{ moveli r9, 12328 ; sne r4, r4, r5 }
+    3b10:	2801b880000c200b 	{ add r11, r0, r2 ; bz r4, 3cc8 <setup_static_sync+0x1f8> }
+    3b18:	303942c7f00832c9 	{ shli r9, r11, 3 ; mfspr r15, IDN_TILE_COORD }
+    3b20:	400791e7800c304a 	{ add r10, r1, r3 ; shri r15, r15, 18 }
+    3b28:	303942c6e02bf3cf 	{ mm r15, r15, zero, 0, 10 ; mfspr r13, IDN_TILE_COORD }
+    3b30:	400419e7700e734d 	{ shri r13, r13, 7 ; shli r14, r15, 3 }
+    3b38:	087e79c7602bf34d 	{ mm r13, r13, zero, 0, 10 ; sub r14, r14, r15 }
+    3b40:	080671a6800ca20c 	{ add r12, r8, r10 ; add r13, r13, r14 }
+    3b48:	301fc1a6c03f730c 	{ addi r12, r12, -9 ; addi r13, r13, -8 }
+    3b50:	087269860174b249 	{ sub r9, r9, r11 ; sne r12, r12, r13 }
+    3b58:	28019180000c1250 	{ add r16, r9, r1 ; bz r12, 3ce8 <setup_static_sync+0x218> }
+    3b60:	303942c9a4140fc2 	{ moveli r2, 16704 ; mfspr r19, IDN_TILE_COORD }
+    3b68:	303942c8f00f24d3 	{ shri r19, r19, 18 ; mfspr r17, IDN_TILE_COORD }
+    3b70:	40073a28e02bf4d3 	{ mm r19, r19, zero, 0, 10 ; shri r17, r17, 7 }
+    3b78:	3815fa28f00834d2 	{ shli r18, r19, 3 ; mm r17, r17, zero, 0, 10 }
+    3b80:	305817e181753492 	{ sub r18, r18, r19 ; movei r3, 2 }
+    3b88:	301f8a08000d2451 	{ add r17, r17, r18 ; addi r16, r16, -15 }
+    3b90:	0806494a403f8451 	{ addi r17, r17, -8 ; add r20, r10, r9 }
+    3b98:	301f828a015d1410 	{ sne r16, r16, r17 ; addi r20, r20, -16 }
+    3ba0:	28016a0070165000 	{ bz r16, 3d08 <setup_static_sync+0x238> }
+    3ba8:	303942cba1a00fc3 	{ moveli r3, 6656 ; mfspr r23, IDN_TILE_COORD }
+    3bb0:	303942caf00f25d7 	{ shri r23, r23, 18 ; mfspr r21, IDN_TILE_COORD }
+    3bb8:	40073aaae02bf5d7 	{ mm r23, r23, zero, 0, 10 ; shri r21, r21, 7 }
+    3bc0:	3815faaaf00835d6 	{ shli r22, r23, 3 ; mm r21, r21, zero, 0, 10 }
+    3bc8:	305817e101757596 	{ sub r22, r22, r23 ; movei r2, 2 }
+    3bd0:	0806b2aaf0165000 	{ add r21, r21, r22 }
+    3bd8:	301fc2aaf0165000 	{ addi r21, r21, -8 }
+    3be0:	0872aa8a70165000 	{ sne r20, r20, r21 }
+    3be8:	28013a8070165000 	{ bz r20, 3d20 <setup_static_sync+0x250> }
+    3bf0:	303942cc23005fc3 	{ moveli r3, 12293 ; mfspr r24, IDN_TILE_COORD }
+    3bf8:	305817e1700f2618 	{ shri r24, r24, 18 ; movei r2, 2 }
+    3c00:	3815fb0c70165000 	{ mm r24, r24, zero, 0, 10 }
+    3c08:	0872c00c70165000 	{ sne r24, r0, r24 }
+    3c10:	28012b0070165000 	{ bz r24, 3d38 <setup_static_sync+0x268> }
+    3c18:	303942ccc0802fc2 	{ movei r2, 2 ; mfspr r25, IDN_TILE_COORD }
+    3c20:	1a0147e1f00e7659 	{ shri r25, r25, 7 ; moveli r3, 16424 }
+    3c28:	301ff94d602bf659 	{ mm r25, r25, zero, 0, 10 ; addi r26, r10, -1 }
+    3c30:	0872c82cf0165000 	{ sne r25, r1, r25 }
+    3c38:	28011b2070165000 	{ bz r25, 3d50 <setup_static_sync+0x280> }
+    3c40:	303942cda2a00fc2 	{ moveli r2, 10752 ; mfspr r27, IDN_TILE_COORD }
+    3c48:	301ff96e700e76db 	{ shri r27, r27, 7 ; addi r28, r11, -1 }
+    3c50:	3815fb6df0165000 	{ mm r27, r27, zero, 0, 10 }
+    3c58:	0872db4d70165000 	{ sne r26, r26, r27 }
+    3c60:	2801734070165000 	{ bz r26, 3dd0 <setup_static_sync+0x300> }
+    3c68:	303942ced0101042 	{ andi r2, r1, 1 ; mfspr r29, IDN_TILE_COORD }
+    3c70:	1a0a07e0f00f275d 	{ shri r29, r29, 18 ; moveli r1, 16704 }
+    3c78:	30180803e02bf75d 	{ mm r29, r29, zero, 0, 10 ; addi r7, r0, 1 }
+    3c80:	0872eb8e70165000 	{ sne r28, r28, r29 }
+    3c88:	2800e381f0165000 	{ bnzt r28, 3d68 <setup_static_sync+0x298> }
+    3c90:	303942c1a1a00fc0 	{ moveli r0, 6656 ; mfspr r3, IDN_TILE_COORD }
+    3c98:	40073861f0165000 	{ shri r3, r3, 7 }
+    3ca0:	30200861f0165000 	{ andi r3, r3, 1 }
+    3ca8:	08721841f0165000 	{ sne r3, r2, r3 }
+    3cb0:	28013061f0165000 	{ bnzt r3, 3de0 <setup_static_sync+0x310> }
+    3cb8:	3051002670165000 	{ mtspr SNSTATIC, r1 }
+    3cc0:	5000100070165000 	{ j 3cd0 <setup_static_sync+0x200> }
+    3cc8:	3051012670165000 	{ mtspr SNSTATIC, r9 }
+    3cd0:	305817e270165000 	{ movei r4, 2 }
+    3cd8:	30510082f0165000 	{ mtspr SNCTL, r4 }
+    3ce0:	081606e070165000 	{ jrp lr }
+    3ce8:	305817e2a2005fc6 	{ moveli r6, 8197 ; movei r5, 2 }
+    3cf0:	305100c670165000 	{ mtspr SNSTATIC, r6 }
+    3cf8:	305100a2f0165000 	{ mtspr SNCTL, r5 }
+    3d00:	081606e070165000 	{ jrp lr }
+    3d08:	3051004670165000 	{ mtspr SNSTATIC, r2 }
+    3d10:	30510062f0165000 	{ mtspr SNCTL, r3 }
+    3d18:	081606e070165000 	{ jrp lr }
+    3d20:	3051006670165000 	{ mtspr SNSTATIC, r3 }
+    3d28:	30510042f0165000 	{ mtspr SNCTL, r2 }
+    3d30:	081606e070165000 	{ jrp lr }
+    3d38:	3051006670165000 	{ mtspr SNSTATIC, r3 }
+    3d40:	30510042f0165000 	{ mtspr SNCTL, r2 }
+    3d48:	081606e070165000 	{ jrp lr }
+    3d50:	3051006670165000 	{ mtspr SNSTATIC, r3 }
+    3d58:	30510042f0165000 	{ mtspr SNCTL, r2 }
+    3d60:	081606e070165000 	{ jrp lr }
+    3d68:	303942c470165000 	{ mfspr r8, IDN_TILE_COORD }
+    3d70:	4007910470165000 	{ shri r8, r8, 18 }
+    3d78:	3815f90470165000 	{ mm r8, r8, zero, 0, 10 }
+    3d80:	087240e3f0165000 	{ sne r7, r7, r8 }
+    3d88:	280068e1f0165000 	{ bnzt r7, 3df0 <setup_static_sync+0x320> }
+    3d90:	303942c4f0165000 	{ mfspr r9, IDN_TILE_COORD }
+    3d98:	40073924f0165000 	{ shri r9, r9, 7 }
+    3da0:	30200924f0165000 	{ andi r9, r9, 1 }
+    3da8:	08724844f0165000 	{ sne r9, r2, r9 }
+    3db0:	28008121f0165000 	{ bnzt r9, 3e30 <setup_static_sync+0x360> }
+    3db8:	188147e570165000 	{ moveli r10, 4136 }
+    3dc0:	3051014670165000 	{ mtspr SNSTATIC, r10 }
+    3dc8:	5fff0ffff0165000 	{ j 3cd0 <setup_static_sync+0x200> }
+    3dd0:	3051004670165000 	{ mtspr SNSTATIC, r2 }
+    3dd8:	5ffefffff0165000 	{ j 3cd0 <setup_static_sync+0x200> }
+    3de0:	3051000670165000 	{ mtspr SNSTATIC, r0 }
+    3de8:	5ffeeffff0165000 	{ j 3cd0 <setup_static_sync+0x200> }
+    3df0:	303942c5f0165000 	{ mfspr r11, IDN_TILE_COORD }
+    3df8:	40073965f0165000 	{ shri r11, r11, 7 }
+    3e00:	30200965f0165000 	{ andi r11, r11, 1 }
+    3e08:	08725845f0165000 	{ sne r11, r2, r11 }
+    3e10:	28003961f0165000 	{ bnzt r11, 3e48 <setup_static_sync+0x378> }
+    3e18:	1a0147e670165000 	{ moveli r12, 16424 }
+    3e20:	3051018670165000 	{ mtspr SNSTATIC, r12 }
+    3e28:	5ffeaffff0165000 	{ j 3cd0 <setup_static_sync+0x200> }
+    3e30:	190a07e6f0165000 	{ moveli r13, 8512 }
+    3e38:	305101a670165000 	{ mtspr SNSTATIC, r13 }
+    3e40:	5ffe97fff0165000 	{ j 3cd0 <setup_static_sync+0x200> }
+    3e48:	195007e770165000 	{ moveli r14, 10752 }
+    3e50:	305101c670165000 	{ mtspr SNSTATIC, r14 }
+    3e58:	5ffe7ffff0165000 	{ j 3cd0 <setup_static_sync+0x200> }
+    3e60:	081606e070165000 	{ jrp lr }
+
+00003e68 <static_sync>:
+    3e68:	303942c370083005 	{ shli r5, r0, 3 ; mfspr r6, IDN_TILE_COORD }
+    3e70:	400790c301740145 	{ sub r5, r5, r0 ; shri r6, r6, 18 }
+    3e78:	303942c1e02bf186 	{ mm r6, r6, zero, 0, 10 ; mfspr r3, IDN_TILE_COORD }
+    3e80:	400418c2700e70c3 	{ shri r3, r3, 7 ; shli r4, r6, 3 }
+    3e88:	087e3082602bf0c3 	{ mm r3, r3, zero, 0, 10 ; sub r4, r4, r6 }
+    3e90:	08062061800c5041 	{ add r1, r1, r5 ; add r3, r3, r4 }
+    3e98:	08721820403f8db6 	{ addi sp, sp, -8 ; sne r0, r1, r3 }
+    3ea0:	2800200000cff087 	{ move r7, r2 ; bz r0, 3ec0 <static_sync+0x58> }
+    3ea8:	301846db00cffe06 	{ move r6, sn ; addi sp, sp, 8 }
+    3eb0:	0833f8dc70165000 	{ move sn, r6 }
+    3eb8:	081606e070165000 	{ jrp lr }
+    3ec0:	0833f8fc40801fc0 	{ movei r0, 1 ; move sn, r7 }
+    3ec8:	0833ff0140804fc1 	{ movei r1, 4 ; move r2, sn }
+    3ed0:	500ff80040308db6 	{ addi sp, sp, 8 ; j 4ec8 <bringup_pass> }
+    3ed8:	30207ffff0165000 	{ info 15 }
+
+00003ee0 <start_tile>:
+    3ee0:	301f46db30008fc9 	{ auli r9, zero, 8 ; addi sp, sp, -24 }
+    3ee8:	301846c3a0800fcd 	{ moveli r13, 2048 ; addi r7, sp, 8 }
+    3ef0:	dc1a38234cb0cd8c 	{ addi r12, sp, 12 ; shli r6, r1, 7 ; lw r11, r7 }
+    3ef8:	cf33c7e7c8d00d82 	{ addi r2, sp, 0 ; movei r15, 120 ; sw r12, r13 }
+    3f00:	bc08204448c04d8e 	{ addi r14, sp, 4 ; addi r8, r2, 4 ; lw r12, r2 }
+    3f08:	df3d080058f03fcd 	{ movei r13, 3 ; sw r14, r15 }
+    3f10:	3b0df965e3fcd30c 	{ mm r12, r12, r13, 7, 31 ; mm r11, r11, zero, 12, 6 }
+    3f18:	40049005e860b249 	{ mm r9, r9, r11, 16, 24 ; shli r11, r0, 18 }
+    3f20:	3cb86165ece49fc9 	{ mm r9, zero, r9, 25, 25 ; mm r11, r11, r12, 18, 28 }
+    3f28:	088048e063c4b186 	{ mm r6, r6, r11, 7, 17 ; sw r7, r9 }
+    3f30:	3f7a37e340304207 	{ addi r7, r8, 4 ; mm r6, zero, r6, 29, 29 }
+    3f38:	df0d0800486041d0 	{ addi r16, r7, 4 ; sw r2, r6 }
+    3f40:	dc250800192bf1b9 	{ move idn0, r6 ; lw r18, r8 }
+    3f48:	dc1d08006d1a5000 	{ lw r17, r7 }
+    3f50:	dc450800190bf4b9 	{ move idn0, r18 ; lw r16, r16 }
+    3f58:	0833fa3cf0165000 	{ move idn0, r17 }
+    3f60:	0833fa1cf0165000 	{ move idn0, r16 }
+    3f68:	081606e040318db6 	{ addi sp, sp, 24 ; jrp lr }
+
+00003f70 <western_mdn_port_x>:
+    3f70:	bfdf46db1b7bfd89 	{ move r9, sp ; addi sp, sp, -24 ; sw sp, lr }
+    3f78:	301826c140310d84 	{ addi r4, sp, 16 ; addi r2, sp, 4 }
+    3f80:	9f15f80f49e0cd83 	{ addi r3, sp, 12 ; move r30, r0 ; sw r4, r30 }
+    3f88:	9f0dffe19f4bf074 	{ move r52, r1 ; move r3, zero ; sw r3, r52 }
+    3f90:	cf08a7e2189bffc2 	{ move r2, zero ; movei r4, 20 ; sw r2, r9 }
+    3f98:	6007e00070165000 	{ jal 4778 <send_config_read> }
+    3fa0:	30583fe380cff002 	{ move r2, r0 ; movei r7, 7 }
+    3fa8:	400468e3e6bff005 	{ mm r5, r0, zero, 13, 15 ; shli r7, r7, 13 }
+    3fb0:	087238a2c0807fc6 	{ movei r6, 7 ; sne r5, r5, r7 }
+    3fb8:	280070a1f008f181 	{ shli r1, r6, 15 ; bnzt r5, 4028 <western_mdn_port_x+0xb8> }
+    3fc0:	30580fe170165000 	{ movei r2, 1 }
+    3fc8:	301ff3c341102d08 	{ slti_u r8, r52, 2 ; addi r6, r30, -2 }
+    3fd0:	2800310080cff180 	{ move r0, r6 ; bzt r8, 4000 <western_mdn_port_x+0x90> }
+    3fd8:	1800c6db80b5e080 	{ mvnz r0, r2, r30 ; addli lr, sp, 24 }
+    3fe0:	bcd866da4f710d9e 	{ addi r30, sp, 16 ; addi r52, sp, 12 ; lw lr, lr }
+    3fe8:	dc7d080069ea5000 	{ lw r30, r30 }
+    3ff0:	dcd508004b418db6 	{ addi sp, sp, 24 ; lw r52, r52 }
+    3ff8:	081606e070165000 	{ jrp lr }
+    4000:	0833fbc020018db7 	{ addli lr, sp, 24 ; move r0, r30 }
+    4008:	bcd866da4f710d9e 	{ addi r30, sp, 16 ; addi r52, sp, 12 ; lw lr, lr }
+    4010:	dc7d080011e46080 	{ mvnz r0, r2, r6 ; lw r30, r30 }
+    4018:	dcd508004b418db6 	{ addi sp, sp, 24 ; lw r52, r52 }
+    4020:	081606e070165000 	{ jrp lr }
+    4028:	3be3f80070165000 	{ mm r0, r0, zero, 15, 17 }
+    4030:	0872080070165000 	{ sne r0, r0, r1 }
+    4038:	2800100170165000 	{ bnz r0, 4048 <western_mdn_port_x+0xd8> }
+    4040:	5fff8fff80cfffc2 	{ move r2, zero ; j 3fc8 <western_mdn_port_x+0x58> }
+    4048:	305827e0c0801fc0 	{ movei r0, 1 ; movei r1, 4 }
+    4050:	600e980070165000 	{ jal 4ee8 <bringup_fail> }
+    4058:	301846c170165000 	{ addi r2, sp, 8 }
+    4060:	dc0d0800682a5000 	{ lw r2, r2 }
+    4068:	5fff67fff0165000 	{ j 3fc8 <western_mdn_port_x+0x58> }
+    4070:	081607e040318db6 	{ addi sp, sp, 24 ; jrp zero }
+
+00004078 <start_tiles>:
+    4078:	bfddc6db1b7bfd8a 	{ move r10, sp ; addi sp, sp, -72 ; sw sp, lr }
+    4080:	30205ffff0165000 	{ info 11 }
+    4088:	301886c6c030cd8b 	{ addi r11, sp, 12 ; addi r13, sp, 16 }
+    4090:	bf29c6c8cc140d90 	{ addi r16, sp, 64 ; addi r17, sp, 56 ; sw r11, r1 }
+    4098:	bf30e6c9cc03cd92 	{ addi r18, sp, 60 ; addi r19, sp, 28 ; sw r13, r0 }
+    40a0:	bf40c6caca914d94 	{ addi r20, sp, 20 ; addi r21, sp, 24 ; sw r16, r41 }
+    40a8:	bf4126cbce820d96 	{ addi r22, sp, 32 ; addi r23, sp, 36 ; sw r17, r40 }
+    40b0:	bf4966ccca728d98 	{ addi r24, sp, 40 ; addi r25, sp, 44 ; sw r18, r39 }
+    40b8:	9f4df8264e630d9a 	{ addi r26, sp, 48 ; move r12, r1 ; sw r19, r38 }
+    40c0:	cf57ffe44a534d9b 	{ addi r27, sp, 52 ; movei r8, -1 ; sw r20, r37 }
+    40c8:	9f55f8074e404d8f 	{ addi r15, sp, 4 ; move r14, r0 ; sw r21, r36 }
+    40d0:	df5a1803da3fffc9 	{ movei r9, -1 ; shli r7, r0, 3 ; sw r22, r35 }
+    40d8:	9f5df8530e2c01c0 	{ sub r0, r7, r0 ; move r38, r2 ; sw r23, r34 }
+    40e0:	9f65f8b48a100040 	{ add r0, r1, r0 ; move r41, r5 ; sw r24, r33 }
+    40e8:	9f65f8941e0bf0e0 	{ move r32, r3 ; move r40, r4 ; sw r25, r32 }
+    40f0:	df6d080051f2cfff 	{ info 44 ; sw r26, r31 }
+    40f8:	df6d080055e2cfff 	{ info 44 ; sw r27, r30 }
+    4100:	df3d080054a2cfff 	{ info 44 ; sw r15, r10 }
+    4108:	34508125d012cfff 	{ info 44 ; mtspr INTERRUPT_MASK_SET_3_0, r9 }
+    4110:	345081065012cfff 	{ info 44 ; mtspr INTERRUPT_MASK_SET_3_1, r8 }
+    4118:	303942c35012cfff 	{ info 44 ; mfspr r6, IDN_TILE_COORD }
+    4120:	303942c1700f2186 	{ shri r6, r6, 18 ; mfspr r2, IDN_TILE_COORD }
+    4128:	40073841602bf186 	{ mm r6, r6, zero, 0, 10 ; shri r2, r2, 7 }
+    4130:	3815f84170083183 	{ shli r3, r6, 3 ; mm r2, r2, zero, 0, 10 }
+    4138:	302167ff817460c3 	{ sub r3, r3, r6 ; info 44 }
+    4140:	302167ff800c3081 	{ add r1, r2, r3 ; info 44 }
+    4148:	302167ff815c1000 	{ sne r0, r0, r1 ; info 44 }
+    4150:	28008801d012cfff 	{ info 44 ; bnzt r0, 41d8 <start_tiles+0x160> }
+    4158:	343980f15012cfff 	{ info 44 ; mfspr r34, CBOX_MMAP_0 }
+    4160:	343980f1f00f28a2 	{ shri r34, r34, 18 ; mfspr r35, CBOX_MMAP_0 }
+    4168:	3815fc51700e78e3 	{ shri r35, r35, 7 ; mm r34, r34, zero, 0, 10 }
+    4170:	3815fc7180cff880 	{ move r0, r34 ; mm r35, r35, zero, 0, 10 }
+    4178:	6ffdffff80cff8c1 	{ move r1, r35 ; jal 3f70 <western_mdn_port_x> }
+    4180:	30216fff800e89a1 	{ add r33, r38, r40 ; info 45 }
+    4188:	302167ffc03ff861 	{ addi r33, r33, -1 ; info 44 }
+    4190:	302167ff814e6877 	{ slt lr, r33, r38 ; info 44 }
+    4198:	280046e15012cfff 	{ info 44 ; bnz lr, 41d8 <start_tiles+0x160> }
+    41a0:	0833fd33c0801fc0 	{ movei r0, 1 ; move r39, r41 }
+    41a8:	301846d2814c0a77 	{ slt lr, r41, r0 ; addi r37, sp, 8 }
+    41b0:	40041c3200b40de7 	{ mvnz r39, lr, r0 ; shli r36, r33, 3 }
+    41b8:	8f970c920e729825 	{ add r37, r32, r41 ; sub r36, r36, r33 ; sw r37, r39 }
+    41c0:	302167ffc03ff965 	{ addi r37, r37, -1 ; info 44 }
+    41c8:	08632c1380cff95f 	{ move r31, r37 ; slte r39, r32, r37 }
+    41d0:	5000c8005012cfff 	{ info 44 ; j 4298 <start_tiles+0x220> }
+    41d8:	30216ffff0165000 	{ info 45 }
+    41e0:	301886c04030cd81 	{ addi r1, sp, 12 ; addi r0, sp, 16 }
+    41e8:	400b7020a0048db7 	{ addli lr, sp, 72 ; lw r1, r1 }
+    41f0:	30216ffff0165000 	{ info 45 }
+    41f8:	bc0186cfc8034d9e 	{ addi r30, sp, 52 ; addi r31, sp, 48 ; lw r0, r0 }
+    4200:	bcd966d01f7bf803 	{ move r3, r32 ; addi r32, sp, 44 ; lw lr, lr }
+    4208:	30216ffff0165000 	{ info 45 }
+    4210:	bc7926d149e28da1 	{ addi r33, sp, 40 ; addi r34, sp, 36 ; lw r30, r30 }
+    4218:	bc78c6d24df20da3 	{ addi r35, sp, 32 ; addi r36, sp, 24 ; lw r31, r31 }
+    4220:	9c85fcc14a014da5 	{ addi r37, sp, 20 ; move r2, r38 ; lw r32, r32 }
+    4228:	bc81e6d3ce11cda6 	{ addi r38, sp, 28 ; addi r39, sp, 60 ; lw r33, r33 }
+    4230:	bc89c6d41a2bfa04 	{ move r4, r40 ; addi r40, sp, 56 ; lw r34, r34 }
+    4238:	bc8a06d49e3bfa45 	{ move r5, r41 ; addi r41, sp, 64 ; lw r35, r35 }
+    4240:	c49177ff9a4bffc6 	{ move r6, zero ; info 46 ; lw r36, r36 }
+    4248:	dc9508005652efff 	{ info 46 ; lw r37, r37 }
+    4250:	dc9d08005262efff 	{ info 46 ; lw r38, r38 }
+    4258:	dc9d08005672efff 	{ info 46 ; lw r39, r39 }
+    4260:	dca508005282efff 	{ info 46 ; lw r40, r40 }
+    4268:	c4a177ffce948db6 	{ addi sp, sp, 72 ; info 46 ; lw r41, r41 }
+    4270:	5ff66fffd010afff 	{ info 10 ; j 38d8 <do_results> }
+    4278:	30205ffff0165000 	{ info 11 }
+    4280:	301fcc92403ff861 	{ addi r33, r33, -1 ; addi r36, r36, -7 }
+    4288:	0833fcaf813e1981 	{ slte r1, r38, r33 ; move r31, r37 }
+    4290:	2bff483870165000 	{ bz r1, 41d8 <start_tiles+0x160> }
+    4298:	2bffe4f8000e591e 	{ add r30, r36, r37 ; bz r39, 4278 <start_tiles+0x200> }
+    42a0:	5000200070165000 	{ j 42c0 <start_tiles+0x248> }
+    42a8:	301ffbcf403ff7df 	{ addi r31, r31, -1 ; addi r30, r30, -1 }
+    42b0:	0862fc0170165000 	{ slte r2, r32, r31 }
+    42b8:	2bffc05870165000 	{ bz r2, 4278 <start_tiles+0x200> }
+    42c0:	303942c3403f8783 	{ addi r3, r30, -8 ; mfspr r6, IDN_TILE_COORD }
+    42c8:	303942c2700f2186 	{ shri r6, r6, 18 ; mfspr r4, IDN_TILE_COORD }
+    42d0:	40073882602bf186 	{ mm r6, r6, zero, 0, 10 ; shri r4, r4, 7 }
+    42d8:	3815f88270083185 	{ shli r5, r6, 3 ; mm r4, r4, zero, 0, 10 }
+    42e0:	087e30a2f0165000 	{ sub r5, r5, r6 }
+    42e8:	0806288270165000 	{ add r4, r4, r5 }
+    42f0:	301fc08270165000 	{ addi r4, r4, -8 }
+    42f8:	08462061f0165000 	{ seq r3, r3, r4 }
+    4300:	2bffa879f0165000 	{ bnzt r3, 42a8 <start_tiles+0x230> }
+    4308:	0833fbe080cff840 	{ move r0, r33 ; move r1, r31 }
+    4310:	0833fc6180cff882 	{ move r2, r34 ; move r3, r35 }
+    4318:	6ffbcffff0165000 	{ jal 3ee0 <start_tile> }
+    4320:	5fff8ffff0165000 	{ j 42a8 <start_tiles+0x230> }
+    4328:	081607e040348db6 	{ addi sp, sp, 72 ; jrp zero }
+
+00004330 <choose_mshim_and_start>:
+    4330:	30580fe1c0802fc2 	{ movei r2, 2 ; movei r3, 1 }
+    4338:	302057ffc03f8db6 	{ addi sp, sp, -8 ; info 10 }
+    4340:	5ffba7ffc0308db6 	{ addi sp, sp, 8 ; j 3ee0 <start_tile> }
+    4348:	30207ffff0165000 	{ info 15 }
+
+00004350 <start_tiles_distributed>:
+    4350:	bfde86db1b7bfd88 	{ move r8, sp ; addi sp, sp, -48 ; sw sp, lr }
+    4358:	3018e6c540320d89 	{ addi r9, sp, 32 ; addi r10, sp, 28 }
+    4360:	9f25fc9bcdf28d87 	{ addi r7, sp, 40 ; move lr, r36 ; sw r9, r31 }
+    4368:	bf28c6c2c9e10da4 	{ addi r36, sp, 16 ; addi r5, sp, 24 ; sw r10, r30 }
+    4370:	bf18a6c24e024d86 	{ addi r6, sp, 36 ; addi r4, sp, 20 ; sw r7, r32 }
+    4378:	9f95f8301b7bf024 	{ move r36, r0 ; move r32, r1 ; sw r36, lr }
+    4380:	df1508004e204da2 	{ addi r34, sp, 4 ; sw r5, r34 }
+    4388:	df1d08000a102021 	{ add r33, r0, r2 ; sw r6, r33 }
+    4390:	bf17fc30ca30cda3 	{ addi r35, sp, 12 ; addi r33, r33, -1 ; sw r4, r35 }
+    4398:	df8d080028880840 	{ slt r0, r33, r0 ; sw r34, r8 }
+    43a0:	df8d08006e5a5000 	{ sw r35, r37 }
+    43a8:	2800e00170165000 	{ bnz r0, 4488 <start_tiles_distributed+0x138> }
+    43b0:	0833f872c0801fc0 	{ movei r0, 1 ; move r37, r3 }
+    43b8:	301846d1814c00f7 	{ slt lr, r3, r0 ; addi r35, sp, 8 }
+    43c0:	40041c3100b40de5 	{ mvnz r37, lr, r0 ; shli r34, r33, 3 }
+    43c8:	8f8f0c510e503063 	{ add r35, r1, r3 ; sub r34, r34, r33 ; sw r35, r37 }
+    43d0:	301ffc71f0165000 	{ addi r35, r35, -1 }
+    43d8:	0863183280cff8df 	{ move r31, r35 ; slte r37, r1, r35 }
+    43e0:	5000200070165000 	{ j 4400 <start_tiles_distributed+0xb0> }
+    43e8:	301fcc51403ff861 	{ addi r33, r33, -1 ; addi r34, r34, -7 }
+    43f0:	0833fc6f813e1901 	{ slte r1, r36, r33 ; move r31, r35 }
+    43f8:	2800902070165000 	{ bz r1, 4488 <start_tiles_distributed+0x138> }
+    4400:	2bffecb8000e389e 	{ add r30, r34, r35 ; bz r37, 43e8 <start_tiles_distributed+0x98> }
+    4408:	5000200070165000 	{ j 4428 <start_tiles_distributed+0xd8> }
+    4410:	301ffbcf403ff7df 	{ addi r31, r31, -1 ; addi r30, r30, -1 }
+    4418:	0862fc0170165000 	{ slte r2, r32, r31 }
+    4420:	2bffc85870165000 	{ bz r2, 43e8 <start_tiles_distributed+0x98> }
+    4428:	303942c3403f8783 	{ addi r3, r30, -8 ; mfspr r6, IDN_TILE_COORD }
+    4430:	303942c2700f2186 	{ shri r6, r6, 18 ; mfspr r4, IDN_TILE_COORD }
+    4438:	40073882602bf186 	{ mm r6, r6, zero, 0, 10 ; shri r4, r4, 7 }
+    4440:	3815f88270083185 	{ shli r5, r6, 3 ; mm r4, r4, zero, 0, 10 }
+    4448:	087e30a2f0165000 	{ sub r5, r5, r6 }
+    4450:	0806288270165000 	{ add r4, r4, r5 }
+    4458:	301fc08270165000 	{ addi r4, r4, -8 }
+    4460:	08462061f0165000 	{ seq r3, r3, r4 }
+    4468:	2bffa879f0165000 	{ bnzt r3, 4410 <start_tiles_distributed+0xc0> }
+    4470:	0833fbe080cff840 	{ move r0, r33 ; move r1, r31 }
+    4478:	6ffebfffc0805fc2 	{ movei r2, 5 ; jal 4330 <choose_mshim_and_start> }
+    4480:	5fff97fff0165000 	{ j 4410 <start_tiles_distributed+0xc0> }
+    4488:	3018e6cf20030db7 	{ addli lr, sp, 48 ; addi r30, sp, 28 }
+    4490:	bcd946d04f720d9f 	{ addi r31, sp, 32 ; addi r32, sp, 40 ; lw lr, lr }
+    4498:	bc78c6d149e24da1 	{ addi r33, sp, 36 ; addi r34, sp, 24 ; lw r30, r30 }
+    44a0:	bc7886d24df14da3 	{ addi r35, sp, 20 ; addi r36, sp, 16 ; lw r31, r31 }
+    44a8:	dc8508004a00cda5 	{ addi r37, sp, 12 ; lw r32, r32 }
+    44b0:	dc8508006e1a5000 	{ lw r33, r33 }
+    44b8:	dc8d08006a2a5000 	{ lw r34, r34 }
+    44c0:	dc8d08006e3a5000 	{ lw r35, r35 }
+    44c8:	dc9508006a4a5000 	{ lw r36, r36 }
+    44d0:	dc9508004e530db6 	{ addi sp, sp, 48 ; lw r37, r37 }
+    44d8:	081606e070165000 	{ jrp lr }
+
+000044e0 <test_end>:
+    44e0:	bfdf86db1b7bfd8b 	{ move r11, sp ; addi sp, sp, -16 ; sw sp, lr }
+    44e8:	301866c4c0304d87 	{ addi r7, sp, 4 ; addi r9, sp, 12 }
+    44f0:	df1d08004cb08d88 	{ addi r8, sp, 8 ; sw r7, r11 }
+    44f8:	df2508001debf01e 	{ move r30, r0 ; sw r9, r30 }
+    4500:	df25080019fbf05f 	{ move r31, r1 ; sw r8, r31 }
+    4508:	6ff50ffff0165000 	{ jal 3a10 <sync_and_check> }
+    4510:	303942c6f008378a 	{ shli r10, r30, 3 ; mfspr r13, IDN_TILE_COORD }
+    4518:	400791a68175e28a 	{ sub r10, r10, r30 ; shri r13, r13, 18 }
+    4520:	303942c5e02bf34d 	{ mm r13, r13, zero, 0, 10 ; mfspr r11, IDN_TILE_COORD }
+    4528:	400419a6700e72cb 	{ shri r11, r11, 7 ; shli r12, r13, 3 }
+    4530:	087e6986602bf2cb 	{ mm r11, r11, zero, 0, 10 ; sub r12, r12, r13 }
+    4538:	08066165800ca7ca 	{ add r10, r31, r10 ; add r11, r11, r12 }
+    4540:	0872594570165000 	{ sne r10, r10, r11 }
+    4548:	2800114070165000 	{ bz r10, 4558 <test_end+0x78> }
+    4550:	5000000070165000 	{ j 4550 <test_end+0x70> }
+    4558:	305827e0c0801fc0 	{ movei r0, 1 ; movei r1, 4 }
+    4560:	6009a80000cfffc2 	{ move r2, zero ; jal 4f08 <bringup_done> }
+    4568:	5fffeffff0165000 	{ j 4550 <test_end+0x70> }
+    4570:	081607e040310db6 	{ addi sp, sp, 16 ; jrp zero }
+
+00004578 <send_config_write>:
+    4578:	bfdfc6db1b7bfd8a 	{ move r10, sp ; addi sp, sp, -8 ; sw sp, lr }
+    4580:	30205ffff0165000 	{ info 11 }
+    4588:	302067ffc0304d86 	{ addi r6, sp, 4 ; info 12 }
+    4590:	df1d080050a0cfff 	{ info 12 ; sw r6, r10 }
+    4598:	600028005010cfff 	{ info 12 ; jal 45c0 <issue_config_write> }
+    45a0:	302067ffa0008db7 	{ addli lr, sp, 8 ; info 12 }
+    45a8:	c4d867ffcf708db6 	{ addi sp, sp, 8 ; info 12 ; lw lr, lr }
+    45b0:	5fea6fffd010afff 	{ info 10 ; j 3018 <wait_for_fc> }
+    45b8:	30205ffff0165000 	{ info 11 }
+
+000045c0 <issue_config_write>:
+    45c0:	301f46db7008a10b 	{ shli r11, r4, 10 ; addi sp, sp, -24 }
+    45c8:	301806c6f008704e 	{ shli r14, r1, 7 ; addi r13, sp, 0 }
+    45d0:	bc3046c46d15200f 	{ shli r15, r0, 18 ; addi r8, sp, 8 ; lw r17, r13 }
+    45d8:	bc2026c4d8704fd2 	{ movei r18, 4 ; addi r9, sp, 4 ; lw r7, r8 }
+    45e0:	400b712663fd2451 	{ mm r17, r17, r18, 7, 31 ; lw r12, r9 }
+    45e8:	3cb889e7e073f1c7 	{ mm r7, r7, zero, 0, 28 ; mm r15, r15, r17, 18, 28 }
+    45f0:	210007e7e3c4f38e 	{ mm r14, r14, r15, 7, 17 ; auli r15, zero, 8192 }
+    45f8:	184807e780ccf38e 	{ or r14, r14, r15 ; moveli r15, 2304 }
+    4600:	088039006618f30c 	{ mm r12, r12, r15, 12, 6 ; sw r8, r7 }
+    4608:	380c60666077f38e 	{ mm r14, r14, zero, 0, 29 ; mm r12, r3, r12, 0, 6 }
+    4610:	088071a0667cc2cb 	{ mm r11, r11, r12, 12, 31 ; sw r13, r14 }
+    4618:	9f25f9a54cb08d80 	{ addi r0, sp, 8 ; move r10, r13 ; sw r9, r11 }
+    4620:	303942c340304296 	{ addi r22, r10, 4 ; mfspr r6, IDN_TILE_COORD }
+    4628:	3cb838c340308d89 	{ addi r9, sp, 8 ; mm r6, r6, r7, 18, 28 }
+    4630:	bf2066c44c604595 	{ addi r21, r22, 4 ; addi r8, sp, 12 ; sw r9, r6 }
+    4638:	303942c240310d87 	{ addi r7, sp, 16 ; mfspr r4, IDN_TILE_COORD }
+    4640:	088028e063c46104 	{ mm r4, r4, r6, 7, 17 ; sw r7, r5 }
+    4648:	bf2046c148204554 	{ addi r20, r21, 4 ; addi r2, sp, 8 ; sw r8, r2 }
+    4650:	08802040601840c1 	{ mm r1, r3, r4, 0, 6 ; sw r2, r4 }
+    4658:	bf002289c8114d90 	{ addi r16, sp, 20 ; addi r19, r20, 4 ; sw r0, r1 }
+    4660:	dc2d0800697a5000 	{ lw r23, r10 }
+    4668:	dc5d0800696a5000 	{ lw r22, r22 }
+    4670:	dc5508001d5bf5f9 	{ move idn0, r23 ; lw r21, r21 }
+    4678:	dc550800194bf5b9 	{ move idn0, r22 ; lw r20, r20 }
+    4680:	dc4d08001d3bf579 	{ move idn0, r21 ; lw r19, r19 }
+    4688:	0833fa9cf0165000 	{ move idn0, r20 }
+    4690:	0833fa7cf0165000 	{ move idn0, r19 }
+    4698:	081606e040318db6 	{ addi sp, sp, 24 ; jrp lr }
+
+000046a0 <issue_config_read>:
+    46a0:	301f86db7008a10a 	{ shli r10, r4, 10 ; addi sp, sp, -16 }
+    46a8:	301806c67008704d 	{ shli r13, r1, 7 ; addi r12, sp, 0 }
+    46b0:	bc3046c3e905200e 	{ shli r14, r0, 18 ; addi r7, sp, 8 ; lw r16, r12 }
+    46b8:	bc1826c45c603fd1 	{ movei r17, 3 ; addi r8, sp, 4 ; lw r6, r7 }
+    46c0:	400b7105e3fd1410 	{ mm r16, r16, r17, 7, 31 ; lw r11, r8 }
+    46c8:	3cb881c76073f186 	{ mm r6, r6, zero, 0, 28 ; mm r14, r14, r16, 18, 28 }
+    46d0:	210007e763c4e34d 	{ mm r13, r13, r14, 7, 17 ; auli r14, zero, 8192 }
+    46d8:	184407e700cce34d 	{ or r13, r13, r14 ; moveli r14, 2176 }
+    46e0:	088030e06618e2cb 	{ mm r11, r11, r14, 12, 6 ; sw r7, r6 }
+    46e8:	380c5865e077f34d 	{ mm r13, r13, zero, 0, 29 ; mm r11, r3, r11, 0, 6 }
+    46f0:	08806980667cb28a 	{ mm r10, r10, r11, 12, 31 ; sw r12, r13 }
+    46f8:	bf2046c048a08d87 	{ addi r7, sp, 8 ; addi r0, sp, 8 ; sw r8, r10 }
+    4700:	303942c280cff309 	{ move r9, r12 ; mfspr r5, IDN_TILE_COORD }
+    4708:	3018212a69706145 	{ mm r5, r5, r6, 18, 28 ; addi r20, r9, 4 }
+    4710:	bf182289cc50cd86 	{ addi r6, sp, 12 ; addi r19, r20, 4 ; sw r7, r5 }
+    4718:	303942c240310d8f 	{ addi r15, sp, 16 ; mfspr r4, IDN_TILE_COORD }
+    4720:	088010c063c45104 	{ mm r4, r4, r5, 7, 17 ; sw r6, r2 }
+    4728:	380c2060c0308d82 	{ addi r2, sp, 8 ; mm r1, r3, r4, 0, 6 }
+    4730:	df0d0800484044d2 	{ addi r18, r19, 4 ; sw r2, r4 }
+    4738:	df050800681a5000 	{ sw r0, r1 }
+    4740:	dc2508006d5a5000 	{ lw r21, r9 }
+    4748:	dc550800694a5000 	{ lw r20, r20 }
+    4750:	dc4d08001d3bf579 	{ move idn0, r21 ; lw r19, r19 }
+    4758:	dc4d0800192bf539 	{ move idn0, r20 ; lw r18, r18 }
+    4760:	0833fa7cf0165000 	{ move idn0, r19 }
+    4768:	0833fa5cf0165000 	{ move idn0, r18 }
+    4770:	081606e040310db6 	{ addi sp, sp, 16 ; jrp lr }
+
+00004778 <send_config_read>:
+    4778:	bfdfc6db1b7bfd89 	{ move r9, sp ; addi sp, sp, -8 ; sw sp, lr }
+    4780:	301826c2f0165000 	{ addi r5, sp, 4 }
+    4788:	df1508006c9a5000 	{ sw r5, r9 }
+    4790:	6fff17fff0165000 	{ jal 46a0 <issue_config_read> }
+    4798:	3039601fa0008db7 	{ addli lr, sp, 8 ; mfspr zero, IDN_CA_DATA }
+    47a0:	3039600070165000 	{ mfspr r0, IDN_CA_DATA }
+    47a8:	dcdd08004f708db6 	{ addi sp, sp, 8 ; lw lr, lr }
+    47b0:	081606e070165000 	{ jrp lr }
+
+000047b8 <setup_basic_translations>:
+    47b8:	305027e24080efc3 	{ movei r3, 14 ; mtspr ITLB_INDEX, zero }
+    47c0:	400b080070166000 	{ drain }
+    47c8:	30583fe170165000 	{ movei r2, 7 }
+    47d0:	305020604080efc1 	{ movei r1, 14 ; mtspr ITLB_CURRENT_0, r3 }
+    47d8:	305027e0c0807fc0 	{ movei r0, 7 ; mtspr ITLB_CURRENT_1, zero }
+    47e0:	305027e1f0165000 	{ mtspr ITLB_CURRENT_3, zero }
+    47e8:	3050204170165000 	{ mtspr ITLB_CURRENT_2, r2 }
+    47f0:	400b080070166000 	{ drain }
+    47f8:	3451a7e170165000 	{ mtspr I_PHYSICAL_MEMORY_MODE, zero }
+    4800:	400b080070166000 	{ drain }
+    4808:	305427e470165000 	{ mtspr DTLB_INDEX, zero }
+    4810:	400b080070166000 	{ drain }
+    4818:	3054202270165000 	{ mtspr DTLB_CURRENT_0, r1 }
+    4820:	305427e2f0165000 	{ mtspr DTLB_CURRENT_1, zero }
+    4828:	305427e3f0165000 	{ mtspr DTLB_CURRENT_3, zero }
+    4830:	3054200370165000 	{ mtspr DTLB_CURRENT_2, r0 }
+    4838:	400b080070166000 	{ drain }
+    4840:	305427e5f0165000 	{ mtspr PHYSICAL_MEMORY_MODE, zero }
+    4848:	400b080070166000 	{ drain }
+    4850:	081606e070165000 	{ jrp lr }
+
+00004858 <setup_snc_page>:
+    4858:	301f86db70165000 	{ addi sp, sp, -16 }
+    4860:	180026c220000d85 	{ addli r5, sp, 0 ; addli r4, sp, 4 }
+    4868:	088000a020008d80 	{ addli r0, sp, 8 ; sw r5, r0 }
+    4870:	0880088020008d81 	{ addli r1, sp, 8 ; sw r4, r1 }
+    4878:	0880102020000d84 	{ addli r4, sp, 0 ; sw r1, r2 }
+    4880:	3054206420004d81 	{ addli r1, sp, 4 ; mtspr DTLB_INDEX, r3 }
+    4888:	400b080070166000 	{ drain }
+    4890:	1869dfe170165000 	{ moveli r2, 3387 }
+    4898:	dc050800680a5000 	{ lw r0, r0 }
+    48a0:	0832100040808005 	{ ori r5, r0, 8 ; or r0, r0, r2 }
+    48a8:	305420a270165000 	{ mtspr DTLB_CURRENT_0, r5 }
+    48b0:	305427e2f0165000 	{ mtspr DTLB_CURRENT_1, zero }
+    48b8:	dc150800684a5000 	{ lw r4, r4 }
+    48c0:	dc0508004c110db6 	{ addi sp, sp, 16 ; lw r1, r1 }
+    48c8:	4004588270165000 	{ shli r4, r4, 11 }
+    48d0:	08322020f0165000 	{ or r1, r1, r4 }
+    48d8:	30542023f0165000 	{ mtspr DTLB_CURRENT_3, r1 }
+    48e0:	3054200370165000 	{ mtspr DTLB_CURRENT_2, r0 }
+    48e8:	400b080070166000 	{ drain }
+    48f0:	081606e070165000 	{ jrp lr }
+
+000048f8 <setup_proxy_page>:
+    48f8:	301f86db70165000 	{ addi sp, sp, -16 }
+    4900:	180026c220000d85 	{ addli r5, sp, 0 ; addli r4, sp, 4 }
+    4908:	088000a020008d80 	{ addli r0, sp, 8 ; sw r5, r0 }
+    4910:	0880088020008d81 	{ addli r1, sp, 8 ; sw r4, r1 }
+    4918:	0880102020000d82 	{ addli r2, sp, 0 ; sw r1, r2 }
+    4920:	3054206420004d81 	{ addli r1, sp, 4 ; mtspr DTLB_INDEX, r3 }
+    4928:	400b080070166000 	{ drain }
+    4930:	dc050800680a5000 	{ lw r0, r0 }
+    4938:	3059d80040808004 	{ ori r4, r0, 8 ; ori r0, r0, 59 }
+    4940:	3054208270165000 	{ mtspr DTLB_CURRENT_0, r4 }
+    4948:	305427e2f0165000 	{ mtspr DTLB_CURRENT_1, zero }
+    4950:	dc0d0800682a5000 	{ lw r2, r2 }
+    4958:	dc0508004c110db6 	{ addi sp, sp, 16 ; lw r1, r1 }
+    4960:	4004584170165000 	{ shli r2, r2, 11 }
+    4968:	08321020f0165000 	{ or r1, r1, r2 }
+    4970:	30542023f0165000 	{ mtspr DTLB_CURRENT_3, r1 }
+    4978:	3054200370165000 	{ mtspr DTLB_CURRENT_2, r0 }
+    4980:	400b080070166000 	{ drain }
+    4988:	081606e070165000 	{ jrp lr }
+
+00004990 <setup_local_page>:
+    4990:	301fc6db70165000 	{ addi sp, sp, -8 }
+    4998:	180006c170165000 	{ addli r2, sp, 0 }
+    49a0:	0880004020000d80 	{ addli r0, sp, 0 ; sw r2, r0 }
+    49a8:	3054202440308db6 	{ addi sp, sp, 8 ; mtspr DTLB_INDEX, r1 }
+    49b0:	400b080070166000 	{ drain }
+    49b8:	dc050800680a5000 	{ lw r0, r0 }
+    49c0:	3059b80040808002 	{ ori r2, r0, 8 ; ori r0, r0, 55 }
+    49c8:	3054204270165000 	{ mtspr DTLB_CURRENT_0, r2 }
+    49d0:	305427e2f0165000 	{ mtspr DTLB_CURRENT_1, zero }
+    49d8:	305427e3f0165000 	{ mtspr DTLB_CURRENT_3, zero }
+    49e0:	3054200370165000 	{ mtspr DTLB_CURRENT_2, r0 }
+    49e8:	400b080070166000 	{ drain }
+    49f0:	081606e070165000 	{ jrp lr }
+
+000049f8 <setup_sized_local_page>:
+    49f8:	301f86db70165000 	{ addi sp, sp, -16 }
+    4a00:	180006c220008d83 	{ addli r3, sp, 8 ; addli r4, sp, 0 }
+    4a08:	0880106020008d82 	{ addli r2, sp, 8 ; sw r3, r2 }
+    4a10:	0880008020000d80 	{ addli r0, sp, 0 ; sw r4, r0 }
+    4a18:	3054202470165000 	{ mtspr DTLB_INDEX, r1 }
+    4a20:	400b080070166000 	{ drain }
+    4a28:	dc050800680a5000 	{ lw r0, r0 }
+    4a30:	dc0d080048210db6 	{ addi sp, sp, 16 ; lw r2, r2 }
+    4a38:	3059b80000cc0082 	{ or r2, r2, r0 ; ori r0, r0, 55 }
+    4a40:	3058404170165000 	{ ori r2, r2, 8 }
+    4a48:	3054204270165000 	{ mtspr DTLB_CURRENT_0, r2 }
+    4a50:	305427e2f0165000 	{ mtspr DTLB_CURRENT_1, zero }
+    4a58:	305427e3f0165000 	{ mtspr DTLB_CURRENT_3, zero }
+    4a60:	3054200370165000 	{ mtspr DTLB_CURRENT_2, r0 }
+    4a68:	400b080070166000 	{ drain }
+    4a70:	081606e070165000 	{ jrp lr }
+
+00004a78 <setup_snc_page_extended>:
+    4a78:	301f46db70165000 	{ addi sp, sp, -24 }
+    4a80:	180006c3a0008d85 	{ addli r5, sp, 8 ; addli r7, sp, 0 }
+    4a88:	088010a020004d86 	{ addli r6, sp, 4 ; sw r5, r2 }
+    4a90:	088000e020008d80 	{ addli r0, sp, 8 ; sw r7, r0 }
+    4a98:	088008c020010d81 	{ addli r1, sp, 16 ; sw r6, r1 }
+    4aa0:	0880202020010d84 	{ addli r4, sp, 16 ; sw r1, r4 }
+    4aa8:	3054206420000d82 	{ addli r2, sp, 0 ; mtspr DTLB_INDEX, r3 }
+    4ab0:	400b080070166000 	{ drain }
+    4ab8:	180026c0f0165000 	{ addli r1, sp, 4 }
+    4ac0:	dc050800680a5000 	{ lw r0, r0 }
+    4ac8:	dc150800684a5000 	{ lw r4, r4 }
+    4ad0:	3059d80000cc0104 	{ or r4, r4, r0 ; ori r0, r0, 59 }
+    4ad8:	3058408270165000 	{ ori r4, r4, 8 }
+    4ae0:	3054208270165000 	{ mtspr DTLB_CURRENT_0, r4 }
+    4ae8:	305427e2f0165000 	{ mtspr DTLB_CURRENT_1, zero }
+    4af0:	dc0d0800682a5000 	{ lw r2, r2 }
+    4af8:	dc0508004c118db6 	{ addi sp, sp, 24 ; lw r1, r1 }
+    4b00:	4004584170165000 	{ shli r2, r2, 11 }
+    4b08:	08321020f0165000 	{ or r1, r1, r2 }
+    4b10:	30542023f0165000 	{ mtspr DTLB_CURRENT_3, r1 }
+    4b18:	3054200370165000 	{ mtspr DTLB_CURRENT_2, r0 }
+    4b20:	400b080070166000 	{ drain }
+    4b28:	081606e070165000 	{ jrp lr }
+
+00004b30 <setup_local_page_extended>:
+    4b30:	301f86db70165000 	{ addi sp, sp, -16 }
+    4b38:	180006c220008d83 	{ addli r3, sp, 8 ; addli r4, sp, 0 }
+    4b40:	0880106020008d82 	{ addli r2, sp, 8 ; sw r3, r2 }
+    4b48:	0880008020000d80 	{ addli r0, sp, 0 ; sw r4, r0 }
+    4b50:	3054202470165000 	{ mtspr DTLB_INDEX, r1 }
+    4b58:	400b080070166000 	{ drain }
+    4b60:	dc050800680a5000 	{ lw r0, r0 }
+    4b68:	dc0d080048210db6 	{ addi sp, sp, 16 ; lw r2, r2 }
+    4b70:	3059b80000cc0082 	{ or r2, r2, r0 ; ori r0, r0, 55 }
+    4b78:	3058404170165000 	{ ori r2, r2, 8 }
+    4b80:	3054204270165000 	{ mtspr DTLB_CURRENT_0, r2 }
+    4b88:	305427e2f0165000 	{ mtspr DTLB_CURRENT_1, zero }
+    4b90:	305427e3f0165000 	{ mtspr DTLB_CURRENT_3, zero }
+    4b98:	3054200370165000 	{ mtspr DTLB_CURRENT_2, r0 }
+    4ba0:	400b080070166000 	{ drain }
+    4ba8:	081606e070165000 	{ jrp lr }
+
+00004bb0 <get_mshim_location>:
+    4bb0:	bfdfc6db1b7bfd85 	{ move r5, sp ; addi sp, sp, -8 ; sw sp, lr }
+    4bb8:	301826c0c0b01002 	{ seqi r2, r0, 1 ; addi r1, sp, 4 }
+    4bc0:	0880282020008db7 	{ addli lr, sp, 8 ; sw r1, r5 }
+    4bc8:	2800680040b02005 	{ seqi r5, r0, 2 ; bz r0, 4c30 <get_mshim_location+0x80> }
+    4bd0:	2800784140b03006 	{ seqi r6, r0, 3 ; bnz r2, 4c48 <get_mshim_location+0x98> }
+    4bd8:	280088a170165000 	{ bnz r5, 4c60 <get_mshim_location+0xb0> }
+    4be0:	280038c120008db7 	{ addli lr, sp, 8 ; bnz r6, 4c18 <get_mshim_location+0x68> }
+    4be8:	305827e0c0801fc0 	{ movei r0, 1 ; movei r1, 4 }
+    4bf0:	26f56fe170165000 	{ auli r2, zero, -8531 }
+    4bf8:	6002f000700f0082 	{ shri r2, r2, 16 ; jal 4ee8 <bringup_fail> }
+    4c00:	305fffe020008db7 	{ addli lr, sp, 8 ; movei r0, -1 }
+    4c08:	dcdd08004f708db6 	{ addi sp, sp, 8 ; lw lr, lr }
+    4c10:	081606e070165000 	{ jrp lr }
+    4c18:	343980e070165000 	{ mfspr r0, CBOX_MMAP_0 }
+    4c20:	dcdd08004f708db6 	{ addi sp, sp, 8 ; lw lr, lr }
+    4c28:	081606e070165000 	{ jrp lr }
+    4c30:	343980e070165000 	{ mfspr r0, CBOX_MMAP_0 }
+    4c38:	dcdd08004f708db6 	{ addi sp, sp, 8 ; lw lr, lr }
+    4c40:	081606e070165000 	{ jrp lr }
+    4c48:	3439810020008db7 	{ addli lr, sp, 8 ; mfspr r0, CBOX_MMAP_1 }
+    4c50:	dcdd08004f708db6 	{ addi sp, sp, 8 ; lw lr, lr }
+    4c58:	081606e070165000 	{ jrp lr }
+    4c60:	3439812020008db7 	{ addli lr, sp, 8 ; mfspr r0, CBOX_MMAP_2 }
+    4c68:	dcdd08004f708db6 	{ addi sp, sp, 8 ; lw lr, lr }
+    4c70:	081606e070165000 	{ jrp lr }
+
+00004c78 <get_tile_semaphore>:
+    4c78:	bfdf86db1b7bfd89 	{ move r9, sp ; addi sp, sp, -16 ; sw sp, lr }
+    4c80:	301826c140308d84 	{ addi r4, sp, 8 ; addi r2, sp, 4 }
+    4c88:	9f15f80f49e0cd83 	{ addi r3, sp, 12 ; move r30, r0 ; sw r4, r30 }
+    4c90:	9f0dffe19dfbf05f 	{ move r31, r1 ; move r3, zero ; sw r3, r31 }
+    4c98:	df0d0800189bffc2 	{ move r2, zero ; sw r2, r9 }
+    4ca0:	6ffadfffa0810fc4 	{ moveli r4, 2064 ; jal 4778 <send_config_read> }
+    4ca8:	2800280770165000 	{ bbns r0, 4cd0 <get_tile_semaphore+0x58> }
+    4cb0:	0833fbe080cff780 	{ move r0, r30 ; move r1, r31 }
+    4cb8:	0833ffe180cfffc2 	{ move r2, zero ; move r3, zero }
+    4cc0:	6ffabfffa0810fc4 	{ moveli r4, 2064 ; jal 4778 <send_config_read> }
+    4cc8:	2bffe81ef0165000 	{ bbst r0, 4cb0 <get_tile_semaphore+0x38> }
+    4cd0:	301846cf20010db7 	{ addli lr, sp, 16 ; addi r30, sp, 8 }
+    4cd8:	dcdd08004f70cd9f 	{ addi r31, sp, 12 ; lw lr, lr }
+    4ce0:	dc7d080069ea5000 	{ lw r30, r30 }
+    4ce8:	dc7d08004df10db6 	{ addi sp, sp, 16 ; lw r31, r31 }
+    4cf0:	081606e070165000 	{ jrp lr }
+
+00004cf8 <release_tile_semaphore>:
+    4cf8:	0833ffe100cfffc5 	{ move r5, zero ; move r2, zero }
+    4d00:	184087e200cfffc3 	{ move r3, zero ; moveli r4, 2064 }
+    4d08:	302057ffc03f8db6 	{ addi sp, sp, -8 ; info 10 }
+    4d10:	5ff86fffc0308db6 	{ addi sp, sp, 8 ; j 4578 <send_config_write> }
+    4d18:	30207ffff0165000 	{ info 15 }
+
+00004d20 <bringup_send_msg>:
+    4d20:	bfdf46db1b7bfd85 	{ move r5, sp ; addi sp, sp, -24 ; sw sp, lr }
+    4d28:	30205ffff0165000 	{ info 11 }
+    4d30:	301866c100cff084 	{ move r4, r2 ; addi r2, sp, 12 }
+    4d38:	bf0826c348410d89 	{ addi r9, sp, 16 ; addi r6, sp, 4 ; sw r2, r4 }
+    4d40:	bf2046c3cde14d88 	{ addi r8, sp, 20 ; addi r7, sp, 8 ; sw r9, r30 }
+    4d48:	9f25f82f99fbf01e 	{ move r30, r0 ; move r31, r1 ; sw r8, r31 }
+    4d50:	9f1df87a1f4bffc2 	{ move r2, zero ; move r52, r3 ; sw r7, r52 }
+    4d58:	cf1867e258505fc3 	{ movei r3, 5 ; movei r4, 12 ; sw r6, r5 }
+    4d60:	6ffa1ffff0165000 	{ jal 4778 <send_config_read> }
+    4d68:	2800280050114fff 	{ info 20 ; bz r0, 4d90 <bringup_send_msg+0x70> }
+    4d70:	0833fbe080cff780 	{ move r0, r30 ; move r1, r31 }
+    4d78:	30582fe180cfffc2 	{ move r2, zero ; movei r3, 5 }
+    4d80:	6ff9ffffc080cfc4 	{ movei r4, 12 ; jal 4778 <send_config_read> }
+    4d88:	2bffe819d0114fff 	{ info 20 ; bnzt r0, 4d70 <bringup_send_msg+0x50> }
+    4d90:	0833ffe1c080cfc4 	{ movei r4, 12 ; move r3, zero }
+    4d98:	0833fbe080cfffc2 	{ move r2, zero ; move r1, r31 }
+    4da0:	0833fe8280cff780 	{ move r0, r30 ; move r5, r52 }
+    4da8:	6ff7d7ffd0114fff 	{ info 20 ; jal 4578 <send_config_write> }
+    4db0:	30582fe180cfffc2 	{ move r2, zero ; movei r3, 5 }
+    4db8:	301846da4080cfc4 	{ movei r4, 12 ; addi r52, sp, 8 }
+    4dc0:	3018a6cf80cff7c1 	{ move r1, r31 ; addi r31, sp, 20 }
+    4dc8:	0833fbc020018db7 	{ addli lr, sp, 24 ; move r0, r30 }
+    4dd0:	303942c34030cd85 	{ addi r5, sp, 12 ; mfspr r6, IDN_TILE_COORD }
+    4dd8:	303942c3f00f2186 	{ shri r6, r6, 18 ; mfspr r7, IDN_TILE_COORD }
+    4de0:	400b70a2e02bf186 	{ mm r6, r6, zero, 0, 10 ; lw r5, r5 }
+    4de8:	dcdb38e3cf710d9e 	{ addi r30, sp, 16 ; shri r7, r7, 7 ; lw lr, lr }
+    4df0:	3020affff0165000 	{ info 21 }
+    4df8:	400b73cf602bf1c7 	{ mm r7, r7, zero, 0, 10 ; lw r30, r30 }
+    4e00:	dc7a38e3edf52186 	{ shli r6, r6, 18 ; shli r7, r7, 7 ; lw r31, r31 }
+    4e08:	9cd438c34b418db6 	{ addi sp, sp, 24 ; or r6, r6, r7 ; lw r52, r52 }
+    4e10:	3020bffff0165000 	{ info 23 }
+    4e18:	5ff767ff80cc6145 	{ or r5, r5, r6 ; j 4578 <send_config_write> }
+    4e20:	30205ffff0165000 	{ info 11 }
+
+00004e28 <bringup_msg>:
+    4e28:	bfdf46db1b7bfd88 	{ move r8, sp ; addi sp, sp, -24 ; sw sp, lr }
+    4e30:	30205ffff0165000 	{ info 11 }
+    4e38:	301846c2c0304d84 	{ addi r4, sp, 4 ; addi r5, sp, 8 }
+    4e40:	bf10a6c348810d87 	{ addi r7, sp, 16 ; addi r6, sp, 20 ; sw r4, r8 }
+    4e48:	df1508001f4bf0b4 	{ move r52, r2 ; sw r5, r52 }
+    4e50:	bf1866c01debf01e 	{ move r30, r0 ; addi r0, sp, 12 ; sw r7, r30 }
+    4e58:	df1d080019fbf05f 	{ move r31, r1 ; sw r6, r31 }
+    4e60:	df050800183bf780 	{ move r0, r30 ; sw r0, r3 }
+    4e68:	6ffe17fff0165000 	{ jal 4c78 <get_tile_semaphore> }
+    4e70:	0833fbc04030cd83 	{ addi r3, sp, 12 ; move r0, r30 }
+    4e78:	9c0dfe811c3bf7c1 	{ move r1, r31 ; move r2, r52 ; lw r3, r3 }
+    4e80:	6ffea7ffd0114fff 	{ info 20 ; jal 4d20 <bringup_send_msg> }
+    4e88:	0833fbc020018db7 	{ addli lr, sp, 24 ; move r0, r30 }
+    4e90:	9cddfbe0cf710d9e 	{ addi r30, sp, 16 ; move r1, r31 ; lw lr, lr }
+    4e98:	3020affff0165000 	{ info 21 }
+    4ea0:	bc7846da49e14d9f 	{ addi r31, sp, 20 ; addi r52, sp, 8 ; lw r30, r30 }
+    4ea8:	dc7d080055f16fff 	{ info 22 ; lw r31, r31 }
+    4eb0:	c4d0b7ffcb418db6 	{ addi sp, sp, 24 ; info 22 ; lw r52, r52 }
+    4eb8:	5ffe47ffd010afff 	{ info 10 ; j 4cf8 <release_tile_semaphore> }
+    4ec0:	30205ffff0165000 	{ info 11 }
+
+00004ec8 <bringup_pass>:
+    4ec8:	30580fe100cff083 	{ move r3, r2 ; movei r2, 1 }
+    4ed0:	302057ffc03f8db6 	{ addi sp, sp, -8 ; info 10 }
+    4ed8:	5fff57ffc0308db6 	{ addi sp, sp, 8 ; j 4e28 <bringup_msg> }
+    4ee0:	30207ffff0165000 	{ info 15 }
+
+00004ee8 <bringup_fail>:
+    4ee8:	305817e100cff083 	{ move r3, r2 ; movei r2, 2 }
+    4ef0:	302057ffc03f8db6 	{ addi sp, sp, -8 ; info 10 }
+    4ef8:	5fff37ffc0308db6 	{ addi sp, sp, 8 ; j 4e28 <bringup_msg> }
+    4f00:	30207ffff0165000 	{ info 15 }
+
+00004f08 <bringup_done>:
+    4f08:	30581fe100cff083 	{ move r3, r2 ; movei r2, 3 }
+    4f10:	302057ffc03f8db6 	{ addi sp, sp, -8 ; info 10 }
+    4f18:	5fff17ffc0308db6 	{ addi sp, sp, 8 ; j 4e28 <bringup_msg> }
+    4f20:	30207ffff0165000 	{ info 15 }
+
+00004f28 <bringup_prompt>:
+    4f28:	305837e100cff083 	{ move r3, r2 ; movei r2, 6 }
+    4f30:	302057ffc03f8db6 	{ addi sp, sp, -8 ; info 10 }
+    4f38:	5ffef7ffc0308db6 	{ addi sp, sp, 8 ; j 4e28 <bringup_msg> }
+    4f40:	30207ffff0165000 	{ info 15 }
+
+00004f48 <bringup_send_msg_string>:
+    4f48:	bfdf06db1b7bfd88 	{ move r8, sp ; addi sp, sp, -32 ; sw sp, lr }
+    4f50:	30205ffff0165000 	{ info 11 }
+    4f58:	3018a6c4c0310d8a 	{ addi r10, sp, 16 ; addi r9, sp, 20 }
+    4f60:	bf2866c5c9f04d84 	{ addi r4, sp, 4 ; addi r11, sp, 12 ; sw r10, r31 }
+    4f68:	bf20c6c34e01cd87 	{ addi r7, sp, 28 ; addi r6, sp, 24 ; sw r9, r32 }
+    4f70:	c710c7ffc8808d85 	{ addi r5, sp, 8 ; info 24 ; sw r4, r8 }
+    4f78:	c728c7ff9debf09e 	{ move r30, r2 ; info 24 ; sw r11, r30 }
+    4f80:	c718c7ff9e1bf021 	{ move r33, r0 ; info 24 ; sw r7, r33 }
+    4f88:	c718c7ff9a2bf062 	{ move r34, r1 ; info 24 ; sw r6, r34 }
+    4f90:	c710c7ffb74ff0f4 	{ sne r52, r3, zero ; info 24 ; sw r5, r52 }
+    4f98:	2800106050118fff 	{ info 24 ; bz r3, 4fa8 <bringup_send_msg_string+0x60> }
+    4fa0:	6ffcdfffd0118fff 	{ info 24 ; jal 4c78 <get_tile_semaphore> }
+    4fa8:	0833ffef80cfffe0 	{ move r32, zero ; move r31, zero }
+    4fb0:	3020c7ffd01037c2 	{ andi r2, r31, 3 ; info 24 }
+    4fb8:	2801304050118fff 	{ info 24 ; bz r2, 50e8 <bringup_send_msg_string+0x1a0> }
+    4fc0:	3020c7ffc0b0108c 	{ seqi r12, r2, 1 ; info 24 }
+    4fc8:	2801318150118fff 	{ info 24 ; bnz r12, 50f8 <bringup_send_msg_string+0x1b0> }
+    4fd0:	3020c7ffc0b0208d 	{ seqi r13, r2, 2 ; info 24 }
+    4fd8:	280139a150118fff 	{ info 24 ; bnz r13, 5110 <bringup_send_msg_string+0x1c8> }
+    4fe0:	3020c7ffc0b03083 	{ seqi r3, r2, 3 ; info 24 }
+    4fe8:	2801406150118fff 	{ info 24 ; bnz r3, 5128 <bringup_send_msg_string+0x1e0> }
+    4ff0:	28001861d0118fff 	{ info 24 ; bnzt r3, 5008 <bringup_send_msg_string+0xc0> }
+    4ff8:	d87d080050e18fff 	{ info 24 ; lb r14, r30 }
+    5000:	280031c1c0b00382 	{ seqi r2, r14, 0 ; bnzt r14, 5030 <bringup_send_msg_string+0xe8> }
+    5008:	0833fc40c0808fc2 	{ movei r2, 8 ; move r1, r34 }
+    5010:	0833fc0180cff840 	{ move r0, r33 ; move r3, r32 }
+    5018:	6ffd0fffd0118fff 	{ info 24 ; jal 4d20 <bringup_send_msg> }
+    5020:	d87d080050218fff 	{ info 24 ; lb r2, r30 }
+    5028:	3020c7ffc0b00082 	{ seqi r2, r2, 0 ; info 24 }
+    5030:	28001041c030179e 	{ addi r30, r30, 1 ; bnzt r2, 5040 <bringup_send_msg_string+0xf8> }
+    5038:	5fff7fffc03017df 	{ addi r31, r31, 1 ; j 4fb0 <bringup_send_msg_string+0x68> }
+    5040:	2800668020020db7 	{ addli lr, sp, 32 ; bz r52, 50a0 <bringup_send_msg_string+0x158> }
+    5048:	3020cffff0165000 	{ info 25 }
+    5050:	301866cf20020db7 	{ addli lr, sp, 32 ; addi r30, sp, 12 }
+    5058:	bcd8a6d04f710d9f 	{ addi r31, sp, 16 ; addi r32, sp, 20 ; lw lr, lr }
+    5060:	3020cffff0165000 	{ info 25 }
+    5068:	bc78e6d099ebf840 	{ move r0, r33 ; addi r33, sp, 28 ; lw r30, r30 }
+    5070:	bc78c6d11dfbf881 	{ move r1, r34 ; addi r34, sp, 24 ; lw r31, r31 }
+    5078:	c480d7ffca008db4 	{ addi r52, sp, 8 ; info 26 ; lw r32, r32 }
+    5080:	dc8508005611afff 	{ info 26 ; lw r33, r33 }
+    5088:	dc8d08005221afff 	{ info 26 ; lw r34, r34 }
+    5090:	c4d0d7ffcb420db6 	{ addi sp, sp, 32 ; info 26 ; lw r52, r52 }
+    5098:	5ffc67ffd010afff 	{ info 10 ; j 4cf8 <release_tile_semaphore> }
+    50a0:	30205ffff0165000 	{ info 11 }
+    50a8:	bcd886cfcf70cd9e 	{ addi r30, sp, 12 ; addi r31, sp, 16 ; lw lr, lr }
+    50b0:	bc78e6d0c9e14da0 	{ addi r32, sp, 20 ; addi r33, sp, 28 ; lw r30, r30 }
+    50b8:	bc7846da4df18da2 	{ addi r34, sp, 24 ; addi r52, sp, 8 ; lw r31, r31 }
+    50c0:	dc8508006a0a5000 	{ lw r32, r32 }
+    50c8:	dc8508006e1a5000 	{ lw r33, r33 }
+    50d0:	dc8d08006a2a5000 	{ lw r34, r34 }
+    50d8:	dcd508004b420db6 	{ addi sp, sp, 32 ; lw r52, r52 }
+    50e0:	081606e070165000 	{ jrp lr }
+    50e8:	d87d08006a0a5000 	{ lb r32, r30 }
+    50f0:	5ffed7fff0165000 	{ j 4fc0 <bringup_send_msg_string+0x78> }
+    50f8:	d87d0800680a5000 	{ lb r0, r30 }
+    5100:	4004400070165000 	{ shli r0, r0, 8 }
+    5108:	5ffecfff80cc0820 	{ or r32, r32, r0 ; j 4fd0 <bringup_send_msg_string+0x88> }
+    5110:	d87d0800681a5000 	{ lb r1, r30 }
+    5118:	40048020f0165000 	{ shli r1, r1, 16 }
+    5120:	5ffec7ff80cc1820 	{ or r32, r32, r1 ; j 4fe0 <bringup_send_msg_string+0x98> }
+    5128:	d87d0800682a5000 	{ lb r2, r30 }
+    5130:	4004c04170165000 	{ shli r2, r2, 24 }
+    5138:	5ffebfff80cc2820 	{ or r32, r32, r2 ; j 4ff0 <bringup_send_msg_string+0xa8> }
+    5140:	081606e040320db6 	{ addi sp, sp, 32 ; jrp lr }
+
+00005148 <bringup_board>:
+    5148:	081606e040801fc0 	{ movei r0, 1 ; jrp lr }
+
+00005150 <hex_to_ascii>:
+    5150:	30183004c0307007 	{ addi r7, r0, 7 ; addi r9, r0, 6 }
+    5158:	30182006c030500b 	{ addi r11, r0, 5 ; addi r13, r0, 4 }
+    5160:	4007e028c030300f 	{ addi r15, r0, 3 ; shri r17, r1, 28 }
+    5168:	305bc7e9c0830fd4 	{ movei r20, 48 ; movei r19, 120 }
+    5170:	bd00100349401012 	{ addi r18, r0, 1 ; addi r6, r0, 2 ; sb r0, r20 }
+    5178:	dd4ba02769378050 	{ shri r16, r1, 24 ; shri r14, r1, 20 ; sb r18, r19 }
+    5180:	dd1b80265110f410 	{ andi r16, r16, 15 ; shri r12, r1, 16 ; sb r6, r17 }
+    5188:	dd3b60255500f38e 	{ andi r14, r14, 15 ; shri r10, r1, 12 ; sb r15, r16 }
+    5190:	dd33402454e0f30c 	{ andi r12, r12, 15 ; shri r8, r1, 8 ; sb r13, r14 }
+    5198:	dd2b2022d4c0f28a 	{ andi r10, r10, 15 ; shri r5, r1, 4 ; sb r11, r12 }
+    51a0:	bd20400254a0f208 	{ andi r8, r8, 15 ; addi r4, r0, 8 ; sb r9, r10 }
+    51a8:	c5187821d480f145 	{ andi r5, r5, 15 ; andi r3, r1, 15 ; sb r7, r8 }
+    51b0:	bd105003c8509002 	{ addi r2, r0, 9 ; addi r7, r0, 10 ; sb r4, r5 }
+    51b8:	dd0d0800683a5000 	{ sb r2, r3 }
+    51c0:	5000200070165000 	{ j 51e0 <hex_to_ascii+0x90> }
+    51c8:	dd1d080048501186 	{ addi r6, r6, 1 ; sb r6, r5 }
+    51d0:	087238caf0165000 	{ sne r21, r6, r7 }
+    51d8:	28002aa070165000 	{ bz r21, 5200 <hex_to_ascii+0xb0> }
+    51e0:	d81d0800684a5000 	{ lb r4, r6 }
+    51e8:	30198082c100a116 	{ slti r22, r4, 10 ; addi r5, r4, 48 }
+    51f0:	2bffdad970165000 	{ bnz r22, 51c8 <hex_to_ascii+0x78> }
+    51f8:	5fffd7ffc0357105 	{ addi r5, r4, 87 ; j 51c8 <hex_to_ascii+0x78> }
+    5200:	dd1d08006ffa5000 	{ sb r7, zero }
+    5208:	081606e070165000 	{ jrp lr }
+
+00005210 <str_append>:
+    5210:	9805f80358201fc7 	{ movei r7, 1 ; move r6, r0 ; lb r2, r0 }
+    5218:	2800704070165000 	{ bz r2, 5288 <str_append+0x78> }
+    5220:	301808e3c0301186 	{ addi r6, r6, 1 ; addi r7, r7, 1 }
+    5228:	d81d0800683a5000 	{ lb r3, r6 }
+    5230:	2bfff079f0165000 	{ bnzt r3, 5220 <str_append+0x10> }
+    5238:	b807f824cc4ff1c7 	{ addi r7, r7, -1 ; addi r9, r1, -1 ; lb r4, r1 }
+    5240:	0806380470165000 	{ add r8, r0, r7 }
+    5248:	28004880403ff206 	{ addi r6, r8, -1 ; bz r4, 5290 <str_append+0x80> }
+    5250:	301808c340301249 	{ addi r9, r9, 1 ; addi r6, r6, 1 }
+    5258:	b82009044c701041 	{ addi r1, r1, 1 ; addi r8, r8, 1 ; lb r7, r9 }
+    5260:	dd1d0800687a5000 	{ sb r6, r7 }
+    5268:	d80508006c5a5000 	{ lb r5, r1 }
+    5270:	2bffe0b9f0165000 	{ bnzt r5, 5250 <str_append+0x40> }
+    5278:	dd2508006bfa5000 	{ sb r8, zero }
+    5280:	081606e070165000 	{ jrp lr }
+    5288:	5fffb7ffc0801fc7 	{ movei r7, 1 ; j 5238 <str_append+0x28> }
+    5290:	0806380470165000 	{ add r8, r0, r7 }
+    5298:	dd2508006bfa5000 	{ sb r8, zero }
+    52a0:	081606e070165000 	{ jrp lr }
+
+000052a8 <str_append_int>:
+    52a8:	bfde86db1b7bfd87 	{ move r7, sp ; addi sp, sp, -48 ; sw sp, lr }
+    52b0:	301846c330002fc8 	{ auli r8, zero, 2 ; addi r6, sp, 8 }
+    52b8:	301946c525ca0208 	{ addli r8, r8, 23712 /* 25ca0 <print6_nolock+0x20288> */ ; addi r10, sp, 40 }
+    52c0:	9f2df81a4b404d89 	{ addi r9, sp, 4 ; move r52, r0 ; sw r10, r52 }
+    52c8:	bf20c1084c71c20e 	{ addi r14, r8, 28 ; addi r16, r8, 24 ; sw r9, r7 }
+    52d0:	bc38810a48e14212 	{ addi r18, r8, 20 ; addi r20, r8, 16 ; lw r14, r14 }
+    52d8:	bc40410c4900c216 	{ addi r22, r8, 12 ; addi r24, r8, 8 ; lw r16, r16 }
+    52e0:	bc2020ccc9b0421a 	{ addi r26, r8, 4 ; addi r25, r6, 4 ; lw r27, r8 }
+    52e8:	bc4860cac9208197 	{ addi r23, r6, 8 ; addi r21, r6, 12 ; lw r18, r18 }
+    52f0:	bc50a0c8c9410193 	{ addi r19, r6, 16 ; addi r17, r6, 20 ; lw r20, r20 }
+    52f8:	bc58e0c5c961818f 	{ addi r15, r6, 24 ; addi r11, r6, 28 ; lw r22, r22 }
+    5300:	dc650800698a5000 	{ lw r24, r24 }
+    5308:	dc6d080069aa5000 	{ lw r26, r26 }
+    5310:	df1d080069ba5000 	{ sw r6, r27 }
+    5318:	df6508006daa5000 	{ sw r25, r26 }
+    5320:	df5d08006d8a5000 	{ sw r23, r24 }
+    5328:	df5508006d6a5000 	{ sw r21, r22 }
+    5330:	df4d08006d4a5000 	{ sw r19, r20 }
+    5338:	df4508006d2a5000 	{ sw r17, r18 }
+    5340:	df3d08006d0a5000 	{ sw r15, r16 }
+    5348:	df2d08006cea5000 	{ sw r11, r14 }
+    5350:	6ffe07ff80cff180 	{ move r0, r6 ; jal 5150 <hex_to_ascii> }
+    5358:	301846c080cffd00 	{ move r0, r52 ; addi r1, sp, 8 }
+    5360:	6ffeb7fff0165000 	{ jal 5210 <str_append> }
+    5368:	301946da20030db7 	{ addli lr, sp, 48 ; addi r52, sp, 40 }
+    5370:	dcdd08006f7a5000 	{ lw lr, lr }
+    5378:	dcd508004b430db6 	{ addi sp, sp, 48 ; lw r52, r52 }
+    5380:	081606e070165000 	{ jrp lr }
+
+00005388 <print>:
+    5388:	30580fe000cff002 	{ move r2, r0 ; movei r0, 1 }
+    5390:	30580fe1c0804fc1 	{ movei r1, 4 ; movei r3, 1 }
+    5398:	302057ffc03f8db6 	{ addi sp, sp, -8 ; info 10 }
+    53a0:	5ffbafffc0308db6 	{ addi sp, sp, 8 ; j 4f48 <bringup_send_msg_string> }
+    53a8:	30207ffff0165000 	{ info 15 }
+
+000053b0 <print2>:
+    53b0:	9fddf8011b7bfd86 	{ move r6, sp ; move r2, r0 ; sw sp, lr }
+    53b8:	1fdf86db70165000 	{ addli sp, sp, -1040 }
+    53c0:	182046c2c0304d84 	{ addi r4, sp, 4 ; addli r5, sp, 1032 }
+    53c8:	df15080048608d83 	{ addi r3, sp, 8 ; sw r4, r6 }
+    53d0:	9f15f83a1f4bf0c0 	{ move r0, r3 ; move r52, r1 ; sw r5, r52 }
+    53d8:	dd0d08001ffbf081 	{ move r1, r2 ; sb r3, zero }
+    53e0:	6ffe37fff0165000 	{ jal 5210 <str_append> }
+    53e8:	0833fe80c0308d80 	{ addi r0, sp, 8 ; move r1, r52 }
+    53f0:	6ffebffff0165000 	{ jal 52a8 <str_append_int> }
+    53f8:	305827e0c0801fc0 	{ movei r0, 1 ; movei r1, 4 }
+    5400:	30580fe1c0308d82 	{ addi r2, sp, 8 ; movei r3, 1 }
+    5408:	6ffb47fff0165000 	{ jal 4f48 <bringup_send_msg_string> }
+    5410:	182046da20410db7 	{ addli lr, sp, 1040 ; addli r52, sp, 1032 }
+    5418:	dcdd08006f7a5000 	{ lw lr, lr }
+    5420:	400b769a20410db6 	{ addli sp, sp, 1040 ; lw r52, r52 }
+    5428:	081606e070165000 	{ jrp lr }
+
+00005430 <print4>:
+    5430:	9fddf8021b7bfd88 	{ move r8, sp ; move r4, r0 ; sw sp, lr }
+    5438:	1fdf46db70165000 	{ addli sp, sp, -1048 }
+    5440:	182066c2a0410d86 	{ addli r6, sp, 1040 ; addli r5, sp, 1036 }
+    5448:	bf1846c048204d87 	{ addi r7, sp, 4 ; addi r0, sp, 8 ; sw r6, r2 }
+    5450:	088018a020408d89 	{ addli r9, sp, 1032 ; sw r5, r3 }
+    5458:	df1d08006c8a5000 	{ sw r7, r8 }
+    5460:	9f25f8809f4bf074 	{ move r52, r1 ; move r1, r4 ; sw r9, r52 }
+    5468:	dd0508006bfa5000 	{ sb r0, zero }
+    5470:	6ffda7fff0165000 	{ jal 5210 <str_append> }
+    5478:	0833fe80c0308d80 	{ addi r0, sp, 8 ; move r1, r52 }
+    5480:	6ffe2ffff0165000 	{ jal 52a8 <str_append_int> }
+    5488:	301846c020410d81 	{ addli r1, sp, 1040 ; addi r0, sp, 8 }
+    5490:	dc0508006c1a5000 	{ lw r1, r1 }
+    5498:	6ffd7ffff0165000 	{ jal 5210 <str_append> }
+    54a0:	301846c02040cd81 	{ addli r1, sp, 1036 ; addi r0, sp, 8 }
+    54a8:	dc0508006c1a5000 	{ lw r1, r1 }
+    54b0:	6ffdfffff0165000 	{ jal 52a8 <str_append_int> }
+    54b8:	305827e0c0801fc0 	{ movei r0, 1 ; movei r1, 4 }
+    54c0:	30580fe1c0308d82 	{ addi r2, sp, 8 ; movei r3, 1 }
+    54c8:	6ffa87fff0165000 	{ jal 4f48 <bringup_send_msg_string> }
+    54d0:	182046da20418db7 	{ addli lr, sp, 1048 ; addli r52, sp, 1032 }
+    54d8:	dcdd08006f7a5000 	{ lw lr, lr }
+    54e0:	400b769a20418db6 	{ addli sp, sp, 1048 ; lw r52, r52 }
+    54e8:	081606e070165000 	{ jrp lr }
+
+000054f0 <print6>:
+    54f0:	9fddf8031b7bfd8a 	{ move r10, sp ; move r6, r0 ; sw sp, lr }
+    54f8:	1fdf06db70165000 	{ addli sp, sp, -1056 }
+    5500:	1820a6c4a0418d8b 	{ addli r11, sp, 1048 ; addli r9, sp, 1044 }
+    5508:	0880116020410d88 	{ addli r8, sp, 1040 ; sw r11, r2 }
+    5510:	088019202040cd87 	{ addli r7, sp, 1036 ; sw r9, r3 }
+    5518:	bf2046c048404d8c 	{ addi r12, sp, 4 ; addi r0, sp, 8 ; sw r8, r4 }
+    5520:	088028e020408d8d 	{ addli r13, sp, 1032 ; sw r7, r5 }
+    5528:	df35080068aa5000 	{ sw r12, r10 }
+    5530:	9f35f8c09f4bf074 	{ move r52, r1 ; move r1, r6 ; sw r13, r52 }
+    5538:	dd0508006bfa5000 	{ sb r0, zero }
+    5540:	6ffcd7fff0165000 	{ jal 5210 <str_append> }
+    5548:	0833fe80c0308d80 	{ addi r0, sp, 8 ; move r1, r52 }
+    5550:	6ffd5ffff0165000 	{ jal 52a8 <str_append_int> }
+    5558:	301846c020418d81 	{ addli r1, sp, 1048 ; addi r0, sp, 8 }
+    5560:	dc0508006c1a5000 	{ lw r1, r1 }
+    5568:	6ffcaffff0165000 	{ jal 5210 <str_append> }
+    5570:	301846c020414d81 	{ addli r1, sp, 1044 ; addi r0, sp, 8 }
+    5578:	dc0508006c1a5000 	{ lw r1, r1 }
+    5580:	6ffd2ffff0165000 	{ jal 52a8 <str_append_int> }
+    5588:	301846c020410d81 	{ addli r1, sp, 1040 ; addi r0, sp, 8 }
+    5590:	dc0508006c1a5000 	{ lw r1, r1 }
+    5598:	6ffc7ffff0165000 	{ jal 5210 <str_append> }
+    55a0:	301846c02040cd81 	{ addli r1, sp, 1036 ; addi r0, sp, 8 }
+    55a8:	dc0508006c1a5000 	{ lw r1, r1 }
+    55b0:	6ffcfffff0165000 	{ jal 52a8 <str_append_int> }
+    55b8:	305827e0c0801fc0 	{ movei r0, 1 ; movei r1, 4 }
+    55c0:	30580fe1c0308d82 	{ addi r2, sp, 8 ; movei r3, 1 }
+    55c8:	6ff987fff0165000 	{ jal 4f48 <bringup_send_msg_string> }
+    55d0:	182046da20420db7 	{ addli lr, sp, 1056 ; addli r52, sp, 1032 }
+    55d8:	dcdd08006f7a5000 	{ lw lr, lr }
+    55e0:	400b769a20420db6 	{ addli sp, sp, 1056 ; lw r52, r52 }
+    55e8:	081606e070165000 	{ jrp lr }
+
+000055f0 <print8>:
+    55f0:	9fddf8041b7bfd8c 	{ move r12, sp ; move r8, r0 ; sw sp, lr }
+    55f8:	1fdec6db70165000 	{ addli sp, sp, -1064 }
+    5600:	1820e6c720420d8f 	{ addli r15, sp, 1056 ; addli r14, sp, 1052 }
+    5608:	088011e020418d8d 	{ addli r13, sp, 1048 ; sw r15, r2 }
+    5610:	088019c020414d8b 	{ addli r11, sp, 1044 ; sw r14, r3 }
+    5618:	088021a020410d8a 	{ addli r10, sp, 1040 ; sw r13, r4 }
+    5620:	088029602040cd89 	{ addli r9, sp, 1036 ; sw r11, r5 }
+    5628:	bf2846c048604d90 	{ addi r16, sp, 4 ; addi r0, sp, 8 ; sw r10, r6 }
+    5630:	0880392020408d91 	{ addli r17, sp, 1032 ; sw r9, r7 }
+    5638:	df45080068ca5000 	{ sw r16, r12 }
+    5640:	9f45f9009f4bf074 	{ move r52, r1 ; move r1, r8 ; sw r17, r52 }
+    5648:	dd0508006bfa5000 	{ sb r0, zero }
+    5650:	6ffbc7fff0165000 	{ jal 5210 <str_append> }
+    5658:	0833fe80c0308d80 	{ addi r0, sp, 8 ; move r1, r52 }
+    5660:	6ffc4ffff0165000 	{ jal 52a8 <str_append_int> }
+    5668:	301846c020420d81 	{ addli r1, sp, 1056 ; addi r0, sp, 8 }
+    5670:	dc0508006c1a5000 	{ lw r1, r1 }
+    5678:	6ffb9ffff0165000 	{ jal 5210 <str_append> }
+    5680:	301846c02041cd81 	{ addli r1, sp, 1052 ; addi r0, sp, 8 }
+    5688:	dc0508006c1a5000 	{ lw r1, r1 }
+    5690:	6ffc1ffff0165000 	{ jal 52a8 <str_append_int> }
+    5698:	301846c020418d81 	{ addli r1, sp, 1048 ; addi r0, sp, 8 }
+    56a0:	dc0508006c1a5000 	{ lw r1, r1 }
+    56a8:	6ffb6ffff0165000 	{ jal 5210 <str_append> }
+    56b0:	301846c020414d81 	{ addli r1, sp, 1044 ; addi r0, sp, 8 }
+    56b8:	dc0508006c1a5000 	{ lw r1, r1 }
+    56c0:	6ffbeffff0165000 	{ jal 52a8 <str_append_int> }
+    56c8:	301846c020410d81 	{ addli r1, sp, 1040 ; addi r0, sp, 8 }
+    56d0:	dc0508006c1a5000 	{ lw r1, r1 }
+    56d8:	6ffb3ffff0165000 	{ jal 5210 <str_append> }
+    56e0:	301846c02040cd81 	{ addli r1, sp, 1036 ; addi r0, sp, 8 }
+    56e8:	dc0508006c1a5000 	{ lw r1, r1 }
+    56f0:	6ffbbffff0165000 	{ jal 52a8 <str_append_int> }
+    56f8:	305827e0c0801fc0 	{ movei r0, 1 ; movei r1, 4 }
+    5700:	30580fe1c0308d82 	{ addi r2, sp, 8 ; movei r3, 1 }
+    5708:	6ff847fff0165000 	{ jal 4f48 <bringup_send_msg_string> }
+    5710:	182046da20428db7 	{ addli lr, sp, 1064 ; addli r52, sp, 1032 }
+    5718:	dcdd08006f7a5000 	{ lw lr, lr }
+    5720:	400b769a20428db6 	{ addli sp, sp, 1064 ; lw r52, r52 }
+    5728:	081606e070165000 	{ jrp lr }
+
+00005730 <print10>:
+    5730:	9fddf8051b7bfd8e 	{ move r14, sp ; move r10, r0 ; sw sp, lr }
+    5738:	1fde86db70165000 	{ addli sp, sp, -1072 }
+    5740:	182126c920428d93 	{ addli r19, sp, 1064 ; addli r18, sp, 1060 }
+    5748:	0880126020420d91 	{ addli r17, sp, 1056 ; sw r19, r2 }
+    5750:	08801a402041cd90 	{ addli r16, sp, 1052 ; sw r18, r3 }
+    5758:	0880222020418d8f 	{ addli r15, sp, 1048 ; sw r17, r4 }
+    5760:	08802a0020414d8d 	{ addli r13, sp, 1044 ; sw r16, r5 }
+    5768:	088031e020410d8c 	{ addli r12, sp, 1040 ; sw r15, r6 }
+    5770:	088039a02040cd8b 	{ addli r11, sp, 1036 ; sw r13, r7 }
+    5778:	bf3046c048804d94 	{ addi r20, sp, 4 ; addi r0, sp, 8 ; sw r12, r8 }
+    5780:	0880496020408d95 	{ addli r21, sp, 1032 ; sw r11, r9 }
+    5788:	df55080068ea5000 	{ sw r20, r14 }
+    5790:	9f55f9409f4bf074 	{ move r52, r1 ; move r1, r10 ; sw r21, r52 }
+    5798:	dd0508006bfa5000 	{ sb r0, zero }
+    57a0:	6ffa77fff0165000 	{ jal 5210 <str_append> }
+    57a8:	0833fe80c0308d80 	{ addi r0, sp, 8 ; move r1, r52 }
+    57b0:	6ffafffff0165000 	{ jal 52a8 <str_append_int> }
+    57b8:	301846c020428d81 	{ addli r1, sp, 1064 ; addi r0, sp, 8 }
+    57c0:	dc0508006c1a5000 	{ lw r1, r1 }
+    57c8:	6ffa4ffff0165000 	{ jal 5210 <str_append> }
+    57d0:	301846c020424d81 	{ addli r1, sp, 1060 ; addi r0, sp, 8 }
+    57d8:	dc0508006c1a5000 	{ lw r1, r1 }
+    57e0:	6ffacffff0165000 	{ jal 52a8 <str_append_int> }
+    57e8:	301846c020420d81 	{ addli r1, sp, 1056 ; addi r0, sp, 8 }
+    57f0:	dc0508006c1a5000 	{ lw r1, r1 }
+    57f8:	6ffa1ffff0165000 	{ jal 5210 <str_append> }
+    5800:	301846c02041cd81 	{ addli r1, sp, 1052 ; addi r0, sp, 8 }
+    5808:	dc0508006c1a5000 	{ lw r1, r1 }
+    5810:	6ffa9ffff0165000 	{ jal 52a8 <str_append_int> }
+    5818:	301846c020418d81 	{ addli r1, sp, 1048 ; addi r0, sp, 8 }
+    5820:	dc0508006c1a5000 	{ lw r1, r1 }
+    5828:	6ff9effff0165000 	{ jal 5210 <str_append> }
+    5830:	301846c020414d81 	{ addli r1, sp, 1044 ; addi r0, sp, 8 }
+    5838:	dc0508006c1a5000 	{ lw r1, r1 }
+    5840:	6ffa6ffff0165000 	{ jal 52a8 <str_append_int> }
+    5848:	301846c020410d81 	{ addli r1, sp, 1040 ; addi r0, sp, 8 }
+    5850:	dc0508006c1a5000 	{ lw r1, r1 }
+    5858:	6ff9bffff0165000 	{ jal 5210 <str_append> }
+    5860:	301846c02040cd81 	{ addli r1, sp, 1036 ; addi r0, sp, 8 }
+    5868:	dc0508006c1a5000 	{ lw r1, r1 }
+    5870:	6ffa3ffff0165000 	{ jal 52a8 <str_append_int> }
+    5878:	305827e0c0801fc0 	{ movei r0, 1 ; movei r1, 4 }
+    5880:	30580fe1c0308d82 	{ addi r2, sp, 8 ; movei r3, 1 }
+    5888:	6ff6c7fff0165000 	{ jal 4f48 <bringup_send_msg_string> }
+    5890:	182046da20430db7 	{ addli lr, sp, 1072 ; addli r52, sp, 1032 }
+    5898:	dcdd08006f7a5000 	{ lw lr, lr }
+    58a0:	400b769a20430db6 	{ addli sp, sp, 1072 ; lw r52, r52 }
+    58a8:	081606e070165000 	{ jrp lr }
+
+000058b0 <print_nolock>:
+    58b0:	0833f80100cfffc3 	{ move r3, zero ; move r2, r0 }
+    58b8:	305827e0c0801fc0 	{ movei r0, 1 ; movei r1, 4 }
+    58c0:	302057ffc03f8db6 	{ addi sp, sp, -8 ; info 10 }
+    58c8:	5ff687ffc0308db6 	{ addi sp, sp, 8 ; j 4f48 <bringup_send_msg_string> }
+    58d0:	30207ffff0165000 	{ info 15 }
+
+000058d8 <print2_nolock>:
+    58d8:	9fddf8011b7bfd86 	{ move r6, sp ; move r2, r0 ; sw sp, lr }
+    58e0:	1fdf86db70165000 	{ addli sp, sp, -1040 }
+    58e8:	182046c2c0304d84 	{ addi r4, sp, 4 ; addli r5, sp, 1032 }
+    58f0:	df15080048608d83 	{ addi r3, sp, 8 ; sw r4, r6 }
+    58f8:	9f15f83a1f4bf0c0 	{ move r0, r3 ; move r52, r1 ; sw r5, r52 }
+    5900:	dd0d08001ffbf081 	{ move r1, r2 ; sb r3, zero }
+    5908:	6ff90ffff0165000 	{ jal 5210 <str_append> }
+    5910:	0833fe80c0308d80 	{ addi r0, sp, 8 ; move r1, r52 }
+    5918:	6ff997fff0165000 	{ jal 52a8 <str_append_int> }
+    5920:	305827e0c0801fc0 	{ movei r0, 1 ; movei r1, 4 }
+    5928:	0833ffe1c0308d82 	{ addi r2, sp, 8 ; move r3, zero }
+    5930:	6ff61ffff0165000 	{ jal 4f48 <bringup_send_msg_string> }
+    5938:	182046da20410db7 	{ addli lr, sp, 1040 ; addli r52, sp, 1032 }
+    5940:	dcdd08006f7a5000 	{ lw lr, lr }
+    5948:	400b769a20410db6 	{ addli sp, sp, 1040 ; lw r52, r52 }
+    5950:	081606e070165000 	{ jrp lr }
+
+00005958 <print4_nolock>:
+    5958:	9fddf8021b7bfd88 	{ move r8, sp ; move r4, r0 ; sw sp, lr }
+    5960:	1fdf46db70165000 	{ addli sp, sp, -1048 }
+    5968:	182066c2a0410d86 	{ addli r6, sp, 1040 ; addli r5, sp, 1036 }
+    5970:	bf1846c048204d87 	{ addi r7, sp, 4 ; addi r0, sp, 8 ; sw r6, r2 }
+    5978:	088018a020408d89 	{ addli r9, sp, 1032 ; sw r5, r3 }
+    5980:	df1d08006c8a5000 	{ sw r7, r8 }
+    5988:	9f25f8809f4bf074 	{ move r52, r1 ; move r1, r4 ; sw r9, r52 }
+    5990:	dd0508006bfa5000 	{ sb r0, zero }
+    5998:	6ff87ffff0165000 	{ jal 5210 <str_append> }
+    59a0:	0833fe80c0308d80 	{ addi r0, sp, 8 ; move r1, r52 }
+    59a8:	6ff907fff0165000 	{ jal 52a8 <str_append_int> }
+    59b0:	301846c020410d81 	{ addli r1, sp, 1040 ; addi r0, sp, 8 }
+    59b8:	dc0508006c1a5000 	{ lw r1, r1 }
+    59c0:	6ff857fff0165000 	{ jal 5210 <str_append> }
+    59c8:	301846c02040cd81 	{ addli r1, sp, 1036 ; addi r0, sp, 8 }
+    59d0:	dc0508006c1a5000 	{ lw r1, r1 }
+    59d8:	6ff8d7fff0165000 	{ jal 52a8 <str_append_int> }
+    59e0:	305827e0c0801fc0 	{ movei r0, 1 ; movei r1, 4 }
+    59e8:	0833ffe1c0308d82 	{ addi r2, sp, 8 ; move r3, zero }
+    59f0:	6ff55ffff0165000 	{ jal 4f48 <bringup_send_msg_string> }
+    59f8:	182046da20418db7 	{ addli lr, sp, 1048 ; addli r52, sp, 1032 }
+    5a00:	dcdd08006f7a5000 	{ lw lr, lr }
+    5a08:	400b769a20418db6 	{ addli sp, sp, 1048 ; lw r52, r52 }
+    5a10:	081606e070165000 	{ jrp lr }
+
+00005a18 <print6_nolock>:
+    5a18:	9fddf8031b7bfd8a 	{ move r10, sp ; move r6, r0 ; sw sp, lr }
+    5a20:	1fdf06db70165000 	{ addli sp, sp, -1056 }
+    5a28:	1820a6c4a0418d8b 	{ addli r11, sp, 1048 ; addli r9, sp, 1044 }
+    5a30:	0880116020410d88 	{ addli r8, sp, 1040 ; sw r11, r2 }
+    5a38:	088019202040cd87 	{ addli r7, sp, 1036 ; sw r9, r3 }
+    5a40:	bf2046c048404d8c 	{ addi r12, sp, 4 ; addi r0, sp, 8 ; sw r8, r4 }
+    5a48:	088028e020408d8d 	{ addli r13, sp, 1032 ; sw r7, r5 }
+    5a50:	df35080068aa5000 	{ sw r12, r10 }
+    5a58:	9f35f8c09f4bf074 	{ move r52, r1 ; move r1, r6 ; sw r13, r52 }
+    5a60:	dd0508006bfa5000 	{ sb r0, zero }
+    5a68:	6ff7affff0165000 	{ jal 5210 <str_append> }
+    5a70:	0833fe80c0308d80 	{ addi r0, sp, 8 ; move r1, r52 }
+    5a78:	6ff837fff0165000 	{ jal 52a8 <str_append_int> }
+    5a80:	301846c020418d81 	{ addli r1, sp, 1048 ; addi r0, sp, 8 }
+    5a88:	dc0508006c1a5000 	{ lw r1, r1 }
+    5a90:	6ff787fff0165000 	{ jal 5210 <str_append> }
+    5a98:	301846c020414d81 	{ addli r1, sp, 1044 ; addi r0, sp, 8 }
+    5aa0:	dc0508006c1a5000 	{ lw r1, r1 }
+    5aa8:	6ff807fff0165000 	{ jal 52a8 <str_append_int> }
+    5ab0:	301846c020410d81 	{ addli r1, sp, 1040 ; addi r0, sp, 8 }
+    5ab8:	dc0508006c1a5000 	{ lw r1, r1 }
+    5ac0:	6ff757fff0165000 	{ jal 5210 <str_append> }
+    5ac8:	301846c02040cd81 	{ addli r1, sp, 1036 ; addi r0, sp, 8 }
+    5ad0:	dc0508006c1a5000 	{ lw r1, r1 }
+    5ad8:	6ff7d7fff0165000 	{ jal 52a8 <str_append_int> }
+    5ae0:	305827e0c0801fc0 	{ movei r0, 1 ; movei r1, 4 }
+    5ae8:	0833ffe1c0308d82 	{ addi r2, sp, 8 ; move r3, zero }
+    5af0:	6ff45ffff0165000 	{ jal 4f48 <bringup_send_msg_string> }
+    5af8:	182046da20420db7 	{ addli lr, sp, 1056 ; addli r52, sp, 1032 }
+    5b00:	dcdd08006f7a5000 	{ lw lr, lr }
+    5b08:	400b769a20420db6 	{ addli sp, sp, 1056 ; lw r52, r52 }
+    5b10:	081606e070165000 	{ jrp lr }
+	...
+Disassembly of section startup:
+
+00000800 <dv_startup>:
+ 800:	181e07fa70165000 	{ moveli r52, 960 }
+
+00000808 <_flush>:
+ 808:	400b368070165000 	{ icoh r52 }
+ 810:	2bfffe992ffc0d34 	{ addli r52, r52, -64 ; bnz r52, 808 <_flush> }
+ 818:	208007e0c0801fc2 	{ movei r2, 1 ; auli r1, zero, 4096 }
+ 820:	4004804170165000 	{ shli r2, r2, 16 }
+
+00000828 <l2_inval>:
+ 828:	400b402070165000 	{ inv r1 }
+ 830:	301e004140340041 	{ addi r1, r1, 64 ; addi r2, r2, -64 }
+ 838:	2bfff05970165000 	{ bnz r2, 828 <l2_inval> }
+ 840:	0833ffe100cfffc1 	{ move r1, zero ; move r2, zero }
+ 848:	0833ffe200cfffc3 	{ move r3, zero ; move r4, zero }
+ 850:	0833ffe300cfffc5 	{ move r5, zero ; move r6, zero }
+ 858:	0833ffe400cfffc7 	{ move r7, zero ; move r8, zero }
+ 860:	0833ffe500cfffc9 	{ move r9, zero ; move r10, zero }
+ 868:	0833ffe600cfffcb 	{ move r11, zero ; move r12, zero }
+ 870:	0833ffe700cfffcd 	{ move r13, zero ; move r14, zero }
+ 878:	0833ffe800cfffcf 	{ move r15, zero ; move r16, zero }
+ 880:	0833ffe900cfffd1 	{ move r17, zero ; move r18, zero }
+ 888:	0833ffea00cfffd3 	{ move r19, zero ; move r20, zero }
+ 890:	0833ffeb00cfffd5 	{ move r21, zero ; move r22, zero }
+ 898:	0833ffec00cfffd7 	{ move r23, zero ; move r24, zero }
+ 8a0:	0833ffed00cfffd9 	{ move r25, zero ; move r26, zero }
+ 8a8:	0833ffee00cfffdb 	{ move r27, zero ; move r28, zero }
+ 8b0:	0833ffef00cfffdd 	{ move r29, zero ; move r30, zero }
+ 8b8:	0833fff000cfffdf 	{ move r31, zero ; move r32, zero }
+ 8c0:	0833fff100cfffe1 	{ move r33, zero ; move r34, zero }
+ 8c8:	0833fff200cfffe3 	{ move r35, zero ; move r36, zero }
+ 8d0:	0833fff300cfffe5 	{ move r37, zero ; move r38, zero }
+ 8d8:	0833fff400cfffe7 	{ move r39, zero ; move r40, zero }
+ 8e0:	0833fff500cfffe9 	{ move r41, zero ; move r42, zero }
+ 8e8:	0833fff600cfffeb 	{ move r43, zero ; move r44, zero }
+ 8f0:	0833fff700cfffed 	{ move r45, zero ; move r46, zero }
+ 8f8:	0833fff800cfffef 	{ move r47, zero ; move r48, zero }
+ 900:	0833fff900cffff1 	{ move r49, zero ; move r50, zero }
+ 908:	0833fffa00cffff3 	{ move r51, zero ; move r52, zero }
+ 910:	0833ffe000cffff5 	{ move tp, zero ; move r0, zero }
+ 918:	6001d80070165000 	{ jal af0 <done_mshim_config> }
+ 920:	343982e0f0165000 	{ mfspr r1, TILE_COORD }
+ 928:	40073821700f2041 	{ shri r1, r1, 18 ; shri r2, r1, 7 }
+ 930:	302078415010f041 	{ andi r1, r1, 15 ; andi r2, r2, 15 }
+ 938:	301ff820f0165000 	{ addi r1, r1, -1 }
+ 940:	2801b021403ff082 	{ addi r2, r2, -1 ; bnz r1, af0 <done_mshim_config> }
+ 948:	2801a84170165000 	{ bnz r2, af0 <done_mshim_config> }
+ 950:	18001feff0165000 	{ moveli r31, 3 }
+
+00000958 <config_next_mshim>:
+ 958:	1fffebef70165000 	{ addli r30, r31, -3 }
+ 960:	280023c170165000 	{ bnz r30, 980 <check_mshim_2> }
+ 968:	182007ef70165000 	{ moveli r30, 1024 }
+ 970:	200043cf70165000 	{ auli r30, r30, 8 /* 80400 <__bss_start+0x4a740> */ }
+ 978:	5000a00070165000 	{ j a18 <config_mshim> }
+
+00000980 <check_mshim_2>:
+ 980:	1ffff3ef70165000 	{ addli r30, r31, -2 }
+ 988:	28005bc170165000 	{ bnz r30, 9e0 <check_mshim_1> }
+ 990:	181007ef70165000 	{ moveli r30, 512 }
+ 998:	200023cf70165000 	{ auli r30, r30, 4 /* 40200 <__bss_start+0xa540> */ }
+ 9a0:	6003480020220fca 	{ moveli r10, 544 ; jal ce8 <read_mshim_cfg_reg> }
+ 9a8:	180407e570165000 	{ moveli r10, 128 }
+ 9b0:	08085945f0165000 	{ and r11, r10, r11 }
+ 9b8:	08825165f0165000 	{ xor r11, r11, r10 }
+ 9c0:	2801296070165000 	{ bz r11, ae8 <check_for_next_mshim> }
+ 9c8:	182007ef70165000 	{ moveli r30, 1024 }
+ 9d0:	2000e3cf70165000 	{ auli r30, r30, 28 /* 1c0400 <__bss_start+0x18a740> */ }
+ 9d8:	5000400070165000 	{ j a18 <config_mshim> }
+
+000009e0 <check_mshim_1>:
+ 9e0:	1ffffbef70165000 	{ addli r30, r31, -1 }
+ 9e8:	280023c170165000 	{ bnz r30, a08 <check_mshim_0> }
+ 9f0:	180407ef70165000 	{ moveli r30, 128 }
+ 9f8:	2000e3cf70165000 	{ auli r30, r30, 28 /* 1c0080 <__bss_start+0x18a3c0> */ }
+ a00:	5000180070165000 	{ j a18 <config_mshim> }
+
+00000a08 <check_mshim_0>:
+ a08:	180407ef70165000 	{ moveli r30, 128 }
+ a10:	200043cf70165000 	{ auli r30, r30, 8 /* 80080 <__bss_start+0x4a3c0> */ }
+
+00000a18 <config_mshim>:
+ a18:	6002d00040801fca 	{ movei r10, 1 ; jal ce8 <read_mshim_cfg_reg> }
+ a20:	2800c96670165000 	{ bbs r11, ae8 <check_for_next_mshim> }
+ a28:	1843ffe5a0117fca 	{ moveli r10, 279 ; moveli r11, 2175 }
+ a30:	60029000300092cb 	{ auli r11, r11, 9 /* 9087f <__bss_start+0x5abbf> */ ; jal cc0 <send_mshim_cfg_pkt> }
+ a38:	30580fe5c0801fca 	{ movei r10, 1 ; movei r11, 1 }
+ a40:	6002800070165000 	{ jal cc0 <send_mshim_cfg_pkt> }
+ a48:	180a4fe5a0111fca 	{ moveli r10, 273 ; moveli r11, 329 }
+ a50:	6002700070165000 	{ jal cc0 <send_mshim_cfg_pkt> }
+ a58:	18aa17e5a0040fca 	{ moveli r10, 64 ; moveli r11, 5442 }
+ a60:	20004165f0165000 	{ auli r11, r11, 8 /* 81542 <__bss_start+0x4b882> */ }
+ a68:	6002580070165000 	{ jal cc0 <send_mshim_cfg_pkt> }
+ a70:	30580fe5a0100fca 	{ moveli r10, 256 ; movei r11, 1 }
+ a78:	20380165f0165000 	{ auli r11, r11, 1792 }
+ a80:	6002400070165000 	{ jal cc0 <send_mshim_cfg_pkt> }
+ a88:	180a9fe5a0102fca 	{ moveli r10, 258 ; moveli r11, 339 }
+ a90:	6002300070165000 	{ jal cc0 <send_mshim_cfg_pkt> }
+ a98:	3059bfe5a0107fca 	{ moveli r10, 263 ; movei r11, 55 }
+ aa0:	60022000300332cb 	{ auli r11, r11, 51 ; jal cc0 <send_mshim_cfg_pkt> }
+ aa8:	305857e5a0106fca 	{ moveli r10, 262 ; movei r11, 10 }
+ ab0:	6002100030f202cb 	{ auli r11, r11, 3872 ; jal cc0 <send_mshim_cfg_pkt> }
+
+00000ab8 <check_pll>:
+ ab8:	6002300020117fca 	{ moveli r10, 279 ; jal ce8 <read_mshim_cfg_reg> }
+ ac0:	2bfff97e70165000 	{ bbs r11, ab8 <check_pll> }
+ ac8:	30580fe5a010afca 	{ moveli r10, 266 ; movei r11, 1 }
+ ad0:	6001f00070165000 	{ jal cc0 <send_mshim_cfg_pkt> }
+ ad8:	305807e5f0165000 	{ movei r11, 0 }
+ ae0:	6001e00070165000 	{ jal cc0 <send_mshim_cfg_pkt> }
+
+00000ae8 <check_for_next_mshim>:
+ ae8:	2bfe73f9403ff7df 	{ addi r31, r31, -1 ; bnz r31, 958 <config_next_mshim> }
+
+00000af0 <done_mshim_config>:
+ af0:	184007e100cfffc1 	{ move r1, zero ; moveli r2, 2048 }
+
+00000af8 <sn_inv_loop>:
+ af8:	3051002440320041 	{ addi r1, r1, 32 ; mtspr SNIC_INVADDR, r1 }
+ b00:	086a1021f0165000 	{ slt r3, r1, r2 }
+ b08:	2bfff079f0165000 	{ bnzt r3, af8 <sn_inv_loop> }
+ b10:	18000fe5f0165000 	{ moveli r11, 1 }
+ b18:	34508161f0165000 	{ mtspr MPL_INTCTRL_3_SET_3, r11 }
+ b20:	3450c16170165000 	{ mtspr MPL_INTCTRL_2_SET_2, r11 }
+ b28:	34510160f0165000 	{ mtspr MPL_INTCTRL_1_SET_1, r11 }
+ b30:	3451416070165000 	{ mtspr MPL_INTCTRL_0_SET_0, r11 }
+ b38:	305ffffbf0165000 	{ movei lr, -1 }
+ b40:	343982e0f0165000 	{ mfspr r1, TILE_COORD }
+ b48:	40073822700f2043 	{ shri r3, r1, 18 ; shri r4, r1, 7 }
+ b50:	301ff882403ff0c3 	{ addi r3, r3, -1 ; addi r4, r4, -1 }
+ b58:	30203883501070c5 	{ andi r5, r3, 7 ; andi r6, r4, 7 }
+ b60:	400418a2f0165000 	{ shli r5, r5, 3 }
+ b68:	083230a3f0165000 	{ or r7, r5, r6 }
+ b70:	301808e420000ff6 	{ moveli sp, 0 ; addi r8, r7, 1 }
+ b78:	4004790530004db6 	{ auli sp, sp, 4 /* 40000 <__bss_start+0xa340> */ ; shli r10, r8, 15 }
+ b80:	080656db70165000 	{ add sp, sp, r10 }
+ b88:	305fffe2a0cb8fc2 	{ moveli r2, 3256 ; movei r5, -1 }
+ b90:	400460a2a0cb8fc3 	{ moveli r3, 3256 ; shli r5, r5, 12 }
+ b98:	20000061f0165000 	{ auli r3, r3, 0 /* cb8 <_start> */ }
+ ba0:	0846184270165000 	{ seq r4, r2, r3 }
+ ba8:	190007e170165000 	{ moveli r2, 8192 }
+ bb0:	2000004170165000 	{ auli r2, r2, 0 /* 2000 <main> */ }
+ bb8:	400b280000b42103 	{ mvnz r3, r4, r2 }
+ bc0:	08082861f0165000 	{ and r3, r3, r5 }
+ bc8:	18000fe170165000 	{ moveli r2, 1 }
+ bd0:	30550045f0165000 	{ mtspr SNITLB_INDEX, r2 }
+ bd8:	30550063f0165000 	{ mtspr SNITLB_CURRENT_0, r3 }
+ be0:	180007e170165000 	{ moveli r2, 0 }
+ be8:	3055004470165000 	{ mtspr SNITLB_CURRENT_1, r2 }
+ bf0:	3055004570165000 	{ mtspr SNITLB_CURRENT_3, r2 }
+ bf8:	3059a86170165000 	{ ori r2, r3, 53 }
+ c00:	30550044f0165000 	{ mtspr SNITLB_CURRENT_2, r2 }
+ c08:	180007f9f0165000 	{ moveli r51, 0 }
+ c10:	22000679f0165000 	{ auli r51, r51, 16384 /* 40000000 <__bss_start+0x3ffca340> */ }
+ c18:	30564662f0165000 	{ mtspr TILE_TIMER_CONTROL, r51 }
+ c20:	1a0007f9f0165000 	{ moveli r51, 16384 }
+ c28:	20000679f0165000 	{ auli r51, r51, 0 /* 4000 <western_mdn_port_x+0x90> */ }
+ c30:	305687e2f0165000 	{ mtspr IDN_DEADLOCK_COUNT, zero }
+ c38:	3056866370165000 	{ mtspr IDN_DEADLOCK_TIMEOUT, r51 }
+ c40:	3056c7e2f0165000 	{ mtspr UDN_DEADLOCK_COUNT, zero }
+ c48:	3056c66370165000 	{ mtspr UDN_DEADLOCK_TIMEOUT, r51 }
+ c50:	1fffffe170165000 	{ moveli r2, -1 }
+ c58:	2000004170165000 	{ auli r2, r2, 0 /* ffffffff <__bss_start+0xfffca33f> */ }
+ c60:	1fffffe170165000 	{ moveli r2, -1 }
+ c68:	2000004170165000 	{ auli r2, r2, 0 /* ffffffff <__bss_start+0xfffca33f> */ }
+ c70:	301857e1c0301fc2 	{ addi r2, zero, 1 ; addi r3, zero, 10 }
+ c78:	084c184170165000 	{ shl r2, r2, r3 }
+ c80:	34508045f0165000 	{ mtspr INTERRUPT_MASK_SET_3_0, r2 }
+ c88:	30184fe1c0301fc2 	{ addi r2, zero, 1 ; addi r3, zero, 9 }
+ c90:	084c184170165000 	{ shl r2, r2, r3 }
+ c98:	34508045f0165000 	{ mtspr INTERRUPT_MASK_SET_3_0, r2 }
+ ca0:	180777e0f0165000 	{ moveli r1, 238 }
+ ca8:	34516021f0165000 	{ mtspr SYSTEM_SAVE_0_3, r1 }
+ cb0:	5000080070165000 	{ j cb8 <_start> }
+
+00000cb8 <_start>:
+ cb8:	5013480070165000 	{ j 2000 <main> }
+
+00000cc0 <send_mshim_cfg_pkt>:
+ cc0:	4004614640304798 	{ addi r24, r30, 4 ; shli r12, r10, 12 }
+ cc8:	18480186b2000619 	{ auli r25, r24, 8192 ; addli r13, r12, 2304 }
+ cd0:	6000400000cffdcc 	{ move r12, lr ; jal d10 <send_pkt> }
+ cd8:	0833f99b80cff2f9 	{ move idn0, r11 ; move lr, r12 }
+ ce0:	081606e000cffe74 	{ move r52, idn0 ; jrp lr }
+
+00000ce8 <read_mshim_cfg_reg>:
+ ce8:	4004614640303798 	{ addi r24, r30, 3 ; shli r12, r10, 12 }
+ cf0:	18440186b2000619 	{ auli r25, r24, 8192 ; addli r13, r12, 2176 }
+ cf8:	6000180000cffdcc 	{ move r12, lr ; jal d10 <send_pkt> }
+ d00:	0833f99b80cffe58 	{ move r24, idn0 ; move lr, r12 }
+ d08:	081606e000cffe4b 	{ move r11, idn0 ; jrp lr }
+
+00000d10 <send_pkt>:
+ d10:	0833fb3cf0165000 	{ move idn0, r25 }
+ d18:	0833f9bcf0165000 	{ move idn0, r13 }
+ d20:	343982fcf0165000 	{ mfspr idn0, TILE_COORD }
+ d28:	081606e020078ff9 	{ moveli idn0, 120 ; jrp lr }
+Disassembly of section .rodata:
+
+00025b40 <.rodata>:
+   25b40:	7273207472617453 	{ <invalid> ; <invalid> }
+   25b48:	5f646165725f6d6f 	{ <invalid> ; j cba5bfa8 <__bss_start+0xcba262e8> }
+   25b50:	7261745300676973 	{ mulhhsa_uu r51, r37, sp ; <invalid> }
+   25b58:	725f6d6f72732074 	{ <invalid> ; <invalid> }
+   25b60:	000064695f646165 	{ <invalid> ; <invalid> }
+   25b68:	7273207472617453 	{ <invalid> ; <invalid> }
+   25b70:	5f646165725f6d6f 	{ <invalid> ; j cba5bfd0 <__bss_start+0xcba26310> }
+   25b78:	0000006b636f6c62 	{ mm r34, r49, sp, 6, 27 ; <invalid> }
+   25b80:	6d6920646e756f46 	{ mm r6, udn2, r22, 28, 29 ; jal c383c4a0 <__bss_start+0xc38067e0> }
+   25b88:	656c626973736f70 	{ <invalid> ; jal 5327c7e8 <__bss_start+0x53246b28> }
+   25b90:	6f632064726f7720 	{ <invalid> ; jal c385beb0 <__bss_start+0xc38261f0> }
+   25b98:	0000000020746e75 	{ addli tp, idn0, 1862 ; <invalid> }
+   25ba0:	6f6e20646e756f46 	{ mm r6, udn2, r22, 28, 29 ; jal c385c9c0 <__bss_start+0xc3826d00> }
+   25ba8:	72206f72657a2d6e 	{ mm r46, tp, r34, 10, 30 ; <invalid> }
+   25bb0:	2064657672657365 	{ <invalid> ; auli r44, r43, 3212 }
+   25bb8:	6e6920646c656966 	{ mm r38, r37, r22, 24, 25 ; jal c384c4d8 <__bss_start+0xc3816818> }
+   25bc0:	746e656d67657320 	{ mm r32, r12, r23, 14, 25 ; <invalid> }
+   25bc8:	0072656461656820 	{ mm r32, r32, r22, 2, 25 ; <invalid> }
+   25bd0:	6f6e20646e756f46 	{ mm r6, udn2, r22, 28, 29 ; jal c385c9f0 <__bss_start+0xc3826d30> }
+   25bd8:	72206f72657a2d6e 	{ mm r46, tp, r34, 10, 30 ; <invalid> }
+   25be0:	2064657672657365 	{ <invalid> ; auli r44, r43, 3212 }
+   25be8:	6e6920646c656966 	{ mm r38, r37, r22, 24, 25 ; jal c384c508 <__bss_start+0xc3816848> }
+   25bf0:	6c6220746f6f6220 	{ mm r32, r8, sp, 30, 27 ; jal c38abe10 <__bss_start+0xc3876150> }
+   25bf8:	64616568206b636f 	{ addli r47, r13, 1718 ; jal 6b06bd58 <__bss_start+0x6b036098> }
+   25c00:	6e756f4600007265 	{ <invalid> ; jal fac4d168 <__bss_start+0xfac174a8> }
+   25c08:	2064696c61762064 	{ mm r36, r1, r34, 2, 29 ; auli r24, r11, 3213 }
+   25c10:	67657320746f6f62 	{ <invalid> ; jal 5905c180 <__bss_start+0x590264c0> }
+   25c18:	6e692073746e656d 	{ <invalid> ; jal c36cc538 <__bss_start+0xc3696878> }
+   25c20:	4f52532049505320 	{ <invalid> ; <invalid> }
+   25c28:	7473654420202e4d 	{ addli r13, idn0, 514 ; <invalid> }
+   25c30:	2065766974637572 	{ <invalid> ; auli r18, r51, 3246 }
+   25c38:	6c69772074736574 	{ <invalid> ; jal f902c5a8 <__bss_start+0xf8ff68e8> }
+   25c40:	656220544f4e206c 	{ <invalid> ; jal 428bbe60 <__bss_start+0x428861a0> }
+   25c48:	0000002e6e757220 	{ mm r32, r8, r23, 28, 29 ; <invalid> }
+   25c50:	20544f4e20646944 	{ addli r4, r37, 1606 ; auli r28, idn1, 2697 }
+   25c58:	6c617620646e6966 	{ mm r38, r37, r38, 8, 27 ; jal f102bdc8 <__bss_start+0xf0ff6108> }
+   25c60:	20746f6f62206469 	{ mm r41, r17, r6, 4, 8 ; auli r30, udn0, 3725 }
+   25c68:	73746e656d676573 	{ mm r51, r21, sp, 26, 25 ; <invalid> }
+   25c70:	20495053206e6920 	{ addli r32, r36, 1766 ; auli r38, r2, 2346 }
+   25c78:	4420202e4d4f5253 	{ <invalid> ; <invalid> }
+   25c80:	6974637572747365 	{ <invalid> ; jal 9babd0e0 <__bss_start+0x9ba87420> }
+   25c88:	2074736574206576 	{ <invalid> ; auli r10, r27, 3726 }
+   25c90:	206562206c6c6977 	{ mm lr, r37, r6, 24, 27 ; auli r0, r17, 3244 }
+   25c98:	000000002e6e7572 	{ addli r50, r21, -6425 ; <invalid> }
+   25ca0:	0000000000000020 	{ <invalid> ; <invalid> }
+	...
+Disassembly of section .comment:
+
+00000000 <.comment>:
+   0:	63632d656c697400 	{ mm r0, r16, r23, 24, 26 ; jal 2ba36328 <__bss_start+0x2ba00668> }
+   8:	00312e302e32203a 	{ addli idn1, r0, -7390 ; <invalid> }
+  10:	63632d656c697400 	{ mm r0, r16, r23, 24, 26 ; jal 2ba36338 <__bss_start+0x2ba00678> }
+  18:	00312e302e32203a 	{ addli idn1, r0, -7390 ; <invalid> }
+  20:	63632d656c697400 	{ mm r0, r16, r23, 24, 26 ; jal 2ba36348 <__bss_start+0x2ba00688> }
+  28:	00312e302e32203a 	{ addli idn1, r0, -7390 ; <invalid> }

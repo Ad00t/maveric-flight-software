@@ -1,0 +1,206 @@
+
+/home/rogers/aeneas/maestro/TileraMDE-2.0.1.78377.tile49.20110505/src/tools/btk/comp_out/itc_chip_bringup_imesh_test/itc_chip_bringup_imesh_test.tilexe:     file format elf32-tile64
+
+Disassembly of section .text:
+
+00002000 <.text>:
+	...
+Disassembly of section startup:
+
+00000800 <dv_startup>:
+ 800:	181e07fa70165000 	{ moveli r52, 960 }
+
+00000808 <_flush>:
+ 808:	400b368070165000 	{ icoh r52 }
+ 810:	2bfffe992ffc0d34 	{ addli r52, r52, -64 ; bnz r52, 808 <_flush> }
+ 818:	208007e0c0801fc2 	{ movei r2, 1 ; auli r1, zero, 4096 }
+ 820:	4004804170165000 	{ shli r2, r2, 16 }
+
+00000828 <l2_inval>:
+ 828:	400b402070165000 	{ inv r1 }
+ 830:	301e004140340041 	{ addi r1, r1, 64 ; addi r2, r2, -64 }
+ 838:	2bfff05970165000 	{ bnz r2, 828 <l2_inval> }
+ 840:	0833ffe100cfffc1 	{ move r1, zero ; move r2, zero }
+ 848:	0833ffe200cfffc3 	{ move r3, zero ; move r4, zero }
+ 850:	0833ffe300cfffc5 	{ move r5, zero ; move r6, zero }
+ 858:	0833ffe400cfffc7 	{ move r7, zero ; move r8, zero }
+ 860:	0833ffe500cfffc9 	{ move r9, zero ; move r10, zero }
+ 868:	0833ffe600cfffcb 	{ move r11, zero ; move r12, zero }
+ 870:	0833ffe700cfffcd 	{ move r13, zero ; move r14, zero }
+ 878:	0833ffe800cfffcf 	{ move r15, zero ; move r16, zero }
+ 880:	0833ffe900cfffd1 	{ move r17, zero ; move r18, zero }
+ 888:	0833ffea00cfffd3 	{ move r19, zero ; move r20, zero }
+ 890:	0833ffeb00cfffd5 	{ move r21, zero ; move r22, zero }
+ 898:	0833ffec00cfffd7 	{ move r23, zero ; move r24, zero }
+ 8a0:	0833ffed00cfffd9 	{ move r25, zero ; move r26, zero }
+ 8a8:	0833ffee00cfffdb 	{ move r27, zero ; move r28, zero }
+ 8b0:	0833ffef00cfffdd 	{ move r29, zero ; move r30, zero }
+ 8b8:	0833fff000cfffdf 	{ move r31, zero ; move r32, zero }
+ 8c0:	0833fff100cfffe1 	{ move r33, zero ; move r34, zero }
+ 8c8:	0833fff200cfffe3 	{ move r35, zero ; move r36, zero }
+ 8d0:	0833fff300cfffe5 	{ move r37, zero ; move r38, zero }
+ 8d8:	0833fff400cfffe7 	{ move r39, zero ; move r40, zero }
+ 8e0:	0833fff500cfffe9 	{ move r41, zero ; move r42, zero }
+ 8e8:	0833fff600cfffeb 	{ move r43, zero ; move r44, zero }
+ 8f0:	0833fff700cfffed 	{ move r45, zero ; move r46, zero }
+ 8f8:	0833fff800cfffef 	{ move r47, zero ; move r48, zero }
+ 900:	0833fff900cffff1 	{ move r49, zero ; move r50, zero }
+ 908:	0833fffa00cffff3 	{ move r51, zero ; move r52, zero }
+ 910:	0833ffe000cffff5 	{ move tp, zero ; move r0, zero }
+ 918:	6001d80070165000 	{ jal af0 <done_mshim_config> }
+ 920:	343982e0f0165000 	{ mfspr r1, TILE_COORD }
+ 928:	40073821700f2041 	{ shri r1, r1, 18 ; shri r2, r1, 7 }
+ 930:	302078415010f041 	{ andi r1, r1, 15 ; andi r2, r2, 15 }
+ 938:	301ff820f0165000 	{ addi r1, r1, -1 }
+ 940:	2801b021403ff082 	{ addi r2, r2, -1 ; bnz r1, af0 <done_mshim_config> }
+ 948:	2801a84170165000 	{ bnz r2, af0 <done_mshim_config> }
+ 950:	18001feff0165000 	{ moveli r31, 3 }
+
+00000958 <config_next_mshim>:
+ 958:	1fffebef70165000 	{ addli r30, r31, -3 }
+ 960:	280023c170165000 	{ bnz r30, 980 <check_mshim_2> }
+ 968:	182007ef70165000 	{ moveli r30, 1024 }
+ 970:	200043cf70165000 	{ auli r30, r30, 8 /* 80400 <__bss_start+0x4e3c0> */ }
+ 978:	5000a00070165000 	{ j a18 <config_mshim> }
+
+00000980 <check_mshim_2>:
+ 980:	1ffff3ef70165000 	{ addli r30, r31, -2 }
+ 988:	28005bc170165000 	{ bnz r30, 9e0 <check_mshim_1> }
+ 990:	181007ef70165000 	{ moveli r30, 512 }
+ 998:	200023cf70165000 	{ auli r30, r30, 4 /* 40200 <__bss_start+0xe1c0> */ }
+ 9a0:	6003480020220fca 	{ moveli r10, 544 ; jal ce8 <read_mshim_cfg_reg> }
+ 9a8:	180407e570165000 	{ moveli r10, 128 }
+ 9b0:	08085945f0165000 	{ and r11, r10, r11 }
+ 9b8:	08825165f0165000 	{ xor r11, r11, r10 }
+ 9c0:	2801296070165000 	{ bz r11, ae8 <check_for_next_mshim> }
+ 9c8:	182007ef70165000 	{ moveli r30, 1024 }
+ 9d0:	2000e3cf70165000 	{ auli r30, r30, 28 /* 1c0400 <__bss_start+0x18e3c0> */ }
+ 9d8:	5000400070165000 	{ j a18 <config_mshim> }
+
+000009e0 <check_mshim_1>:
+ 9e0:	1ffffbef70165000 	{ addli r30, r31, -1 }
+ 9e8:	280023c170165000 	{ bnz r30, a08 <check_mshim_0> }
+ 9f0:	180407ef70165000 	{ moveli r30, 128 }
+ 9f8:	2000e3cf70165000 	{ auli r30, r30, 28 /* 1c0080 <__bss_start+0x18e040> */ }
+ a00:	5000180070165000 	{ j a18 <config_mshim> }
+
+00000a08 <check_mshim_0>:
+ a08:	180407ef70165000 	{ moveli r30, 128 }
+ a10:	200043cf70165000 	{ auli r30, r30, 8 /* 80080 <__bss_start+0x4e040> */ }
+
+00000a18 <config_mshim>:
+ a18:	6002d00040801fca 	{ movei r10, 1 ; jal ce8 <read_mshim_cfg_reg> }
+ a20:	2800c96670165000 	{ bbs r11, ae8 <check_for_next_mshim> }
+ a28:	1843ffe5a0117fca 	{ moveli r10, 279 ; moveli r11, 2175 }
+ a30:	60029000300092cb 	{ auli r11, r11, 9 /* 9087f <__bss_start+0x5e83f> */ ; jal cc0 <send_mshim_cfg_pkt> }
+ a38:	30580fe5c0801fca 	{ movei r10, 1 ; movei r11, 1 }
+ a40:	6002800070165000 	{ jal cc0 <send_mshim_cfg_pkt> }
+ a48:	180a4fe5a0111fca 	{ moveli r10, 273 ; moveli r11, 329 }
+ a50:	6002700070165000 	{ jal cc0 <send_mshim_cfg_pkt> }
+ a58:	18aa17e5a0040fca 	{ moveli r10, 64 ; moveli r11, 5442 }
+ a60:	20004165f0165000 	{ auli r11, r11, 8 /* 81542 <__bss_start+0x4f502> */ }
+ a68:	6002580070165000 	{ jal cc0 <send_mshim_cfg_pkt> }
+ a70:	30580fe5a0100fca 	{ moveli r10, 256 ; movei r11, 1 }
+ a78:	20380165f0165000 	{ auli r11, r11, 1792 }
+ a80:	6002400070165000 	{ jal cc0 <send_mshim_cfg_pkt> }
+ a88:	180a9fe5a0102fca 	{ moveli r10, 258 ; moveli r11, 339 }
+ a90:	6002300070165000 	{ jal cc0 <send_mshim_cfg_pkt> }
+ a98:	3059bfe5a0107fca 	{ moveli r10, 263 ; movei r11, 55 }
+ aa0:	60022000300332cb 	{ auli r11, r11, 51 ; jal cc0 <send_mshim_cfg_pkt> }
+ aa8:	305857e5a0106fca 	{ moveli r10, 262 ; movei r11, 10 }
+ ab0:	6002100030f202cb 	{ auli r11, r11, 3872 ; jal cc0 <send_mshim_cfg_pkt> }
+
+00000ab8 <check_pll>:
+ ab8:	6002300020117fca 	{ moveli r10, 279 ; jal ce8 <read_mshim_cfg_reg> }
+ ac0:	2bfff97e70165000 	{ bbs r11, ab8 <check_pll> }
+ ac8:	30580fe5a010afca 	{ moveli r10, 266 ; movei r11, 1 }
+ ad0:	6001f00070165000 	{ jal cc0 <send_mshim_cfg_pkt> }
+ ad8:	305807e5f0165000 	{ movei r11, 0 }
+ ae0:	6001e00070165000 	{ jal cc0 <send_mshim_cfg_pkt> }
+
+00000ae8 <check_for_next_mshim>:
+ ae8:	2bfe73f9403ff7df 	{ addi r31, r31, -1 ; bnz r31, 958 <config_next_mshim> }
+
+00000af0 <done_mshim_config>:
+ af0:	184007e100cfffc1 	{ move r1, zero ; moveli r2, 2048 }
+
+00000af8 <sn_inv_loop>:
+ af8:	3051002440320041 	{ addi r1, r1, 32 ; mtspr SNIC_INVADDR, r1 }
+ b00:	086a1021f0165000 	{ slt r3, r1, r2 }
+ b08:	2bfff079f0165000 	{ bnzt r3, af8 <sn_inv_loop> }
+ b10:	18000fe5f0165000 	{ moveli r11, 1 }
+ b18:	34508161f0165000 	{ mtspr MPL_INTCTRL_3_SET_3, r11 }
+ b20:	3450c16170165000 	{ mtspr MPL_INTCTRL_2_SET_2, r11 }
+ b28:	34510160f0165000 	{ mtspr MPL_INTCTRL_1_SET_1, r11 }
+ b30:	3451416070165000 	{ mtspr MPL_INTCTRL_0_SET_0, r11 }
+ b38:	305ffffbf0165000 	{ movei lr, -1 }
+ b40:	343982e0f0165000 	{ mfspr r1, TILE_COORD }
+ b48:	40073822700f2043 	{ shri r3, r1, 18 ; shri r4, r1, 7 }
+ b50:	301ff882403ff0c3 	{ addi r3, r3, -1 ; addi r4, r4, -1 }
+ b58:	30203883501070c5 	{ andi r5, r3, 7 ; andi r6, r4, 7 }
+ b60:	400418a2f0165000 	{ shli r5, r5, 3 }
+ b68:	083230a3f0165000 	{ or r7, r5, r6 }
+ b70:	301808e420000ff6 	{ moveli sp, 0 ; addi r8, r7, 1 }
+ b78:	4004790530004db6 	{ auli sp, sp, 4 /* 40000 <__bss_start+0xdfc0> */ ; shli r10, r8, 15 }
+ b80:	080656db70165000 	{ add sp, sp, r10 }
+ b88:	305fffe2a0cb8fc2 	{ moveli r2, 3256 ; movei r5, -1 }
+ b90:	400460a2a0cb8fc3 	{ moveli r3, 3256 ; shli r5, r5, 12 }
+ b98:	20000061f0165000 	{ auli r3, r3, 0 /* cb8 <_start> */ }
+ ba0:	0846184270165000 	{ seq r4, r2, r3 }
+ ba8:	180007e170165000 	{ moveli r2, 0 }
+ bb0:	2000004170165000 	{ auli r2, r2, 0 /* 0 <dv_startup-0x800> */ }
+ bb8:	400b280000b42103 	{ mvnz r3, r4, r2 }
+ bc0:	08082861f0165000 	{ and r3, r3, r5 }
+ bc8:	18000fe170165000 	{ moveli r2, 1 }
+ bd0:	30550045f0165000 	{ mtspr SNITLB_INDEX, r2 }
+ bd8:	30550063f0165000 	{ mtspr SNITLB_CURRENT_0, r3 }
+ be0:	180007e170165000 	{ moveli r2, 0 }
+ be8:	3055004470165000 	{ mtspr SNITLB_CURRENT_1, r2 }
+ bf0:	3055004570165000 	{ mtspr SNITLB_CURRENT_3, r2 }
+ bf8:	3059a86170165000 	{ ori r2, r3, 53 }
+ c00:	30550044f0165000 	{ mtspr SNITLB_CURRENT_2, r2 }
+ c08:	180007f9f0165000 	{ moveli r51, 0 }
+ c10:	22000679f0165000 	{ auli r51, r51, 16384 /* 40000000 <__bss_start+0x3ffcdfc0> */ }
+ c18:	30564662f0165000 	{ mtspr TILE_TIMER_CONTROL, r51 }
+ c20:	1a0007f9f0165000 	{ moveli r51, 16384 }
+ c28:	20000679f0165000 	{ auli r51, r51, 0 /* 4000 <send_pkt+0x32f0> */ }
+ c30:	305687e2f0165000 	{ mtspr IDN_DEADLOCK_COUNT, zero }
+ c38:	3056866370165000 	{ mtspr IDN_DEADLOCK_TIMEOUT, r51 }
+ c40:	3056c7e2f0165000 	{ mtspr UDN_DEADLOCK_COUNT, zero }
+ c48:	3056c66370165000 	{ mtspr UDN_DEADLOCK_TIMEOUT, r51 }
+ c50:	1fffffe170165000 	{ moveli r2, -1 }
+ c58:	2000004170165000 	{ auli r2, r2, 0 /* ffffffff <__bss_start+0xfffcdfbf> */ }
+ c60:	1fffffe170165000 	{ moveli r2, -1 }
+ c68:	2000004170165000 	{ auli r2, r2, 0 /* ffffffff <__bss_start+0xfffcdfbf> */ }
+ c70:	301857e1c0301fc2 	{ addi r2, zero, 1 ; addi r3, zero, 10 }
+ c78:	084c184170165000 	{ shl r2, r2, r3 }
+ c80:	34508045f0165000 	{ mtspr INTERRUPT_MASK_SET_3_0, r2 }
+ c88:	30184fe1c0301fc2 	{ addi r2, zero, 1 ; addi r3, zero, 9 }
+ c90:	084c184170165000 	{ shl r2, r2, r3 }
+ c98:	34508045f0165000 	{ mtspr INTERRUPT_MASK_SET_3_0, r2 }
+ ca0:	180777e0f0165000 	{ moveli r1, 238 }
+ ca8:	34516021f0165000 	{ mtspr SYSTEM_SAVE_0_3, r1 }
+ cb0:	5000080070165000 	{ j cb8 <_start> }
+
+00000cb8 <_start>:
+ cb8:	5ff34ffff0165000 	{ j 0 <dv_startup-0x800> }
+
+00000cc0 <send_mshim_cfg_pkt>:
+ cc0:	4004614640304798 	{ addi r24, r30, 4 ; shli r12, r10, 12 }
+ cc8:	18480186b2000619 	{ auli r25, r24, 8192 ; addli r13, r12, 2304 }
+ cd0:	6000400000cffdcc 	{ move r12, lr ; jal d10 <send_pkt> }
+ cd8:	0833f99b80cff2f9 	{ move idn0, r11 ; move lr, r12 }
+ ce0:	081606e000cffe74 	{ move r52, idn0 ; jrp lr }
+
+00000ce8 <read_mshim_cfg_reg>:
+ ce8:	4004614640303798 	{ addi r24, r30, 3 ; shli r12, r10, 12 }
+ cf0:	18440186b2000619 	{ auli r25, r24, 8192 ; addli r13, r12, 2176 }
+ cf8:	6000180000cffdcc 	{ move r12, lr ; jal d10 <send_pkt> }
+ d00:	0833f99b80cffe58 	{ move r24, idn0 ; move lr, r12 }
+ d08:	081606e000cffe4b 	{ move r11, idn0 ; jrp lr }
+
+00000d10 <send_pkt>:
+ d10:	0833fb3cf0165000 	{ move idn0, r25 }
+ d18:	0833f9bcf0165000 	{ move idn0, r13 }
+ d20:	343982fcf0165000 	{ mfspr idn0, TILE_COORD }
+ d28:	081606e020078ff9 	{ moveli idn0, 120 ; jrp lr }

@@ -1,0 +1,186 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.5.4	//
+!_TAG_REVISION_NAME	MCHPTags	//
+!_TAG_REVISION_VERSION	6.0.1	//
+BQ_ADDR::0x6B	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	5;"	d	line:5
+INA226_ADDRESS_10::0x49	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	14;"	d	line:14
+INA226_ADDRESS_11::0x4A	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	15;"	d	line:15
+INA226_ADDRESS_12::0x4B	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	16;"	d	line:16
+INA226_ADDRESS_13::0x4C	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	17;"	d	line:17
+INA226_ADDRESS_14::0x4D	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	18;"	d	line:18
+INA226_ADDRESS_15::0x4E	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	19;"	d	line:19
+INA226_ADDRESS_16::0x4F	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	20;"	d	line:20
+INA226_ADDRESS_1::0x40	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	5;"	d	line:5
+INA226_ADDRESS_2::0x41	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	6;"	d	line:6
+INA226_ADDRESS_3::0x42	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	7;"	d	line:7
+INA226_ADDRESS_4::0x43	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	8;"	d	line:8
+INA226_ADDRESS_5::0x44	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	9;"	d	line:9
+INA226_ADDRESS_6::0x45	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	10;"	d	line:10
+INA226_ADDRESS_7::0x46	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	11;"	d	line:11
+INA226_ADDRESS_8::0x47	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	12;"	d	line:12
+INA226_ADDRESS_9::0x48	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	13;"	d	line:13
+INA226_MODE_1::0x00	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	35;"	d	line:35
+INA226_MODE_2::0x01	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	36;"	d	line:36
+INA226_MODE_3::0x02	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	37;"	d	line:37
+INA226_MODE_4::0x03	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	38;"	d	line:38
+INA226_MODE_5::0x04	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	39;"	d	line:39
+INA226_MODE_6::0x05	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	40;"	d	line:40
+INA226_MODE_7::0x06	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	41;"	d	line:41
+INA226_MODE_8::0x07	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	42;"	d	line:42
+INA226_REG_ALERT::0x07	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	30;"	d	line:30
+INA226_REG_CALIBRATION::0x05	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	28;"	d	line:28
+INA226_REG_CONFIG::0x00	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	23;"	d	line:23
+INA226_REG_CURRENT::0x04	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	27;"	d	line:27
+INA226_REG_ID::0xFF	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	32;"	d	line:32
+INA226_REG_MANID::0xFE	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	31;"	d	line:31
+INA226_REG_MASK::0x06	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	29;"	d	line:29
+INA226_REG_PWR::0x03	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	26;"	d	line:26
+INA226_REG_SHUNTV::0x01	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	24;"	d	line:24
+INA226_REG_VBUS::0x02	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	25;"	d	line:25
+REG00_Minimal_System_Voltage::0x00	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	8;"	d	line:8
+REG01_Charge_Voltage_Limit::0x01	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	9;"	d	line:9
+REG03_Charge_Current_Limit::0x03	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	10;"	d	line:10
+REG05_Input_Voltage_Limit::0x05	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	11;"	d	line:11
+REG06_Input_Current_Limit::0x06	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	12;"	d	line:12
+REG08_Precharge_Control::0x08	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	13;"	d	line:13
+REG09_Termination_Control::0x09	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	14;"	d	line:14
+REG0A_Recharge_Control::0x0A	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	15;"	d	line:15
+REG0B_VOTG_regulation::0x0B	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	16;"	d	line:16
+REG0D_IOTG_regulation::0x0D	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	17;"	d	line:17
+REG0E_Timer_Control::0x0E	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	18;"	d	line:18
+REG0F_Charger_Control_0::0x0F	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	19;"	d	line:19
+REG10_Charger_Control_1::0x10	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	20;"	d	line:20
+REG11_Charger_Control_2::0x11	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	21;"	d	line:21
+REG12_Charger_Control_3::0x12	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	22;"	d	line:22
+REG13_Charger_Control_4::0x13	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	23;"	d	line:23
+REG14_Charger_Control_5::0x14	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	24;"	d	line:24
+REG15_MPPT_Control::0x15	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	25;"	d	line:25
+REG16_Temperature_Control::0x16	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	26;"	d	line:26
+REG17_NTC_Control_0::0x17	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	27;"	d	line:27
+REG18_NTC_Control_1::0x18	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	28;"	d	line:28
+REG19_ICO_Current_Limit::0x19	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	29;"	d	line:29
+REG1B_Charger_Status_0::0x1B	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	30;"	d	line:30
+REG1C_Charger_Status_1::0x1C	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	31;"	d	line:31
+REG1D_Charger_Status_2::0x1D	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	32;"	d	line:32
+REG1E_Charger_Status_3::0x1E	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	33;"	d	line:33
+REG1F_Charger_Status_4::0x1F	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	34;"	d	line:34
+REG20_FAULT_Status_0::0x20	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	35;"	d	line:35
+REG21_FAULT_Status_1::0x21	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	36;"	d	line:36
+REG22_Charger_Flag_0::0x22	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	37;"	d	line:37
+REG23_Charger_Flag_1::0x23	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	38;"	d	line:38
+REG24_Charger_Flag_2::0x24	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	39;"	d	line:39
+REG25_Charger_Flag_3::0x25	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	40;"	d	line:40
+REG26_FAULT_Flag_0::0x26	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	41;"	d	line:41
+REG27_FAULT_Flag_1::0x27	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	42;"	d	line:42
+REG28_Charger_Mask_0::0x28	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	43;"	d	line:43
+REG29_Charger_Mask_1::0x29	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	44;"	d	line:44
+REG2A_Charger_Mask_2::0x2A	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	45;"	d	line:45
+REG2B_Charger_Mask_3::0x2B	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	46;"	d	line:46
+REG2C_FAULT_Mask_0::0x2C	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	47;"	d	line:47
+REG2D_FAULT_Mask_1::0x2D	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	48;"	d	line:48
+REG2E_ADC_Control::0x2E	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	49;"	d	line:49
+REG2F_ADC_Function_Disable_0::0x2F	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	50;"	d	line:50
+REG30_ADC_Function_Disable_1::0x30	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	51;"	d	line:51
+REG31_IBUS_ADC::0x31	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	52;"	d	line:52
+REG33_IBAT_ADC::0x33	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	53;"	d	line:53
+REG35_VBUS_ADC::0x35	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	54;"	d	line:54
+REG37_VAC1_ADC::0x37	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	55;"	d	line:55
+REG39_VAC2_ADC::0x39	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	56;"	d	line:56
+REG3B_VBAT_ADC::0x3B	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	57;"	d	line:57
+REG3D_VSYS_ADC::0x3D	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	58;"	d	line:58
+REG3F_TS_ADC::0x3F	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	59;"	d	line:59
+REG41_TDIE_ADC::0x41	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	60;"	d	line:60
+REG43_Dp_ADC::0x43	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	61;"	d	line:61
+REG45_Dm_ADC::0x45	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	62;"	d	line:62
+REG47_DPDM_Driver::0x47	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	63;"	d	line:63
+REG48_Part_Infotmation::0x48	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	64;"	d	line:64
+__BQ25672__	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	2;"	d	line:2
+__EPS__	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\eps.h	2;"	d	line:2
+__I2C__	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\i2c.h	2;"	d	line:2
+__INA226__	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	2;"	d	line:2
+add	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	281;"	l	line:281
+add	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	351;"	l	line:351
+add	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	433;"	l	line:433
+addr	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	216;"	l	line:216
+address	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	25;"	v	line:25
+addw	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	216;"	l	line:216
+bq25672_init	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	66;"	p	line:66	signature:(unsigned int8 add = BQ_ADDR)
+bq25672_state	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	67;"	p	line:67	signature:(unsigned int8 add = BQ_ADDR, unsigned int16 reg = 0x00, unsigned int1 text = 0)
+bq25672_update	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\BQ25672.h	68;"	p	line:68	signature:(unsigned int8 add = BQ_ADDR)
+bq_bit	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	67;"	l	line:67
+buffer	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	25;"	v	line:25
+bus_voltage	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	215;"	l	line:215
+bus_voltage	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	278;"	l	line:278
+bus_voltage	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	350;"	l	line:350
+bus_voltage	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	432;"	l	line:432
+cmd	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	148;"	l	line:148
+command	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	145;"	l	line:145
+curr	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	517;"	l	line:517
+current	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	215;"	l	line:215
+current	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	278;"	l	line:278
+current	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	350;"	l	line:350
+current	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	432;"	l	line:432
+cut_output	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	152;"	l	line:152
+cut_state	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	152;"	l	line:152
+cut_time	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	152;"	l	line:152
+cut_wire	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	21;"	p	line:21	file:	signature:(unsigned int8 cut_output, unsigned int8 cut_state, unsigned int8 cut_time)
+cut_wire	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	348;"	f	line:348	signature:(unsigned int8 cut_output, unsigned int8 cut_state, unsigned int8 cut_time)
+dest	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	515;"	l	line:515
+dp_flag	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	352;"	l	line:352
+dp_pin	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	352;"	l	line:352
+eps_ct	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	65;"	l	line:65
+eps_get_command	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\eps.h	6;"	p	line:6	signature:(unsigned char *command_str, unsigned char *command, unsigned char *params)
+eps_get_prmts	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\eps.h	7;"	p	line:7	signature:(unsigned char *params, unsigned int8 *pmt1, unsigned int8 *pmt2)
+eps_get_prmts3	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\eps.h	8;"	p	line:8	signature:(unsigned char *params, unsigned int8 *pmt1, unsigned int8 *pmt2, unsigned int8 *pmt3)
+eps_hk	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	61;"	l	line:61
+eps_housekeeping	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	22;"	p	line:22	file:	signature:(void)
+eps_housekeeping	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	430;"	f	line:430	signature:(void)
+eps_io	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	63;"	l	line:63
+eps_output	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	151;"	l	line:151
+eps_read_command	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\eps.h	5;"	p	line:5	signature:(unsigned char *string_pointer)
+eps_state	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	151;"	l	line:151
+i	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	70;"	l	line:70
+i2c1_read_16	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\i2c.h	7;"	p	line:7	signature:(unsigned int8 add, unsigned int8 reg)
+i2c1_read_8	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\i2c.h	5;"	p	line:5	signature:(unsigned int8 add, unsigned int8 reg)
+i2c1_read_word	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\i2c.h	9;"	p	line:9	signature:(unsigned int8 add, unsigned int8 reg, unsigned int8 *output, unsigned int8 num_bytes)
+i2c1_write_16	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\i2c.h	8;"	p	line:8	signature:(unsigned int8 add, unsigned int8 reg, unsigned int16 write_data)
+i2c1_write_8	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\i2c.h	6;"	p	line:6	signature:(unsigned int8 add, unsigned int8 reg, unsigned int8 write_data)
+i2c3_isr	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	28;"	f	line:28
+ina226_calibrate	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	46;"	p	line:46	signature:(unsigned int8 add, unsigned int16 calibration = 0x1400)
+ina226_configure	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	45;"	p	line:45	signature:(unsigned int8 add, unsigned int16 average=INA226_MODE_1, unsigned int16 vbusct = INA226_MODE_5, unsigned int16 vshct = INA226_MODE_5, unsigned int16 setmode = INA226_MODE_8)
+ina226_init	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	44;"	p	line:44	signature:(unsigned int8 add)
+ina226_rdata	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	214;"	l	line:214
+ina226_read_data	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\ina226.h	47;"	p	line:47	signature:(unsigned int8 add, int16 *shunt_voltage, int16 *bus_voltage, int16 *power, int16 *current)
+ina226_wdata	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	214;"	l	line:214
+incoming	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	30;"	l	line:30
+init_bit	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	217;"	l	line:217
+j	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	435;"	l	line:435
+main	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	56;"	f	line:56
+params	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	146;"	l	line:146
+pass_command	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	23;"	p	line:23	file:	signature:(char* cmd)
+pass_command	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	512;"	f	line:512	signature:(char* cmd)
+pin	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	282;"	l	line:282
+pin	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	352;"	l	line:352
+power	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	215;"	l	line:215
+power	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	278;"	l	line:278
+power	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	350;"	l	line:350
+power	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	432;"	l	line:432
+power_io	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	20;"	p	line:20	file:	signature:(unsigned int8 eps_output, unsigned int8 eps_state)
+power_io	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	274;"	f	line:274	signature:(unsigned int8 eps_output, unsigned int8 eps_state)
+power_set_test	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	19;"	p	line:19	file:	signature:(int pin, unsigned int8 add)
+power_set_test	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	212;"	f	line:212	signature:(int pin, unsigned int8 add)
+prms	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	149;"	l	line:149
+ptr1	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	143;"	l	line:143
+shunt_voltage	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	215;"	l	line:215
+shunt_voltage	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	278;"	l	line:278
+shunt_voltage	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	350;"	l	line:350
+shunt_voltage	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	432;"	l	line:432
+source	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	516;"	l	line:516
+state	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	30;"	l	line:30
+str1	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	142;"	l	line:142
+sw_pin	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	352;"	l	line:352
+sw_state	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\EPS\main.c	351;"	l	line:351
