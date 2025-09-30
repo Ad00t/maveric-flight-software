@@ -49,8 +49,6 @@
 */
 
 #include "pinslower.h"            // Add pins Lower PPM Definition
-#include "cmd.h"
-#include "interrupt.h"
 
 //==================================================================
 //  		Serial Port Initialization
@@ -69,6 +67,9 @@
 //#use i2c(master, sda=PIN_G3, scl=PIN_G2, STREAM=I2C_1)
 //#use i2c(master, sda=PIN_A3, scl=PIN_A2, STREAM=I2C_1)
 //#use i2c(master, sda=PIN_A15, scl=PIN_A14, STREAM=I2C_1)
+
+#include "cmd.h"
+#include "interrupt.h"
 
 void main(void) 
 {	
@@ -96,7 +97,7 @@ void main(void)
 	setup_crc(8,2,1);
 	delay_ms(1000);
 	crc_init(0);
-//	enable_all_interrupts();
+	enable_all_interrupts();
 	start_flag = TRUE;
 	delay_ms(1000);
 	
@@ -108,7 +109,7 @@ void main(void)
 		{
 			
 			//unsigned char fix_cmd[27];
-//			disable_all_interrupts();
+			disable_all_interrupts();
 			delay_ms(10);
 			crc_init(255);
 			delay_ms(100);			
@@ -147,7 +148,7 @@ void main(void)
 				}
 			}
 			cmd_flag = FALSE;
-//			enable_all_interrupts();
+			enable_all_interrupts();
 		}
 		//House keeping routine
 		else
