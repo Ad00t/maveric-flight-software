@@ -84,8 +84,8 @@ ifneq ($(INFORMATION_MESSAGE), )
 endif
 	${MAKE}  -f nbproject/Makefile-default.mk ${DISTDIR}/Maveric_UPPM.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
 
-
-
+MP_CC="C:\Program Files (x86)\PICC\CCSCON.exe"
+MP_LD="C:\Program Files (x86)\PICC\CCSCON.exe"
 sourceline.device=sourceline="\#device PIC24FJ256GA110"
 sourceline.xccompat=sourceline="\#device ANSI" sourceline="\#device PASS_STRINGS=IN_RAM" sourceline="\#device CONST=READ_ONLY" sourceline="\#case" sourceline="\#TYPE SIGNED" sourceline="\#type INT=16, LONG=32"
 sourceline.gcccompat=sourceline="\#device ANSI" sourceline="\#device PASS_STRINGS=IN_RAM" sourceline="\#device CONST=READ_ONLY" sourceline="\#case" sourceline="\#TYPE SIGNED"
