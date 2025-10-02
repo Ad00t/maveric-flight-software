@@ -24,6 +24,7 @@
     </logicalFolder>
     <logicalFolder name="OtherFiles" displayName="Other Files" projectFiles="false">
       <itemPath>../../mavlibs/v2025/src/cmd.c</itemPath>
+      <itemPath>../../mavlibs/v2025/src/interrupt.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>

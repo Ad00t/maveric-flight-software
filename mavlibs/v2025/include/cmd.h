@@ -1,5 +1,5 @@
-#ifndef _CMD_H_
-#define _CMD_H_
+#ifndef __CMD_H__
+#define __CMD_H__
 
 unsigned int8 origin;
 unsigned int8 destination;
@@ -17,7 +17,5 @@ unsigned int8 *ech=echo;
 void cmd_get_command(unsigned char *command_str,unsigned int8 *origin,unsigned int8 *destination,unsigned int8 *echo, unsigned char *command, unsigned char *params);
 void cmd_get_prmts(unsigned char *params, unsigned int8 *pmt1, unsigned int8 *pmt2);
 void cmd_get_prmts3(unsigned char *params, unsigned int8 *pmt1, unsigned int8 *pmt2, unsigned int8 *pmt3);
-
-#include "cmd.c"
 
 #endif

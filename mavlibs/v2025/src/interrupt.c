@@ -15,7 +15,7 @@ void disable_all_interrupts(void)
 	disable_interrupts(INT_RDA4);
 }
 
-void RDA_isr()
+void RDA_ISR()
 {
    	char c;
 	disable_all_interrupts();
@@ -65,8 +65,7 @@ void RDA_isr()
 	enable_all_interrupts();
 }
 
-
-void RDA2_isr()
+void RDA2_ISR()
 {
    	char c;
 	disable_all_interrupts();
@@ -117,9 +116,7 @@ void RDA2_isr()
 	enable_all_interrupts();
 }
 
-
-#INT_RDA3
-void RDA3_isr()
+void RDA3_ISR()
 {
    	char c;
 	disable_all_interrupts();
@@ -170,8 +167,7 @@ void RDA3_isr()
 	enable_all_interrupts();
 }
 
-#INT_RDA4
-void RDA4_isr()
+void RDA4_ISR()
 {
    	char c;
 	disable_all_interrupts();

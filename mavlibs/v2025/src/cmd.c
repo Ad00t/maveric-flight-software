@@ -1,3 +1,5 @@
+#include "cmd.h"
+
 //void cmd_get_command(unsigned char *command_str,
 //					 unsigned char *origin,
 //					 unsigned char *destination,
