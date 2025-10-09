@@ -100,7 +100,7 @@ ifeq (1,1)
 	@mv ${OBJECTDIR}/scr/main.cof "${DISTDIR}/Maveric_UPPM.${IMAGE_TYPE}.cof" 
 	@mv ${OBJECTDIR}/scr/main.hex "${DISTDIR}/Maveric_UPPM.${IMAGE_TYPE}.hex"
 else 
-	${MP_CC}  out=""${OBJECTDIR}\scr"" scr/main.c +EXPORT +FD +DF +CC +Y=9 +EA I+="..\..\src" +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 +EXPORTD="${OBJECTDIR}/scr"  
+	${MP_CC}  out=""${OBJECTDIR}\scr"" scr/main.c +EXPORT +FD +DF +CC #__DEBUG=1 +ICD +Y=9 +EA I+="..\..\src" +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 +EXPORTD="${OBJECTDIR}/scr"  
 	
 endif 
 	
