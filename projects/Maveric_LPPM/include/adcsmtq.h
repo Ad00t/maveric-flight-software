@@ -23,10 +23,10 @@ typedef struct {
     uint8_t port;  
 } ADCSMTQ;
 
+#define ADCSMTQ_HEAD_READ       0xC9
+#define ADCSMTQ_HEAD_WRITE      0xC8
+
 #define ADCSMTQ_RegDef          static const ADCSMTQ_Reg    
-#define ADCSMTQ_FACTORY_ID      0x64
-#define TAD102063_PORT          COM_A
-#define BUF_MAX_LEN             128
 
 /* Register format: [idx, data_count, map_idx, type]
                 idx: Denotes the register that the command will read/write from/to.
@@ -159,8 +159,15 @@ ADCSMTQ_RegDef ADCSMTQ_REG_NVM = { 255, 1, 2, T_UINT8 };
 
 // API
 
+// Initialize ADCSMTQ object
 void ADCSMTQ_init(ADCSMTQ* a, uint8_t port);
-void ADCSMTQ_read_reg(ADCSMTQ* a, ADCSMTQ_Reg reg, void* data, uint8_t* status);
-void ADCSMTQ_write_reg(ADCSMTQ* a, ADCSMTQ_Reg reg, void* data, uint8_t* status);
+// Send register read command to ADCSMTQ
+void ADCSMTQ_read_start(ADCSMTQ* a, ADCSMTQ_Reg reg);
+// Handle read data received from ADCSMTQ
+void ADCSMTQ_read_complete(ADCSMTQ* a, char* rcv_buf, void* data, uint8_t* status);
+// Send register write command to ADCSMTQ
+void ADCSMTQ_write_start(ADCSMTQ* a, ADCSMTQ_Reg reg, void* data);
+// Handle write response receieved from ADCSMTQ
+void ADCSMTQ_write_complete(ADCSMTQ* a, char* rcv_buf, uint8_t* status);
 
 #endif

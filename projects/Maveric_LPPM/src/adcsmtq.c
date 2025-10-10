@@ -45,10 +45,9 @@ void ADCSMTQ_init(ADCSMTQ* a, uint8_t port) {
     a->port = port;
 }
 
-void ADCSMTQ_read_reg(ADCSMTQ* a, ADCSMTQ_Reg reg, void* data, uint8_t* status) {
-    static const uint8_t head = (ADCSMTQ_FACTORY_ID << 1) | 1;
+void ADCSMTQ_read_start(ADCSMTQ* a, ADCSMTQ_Reg reg) {
     uint8_t w_buf[4];
-    w_buf[0] = head;
+    w_buf[0] = ADCSMTQ_HEAD_READ;
     w_buf[1] = reg.idx;
     w_buf[2] = reg.data_count;
     w_buf[3] = (reg.map_idx << 4) | 0;
@@ -56,7 +55,9 @@ void ADCSMTQ_read_reg(ADCSMTQ* a, ADCSMTQ_Reg reg, void* data, uint8_t* status) 
     write_buf(a, w_buf, 4); 
     write_buf(a, &csum, 1);
     delay_ms(1);
+}
 
+void ADCSMTQ_read_complete(ADCSMTQ* a, char* rcv_buf, void* data, uint8_t* status) {
     uint8_t r_buf[BUF_MAX_LEN];
     size_t r_buf_len = 4 + 4*reg.data_count + 1;
     read_buf(a, r_buf, r_buf_len);
@@ -64,11 +65,11 @@ void ADCSMTQ_read_reg(ADCSMTQ* a, ADCSMTQ_Reg reg, void* data, uint8_t* status) 
     *status = verify_csum(r_buf, r_buf_len); 
 }
 
-void ADCSMTQ_write_reg(ADCSMTQ* a, ADCSMTQ_Reg reg, void* data, uint8_t* status) {
+void ADCSMTQ_write_start(ADCSMTQ* a, ADCSMTQ_Reg reg, void* data) {
     static const uint8_t head = (ADCSMTQ_FACTORY_ID << 1 | 0);
     uint8_t w_buf[BUF_MAX_LEN];
     size_t w_buf_len = 4 + 4*reg.data_count;
-    w_buf[0] = head;
+    w_buf[0] = ADCSMTQ_HEAD_WRITE;
     w_buf[1] = reg.idx;
     w_buf[2] = reg.data_count;
     w_buf[3] = (reg.map_idx << 4) | 0;
@@ -76,8 +77,10 @@ void ADCSMTQ_write_reg(ADCSMTQ* a, ADCSMTQ_Reg reg, void* data, uint8_t* status)
     uint8_t csum = gen_csum(w_buf, w_buf_len);
     write_buf(a, w_buf, w_buf_len);
     write_buf(a, &csum, 1);
+}
 
+void ADCSMTQ_write_complete(ADCSMTQ* a, char* rcv_buf, uint8_t* status) {
     uint8_t r_buf[5];
     read_buf(a, r_buf, 5);
     *status = verify_csum(r_buf, 5);
-}   
+}
