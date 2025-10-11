@@ -11,7 +11,8 @@
             <sourceRootList>
                 <sourceRootElem>.</sourceRootElem>
                 <sourceRootElem>src</sourceRootElem>
-                <sourceRootElem>../../mavlibs/v2025/src</sourceRootElem>
+                <sourceRootElem>../../common/maveric/src</sourceRootElem>
+                <sourceRootElem>../../common/maveric/include</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>

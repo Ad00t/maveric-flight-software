@@ -5,9 +5,11 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>include/pinslower.h</itemPath>
-      <itemPath>../../mavlibs/v2025/include/interrupt.h</itemPath>
-      <itemPath>../../mavlibs/v2025/include/cmd.h</itemPath>
       <itemPath>include/adcsmtq.h</itemPath>
+      <itemPath>../../common/maveric/include/cmd.h</itemPath>
+      <itemPath>../../common/maveric/include/i2c.h</itemPath>
+      <itemPath>../../common/maveric/include/uart.h</itemPath>
+      <itemPath>include/interrupts.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -24,15 +26,17 @@
       <itemPath>src/main.c</itemPath>
     </logicalFolder>
     <logicalFolder name="OtherFiles" displayName="Other Files" projectFiles="false">
-      <itemPath>../../mavlibs/v2025/src/cmd.c</itemPath>
-      <itemPath>../../mavlibs/v2025/src/interrupt.c</itemPath>
       <itemPath>src/adcsmtq.c</itemPath>
+      <itemPath>../../common/maveric/src/cmd.c</itemPath>
+      <itemPath>../../common/maveric/src/i2c.c</itemPath>
+      <itemPath>../../common/maveric/src/uart.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
     <Elem>.</Elem>
     <Elem>src</Elem>
-    <Elem>../../mavlibs/v2025/src</Elem>
+    <Elem>../../common/maveric/src</Elem>
+    <Elem>../../common/maveric/include</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -1201,7 +1205,7 @@
         <property key="debug-file" value="false"/>
         <property key="errors-and-warnings" value="+EA"/>
         <property key="extra-include-directories"
-                  value="C:\Program Files (x86)\PICC\Devices;C:\Program Files (x86)\PICC\Drivers;..\..\mavlibs\v2025\include;include;..\..\mavlibs\v2025\src"/>
+                  value="C:\Program Files (x86)\PICC\Devices;C:\Program Files (x86)\PICC\Drivers;..\..\common\maveric\include;include;..\..\common\maveric\src"/>
         <property key="keep-after-compile" value="false"/>
         <property key="keep-for-xx-seconds" value=""/>
         <property key="keep-if-errors" value="false"/>

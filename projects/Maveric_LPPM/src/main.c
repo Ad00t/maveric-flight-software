@@ -64,7 +64,7 @@
 //#use i2c(master, sda=PIN_A15, scl=PIN_A14, STREAM=I2C_1)
 
 #include "cmd.c"
-#include "interrupt.c"
+#include "interrupts.c"
 #include "adcsmtq.c"
 
 ADCSMTQ tad102063;
@@ -78,9 +78,9 @@ void main(void) {
     system_init();
 
 	while (TRUE) {
-		if (cmd_flag) { // Received command routine
+		if (INTERRUPT_CMD_FLAG) { // Received command routine
             handle_cmd();
-        } else if (rcv_flag) { // Other received data routine
+        } else if (INTERRUPT_RCV_FLAG) { // Other received data routine
             handle_rcv();
         } else { // House keeping routine
             handle_hk();
@@ -127,19 +127,19 @@ void handle_cmd(void) {
     delay_ms(10);
     crc_init(255);
     delay_ms(100);			
-    crc_value = crc_calc8(&rcv_cmd,len-1);
+    crc_value = crc_calc8(&INTERRUPT_RCV_BUF,INTERRUPT_RCV_MSG_LEN-1);
     //crc_value = crc_calc8(&fix_cmd,2,8);
     delay_ms(100);
     fprintf(COM_D,"\033[31m[SYS] Solving cmd: %s; len: %u; start: %u; check: %s; crc: %2u \n\r",
-            rcv_cmd, len, rcv_cmd[0], &rcv_cmd[len-1], crc_value);
+            INTERRUPT_RCV_BUF, INTERRUPT_RCV_MSG_LEN, INTERRUPT_RCV_BUF[0], &INTERRUPT_RCV_BUF[INTERRUPT_RCV_MSG_LEN-1], crc_value);
     //Get the cmd components
-    cmd_get_command(rcv_cmd,&orgn,&dest,&ech, cmd, prms);			
+    cmd_get_command(INTERRUPT_RCV_BUF,&orgn,&dest,&ech, cmd, prms);			
     fprintf(COM_D,"[SYS] origin: %u; destination: %u; echo: %u\n\r",orgn,dest,ech);
     //fprintf(COM_D,"[SYS] command: %s; params: %s\n\r",cmd,prms);
     if (dest == node) {
         fprintf(COM_D,"[SYS] Decoding command: %s; params: %s; route: %u\n\r",cmd,prms,route1[dest-1]);
     } else {
-        fprintf(COM_D,"[SYS] forwarding command: %s to route: %u\n\r",rcv_cmd,route1[dest-1]);
+        fprintf(COM_D,"[SYS] forwarding command: %s to route: %u\n\r",INTERRUPT_RCV_BUF,route1[dest-1]);
     }
     //delay_ms(1000);
 
@@ -147,14 +147,14 @@ void handle_cmd(void) {
         fprintf(COM_D,"[SYS] Recieved command: %s; params: %s; route: %u\n\r",cmd,prms,route1[dest-1]);
     } else {
         if (dest == route1[6]) {
-            fprintf(COM_D,"%s\r",rcv_cmd);
+            fprintf(COM_D,"%s\r",INTERRUPT_RCV_BUF);
         } else if ((dest == route1[2])||(dest == route1[3])||(dest == route1[4])||(dest == route1[5])) {
-            fprintf(COM_C,"%s\r",rcv_cmd);
+            fprintf(COM_C,"%s\r",INTERRUPT_RCV_BUF);
         }
     }
 
-    cmd_flag = FALSE;
-    rcv_flag = FALSE;
+    INTERRUPT_CMD_FLAG = FALSE;
+    INTERRUPT_RCV_FLAG = FALSE;
     enable_all_interrupts();
 }
 
@@ -162,14 +162,14 @@ void handle_rcv(void) {
     disable_all_interrupts();
     
     uint8_t rcv_status;
-    uint8_t b0 = (uint8_t) rcv_buf[0];
+    uint8_t b0 = INTERRUPT_RCV_BUF[0];
     if (b0 == ADCSMTQ_HEAD_READ) {
-        ADCSMTQ_read_complete(&tad102063, rcv_buf, &rcv_status);
+        ADCSMTQ_read_complete(&tad102063, &rcv_status);
     } else if (b0 == ADCSMTQ_HEAD_WRITE) {
-        ADCSMTQ_write_complete(&tad102063, rcv_buf, &rcv_status);
+        ADCSMTQ_write_complete(&tad102063, &rcv_status);
     }
 
-    rcv_flag = FALSE;
+    INTERRUPT_RCV_FLAG = FALSE;
     enable_all_interrupts();
 }
 
@@ -184,5 +184,5 @@ void handle_hk(void) {
     fprintf(COM_D, "\033[32m[HK] I'm alive, Starting port 3.\r\n");
     delay_ms(250);
 
-    ADCSMTQ_read_start(&tad102063, ADCSMTQ_REG_SNID);
+    ADCSMTQ_read_start(&tad102063, "SNID");
 }
