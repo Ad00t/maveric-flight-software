@@ -1,0 +1,216 @@
+// I2C Functions
+
+#include "i2c.h"
+
+#module
+
+// Helper Function
+unsigned char bcdtohex( unsigned char bcd )
+{
+	unsigned char zerosb, onesb, twosb, threesb;
+	int retval;
+
+	zerosb = bcd & 0x000f;
+	onesb = (bcd & 0x00f0)>>4;
+	twosb = (bcd & 0x0f00)>>8;
+	threesb = (bcd & 0xf000)>>12;
+	retval = threesb*1000 + twosb*100 + onesb*10 + zerosb;
+	return retval;
+}
+
+// Helper Function
+unsigned char hextobcd( unsigned char hex ){
+	unsigned char y;
+	y = (hex / 10) <<4;
+	y = y | (hex %10);
+	return (y);
+}
+
+
+
+int getI2CTime(unsigned char *buf)
+{
+		// Assume Failure and set global
+		//I2C_Clock_OK=FALSE;
+
+		i2c_start();					// RTC READ SEQ
+		i2c_write(0xD0);  				// Device address/write mode
+		i2c_write(0x01);				// Device address pointer write
+		i2c_start();					// start
+		i2c_write(0xD1);  				// Device address/read mode 
+
+		buf[6] = bcdtohex(i2c_read()& 0x7f); 	// seconds, w/ACK
+		buf[5] = bcdtohex(i2c_read()& 0x7f); 	// minutes, w/ACK
+		buf[4] = bcdtohex(i2c_read()& 0x3f); 	// hour, w/ACK
+ 		buf[3] = bcdtohex(i2c_read()& 0x07) - 1; 	// weekday, w/ACK (rtc is 1-7, Fred's code is 0-6)
+		buf[1] = bcdtohex(i2c_read()& 0x3f); 	// Month day, w/ACK
+		buf[0] = bcdtohex(i2c_read()& 0x1f); 	// month, w/ACK
+		buf[2] = bcdtohex(i2c_read(0)& 0xff); 	// year, w/NOACK
+
+		i2c_stop();
+
+		// Reset Global to OK
+		//I2C_Clock_OK=TRUE;
+
+        return 4;
+}
+
+int setI2CTime(unsigned char *buf)
+{
+	   //// Assume Failure and set global
+	   //I2C_Clock_OK=FALSE; 
+
+       //memcpy(time, buf, 7);						// set the RAM version of time now
+		i2c_start();
+		i2c_write(0xD0);
+		i2c_write(0x01);
+		i2c_write(hextobcd(buf[6]));	//seconds
+		i2c_write(hextobcd(buf[5]));  //minutes
+		i2c_write(hextobcd(buf[4]));	//hour
+		i2c_write(hextobcd(buf[3]+1));  //weekday (rtc is 1-7 code is 0-6)
+		i2c_write(hextobcd(buf[1]));  //Month day
+		i2c_write(hextobcd(buf[0]));  //month
+		i2c_write(hextobcd(buf[2]));  //year
+		i2c_stop();
+
+		//// Reset Global to OK
+		//I2C_Clock_OK=TRUE;
+
+		return 1;
+}
+
+
+//		memcpy(buf,&globals.T_Init,7);			// get fred's default time
+// 
+int initI2CTime(unsigned char *buf)
+{
+	   // Assume Failure and set global
+	   //I2C_Clock_OK=FALSE; 
+	
+		i2c_start();							// set the FPM rtc clock with it
+		i2c_write(0xD0);
+		i2c_write(0x01);
+		i2c_write(hextobcd(buf[6]));	// seconds
+		i2c_write(hextobcd(buf[5]));  // minutes
+		i2c_write(hextobcd(buf[4]));	// hour
+		i2c_write(hextobcd(buf[3]+1));  // weekday (rtc stores 1 to 7 code is 0to6)
+		i2c_write(hextobcd(buf[1]));  // month day
+		i2c_write(hextobcd(buf[0]));  // month
+		i2c_write(hextobcd(buf[2]));  // year
+		i2c_write(0x0);  	// Cal
+		i2c_write(0x0);  	// Watchdog
+		i2c_write(0x0); 	// Alm Month
+		i2c_write(0x0);  	// Alm Date
+		i2c_write(0x0); 	// Alm Hour
+		i2c_write(0x0); 	// Alm Min
+		i2c_write(0x0);		// Alm Sec
+		i2c_stop();
+
+		// Reset Global to OK
+		//I2C_Clock_OK=TRUE;
+
+		return 0;
+}
+
+
+void enable_FPM_RTC(unsigned char * halted_time, unsigned char * time)
+{
+		int i;
+		unsigned char test_buf[16];
+
+		// Enable interrupts (???? you mean disable?)
+		disable_interrupts(INT_MI2C);
+
+		// Assume Failure and set global
+		I2C_Clock_OK=FALSE;
+
+		i2c_start();					// RTC READ SEQ - reads ST bit & Seconds, 10s and 1s
+		i2c_write(0xD0);  				// Device address/write mode
+		i2c_write(0x01);				// Device address pointer write (ST & Secs)
+		i2c_start();
+		i2c_write(0xD1);  				// Device address/read mode (get ST & Secs)
+		test_buf[1] = i2c_read(0); 		// Read w/NOACK - seconds and ST bit
+		i2c_stop();
+
+		i2c_start();					// RTC READ SEQ - HT & Alarms
+		i2c_write(0xD0);  				// Device address/write mode
+		i2c_write(0x0C);				// Device address pointer write - HT address
+		i2c_start();					//
+		i2c_write(0xD1);  				// Device address/read mode 
+		test_buf[0xC] = i2c_read(0); 	// Read w/NOACK
+		i2c_stop();
+
+		if( test_buf[1] & 0x80 ){		// ST bit set means first time powered up
+			i2c_start();   				// zero out all registers (first time ever board bringup or dead batt)
+			i2c_write(0xD0);
+			i2c_write(0x00);
+			for(i=0; i<16; i++){
+				i2c_write(0x00);
+			}
+			i2c_stop();
+		}
+		else if(test_buf[0xC] & 0x40 ){
+			// We've lost power and been on battery backtup, save halted time, enable updates, reload time[]
+			//save halted time
+			i2c_start();					// RTC READ SEQ
+			i2c_write(0xD0);  				// Device address/write mode
+			i2c_write(0x01);				// Device address pointer write
+			i2c_start();					// start
+			i2c_write(0xD1);  				// Device address/read mode 
+	
+			test_buf[6] = bcdtohex(i2c_read()& 0x7f); 	// seconds, w/ACK
+			test_buf[5] = bcdtohex(i2c_read()& 0x7f); 	// minutes, w/ACK
+			test_buf[4] = bcdtohex(i2c_read()& 0x3f); 	// hour, w/ACK
+	 		test_buf[3] = bcdtohex(i2c_read()& 0x07)-1 ; 	// weekday, w/ACK (rtc is 1-7 code is 0-6)
+			test_buf[1] = bcdtohex(i2c_read()& 0x3f); 	// Month day, w/ACK
+			test_buf[0] = bcdtohex(i2c_read()& 0x1f); 	// month, w/ACK
+			test_buf[2] = bcdtohex(i2c_read(0)& 0xff); 	// year, w/NOACK
+			i2c_stop();
+			memcpy( halted_time, test_buf, 7 );
+			// end save halted time
+	
+			// reenable time updates
+			i2c_start();					// RTC WRITE SEQ - reset HT bit (enabling updates) zero alarms
+			i2c_write(0xD0);
+			i2c_write(0x0C);
+			i2c_write(0x00);				//HT bit lo enables updates, and zeros alarm
+			i2c_stop();
+	
+			for( i=1; i<32; i++){			// delay a bit to allow new update (necessary?)
+			test_buf[0] = test_buf[7];
+			}
+			// end reenable time updates
+	
+			//copy the now updating time from batt backed rtc to time struct (preventing a default time load)
+			i2c_start();					// RTC READ SEQ
+			i2c_write(0xD0);  				// Device address/write mode
+			i2c_write(0x01);				// Device address pointer write
+			i2c_start();					// start
+			i2c_write(0xD1);  				// Device address/read mode 
+			test_buf[6] = bcdtohex(i2c_read()& 0x7f); 	// seconds, w/ACK
+			test_buf[5] = bcdtohex(i2c_read()& 0x7f); 	// minutes, w/ACK
+			test_buf[4] = bcdtohex(i2c_read()& 0x3f); 	// hour, w/ACK
+	 		test_buf[3] = bcdtohex(i2c_read()& 0x07)-1; 	// weekday, w/ACK (rtc is 1-7 code is 0-6)
+			test_buf[1] = bcdtohex(i2c_read()& 0x3f); 	// Month day, w/ACK
+			test_buf[0] = bcdtohex(i2c_read()& 0x1f); 	// month, w/ACK
+			test_buf[2] = bcdtohex(i2c_read(0)& 0xff); 	// year, w/NOACK
+			i2c_stop();
+			memcpy(time, test_buf, 7);
+			// end of recovered time from rtc during batt backup
+		}
+		else{
+		// just another reboot, nothing to save, time[] should be ok, rtc should still be running
+		// do nothing meaningful, just leave some tracks to read on the analyzer
+
+		i2c_start();					// RTC WRITE SEQ - reset ST bit, preserving seconds
+		i2c_write(0xD0);
+		i2c_write(0x01);
+		i2c_write(test_buf[1] & 0x7F);	// ST bit lo enables oscillator, and set seconds
+		i2c_stop();
+		}
+		
+
+		// Reset Global to OK
+		I2C_Clock_OK=TRUE;
+}
+
