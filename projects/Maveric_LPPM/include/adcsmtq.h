@@ -17,7 +17,7 @@ typedef enum {
     T_UINT16,
     T_INT16,
     T_FLOAT,
-    T_STRING
+    T_CHAR
 } ADCSMTQ_Reg_Type;
 
 typedef struct {
@@ -27,6 +27,7 @@ typedef struct {
     uint8_t map_idx;
     ADCSMTQ_Reg_Type type;
     void* value;
+    uint8_t value_len;
 } ADCSMTQ_Reg;
 
 typedef struct {
@@ -46,16 +47,16 @@ typedef struct {
 static const ADCSMTQ_Reg ADCSMTQ_INIT_REG_TABLE[] = {
     // Table 6-2. User Register (0)
     { "FACT", 0, 1, 0, T_UINT16, NULL },
-    { "SNID", 1, 3, 0, T_STRING, NULL },
+    { "SNID", 1, 3, 0, T_CHAR, NULL },
     { "CONF", 4, 1, 0, T_UINT8, NULL },
     { "TIME", 5, 1, 0, T_UINT8, NULL },
     { "DATE", 6, 1, 0, T_UINT8, NULL },
     { "LLA_REF", 7, 3, 0, T_FLOAT, NULL },
     { "Q_REF", 10, 4, 0, T_FLOAT, NULL },
     { "POINTING_AXIS", 14, 3, 0, T_FLOAT, NULL },
-    { "TLE", 17, 35, 0, T_STRING, NULL },
-    { "GGA", 52, 32, 0, T_STRING, NULL },
-    { "ZDA", 84, 16, 0, T_STRING, NULL },
+    { "TLE", 17, 35, 0, T_CHAR, NULL },
+    { "GGA", 52, 32, 0, T_CHAR, NULL },
+    { "ZDA", 84, 16, 0, T_CHAR, NULL },
     { "SV_USER", 100, 3, 0, T_FLOAT, NULL },
     { "MTQ_USER", 103, 3, 0, T_FLOAT, NULL },
     { "CMG0_G_RATE_USER", 106, 1, 0, T_FLOAT, NULL },
@@ -169,14 +170,14 @@ static const ADCSMTQ_Reg ADCSMTQ_INIT_REG_TABLE[] = {
 
 // Initialize ADCSMTQ object
 void ADCSMTQ_init(ADCSMTQ* a, uint8_t port);
-// Lookup name in reg_name_map
+// Lookup register by name in reg_name_map
 ADCSMTQ_Reg* ADCSMTQ_get_reg_by_name(ADCSMTQ* a, char* name);
 // Send register read command to ADCSMTQ
-void ADCSMTQ_read_start(ADCSMTQ* a, ADCSMTQ_Reg reg);
+void ADCSMTQ_read_start(ADCSMTQ* a, char* name);
 // Handle read data received from ADCSMTQ
 void ADCSMTQ_read_complete(ADCSMTQ* a, uint8_t* status);
 // Send register write command to ADCSMTQ
-void ADCSMTQ_write_start(ADCSMTQ* a, ADCSMTQ_Reg reg, void* data);
+void ADCSMTQ_write_start(ADCSMTQ* a, char* name, void* data);
 // Handle write response receieved from ADCSMTQ
 void ADCSMTQ_write_complete(ADCSMTQ* a, uint8_t* status);
 
