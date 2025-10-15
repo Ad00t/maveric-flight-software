@@ -1,7 +1,8 @@
 #include "adcsmtq.h"
-#include "interrupts.c"
-#include "uart.c"
+#include "interrupts.h"
+#include "uart.h"
 #include <stdint.h>
+#include <stdlibm.h>
 
 #module
 
@@ -47,7 +48,7 @@ void ADCSMTQ_init(ADCSMTQ* a, uint8_t port) {
     // Init idx, name maps
     size_t i;
     for (i = 0; i < ADCSMTQ_REG_TABLE_LEN; i++) {
-        const ADCSMTQ_Reg* r = &a->reg_table[i];
+        ADCSMTQ_Reg* r = &a->reg_table[i];
         if (r->map_idx < ADCSMTQ_MAP_COUNT && r->idx < ADCSMTQ_MAX_IDX_COUNT)
             a->reg_idx_map[r->map_idx][r->idx] = r;
         uint8_t h = hash_name(r->name);
@@ -55,7 +56,7 @@ void ADCSMTQ_init(ADCSMTQ* a, uint8_t port) {
     }
 
     // Initialize buffers for register values
-    for (int i = 0; i < ADCSMTQ_REG_TABLE_LEN; i++) {
+    for (i = 0; i < ADCSMTQ_REG_TABLE_LEN; i++) {
         ADCSMTQ_Reg* r = &a->reg_table[i];
         switch (r->type) {
             case T_UINT8:
@@ -109,14 +110,14 @@ void ADCSMTQ_read_start(ADCSMTQ* a, char* name) {
 }
 
 void ADCSMTQ_read_complete(ADCSMTQ* a, uint8_t* status) {
-    uint8_t idx = INTERRUPT_RCV_BUF[1]
+    uint8_t idx = INTERRUPT_RCV_BUF[1];
     uint8_t data_count = INTERRUPT_RCV_BUF[2];
     uint8_t map_idx = INTERRUPT_RCV_BUF[3] >> 4;
     uint8_t error_code = INTERRUPT_RCV_BUF[3] & 0b1111;
     uint8_t* body = &INTERRUPT_RCV_BUF[4];
     ADCSMTQ_Reg* reg = a->reg_idx_map[map_idx][idx];
     
-    size_t n_body_bytes = 4*reg->data_count;
+    size_t n_body_bytes = 4*data_count;
     size_t i;
     switch (reg->type) {
         case T_UINT8: {
@@ -135,14 +136,14 @@ void ADCSMTQ_read_complete(ADCSMTQ* a, uint8_t* status) {
             uint16_t* dst = (uint16_t*)reg->value;
             size_t elems = n_body_bytes / 2;
             for (i = 0; i < elems; i++)
-                dst[i] = ((uint16_t)body[2*i+1] << 8) | body[2*i];
+                dst[i] = (((uint16_t)body[2*i+1]) << 8) | body[2*i];
             break;
         }
         case T_INT16: {
             int16_t* dst = (int16_t*)reg->value;
             size_t elems = n_body_bytes / 2;
             for (i = 0; i < elems; i++)
-                dst[i] = ((int16_t)body[2*i+1] << 8) | body[2*i];
+                dst[i] = (((int16_t)body[2*i+1]) << 8) | body[2*i];
             break;
         }
         case T_FLOAT: {
@@ -158,7 +159,7 @@ void ADCSMTQ_read_complete(ADCSMTQ* a, uint8_t* status) {
             break;
         }
     }    
-    *status = (verify_csum(r_buf, r_buf_len) << 4) | error_code; 
+    *status = (verify_csum(INTERRUPT_RCV_BUF, 4+n_body_bytes) << 4) | error_code; 
 }
 
 void ADCSMTQ_write_start(ADCSMTQ* a, char* name, void* data) {
@@ -214,5 +215,5 @@ void ADCSMTQ_write_start(ADCSMTQ* a, char* name, void* data) {
 
 void ADCSMTQ_write_complete(ADCSMTQ* a, uint8_t* status) {
     uint8_t error_code = INTERRUPT_RCV_BUF[3] & 0b1111;
-    *status = (verify_csum(r_buf, r_buf_len) << 4) | error_code; 
+    *status = (verify_csum(INTERRUPT_RCV_BUF, 4) << 4) | error_code; 
 }

@@ -1,5 +1,5 @@
 #include "interrupts.h"
-#include "uart.c"
+#include "uart.h"
 #include <stdint.h>
 #include <stdio.h>
 
@@ -11,7 +11,7 @@ void default_rda_isr(uint8_t port) {
 	disable_all_interrupts();
    	char c;
    	INTERRUPT_RCV_MSG_LEN = 0;
-	if (start_flag) {
+	if (INTERRUPT_START_FLAG) {
 		while (uart_byte_avail(port) && c != 13) { 
 			c = uart_read_byte(port);
 	     	if (c == 8 && INTERRUPT_RCV_MSG_LEN > 0) {  // Backspace
@@ -56,7 +56,7 @@ void RDA2_ISR(void) {
 
 void RDA3_ISR(void) {
     default_rda_isr(COM_C);
-    cmd_flag = TRUE;
+    INTERRUPT_CMD_FLAG = TRUE;
 	fprintf(COM_C, "\033[33m[COM_C] RCV: %s\n\r", INTERRUPT_RCV_BUF);
 }
 

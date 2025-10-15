@@ -95,8 +95,8 @@
 //#use i2c(master, sda=PIN_A3, scl=PIN_A2, STREAM=I2C_1)
 //#use i2c(master, sda=PIN_A15, scl=PIN_A14, STREAM=I2C_1)
 
-#include "cmd.h"
-#include "interrupt.h"
+#include "cmd.c"
+#include "interrupts.h"
 
 void main(void) 
 {	

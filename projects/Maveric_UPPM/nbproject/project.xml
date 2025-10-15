@@ -9,8 +9,10 @@
             <sourceEncoding>ISO-8859-1</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>
-                <sourceRootElem>scr</sourceRootElem>
                 <sourceRootElem>.</sourceRootElem>
+                <sourceRootElem>src</sourceRootElem>
+                <sourceRootElem>../../common/maveric/src</sourceRootElem>
+                <sourceRootElem>../../common/maveric/include</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>

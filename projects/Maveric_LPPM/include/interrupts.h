@@ -1,6 +1,8 @@
 #ifndef __INTERRUPTS_H__
 #define __INTERRUPTS_H__
 
+#include <stdint.h>
+
 #define MAX_BUF_LEN     256
 
 int1 INTERRUPT_START_FLAG, INTERRUPT_RCV_FLAG, INTERRUPT_CMD_FLAG;

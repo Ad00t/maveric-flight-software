@@ -36,7 +36,6 @@
     <Elem>.</Elem>
     <Elem>src</Elem>
     <Elem>../../common/maveric/src</Elem>
-    <Elem>../../common/maveric/include</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -46,7 +45,7 @@
         <targetDevice>PIC24FJ256GA110</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>noID</platformTool>
+        <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>CCSC</languageToolchain>
         <languageToolchainVersion>4.124</languageToolchainVersion>
         <platform>3</platform>

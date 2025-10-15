@@ -64,6 +64,7 @@
 //#use i2c(master, sda=PIN_A15, scl=PIN_A14, STREAM=I2C_1)
 
 #include "cmd.c"
+#include "uart.c"
 #include "interrupts.c"
 #include "adcsmtq.c"
 
@@ -77,7 +78,7 @@ void handle_hk(void);
 void main(void) {	
     system_init();
 
-	while (TRUE) {
+    while (TRUE) {
 		if (INTERRUPT_CMD_FLAG) { // Received command routine
             handle_cmd();
         } else if (INTERRUPT_RCV_FLAG) { // Other received data routine
@@ -90,6 +91,23 @@ void main(void) {
 
 void system_init(void) {
     ADCSMTQ_init(&tad102063, COM_A);
+
+	//Interrupt enabling
+	//CRCCON = 0x07;
+	//CRCXOR = 0x0106;
+	INTERRUPT_START_FLAG = FALSE;
+	INTERRUPT_CMD_FLAG = FALSE;
+    INTERRUPT_RCV_FLAG = FALSE;
+	setup_crc(8,2,1);
+	delay_ms(1000);
+	crc_init(0);
+	enable_all_interrupts();
+	INTERRUPT_START_FLAG = TRUE;
+	delay_ms(1000);
+}
+
+void handle_cmd(void) {
+    disable_all_interrupts();
 
     //Lower PPM routes
 	int8 node = 1;
@@ -107,22 +125,7 @@ void system_init(void) {
 	//int route1[3]={3,0,1};
 
 	unsigned int16 crc_value;
-	//Interrupt enabling
-	//CRCCON = 0x07;
-	//CRCXOR = 0x0106;
-	start_flag = FALSE;
-	cmd_flag = FALSE;
-	setup_crc(8,2,1);
-	delay_ms(1000);
-	crc_init(0);
-	enable_all_interrupts();
-	start_flag = TRUE;
-	delay_ms(1000);
-}
-
-void handle_cmd(void) {
-    disable_all_interrupts();
-
+	
     //unsigned char fix_cmd[27];
     delay_ms(10);
     crc_init(255);

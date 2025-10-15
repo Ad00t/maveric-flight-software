@@ -12,7 +12,6 @@
                 <sourceRootElem>.</sourceRootElem>
                 <sourceRootElem>src</sourceRootElem>
                 <sourceRootElem>../../common/maveric/src</sourceRootElem>
-                <sourceRootElem>../../common/maveric/include</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
