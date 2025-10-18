@@ -9,11 +9,14 @@
 
 // HELPERS
 
-// Generate hash of name for reg_name_map
-uint8_t hash_name(char* s) {
-    uint8_t h = 0;
-    while (*s) h = (h * 31u) + (uint8_t)(*s++);
-    return h % ADCSMTQ_NAME_HASH_SIZE;
+// Generate hash of name for reg_name_map -- FNV-1a algorithm
+uint16_t hash_name(char* s) {
+    uint32_t hash = 2166136261u; // FNV offset basis
+    while (*s) {
+        hash ^= (uint8_t)(*s++);
+        hash *= 16777619u;        // FNV prime
+    }
+    return (uint16_t) (hash % ADCSMTQ_NAME_HASH_SIZE);
 }
 
 // Compute sum of all bytes in buf
@@ -51,8 +54,10 @@ void ADCSMTQ_init(ADCSMTQ* a, uint8_t port) {
         ADCSMTQ_Reg* r = &a->reg_table[i];
         if (r->map_idx < ADCSMTQ_MAP_COUNT && r->idx < ADCSMTQ_MAX_IDX_COUNT)
             a->reg_idx_map[r->map_idx][r->idx] = r;
-        uint8_t h = hash_name(r->name);
+        uint16_t h = hash_name(r->name);
         a->reg_name_map[h] = r;
+        // fprintf(COM_D, "ADCSMTQ_REG: %s h:%u mi:%u i:%u imap:%s nmap:%s\r\n",
+        //     r->name, h, r->map_idx, r->idx, a->reg_idx_map[r->map_idx][r->idx], a->reg_name_map[h]);
     }
 
     // Initialize buffers for register values
@@ -88,8 +93,9 @@ void ADCSMTQ_init(ADCSMTQ* a, uint8_t port) {
 }
 
 ADCSMTQ_Reg* ADCSMTQ_get_reg_by_name(ADCSMTQ* a, char* name) {
-    uint8_t h = hash_name(name);
+    uint16_t h = hash_name(name);
     ADCSMTQ_Reg* r = a->reg_name_map[h];
+    // fprintf(COM_D, "\033[37mADCSMTQ REG NAME: %s %u %u %s\r\n", name, h, hash_name("SNID"), r->name);
     if (r && strcmp(r->name, name) == 0)
         return r;
     // could extend for collision resolution
@@ -98,6 +104,7 @@ ADCSMTQ_Reg* ADCSMTQ_get_reg_by_name(ADCSMTQ* a, char* name) {
 
 void ADCSMTQ_read_start(ADCSMTQ* a, char* name) {
     ADCSMTQ_Reg* reg = ADCSMTQ_get_reg_by_name(a, name);
+    // fprintf(COM_D, "\033[37mADCSMTQ READ START REG: \"%s\"\r\n", reg->name);
     uint8_t w_buf[4];
     w_buf[0] = ADCSMTQ_HEAD_READ;
     w_buf[1] = reg.idx;

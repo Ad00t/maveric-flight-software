@@ -9,7 +9,7 @@
 #define ADCSMTQ_REG_TABLE_LEN   116
 #define ADCSMTQ_MAP_COUNT       3
 #define ADCSMTQ_MAX_IDX_COUNT   256
-#define ADCSMTQ_NAME_HASH_SIZE  128
+#define ADCSMTQ_NAME_HASH_SIZE  512 
 
 typedef enum {
     T_UINT8,
