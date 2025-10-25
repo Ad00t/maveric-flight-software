@@ -12,8 +12,9 @@
 // Generate hash of name for reg_name_map -- FNV-1a algorithm
 uint16_t hash_name(char* s) {
     uint32_t hash = 2166136261u; // FNV offset basis
-    while (*s) {
-        hash ^= (uint8_t)(*s++);
+    uint8_t i = 0;
+    while (*(s+i)) {
+        hash ^= (uint8_t)(*(s + i++));
         hash *= 16777619u;        // FNV prime
     }
     return (uint16_t) (hash % ADCSMTQ_NAME_HASH_SIZE);
@@ -44,25 +45,23 @@ uint8_t verify_csum(uint8_t* buf, size_t len) {
 // API
 
 void ADCSMTQ_init(ADCSMTQ* a, uint8_t port) {
-    memset(a, 0, sizeof(ADCSMTQ));
-    a->port = port;
     memcpy(a->reg_table, ADCSMTQ_INIT_REG_TABLE, sizeof(ADCSMTQ_INIT_REG_TABLE));
+    a->port = port;
 
-    // Init idx, name maps
+    // Init idx, name maps, register space
     size_t i;
     for (i = 0; i < ADCSMTQ_REG_TABLE_LEN; i++) {
         ADCSMTQ_Reg* r = &a->reg_table[i];
+       
+        // Populate idx map
         if (r->map_idx < ADCSMTQ_MAP_COUNT && r->idx < ADCSMTQ_MAX_IDX_COUNT)
             a->reg_idx_map[r->map_idx][r->idx] = r;
+
+        // Populate string name map
         uint16_t h = hash_name(r->name);
         a->reg_name_map[h] = r;
-        // fprintf(COM_D, "ADCSMTQ_REG: %s h:%u mi:%u i:%u imap:%s nmap:%s\r\n",
-        //     r->name, h, r->map_idx, r->idx, a->reg_idx_map[r->map_idx][r->idx], a->reg_name_map[h]);
-    }
-
-    // Initialize buffers for register values
-    for (i = 0; i < ADCSMTQ_REG_TABLE_LEN; i++) {
-        ADCSMTQ_Reg* r = &a->reg_table[i];
+       
+        // Allocate register data space
         switch (r->type) {
             case T_UINT8:
                 r->value_len = 4*r->data_count / sizeof(uint8_t);
@@ -90,12 +89,13 @@ void ADCSMTQ_init(ADCSMTQ* a, uint8_t port) {
                 break;
         }
     }
+
+    fprintf(COM_D, "%s[LPPM] ADCSMTQ initialized on COM %u\r\n", KWHT, a->port);
 }
 
 ADCSMTQ_Reg* ADCSMTQ_get_reg_by_name(ADCSMTQ* a, char* name) {
     uint16_t h = hash_name(name);
     ADCSMTQ_Reg* r = a->reg_name_map[h];
-    // fprintf(COM_D, "\033[37mADCSMTQ REG NAME: %s %u %u %s\r\n", name, h, hash_name("SNID"), r->name);
     if (r && strcmp(r->name, name) == 0)
         return r;
     // could extend for collision resolution
@@ -104,16 +104,33 @@ ADCSMTQ_Reg* ADCSMTQ_get_reg_by_name(ADCSMTQ* a, char* name) {
 
 void ADCSMTQ_read_start(ADCSMTQ* a, char* name) {
     ADCSMTQ_Reg* reg = ADCSMTQ_get_reg_by_name(a, name);
-    // fprintf(COM_D, "\033[37mADCSMTQ READ START REG: \"%s\"\r\n", reg->name);
     uint8_t w_buf[4];
     w_buf[0] = ADCSMTQ_HEAD_READ;
-    w_buf[1] = reg.idx;
-    w_buf[2] = reg.data_count;
-    w_buf[3] = (reg.map_idx << 4) | 0;
+    w_buf[1] = reg->idx;
+    w_buf[2] = reg->data_count;
+    w_buf[3] = (reg->map_idx << 4) | 0;
     uint8_t csum = gen_csum(w_buf, 4);
+    fprintf(COM_D, "%s[LPPM] ADCSMTQ_read_start: %u '%s' [ 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X ]\r\n", 
+            KYEL, a->port, reg->name, w_buf[0], w_buf[1], w_buf[2], w_buf[3], csum);
     uart_write_buf(a->port, w_buf, 4); 
-    uart_write_buf(a->port, &csum, 1);
-    delay_ms(1);
+    uart_write_byte(a->port, csum);
+   
+    delay_ms(100);
+
+    uint8_t r_buf[17];
+    size_t i;
+    fprintf(COM_D, "%s[LPPM] ADCSMTQ_read_start_done: [", KYEL);
+    for (i = 0; i < 17; i++) {
+        uint32_t timeout = 100000;
+        while (!uart_byte_avail(a->port) && timeout--) {}
+        if (!timeout) {
+            fprintf(COM_D, "\r\n[LPPM] Timeout waiting for byte %u\r\n", i);
+            break;
+        }
+        r_buf[i] = uart_read_byte(a->port);
+        fprintf(COM_D, " 0x%02X", r_buf[i]);
+    }
+    fprintf(COM_D, " ]\r\n");
 }
 
 void ADCSMTQ_read_complete(ADCSMTQ* a, uint8_t* status) {
@@ -123,7 +140,10 @@ void ADCSMTQ_read_complete(ADCSMTQ* a, uint8_t* status) {
     uint8_t error_code = INTERRUPT_RCV_BUF[3] & 0b1111;
     uint8_t* body = &INTERRUPT_RCV_BUF[4];
     ADCSMTQ_Reg* reg = a->reg_idx_map[map_idx][idx];
-    
+
+    fprintf(COM_D, "%s[LPPM] ADCSMTQ_read_complete %s %u %u %u %u\r\n",
+            KYEL, reg->name, idx, data_count, map_idx, error_code);
+
     size_t n_body_bytes = 4*data_count;
     size_t i;
     switch (reg->type) {
@@ -179,7 +199,7 @@ void ADCSMTQ_write_start(ADCSMTQ* a, char* name, void* data) {
     w_buf[0] = ADCSMTQ_HEAD_WRITE;
     w_buf[1] = reg->idx;
     w_buf[2] = reg->data_count;
-    w_buf[3] = (reg.map_idx << 4) | 0;
+    w_buf[3] = (reg->map_idx << 4) | 0;
     
     uint8_t body[MAX_BUF_LEN];
     size_t i;

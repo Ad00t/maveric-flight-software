@@ -63,6 +63,15 @@
 //#use i2c(master, sda=PIN_A3, scl=PIN_A2, STREAM=I2C_1)
 //#use i2c(master, sda=PIN_A15, scl=PIN_A14, STREAM=I2C_1)
 
+#define KNRM  "\033[0m"
+#define KRED  "\033[31m"
+#define KGRN  "\033[32m"
+#define KYEL  "\033[33m"
+#define KBLU  "\033[34m"
+#define KMAG  "\033[35m"
+#define KCYN  "\033[36m"
+#define KWHT  "\033[37m"
+
 #include "cmd.c"
 #include "uart.c"
 #include "interrupts.c"
@@ -107,6 +116,7 @@ void system_init(void) {
 	INTERRUPT_START_FLAG = TRUE;
 
     ADCSMTQ_init(&tad102063, COM_A);
+
 	delay_ms(1000);
 }
 
@@ -137,26 +147,26 @@ void handle_cmd(void) {
     crc_value = crc_calc8(&INTERRUPT_RCV_BUF,INTERRUPT_RCV_MSG_LEN-1);
     //crc_value = crc_calc8(&fix_cmd,2,8);
     delay_ms(100);
-    fprintf(COM_D,"\033[36m[LPPM] Solving cmd: %s; len: %u; start: %u; check: %s; crc: %2u \r\n",
-            INTERRUPT_RCV_BUF, INTERRUPT_RCV_MSG_LEN, INTERRUPT_RCV_BUF[0], &INTERRUPT_RCV_BUF[INTERRUPT_RCV_MSG_LEN-1], crc_value);
+    fprintf(COM_D,"%s[LPPM] Solving cmd: %s; len: %u; start: %u; check: %s; crc: %2u \r\n",
+            KCYN, INTERRUPT_RCV_BUF, INTERRUPT_RCV_MSG_LEN, INTERRUPT_RCV_BUF[0], &INTERRUPT_RCV_BUF[INTERRUPT_RCV_MSG_LEN-1], crc_value);
     //Get the cmd components
     cmd_get_command(INTERRUPT_RCV_BUF,&orgn,&dest,&ech, cmd, prms);			
-    fprintf(COM_D,"\033[36m[LPPM] origin: %u; destination: %u; echo: %u\r\n",orgn,dest,ech);
+    fprintf(COM_D,"%s[LPPM] origin: %u; destination: %u; echo: %u\r\n", KCYN, orgn, dest, ech);
     //fprintf(COM_D,"[SYS] command: %s; params: %s\r\n",cmd,prms);
     if (dest == node) {
-        fprintf(COM_D,"\033[36m[LPPM] Decoding command: %s; params: %s; route: %u\r\n",cmd,prms,route1[dest-1]);
+        fprintf(COM_D,"%s[LPPM] Decoding command: %s; params: %s; route: %u\r\n", KCYN, cmd, prms, route1[dest-1]);
     } else {
-        fprintf(COM_D,"\033[36m[LPPM] forwarding command: %s to route: %u\r\n",INTERRUPT_RCV_BUF,route1[dest-1]);
+        fprintf(COM_D,"%s[LPPM] forwarding command: %s to route: %u\r\n", KCYN, INTERRUPT_RCV_BUF, route1[dest-1]);
     }
     //delay_ms(1000);
 
     if (dest == node) {
-        fprintf(COM_D,"\033[36m[LPPM] Recieved command: %s; params: %s; route: %u\r\n",cmd,prms,route1[dest-1]);
+        fprintf(COM_D,"%s[LPPM] Recieved command: %s; params: %s; route: %u\r\n", KCYN, cmd, prms, route1[dest-1]);
     } else {
         if (dest == route1[6]) {
-            fprintf(COM_D,"\033[36m%s\r",INTERRUPT_RCV_BUF);
+            fprintf(COM_D,"%s%s\r", KCYN, INTERRUPT_RCV_BUF);
         } else if ((dest == route1[2])||(dest == route1[3])||(dest == route1[4])||(dest == route1[5])) {
-            fprintf(COM_C,"\033[36m%s\r",INTERRUPT_RCV_BUF);
+            fprintf(COM_C,"%s%s\r", KCYN, INTERRUPT_RCV_BUF);
         }
     }
 
@@ -164,7 +174,7 @@ void handle_cmd(void) {
 }
 
 void handle_rcv(void) {
-    disable_all_interrupts(); 
+    disable_all_interrupts();
     uint8_t rcv_status;
 
     if (INTERRUPT_RCV_PORT == COM_A) {
@@ -181,9 +191,7 @@ void handle_rcv(void) {
 
 void handle_hk(void) {
     cleanup_interrupts_rcv();
-
+    fprintf(COM_D, "%s[LPPM] HK COM_D ACTIVE \r\n", KWHT);
     ADCSMTQ_read_start(&tad102063, "SNID");
-    
-    fprintf(COM_D, "\033[37m[LPPM] HK COM_D ACTIVE.\r\n");
     delay_ms(2000);
 }

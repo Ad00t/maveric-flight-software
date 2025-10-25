@@ -33,10 +33,11 @@ void uart_read_buf(uint8_t port, uint8_t* buf, uint8_t len) {
 
 void uart_write_byte(uint8_t port, uint8_t c) {
     switch (port) {
-        case COM_A: fputc(c, COM_A);
-        case COM_B: fputc(c, COM_B);
-        case COM_C: fputc(c, COM_C);
-        case COM_D: fputc(c, COM_D);
+        case COM_A: fputc(c, COM_A); break;
+        case COM_B: fputc(c, COM_B); break;
+        case COM_C: fputc(c, COM_C); break;
+        case COM_D: fputc(c, COM_D); break;
+        default:    break;
     }
 }
 

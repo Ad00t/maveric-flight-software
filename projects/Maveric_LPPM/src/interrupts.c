@@ -1,5 +1,6 @@
 #include "interrupts.h"
 #include "uart.h"
+#include "adcsmtq.h"
 #include <stdint.h>
 #include <stdio.h>
 
@@ -25,21 +26,21 @@ void disable_all_interrupts(void) {
 
 void log_interrupts_rcv(void) {
     if (INTERRUPT_RCV_FLAG) {
-        fprintf(COM_D, "\033[32m[LPPM] RCV:%u CMD:%u port:%u msg_len:%u str:\"%s\" [ ", 
-                INTERRUPT_RCV_FLAG, INTERRUPT_CMD_FLAG, INTERRUPT_RCV_PORT, INTERRUPT_RCV_MSG_LEN, INTERRUPT_RCV_BUF);
+        fprintf(COM_D, "%s[LPPM] RCV:%u CMD:%u port:%u msg_len:%u str:\"%s\" [ ", 
+                KGRN, INTERRUPT_RCV_FLAG, INTERRUPT_CMD_FLAG, INTERRUPT_RCV_PORT, INTERRUPT_RCV_MSG_LEN, INTERRUPT_RCV_BUF);
         size_t i;
         for (i = 0; i < INTERRUPT_RCV_MSG_LEN; i++) 
-            fprintf(COM_D, "\033[32m0x%02X ", INTERRUPT_RCV_BUF[i]);
-        fprintf(COM_D, "]\n\r");
+            fprintf(COM_D, "0x%02X ", INTERRUPT_RCV_BUF[i]);
+        fprintf(COM_D, "]\r\n");
     }
 }
 
 void cleanup_interrupts_rcv(void) {
+    memset(INTERRUPT_RCV_BUF, 0, MAX_BUF_LEN * sizeof(uint8_t));
     INTERRUPT_RCV_FLAG = 0;
     INTERRUPT_CMD_FLAG = 0;
     INTERRUPT_RCV_PORT = 255;
     INTERRUPT_RCV_MSG_LEN = 0;
-    memset(INTERRUPT_RCV_BUF, 0, sizeof(INTERRUPT_RCV_BUF));
 }
 
 // UART ISRs
@@ -65,9 +66,18 @@ void default_rda_isr(uint8_t port) {
 
 #INT_RDA
 void RDA1_ISR(void) {
-    fprintf(COM_D, "\033[32mRDA1 INTERRUPT\r\n");
-	// default_rda_isr(COM_A);
-	//    INTERRUPT_CMD_FLAG = TRUE;
+    if (!INTERRUPT_START_FLAG || !uart_byte_avail(COM_A)) return;
+    // size_t i;
+    // size_t max = 5;
+    // for (i = 0; i < max; i++) {
+    //     INTERRUPT_RCV_BUF[i] = uart_read_byte(COM_A);
+    //     INTERRUPT_RCV_MSG_LEN++;
+    //     if (i == 2 && INTERRUPT_RCV_BUF[i] == ADCSMTQ_HEAD_READ)
+    //         max += 4*INTERRUPT_RCV_BUF[i];
+    // }
+    // INTERRUPT_RCV_BUF[INTERRUPT_RCV_MSG_LEN] = 0;
+    // INTERRUPT_RCV_FLAG = TRUE;
+    // INTERRUPT_RCV_PORT = COM_A;
 }
 
 #INT_RDA2
