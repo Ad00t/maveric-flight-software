@@ -10,14 +10,15 @@
 // HELPERS
 
 // Generate hash of name for reg_name_map -- FNV-1a algorithm
-uint16_t hash_name(char* s) {
+// TODO: figure out collisions problem (TIME, CMG3_W_RATE)
+uint32_t hash_name(char* s) {
     uint32_t hash = 2166136261u; // FNV offset basis
     uint8_t i = 0;
-    while (*(s+i)) {
+    while (*(s+i) && i < MAX_BUF_LEN) {
         hash ^= (uint8_t)(*(s + i++));
         hash *= 16777619u;        // FNV prime
     }
-    return (uint16_t) (hash % ADCSMTQ_NAME_HASH_SIZE);
+    return (uint32_t) (hash % ADCSMTQ_NAME_HASH_SIZE);
 }
 
 // Compute sum of all bytes in buf
@@ -88,6 +89,8 @@ void ADCSMTQ_init(ADCSMTQ* a, uint8_t port) {
                 r->value = calloc(r->value_len, sizeof(char));
                 break;
         }
+        
+        fprintf(COM_D, "%s %u (%u,%u)\r\n", r->name, h, r->map_idx, r->idx);
     }
 
     fprintf(COM_D, "%s[LPPM] ADCSMTQ initialized on COM %u\r\n", KWHT, a->port);
@@ -96,102 +99,107 @@ void ADCSMTQ_init(ADCSMTQ* a, uint8_t port) {
 ADCSMTQ_Reg* ADCSMTQ_get_reg_by_name(ADCSMTQ* a, char* name) {
     uint16_t h = hash_name(name);
     ADCSMTQ_Reg* r = a->reg_name_map[h];
-    if (r && strcmp(r->name, name) == 0)
-        return r;
-    // could extend for collision resolution
-    return NULL;
+    fprintf(COM_D, "getreg: %s %s %u\r\n", name, r->name, h);
+    if (r != NULL && strcmp(r->name, name) != 0)
+        return NULL;
+    return r;
+}
+
+ADCSMTQ_Reg* ADCSMTQ_get_reg_by_idx(ADCSMTQ* a, uint8_t map_idx, uint8_t idx) {
+    if (map_idx >= ADCSMTQ_MAP_COUNT || idx >= ADCSMTQ_MAX_IDX_COUNT)
+        return NULL;
+    ADCSMTQ_Reg* r = a->reg_idx_map[map_idx][idx];
+    if (r != NULL && (r->map_idx != map_idx || r->idx != idx))
+        return NULL;
+    return r;
 }
 
 void ADCSMTQ_read_start(ADCSMTQ* a, char* name) {
     ADCSMTQ_Reg* reg = ADCSMTQ_get_reg_by_name(a, name);
+    if (reg == NULL) {
+        fprintf(COM_D, "%s[LPPM] ADCSMTQ_read_start: register invalid '%s'\r\n", KRED, name);
+        return;
+    }
+    
     uint8_t w_buf[4];
     w_buf[0] = ADCSMTQ_HEAD_READ;
     w_buf[1] = reg->idx;
     w_buf[2] = reg->data_count;
     w_buf[3] = (reg->map_idx << 4) | 0;
     uint8_t csum = gen_csum(w_buf, 4);
-    fprintf(COM_D, "%s[LPPM] ADCSMTQ_read_start: %u '%s' [ 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X ]\r\n", 
+    
+    fprintf(COM_D, "%s[LPPM] ADCSMTQ_read_start: port=%u reg='%s' data=[ 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X ]\r\n", 
             KYEL, a->port, reg->name, w_buf[0], w_buf[1], w_buf[2], w_buf[3], csum);
+    
     uart_write_buf(a->port, w_buf, 4); 
     uart_write_byte(a->port, csum);
-   
-    delay_ms(100);
-
-    uint8_t r_buf[17];
-    size_t i;
-    fprintf(COM_D, "%s[LPPM] ADCSMTQ_read_start_done: [", KYEL);
-    for (i = 0; i < 17; i++) {
-        uint32_t timeout = 100000;
-        while (!uart_byte_avail(a->port) && timeout--) {}
-        if (!timeout) {
-            fprintf(COM_D, "\r\n[LPPM] Timeout waiting for byte %u\r\n", i);
-            break;
-        }
-        r_buf[i] = uart_read_byte(a->port);
-        fprintf(COM_D, " 0x%02X", r_buf[i]);
-    }
-    fprintf(COM_D, " ]\r\n");
+    delay_ms(10);
 }
 
 void ADCSMTQ_read_complete(ADCSMTQ* a, uint8_t* status) {
-    uint8_t idx = INTERRUPT_RCV_BUF[1];
-    uint8_t data_count = INTERRUPT_RCV_BUF[2];
-    uint8_t map_idx = INTERRUPT_RCV_BUF[3] >> 4;
-    uint8_t error_code = INTERRUPT_RCV_BUF[3] & 0b1111;
-    uint8_t* body = &INTERRUPT_RCV_BUF[4];
-    ADCSMTQ_Reg* reg = a->reg_idx_map[map_idx][idx];
-
-    fprintf(COM_D, "%s[LPPM] ADCSMTQ_read_complete %s %u %u %u %u\r\n",
-            KYEL, reg->name, idx, data_count, map_idx, error_code);
-
+    uint8_t* r_buf = INTERRUPT_RCV_BUF;
+    uint8_t idx = r_buf[1];
+    uint8_t data_count = r_buf[2];
+    uint8_t map_idx = r_buf[3] >> 4;
+    uint8_t error_code = r_buf[3] & 0b1111;
+    uint8_t* body = &r_buf[4];
+    
+    ADCSMTQ_Reg* reg = ADCSMTQ_get_reg_by_idx(a, map_idx, idx);
+    if (reg == NULL) {
+        fprintf(COM_D, "%s[LPPM] ADCSMTQ_read_complete: register invalid (%u,%u)\r\n", KRED, map_idx, idx);
+        return;
+    }
+        
     size_t n_body_bytes = 4*data_count;
+    memcpy(reg->value, body, n_body_bytes);
+    
+    fprintf(COM_D, "%s[LPPM] ADCSMTQ_read_complete port=%u reg='%s' idx=%u count=%u midx=%u err=%u data=[",
+            KYEL, a->port, reg->name, idx, data_count, map_idx, error_code);
+
     size_t i;
     switch (reg->type) {
         case T_UINT8: {
-            uint8_t* dst = (uint8_t*)reg->value;
             for (i = 0; i < n_body_bytes; i++)
-                dst[i] = body[i];
+                fprintf(COM_D, " %u", (uint8_t)reg->value[i]);
             break;
         }
         case T_INT8: {
-            int8_t* dst = (int8_t*)reg->value;
-            for (i = 0; i < n_body_bytes; i++)
-                dst[i] = (int8_t)body[i];
+            for (i = 0; i < n_body_bytes/2; i++)
+                fprintf(COM_D, " %d", (int8_t)reg->value[i]);
             break;
         }
         case T_UINT16: {
-            uint16_t* dst = (uint16_t*)reg->value;
-            size_t elems = n_body_bytes / 2;
-            for (i = 0; i < elems; i++)
-                dst[i] = (((uint16_t)body[2*i+1]) << 8) | body[2*i];
+            for (i = 0; i < n_body_bytes/2; i++)
+                fprintf(COM_D, " %u", (uint16_t)reg->value[i]);
             break;
         }
         case T_INT16: {
-            int16_t* dst = (int16_t*)reg->value;
-            size_t elems = n_body_bytes / 2;
-            for (i = 0; i < elems; i++)
-                dst[i] = (((int16_t)body[2*i+1]) << 8) | body[2*i];
+            for (i = 0; i < n_body_bytes/2; i++)
+                fprintf(COM_D, " %d", (int16_t)reg->value[i]);
             break;
         }
         case T_FLOAT: {
-            float* dst = (float*)reg->value;
-            size_t elems = n_body_bytes / 4;
-            for (i = 0; i < elems; i++)
-                memcpy(&dst[i], &body[4*i], 4);
+            for (i = 0; i < n_body_bytes/4; i++)
+                fprintf(COM_D, " %.2f", (float)reg->value[i]);
             break;
         }
         case T_CHAR: {
-            memcpy(reg->value, body, n_body_bytes);
             ((char*)reg->value)[n_body_bytes] = '\0'; // Null terminate
+            fprintf(COM_D, " '%s'", (char*)reg->value);
             break;
         }
     }    
+    
     *status = (verify_csum(INTERRUPT_RCV_BUF, 4+n_body_bytes) << 4) | error_code; 
+    fprintf(COM_D, " ] status=0x%02X\r\n", *status);
 }
 
 void ADCSMTQ_write_start(ADCSMTQ* a, char* name, void* data) {
     ADCSMTQ_Reg* reg = ADCSMTQ_get_reg_by_name(a, name);
-    if (reg == NULL) return;
+    if (reg == NULL) {
+        fprintf(COM_D, "%s[LPPM] ADCSMTQ_write_start: register invalid '%s'\r\n", KRED, name);
+        return;
+    }
 
     uint8_t w_buf[MAX_BUF_LEN];
     size_t n_body_bytes = 4*reg->data_count;
@@ -201,46 +209,55 @@ void ADCSMTQ_write_start(ADCSMTQ* a, char* name, void* data) {
     w_buf[2] = reg->data_count;
     w_buf[3] = (reg->map_idx << 4) | 0;
     
-    uint8_t body[MAX_BUF_LEN];
+    memcpy(&w_buf[4], data, n_body_bytes);
+    uint8_t csum = gen_csum(w_buf, w_buf_len);
+    
     size_t i;
     switch (reg->type) {
-        case T_UINT8:
-            for (i = 0; i < n_body_bytes; i++) 
-                body[i] = (uint8_t)data[i];
-            break; 
-        case T_INT8:
-            for (i = 0; i < n_body_bytes; i++) 
-                body[i] = (uint8_t)data[i];
-            break;
-        case T_UINT16:
-            for (i = 0; i < n_body_bytes; i+=2) {
-                body[i] = (uint8_t)data[i/2]; // Extract least significant byte
-                body[i+1] = (uint8_t)(data[i/2] >> 8); // Extract most significant byte
-            }
-            break;
-        case T_INT16:
-            for (i = 0; i < n_body_bytes; i+=2) {
-                body[i] = (uint8_t)data[i/2]; // Extract least significant byte
-                body[i+1] = (uint8_t)(data[i/2] >> 8); // Extract most significant byte
-            }
-            break;
-        case T_FLOAT:
-            for (i = 0; i < n_body_bytes; i+=4)
-                memcpy(&body[i], &data[i/4], 4);
-            break;
+//        case T_UINT8:
+//            break;
+//        case T_INT8:
+//            break;
+//        case T_UINT16:
+//            break;
+//        case T_INT16:
+//            break;
+//        case T_FLOAT:
+//            break;
         case T_CHAR:
-            memcpy(body, data, n_body_bytes);
-            body[n_body_bytes] = (uint8_t)('\0'); // Null terminate
+            w_buf[4+n_body_bytes] = (uint8_t)('\0'); // Null terminate
             break;
     }
-    memcpy(&w_buf[4], body, n_body_bytes);
-
-    uint8_t csum = gen_csum(w_buf, w_buf_len);
+    
+    fprintf(COM_D, "%s[LPPM] ADCSMTQ_write_start: port=%u reg='%s' len=%u data=[", 
+            KYEL, a->port, reg->name, w_buf_len+1);
+    for (i = 0; i < w_buf_len; i++)
+        fprintf(COM_D, " 0x%02X", w_buf[i]);
+    fprintf(COM_D, " 0x%02X ]\r\n", csum);
+    
     uart_write_buf(a->port, w_buf, w_buf_len);
     uart_write_buf(a->port, &csum, 1);
+    delay_ms(10);
 }
 
 void ADCSMTQ_write_complete(ADCSMTQ* a, uint8_t* status) {
-    uint8_t error_code = INTERRUPT_RCV_BUF[3] & 0b1111;
-    *status = (verify_csum(INTERRUPT_RCV_BUF, 4) << 4) | error_code; 
+    uint8_t* r_buf = INTERRUPT_RCV_BUF;
+    uint8_t idx = r_buf[1];
+    uint8_t data_count = r_buf[2];
+    uint8_t map_idx = r_buf[3] >> 4;
+    uint8_t error_code = r_buf[3] & 0b1111;
+    uint8_t csum = r_buf[4];
+
+    ADCSMTQ_Reg* reg = ADCSMTQ_get_reg_by_idx(a, map_idx, idx);
+    if (reg == NULL) {
+        fprintf(COM_D, "%s[LPPM] ADCSMTQ_write_complete: register invalid (%u,%u)\r\n", KRED, map_idx, idx);
+        return;
+    }
+    
+    *status = (verify_csum(r_buf, 4) << 4) | error_code; 
+    fprintf(COM_D, "%s[LPPM] ADCSMTQ_write_complete: port=%u reg='%s' idx=%u count=%u midx=%u err=%u status=0x%02X\r\n", 
+            KYEL, a->port, reg->name, idx, data_count, map_idx, error_code, csum);
+    
+    // Automatically read the current register value back into PIC24 memory
+    ADCSMTQ_read_start(a, reg->name);
 }

@@ -30,6 +30,7 @@
       <itemPath>../../common/maveric/src/cmd.c</itemPath>
       <itemPath>../../common/maveric/src/i2c.c</itemPath>
       <itemPath>../../common/maveric/src/uart.c</itemPath>
+      <itemPath>src/interrupts.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
@@ -131,6 +132,7 @@
         <property key="event.recorder.debugger.behavior" value="Running"/>
         <property key="event.recorder.enabled" value="false"/>
         <property key="event.recorder.scvd.files" value=""/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="lastid" value=""/>
         <property key="memories.aux" value="false"/>

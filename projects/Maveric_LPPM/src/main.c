@@ -192,6 +192,22 @@ void handle_rcv(void) {
 void handle_hk(void) {
     cleanup_interrupts_rcv();
     fprintf(COM_D, "%s[LPPM] HK COM_D ACTIVE \r\n", KWHT);
-    ADCSMTQ_read_start(&tad102063, "SNID");
-    delay_ms(2000);
+    
+//    ADCSMTQ_read_start(&tad102063, "SNID");
+//    delay_ms(1000);
+    
+    uint8_t data[4];
+    data[0] = 0;
+    data[1] = 0;
+    data[2] = 0;
+    data[3] = 0;
+    ADCSMTQ_write_start(&tad102063, "TIME", data);
+    delay_ms(1000);
+    
+//    float data[3];
+//    data[0] = 1f;
+//    data[1] = 1f;
+//    data[2] = 1f;
+//    ADCSMTQ_write_start(&tad102063, "POINTING_AXIS", data);
+//    delay_ms(1000);
 }

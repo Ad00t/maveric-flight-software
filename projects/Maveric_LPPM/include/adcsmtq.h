@@ -9,7 +9,7 @@
 #define ADCSMTQ_REG_TABLE_LEN   116
 #define ADCSMTQ_MAP_COUNT       3
 #define ADCSMTQ_MAX_IDX_COUNT   256
-#define ADCSMTQ_NAME_HASH_SIZE  512 
+#define ADCSMTQ_NAME_HASH_SIZE  2048
 
 typedef enum {
     T_UINT8,
@@ -170,8 +170,12 @@ static const ADCSMTQ_Reg ADCSMTQ_INIT_REG_TABLE[] = {
 
 // Initialize ADCSMTQ object
 void ADCSMTQ_init(ADCSMTQ* a, uint8_t port);
+
 // Lookup register by name in reg_name_map
 ADCSMTQ_Reg* ADCSMTQ_get_reg_by_name(ADCSMTQ* a, char* name);
+// Lookup register by map idx, idx in reg_idx_map
+ADCSMTQ_Reg* ADCSMTQ_get_reg_by_idx(ADCSMTQ* a, uint8_t map_idx, uint8_t idx);
+
 // Send register read command to ADCSMTQ
 void ADCSMTQ_read_start(ADCSMTQ* a, char* name);
 // Handle read data received from ADCSMTQ

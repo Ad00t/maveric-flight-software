@@ -67,27 +67,29 @@ void default_rda_isr(uint8_t port) {
 #INT_RDA
 void RDA1_ISR(void) {
     if (!INTERRUPT_START_FLAG || !uart_byte_avail(COM_A)) return;
-    // size_t i;
-    // size_t max = 5;
-    // for (i = 0; i < max; i++) {
-    //     INTERRUPT_RCV_BUF[i] = uart_read_byte(COM_A);
-    //     INTERRUPT_RCV_MSG_LEN++;
-    //     if (i == 2 && INTERRUPT_RCV_BUF[i] == ADCSMTQ_HEAD_READ)
-    //         max += 4*INTERRUPT_RCV_BUF[i];
-    // }
-    // INTERRUPT_RCV_BUF[INTERRUPT_RCV_MSG_LEN] = 0;
-    // INTERRUPT_RCV_FLAG = TRUE;
-    // INTERRUPT_RCV_PORT = COM_A;
+    size_t i;
+    size_t max = 5;
+    for (i = 0; i < max; i++) {
+        INTERRUPT_RCV_BUF[i] = uart_read_byte(COM_A);
+        INTERRUPT_RCV_MSG_LEN++;
+        if (i == 2 && INTERRUPT_RCV_BUF[0] == ADCSMTQ_HEAD_READ)
+            max += 4*INTERRUPT_RCV_BUF[i];
+    }
+    INTERRUPT_RCV_BUF[INTERRUPT_RCV_MSG_LEN] = 0;
+    INTERRUPT_RCV_FLAG = TRUE;
+    INTERRUPT_RCV_PORT = COM_A;
 }
 
 #INT_RDA2
 void RDA2_ISR(void) {
+    if (!INTERRUPT_START_FLAG || !uart_byte_avail(COM_B)) return;
     // default_rda_isr(COM_B); 
 	//    INTERRUPT_CMD_FLAG = TRUE;
 }
 
 #INT_RDA3
 void RDA3_ISR(void) {
+    if (!INTERRUPT_START_FLAG || !uart_byte_avail(COM_C)) return;
     // default_rda_isr(COM_C);
     // INTERRUPT_CMD_FLAG = TRUE;
 }
