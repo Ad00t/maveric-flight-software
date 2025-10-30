@@ -1,6 +1,7 @@
 #ifndef __ADCSMTQ_H__
 #define __ADCSMTQ_H__
 
+#include "interrupts.h"
 #include <stddef.h>
 #include <stdint.h>
 
@@ -18,24 +19,41 @@ typedef enum {
     T_INT16,
     T_FLOAT,
     T_CHAR
-} ADCSMTQ_Reg_Type;
+} adcsmtq_reg_type_e;
 
 typedef struct {
-    char name[20];
+    char name[32];
     uint8_t idx;
     uint8_t data_count;
     uint8_t map_idx;
-    ADCSMTQ_Reg_Type type;
+    adcsmtq_reg_type_e type;
     void* value;
     uint8_t value_len;
-} ADCSMTQ_Reg;
+} adcsmtq_reg_s;
 
 typedef struct {
     uint8_t port;  
-    ADCSMTQ_Reg* reg_idx_map[ADCSMTQ_MAP_COUNT][ADCSMTQ_MAX_IDX_COUNT];
-    ADCSMTQ_Reg* reg_name_map[ADCSMTQ_NAME_HASH_SIZE];
-    ADCSMTQ_Reg reg_table[ADCSMTQ_REG_TABLE_LEN]; 
-} ADCSMTQ;
+    adcsmtq_reg_s* reg_idx_map[ADCSMTQ_MAP_COUNT][ADCSMTQ_MAX_IDX_COUNT];
+    adcsmtq_reg_s* reg_name_map[ADCSMTQ_NAME_HASH_SIZE];
+    adcsmtq_reg_s reg_table[ADCSMTQ_REG_TABLE_LEN]; 
+} adcsmtq_s;
+
+// Initialize adcsmtq object
+void adcsmtq_init(adcsmtq_s* a, uint8_t port);
+
+// Lookup register by name in reg_name_map
+adcsmtq_reg_s* adcsmtq_get_reg_by_name(adcsmtq_s* a, char* name);
+// Lookup register by map idx, idx in reg_idx_map
+adcsmtq_reg_s* adcsmtq_get_reg_by_idx(adcsmtq_s* a, uint8_t map_idx, uint8_t idx);
+
+// Send register read command to adcsmtq
+void adcsmtq_read_start(adcsmtq_s* a, char* name);
+// Handle read data received from adcsmtq
+void adcsmtq_read_complete(adcsmtq_s* a, irqbuf_s* rcv_buf);
+// Send register write command to adcsmtq
+void adcsmtq_write_start(adcsmtq_s* a, char* name, void* data);
+// Handle write response receieved from adcsmtq
+void adcsmtq_write_complete(adcsmtq_s* a, irqbuf_s* rcv_buf);
 
 /* Register format: [idx, data_count, map_idx, type]
                 idx: Denotes the register that the command will read/write from/to.
@@ -44,7 +62,7 @@ typedef struct {
                 type: Indicates the kind of data stored in a register.
 */
 
-static const ADCSMTQ_Reg ADCSMTQ_INIT_REG_TABLE[] = {
+static const adcsmtq_reg_s ADCSMTQ_INIT_REG_TABLE[] = {
     // Table 6-2. User Register (0)
     { "FACT", 0, 1, 0, T_UINT16, NULL, 0 },
     { "SNID", 1, 3, 0, T_CHAR, NULL, 0 },
@@ -165,24 +183,5 @@ static const ADCSMTQ_Reg ADCSMTQ_INIT_REG_TABLE[] = {
     { "STR1_ORIEN_BS", 89, 4, 2, T_FLOAT, NULL, 0 },
     { "NVM", 255, 1, 2, T_UINT8, NULL, 0 }
 };
-
-// API
-
-// Initialize ADCSMTQ object
-void ADCSMTQ_init(ADCSMTQ* a, uint8_t port);
-
-// Lookup register by name in reg_name_map
-ADCSMTQ_Reg* ADCSMTQ_get_reg_by_name(ADCSMTQ* a, char* name);
-// Lookup register by map idx, idx in reg_idx_map
-ADCSMTQ_Reg* ADCSMTQ_get_reg_by_idx(ADCSMTQ* a, uint8_t map_idx, uint8_t idx);
-
-// Send register read command to ADCSMTQ
-void ADCSMTQ_read_start(ADCSMTQ* a, char* name);
-// Handle read data received from ADCSMTQ
-void ADCSMTQ_read_complete(ADCSMTQ* a, uint8_t* status);
-// Send register write command to ADCSMTQ
-void ADCSMTQ_write_start(ADCSMTQ* a, char* name, void* data);
-// Handle write response receieved from ADCSMTQ
-void ADCSMTQ_write_complete(ADCSMTQ* a, uint8_t* status);
 
 #endif

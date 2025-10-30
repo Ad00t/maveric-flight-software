@@ -8,8 +8,10 @@
             <file>file:/C:/Users/adhit/projects/serc/maveric-flight-software/mavlibs/v2025/include/cmd.h</file>
         </group>
         <group name="maveric">
+            <file>file:/C:/Users/adhit/projects/serc/maveric-flight-software/common/maveric/src/uart.c</file>
             <file>file:/C:/Users/adhit/projects/serc/maveric-flight-software/projects/Maveric_LPPM/include/pinslower.h</file>
             <file>file:/C:/Users/adhit/projects/serc/maveric-flight-software/projects/Maveric_LPPM/include/adcsmtq.h</file>
+            <file>file:/C:/Users/adhit/projects/serc/maveric-flight-software/common/maveric/include/uart.h</file>
             <file>file:/C:/Users/adhit/projects/serc/maveric-flight-software/projects/Maveric_LPPM/src/main.c</file>
             <file>file:/C:/Users/adhit/projects/serc/maveric-flight-software/projects/Maveric_LPPM/include/interrupts.h</file>
             <file>file:/C:/Users/adhit/projects/serc/maveric-flight-software/projects/Maveric_LPPM/src/interrupts.c</file>
