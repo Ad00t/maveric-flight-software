@@ -6,11 +6,9 @@
 
 #module
 
-
 // HELPERS
 
 // Generate hash of name for reg_name_map -- FNV-1a algorithm
-// TODO: figure out collisions problem (TIME, CMG3_W_RATE)
 uint32_t hash_name(char* s) {
     uint32_t hash = 2166136261u; // FNV offset basis
     uint8_t i = 0;
@@ -48,6 +46,8 @@ uint8_t verify_csum(uint8_t* buf, size_t len) {
 void adcsmtq_init(adcsmtq_s* a, uint8_t port) {
     a->port = port;
     memcpy(a->reg_table, ADCSMTQ_INIT_REG_TABLE, sizeof(ADCSMTQ_INIT_REG_TABLE));
+    memset(a->reg_idx_map, 0, ADCSMTQ_MAP_COUNT * ADCSMTQ_MAX_IDX_COUNT * sizeof(adcsmtq_reg_s*));
+    memset(a->reg_name_map, NULL, ADCSMTQ_NAME_HASH_SIZE * sizeof(adcsmtq_reg_s*));
 
     // Init idx, name maps, register space
     size_t i;
@@ -58,8 +58,10 @@ void adcsmtq_init(adcsmtq_s* a, uint8_t port) {
         if (reg->map_idx < ADCSMTQ_MAP_COUNT && reg->idx < ADCSMTQ_MAX_IDX_COUNT)
             a->reg_idx_map[reg->map_idx][reg->idx] = reg;
 
-        // Populate string name map
+        // Populate string name hash map
         uint16_t h = hash_name(reg->name);
+        while (a->reg_name_map[h] != NULL && h < ADCSMTQ_NAME_HASH_SIZE) 
+            h++; // Open addressing
         a->reg_name_map[h] = reg;
        
         // Allocate register data space
@@ -90,7 +92,7 @@ void adcsmtq_init(adcsmtq_s* a, uint8_t port) {
                 break;
         }
         
-        fprintf(COM_D, "%s %u (%u,%u)\r\n", reg->name, h, reg->map_idx, reg->idx);
+//        fprintf(COM_D, "%s %u (%u,%u)\r\n", reg->name, h, reg->map_idx, reg->idx);
     }
 
     fprintf(COM_D, "%s[LPPM] ADCSMTQ initialized on UART%u\r\n", KWHT, a->port);
@@ -99,8 +101,10 @@ void adcsmtq_init(adcsmtq_s* a, uint8_t port) {
 adcsmtq_reg_s* adcsmtq_get_reg_by_name(adcsmtq_s* a, char* name) {
     uint16_t h = hash_name(name);
     adcsmtq_reg_s* reg = a->reg_name_map[h];
-    fprintf(COM_D, "getreg: %s %s %u\r\n", name, reg->name, h);
-    if (reg != NULL && strcmp(reg->name, name) != 0)
+    while (strcmp(reg->name, name) != 0 && h < ADCSMTQ_NAME_HASH_SIZE) 
+        reg = a->reg_name_map[++h];
+//    fprintf(COM_D, "getreg: %s %s %u\r\n", name, reg->name, h);
+    if (reg == NULL || strcmp(reg->name, name) != 0)
         return NULL;
     return reg;
 }
@@ -114,13 +118,7 @@ adcsmtq_reg_s* adcsmtq_get_reg_by_idx(adcsmtq_s* a, uint8_t map_idx, uint8_t idx
     return reg;
 }
 
-void adcsmtq_read_start(adcsmtq_s* a, char* name) {
-    adcsmtq_reg_s* reg = adcsmtq_get_reg_by_name(a, name);
-    if (reg == NULL) {
-        fprintf(COM_D, "%s[LPPM] adcsmtq_read_start: register invalid '%s'\r\n", KRED, name);
-        return;
-    }
-    
+void adcsmtq_read_start(adcsmtq_s* a, adcsmtq_reg_s* reg) {   
     uint8_t w_buf[4];
     w_buf[0] = ADCSMTQ_HEAD_READ;
     w_buf[1] = reg->idx;
@@ -134,6 +132,15 @@ void adcsmtq_read_start(adcsmtq_s* a, char* name) {
     uart_write_buf(a->port, w_buf, 4); 
     uart_write_byte(a->port, csum);
     delay_ms(10);
+}
+
+void adcsmtq_read_start(adcsmtq_s* a, char* name) {
+    adcsmtq_reg_s* reg = adcsmtq_get_reg_by_name(a, name);
+    if (reg == NULL) {
+        fprintf(COM_D, "%s[LPPM] adcsmtq_read_start: register invalid '%s'\r\n", KRED, name);
+        return;
+    }
+    adcsmtq_read_start(a, reg);
 }
 
 void adcsmtq_read_complete(adcsmtq_s* a, irqbuf_s* rcv_buf) {
@@ -161,27 +168,29 @@ void adcsmtq_read_complete(adcsmtq_s* a, irqbuf_s* rcv_buf) {
     switch (reg->type) {
         case T_UINT8: {
             for (i = 0; i < n_body_bytes; i++)
-                fprintf(COM_D, " %u", (uint8_t)reg->value[i]);
+                fprintf(COM_D, " %u", ((uint8_t*)reg->value)[i]);
             break;
         }
         case T_INT8: {
             for (i = 0; i < n_body_bytes/2; i++)
-                fprintf(COM_D, " %d", (int8_t)reg->value[i]);
+                fprintf(COM_D, " %d", ((int8_t*)reg->value)[i]);
             break;
         }
         case T_UINT16: {
             for (i = 0; i < n_body_bytes/2; i++)
-                fprintf(COM_D, " %u", (uint16_t)reg->value[i]);
+                fprintf(COM_D, " %u", ((uint16_t*)reg->value)[i]);
             break;
         }
         case T_INT16: {
             for (i = 0; i < n_body_bytes/2; i++)
-                fprintf(COM_D, " %d", (int16_t)reg->value[i]);
+                fprintf(COM_D, " %d", ((int16_t*)reg->value)[i]);
             break;
         }
         case T_FLOAT: {
-            for (i = 0; i < n_body_bytes/4; i++)
-                fprintf(COM_D, " %.2f", (float)reg->value[i]);
+//            for (i = 0; i < n_body_bytes; i++)
+//                fprintf(COM_D, " 0x%02X", reg->value[i]);
+            for (i = 0; i < n_body_bytes/4; i++) 
+                fprintf(COM_D, " %.2f", ((float*)reg->value)[i]);
             break;
         }
         case T_CHAR: {
@@ -194,13 +203,7 @@ void adcsmtq_read_complete(adcsmtq_s* a, irqbuf_s* rcv_buf) {
     fprintf(COM_D, " ]\r\n");
 }
 
-void adcsmtq_write_start(adcsmtq_s* a, char* name, void* data) {
-    adcsmtq_reg_s* reg = adcsmtq_get_reg_by_name(a, name);
-    if (reg == NULL) {
-        fprintf(COM_D, "%s[LPPM] adcsmtq_write_start: register invalid '%s'\r\n", KRED, name);
-        return;
-    }
-
+void adcsmtq_write_start(adcsmtq_s* a, adcsmtq_reg_s* reg, void* data) {
     uint8_t w_buf[MAX_BUF_LEN];
     size_t n_body_bytes = 4*reg->data_count;
     size_t w_buf_len = 4 + n_body_bytes;
@@ -240,6 +243,15 @@ void adcsmtq_write_start(adcsmtq_s* a, char* name, void* data) {
     delay_ms(10);
 }
 
+void adcsmtq_write_start(adcsmtq_s* a, char* name, void* data) {
+    adcsmtq_reg_s* reg = adcsmtq_get_reg_by_name(a, name);
+    if (reg == NULL) {
+        fprintf(COM_D, "%s[LPPM] adcsmtq_write_start: register invalid '%s'\r\n", KRED, name);
+        return;
+    }
+    adcsmtq_write_start(a, reg, data);
+}
+
 void adcsmtq_write_complete(adcsmtq_s* a, irqbuf_s* rcv_buf) {
     uint8_t idx = rcv_buf->data[1];
     uint8_t data_count = rcv_buf->data[2];
@@ -254,10 +266,18 @@ void adcsmtq_write_complete(adcsmtq_s* a, irqbuf_s* rcv_buf) {
         fprintf(COM_D, "%s[LPPM] adcsmtq_write_complete: register invalid (%u,%u)\r\n", KRED, map_idx, idx);
         return;
     }
+    reg->dirty = TRUE;
     
     fprintf(COM_D, "%s[LPPM] adcsmtq_write_complete: port=%u reg='%s' idx=%u count=%u midx=%u err=%u\r\n", 
             KYEL, a->port, reg->name, idx, data_count, map_idx, error_code);
-    
-    // Automatically read the current register value back into PIC24 memory
-    adcsmtq_read_start(a, reg->name);
+}
+
+void adcsmtq_readback(adcsmtq_s* a) {
+    size_t i;
+    for (i = 0; i < ADCSMTQ_REG_TABLE_LEN; i++) {
+        if (a->reg_table[i].dirty) {
+            adcsmtq_read_start(a, &a->reg_table[i]);
+            a->reg_table[i].dirty = FALSE;
+        }
+    }
 }

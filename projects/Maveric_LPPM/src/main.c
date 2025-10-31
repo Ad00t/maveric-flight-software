@@ -113,21 +113,20 @@ void system_init(void) {
 void housekeeping(void) {
     fprintf(COM_D, "%s[LPPM] HK COM_D ACTIVE \r\n", KWHT);
     
-    adcsmtq_read_start(&tad102063, "SNID");
+    adcsmtq_readback(&tad102063);
+    
+//    adcsmtq_read_start(&tad102063, "SNID");
+    
+    adcsmtq_read_start(&tad102063, "TIME");
+    
+    float mass = 15.0;
+    adcsmtq_write_start(&tad102063, "MASS", &mass);
+    
+//    float axis[3];
+//    axis[0] = 1f;
+//    axis[1] = 0f;
+//    axis[2] = 0f;
+//    adcsmtq_write_start(&tad102063, "POINTING_AXIS", axis);
+
     delay_ms(1000);
-    
-    // uint8_t data[4];
-    // data[0] = 0;
-    // data[1] = 0;
-    // data[2] = 0;
-    // data[3] = 0;
-    // adcsmtq_write_start(&tad102063, "TIME", data);
-    // delay_ms(1000);
-    
-//    float data[3];
-//    data[0] = 1f;
-//    data[1] = 1f;
-//    data[2] = 1f;
-//    adcsmtq_write_start(&tad102063, "POINTING_AXIS", data);
-//    delay_ms(1000);
 }
