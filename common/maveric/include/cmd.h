@@ -1,21 +1,44 @@
 #ifndef __CMD_H__
 #define __CMD_H__
 
-unsigned int8 origin;
-unsigned int8 destination;
-unsigned int8 echo;
-unsigned char command[256];
-unsigned char params[256];
-			
-unsigned char *cmd=command;
-unsigned char *prms=params;
-unsigned int8 *orgn=origin;
-unsigned int8 *dest=destination;
-unsigned int8 *ech=echo;
+#include <stdint.h>
 
-//extern void cmd_get_command(unsigned char *command_str,unsigned char *origin,unsigned char *destination,unsigned char *echo, unsigned char *command, unsigned char *params);
-void cmd_get_command(unsigned char *command_str,unsigned int8 *origin,unsigned int8 *destination,unsigned int8 *echo, unsigned char *command, unsigned char *params);
-void cmd_get_prmts(unsigned char *params, unsigned int8 *pmt1, unsigned int8 *pmt2);
-void cmd_get_prmts3(unsigned char *params, unsigned int8 *pmt1, unsigned int8 *pmt2, unsigned int8 *pmt3);
+#define MAX_CMD_PARAMS  16
+#define NUM_CMDS        1
+#define NUM_CMD_BUFS    3
+
+typedef struct {
+    uint8_t id;
+    uint8_t n_prms;
+    char fmt[MAX_CMD_PARAMS]; // U = uint8_t, X = hex string, S = char string 
+} cmddef_s;
+
+typedef struct {
+    int1 busy;
+    uint8_t orgn;
+    uint8_t dest;
+    uint8_t echo;
+    uint8_t id;
+    char prmstr[MAX_BUF_LEN];
+} cmdbuf_s;
+
+typedef struct {
+    cmdbuf_s active;
+} cmdmgr_s;
+
+// Initialize cmdmgr
+void cmdmgr_init(cmdmgr_s* cmdmgr);
+
+// Clear active cmd data  
+void cmdmgr_clear(cmdmgr_s* cmdmgr);
+
+// Parse & handle cmd from recv'd byte buffer 
+void cmdmgr_handle_rcv(cmdmgr_s* cmdmgr, uint8_t* buf, uint8_t len);
+
+// Table of available cmd definitions in ROM; id should match actual index in table
+static const cmddef_s CMD_TABLE[] = {
+    { 0, 0, NULL },
+    { 1, 8, "UUUUUUUU" }
+}; 
 
 #endif

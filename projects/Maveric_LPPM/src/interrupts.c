@@ -28,8 +28,8 @@ void irqbuf_log(irqbuf_s* irqbuf) {
 void irqbuf_clear(irqbuf_s* irqbuf) {
     irqbuf->flag = FALSE;
     irqbuf->busy = FALSE;
-    memset(irqbuf->data, 0, sizeof(uint8_t) * MAX_BUF_LEN);
     irqbuf->len = 0;
+    memset(irqbuf->data, 0, sizeof(uint8_t) * MAX_BUF_LEN);
 }
 
 // Interrupt request manager 
@@ -39,28 +39,28 @@ void irqmgr_init(irqmgr_s* irqmgr) {
     size_t b;
     for (b = 0; b < BUFS_PER_PORT; b++) {
         irqbuf_init(&irqmgr->uart1[b], "UART", 1);
-        irqbuf_init(&irqmgr->uart2[b], "UART", 2);
-        irqbuf_init(&irqmgr->uart3[b], "UART", 3);
+        // irqbuf_init(&irqmgr->uart2[b], "UART", 2);
+        // irqbuf_init(&irqmgr->uart3[b], "UART", 3);
         irqbuf_init(&irqmgr->uart4[b], "UART", 4);   
     }
 }
 
-void irqmgr_log_bufs(irqmgr_s* irqmgr) {
+void irqmgr_log_all(irqmgr_s* irqmgr) {
     size_t b;
     for (b = 0; b < BUFS_PER_PORT; b++) {
         irqbuf_log(&irqmgr->uart1[b]);
-        irqbuf_log(&irqmgr->uart2[b]);
-        irqbuf_log(&irqmgr->uart3[b]);
+        // irqbuf_log(&irqmgr->uart2[b]);
+        // irqbuf_log(&irqmgr->uart3[b]);
         irqbuf_log(&irqmgr->uart4[b]);
     }
 }
 
-void irqmgr_clear_bufs(irqmgr_s* irqmgr) {
+void irqmgr_clear_all(irqmgr_s* irqmgr) {
     size_t b;
     for (b = 0; b < BUFS_PER_PORT; b++) {
         irqbuf_clear(&irqmgr->uart1[b]);
-        irqbuf_clear(&irqmgr->uart2[b]);
-        irqbuf_clear(&irqmgr->uart3[b]);
+        // irqbuf_clear(&irqmgr->uart2[b]);
+        // irqbuf_clear(&irqmgr->uart3[b]);
         irqbuf_clear(&irqmgr->uart4[b]);
     }
 }
@@ -81,13 +81,13 @@ void irqmgr_handle_rcv(irqmgr_s* irqmgr, adcsmtq_s* a) {
             }
         }
 
-        if (irqmgr->uart2[b].flag) {
-            // TODO: implement if needed
-        }
-
-        if (irqmgr->uart3[b].flag)  {
-            // TODO: implement if needed
-        }
+        // if (irqmgr->uart2[b].flag) {
+        //     // TODO: implement if needed
+        // }
+        //
+        // if (irqmgr->uart3[b].flag)  {
+        //     // TODO: implement if needed
+        // }
         
         // Commands
         if (irqmgr->uart4[b].flag) {
@@ -142,7 +142,7 @@ void irqmgr_handle_rcv(irqmgr_s* irqmgr, adcsmtq_s* a) {
         }
     }
 
-    irqmgr_clear_bufs(irqmgr);
+    irqmgr_clear_all(irqmgr);
     isr_enable_all();
 }
 
@@ -162,19 +162,25 @@ void isr_disable_all(void) {
 	disable_interrupts(INT_RDA4);
 }
 
+// Return a pointer to an available buffer for a given port, null otherwise
+irqbuf_s* find_avail_rcv_buf(irqbuf_s* rcv_buf) {
+    size_t b = 0;
+    while (rcv_buf->busy) {
+        b++;
+        if (b >= BUFS_PER_PORT) return NULL;
+        rcv_buf = rcv_buf+1;
+    }
+    rcv_buf->busy = TRUE;
+    return rcv_buf;
+}
+
 // UART ISRs
 
 #INT_RDA
 void isr_rda1(void) {
     if (!irqmgr.start_flag || !uart_byte_avail(COM_A)) return;   
-    size_t b = 0;
-    irqbuf_s* rcv_buf = &irqmgr.uart1[b];
-    while (rcv_buf->busy) {
-        b++;
-        if (b >= BUFS_PER_PORT) return;
-        rcv_buf = &irqmgr.uart1[b];
-    }
-    rcv_buf->busy = TRUE;
+    irqbuf_s* rcv_buf = find_avail_rcv_buf(&irqmgr.uart1[0]);
+    if (rcv_buf == NULL) return;
 
     // TODO: perform max bounds checking? may be unnecessary due to small register sizes 
 
@@ -193,52 +199,31 @@ void isr_rda1(void) {
 #INT_RDA2
 void isr_rda2(void) {
     if (!irqmgr.start_flag || !uart_byte_avail(COM_B)) return;
-    size_t b = 0;
-    irqbuf_s* rcv_buf = &irqmgr.uart2[b];
-    while (rcv_buf->busy) {
-        b++;
-        if (b >= BUFS_PER_PORT) return;
-        rcv_buf = &irqmgr.uart2[b];
-    }
-    rcv_buf->busy = TRUE;
+    // irqbuf_s* rcv_buf = find_avail_rcv_buf(&irqmgr.uart2[0]);
+    // if (rcv_buf == NULL) return;
 }
 
 #INT_RDA3
 void isr_rda3(void) {
     if (!irqmgr.start_flag || !uart_byte_avail(COM_C)) return;
-    size_t b = 0;
-    irqbuf_s* rcv_buf = &irqmgr.uart3[b];
-    while (rcv_buf->busy) {
-        b++;
-        if (b >= BUFS_PER_PORT) return;
-        rcv_buf = &irqmgr.uart3[b];
-    }
-    rcv_buf->busy = TRUE;
+    // irqbuf_s* rcv_buf = find_avail_rcv_buf(&irqmgr.uart3[0]);
+    // if (rcv_buf == NULL) return;
 }
 
+// TODO: replace with length checked for loop like with RDA1
 #INT_RDA4
 void isr_rda4(void) {
     if (!irqmgr.start_flag || !uart_byte_avail(COM_D)) return;
-    size_t b = 0;
-    irqbuf_s* rcv_buf = &irqmgr.uart4[b];
-    while (rcv_buf->busy) {
-        b++;
-        if (b >= BUFS_PER_PORT) return;
-        rcv_buf = &irqmgr.uart4[b];
-    }
-    rcv_buf->busy = TRUE;
+    irqbuf_s* rcv_buf = find_avail_rcv_buf(&irqmgr.uart4[0]);
+    if (rcv_buf == NULL) return;
 
     char c = 0;
     while (c != 13) { // ASCII 13 = \r
         c = uart_read_byte(COM_D);
-        if (c == 8 && rcv_buf->len > 0) {  // backspace
-            rcv_buf->len--;
-        } else { 
-            if (rcv_buf->len >= MAX_BUF_LEN-1) break;
-            if (c >= ' ' && c <= '~') 
-                rcv_buf->data[rcv_buf->len] = c; // standard chars
-            rcv_buf->len++;
-        }
+        if (rcv_buf->len >= MAX_BUF_LEN-1) break;
+        if (c >= ' ' && c <= '~') 
+            rcv_buf->data[rcv_buf->len] = c; // standard chars
+        rcv_buf->len++;
     }
     rcv_buf->data[rcv_buf->len] = 0;
 	rcv_buf->flag = TRUE;

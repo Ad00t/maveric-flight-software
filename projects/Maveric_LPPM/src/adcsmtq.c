@@ -9,14 +9,14 @@
 // HELPERS
 
 // Generate hash of name for reg_name_map -- FNV-1a algorithm
-uint32_t hash_name(char* s) {
+uint16_t hash_name(char* s) {
     uint32_t hash = 2166136261u; // FNV offset basis
     uint8_t i = 0;
     while (*(s+i) && i < MAX_BUF_LEN) {
         hash ^= (uint8_t)(*(s + i++));
         hash *= 16777619u;        // FNV prime
     }
-    return (uint32_t) (hash % ADCSMTQ_NAME_HASH_SIZE);
+    return (uint16_t) (hash % ADCSMTQ_NAME_HASH_SIZE);
 }
 
 // Compute sum of all bytes in buf

@@ -4,8 +4,7 @@
 #include "adcsmtq.h"
 #include <stdint.h>
 
-#define MAX_BUF_LEN     256
-#define BUFS_PER_PORT   3
+#define BUFS_PER_PORT   4
 
 // Interrupt request buffer
 
@@ -31,8 +30,8 @@ void irqbuf_clear(irqbuf_s* irqbuf);
 typedef struct {
     int1 start_flag;
     irqbuf_s uart1[BUFS_PER_PORT];
-    irqbuf_s uart2[BUFS_PER_PORT];
-    irqbuf_s uart3[BUFS_PER_PORT];
+    // irqbuf_s uart2[BUFS_PER_PORT];
+    // irqbuf_s uart3[BUFS_PER_PORT];
     irqbuf_s uart4[BUFS_PER_PORT];
 } irqmgr_s; 
 
@@ -40,10 +39,10 @@ typedef struct {
 void irqmgr_init(irqmgr_s* irqmgr);
 
 // Log all interrupt rcv bufs
-void irqmgr_log_bufs(irqmgr_s* irqmgr);
+void irqmgr_log_all(irqmgr_s* irqmgr);
 
 // Clear all interrupt rcv bufs
-void irqmgr_clear_bufs(irqmgr_s* irqmgr);
+void irqmgr_clear_all(irqmgr_s* irqmgr);
 
 // Handle all rcv'd interrupts
 void irqmgr_handle_rcv(irqmgr_s* irqmgr, adcsmtq_s* a);

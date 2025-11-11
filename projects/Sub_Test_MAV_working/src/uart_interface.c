@@ -121,12 +121,11 @@ void uart_get_prmts3(unsigned char *params, unsigned int8 *pmt1, unsigned int8 *
 
 	while (*params_ptr != 0x20)
 	{
-		value1 =10*value1 + *params_ptr-0x30;
+	    value1 =10*value1 + *params_ptr-0x30;
 		params_ptr++;
 	}
 
 	params_ptr++;
-
 	while (*params_ptr != 0x20)
 	{
 		value2 =10*value2 + *params_ptr-0x30;

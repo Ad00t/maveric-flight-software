@@ -72,6 +72,8 @@
 #define KCYN  "\033[36m"
 #define KWHT  "\033[37m"
 
+#define MAX_BUF_LEN     256
+
 #include "cmd.c"
 #include "uart.c"
 #include "adcsmtq.c"
