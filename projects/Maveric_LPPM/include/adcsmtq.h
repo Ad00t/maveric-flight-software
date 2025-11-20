@@ -2,15 +2,16 @@
 #define __ADCSMTQ_H__
 
 #include "interrupts.h"
+#include "hashtable.h"
 #include <stddef.h>
 #include <stdint.h>
 
-#define ADCSMTQ_HEAD_READ       0xC9
-#define ADCSMTQ_HEAD_WRITE      0xC8
-#define ADCSMTQ_REG_TABLE_LEN   12      // 116
-#define ADCSMTQ_MAP_COUNT       3
-#define ADCSMTQ_MAX_IDX_COUNT   84      // 256
-#define ADCSMTQ_NAME_HASH_SIZE  128     // 2048
+#define ADCSMTQ_HEAD_READ           0xC9
+#define ADCSMTQ_HEAD_WRITE          0xC8
+#define ADCSMTQ_REG_TABLE_LEN       12      // 116
+#define ADCSMTQ_MAP_COUNT           3
+#define ADCSMTQ_MAX_IDX_COUNT       84      // 256
+#define ADCSMTQ_MAX_REG_NAME_LEN    17
 
 typedef enum {
     T_UINT8,
@@ -22,7 +23,7 @@ typedef enum {
 } adcsmtq_reg_type_e;
 
 typedef struct {
-    char name[17];
+    char name[ADCSMTQ_MAX_REG_NAME_LEN];
     uint8_t idx;
     uint8_t data_count;
     uint8_t map_idx;
@@ -36,7 +37,7 @@ typedef struct {
     uint8_t port;  
     adcsmtq_reg_s reg_table[ADCSMTQ_REG_TABLE_LEN]; 
     adcsmtq_reg_s* reg_idx_map[ADCSMTQ_MAP_COUNT][ADCSMTQ_MAX_IDX_COUNT];
-    adcsmtq_reg_s* reg_name_map[ADCSMTQ_NAME_HASH_SIZE];
+    hashtable_s reg_name_map;
 } adcsmtq_s;
 
 // Initialize adcsmtq object
@@ -61,6 +62,9 @@ void adcsmtq_write_start(adcsmtq_s* a, char* name, void* data);
 
 // Handle write response receieved from adcsmtq
 void adcsmtq_write_complete(adcsmtq_s* a, irqbuf_s* rcv_buf);
+
+// Process a complete frame 
+void adcsmtq_proc_frame(adcsmtq_s* a, uint8_t* buf, uint8_t len);
 
 // Read back values from registers that were recently written
 void adcsmtq_readback(adcsmtq_s* a);

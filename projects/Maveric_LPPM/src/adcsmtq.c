@@ -2,22 +2,10 @@
 #include "interrupts.h"
 #include "uart.h"
 #include <stdint.h>
-#include <stdlibm.h>
 
 #module
 
 // HELPERS
-
-// Generate hash of name for reg_name_map -- FNV-1a algorithm
-uint16_t hash_name(char* s) {
-    uint32_t hash = 2166136261u; // FNV offset basis
-    uint8_t i = 0;
-    while (*(s+i) && i < MAX_BUF_LEN) {
-        hash ^= (uint8_t)(*(s + i++));
-        hash *= 16777619u;        // FNV prime
-    }
-    return (uint16_t) (hash % ADCSMTQ_NAME_HASH_SIZE);
-}
 
 // Compute sum of all bytes in buf
 uint16_t sum_buf(uint8_t* buf, size_t len) {
@@ -47,7 +35,7 @@ void adcsmtq_init(adcsmtq_s* a, uint8_t port) {
     a->port = port;
     memcpy(a->reg_table, ADCSMTQ_INIT_REG_TABLE, sizeof(ADCSMTQ_INIT_REG_TABLE));
     memset(a->reg_idx_map, 0, ADCSMTQ_MAP_COUNT * ADCSMTQ_MAX_IDX_COUNT * sizeof(adcsmtq_reg_s*));
-    memset(a->reg_name_map, NULL, ADCSMTQ_NAME_HASH_SIZE * sizeof(adcsmtq_reg_s*));
+    ht_init(&a->reg_name_map);
 
     // Init idx, name maps, register space
     size_t i;
@@ -59,10 +47,7 @@ void adcsmtq_init(adcsmtq_s* a, uint8_t port) {
             a->reg_idx_map[reg->map_idx][reg->idx] = reg;
 
         // Populate string name hash map
-        uint16_t h = hash_name(reg->name);
-        while (a->reg_name_map[h] != NULL && h < ADCSMTQ_NAME_HASH_SIZE) 
-            h++; // Open addressing
-        a->reg_name_map[h] = reg;
+        int1 ht_status = ht_set(&a->reg_name_map, reg->name, reg);
        
         // Allocate register data space
         switch (reg->type) {
@@ -99,14 +84,7 @@ void adcsmtq_init(adcsmtq_s* a, uint8_t port) {
 }
 
 adcsmtq_reg_s* adcsmtq_get_reg_by_name(adcsmtq_s* a, char* name) {
-    uint16_t h = hash_name(name);
-    adcsmtq_reg_s* reg = a->reg_name_map[h];
-    while (strcmp(reg->name, name) != 0 && h < ADCSMTQ_NAME_HASH_SIZE) 
-        reg = a->reg_name_map[++h];
-//    fprintf(COM_D, "getreg: %s %s %u\r\n", name, reg->name, h);
-    if (reg == NULL || strcmp(reg->name, name) != 0)
-        return NULL;
-    return reg;
+    return ht_get(&a->reg_name_map, name);
 }
 
 adcsmtq_reg_s* adcsmtq_get_reg_by_idx(adcsmtq_s* a, uint8_t map_idx, uint8_t idx) {
@@ -143,12 +121,12 @@ void adcsmtq_read_start(adcsmtq_s* a, char* name) {
     adcsmtq_read_start(a, reg);
 }
 
-void adcsmtq_read_complete(adcsmtq_s* a, irqbuf_s* rcv_buf) {
-    uint8_t idx = rcv_buf->data[1];
-    uint8_t data_count = rcv_buf->data[2];
-    uint8_t map_idx = rcv_buf->data[3] >> 4;
-    uint8_t error_code = rcv_buf->data[3] & 0b1111;
-    uint8_t* body = &rcv_buf->data[4];
+void adcsmtq_read_complete(adcsmtq_s* a, uint8_t* buf) {
+    uint8_t idx = buf[1];
+    uint8_t data_count = buf[2];
+    uint8_t map_idx = buf[3] >> 4;
+    uint8_t error_code = buf[3] & 0b1111;
+    uint8_t* body = &buf[4];
 
     // TODO: verify csum, handle error code
 
@@ -252,12 +230,12 @@ void adcsmtq_write_start(adcsmtq_s* a, char* name, void* data) {
     adcsmtq_write_start(a, reg, data);
 }
 
-void adcsmtq_write_complete(adcsmtq_s* a, irqbuf_s* rcv_buf) {
-    uint8_t idx = rcv_buf->data[1];
-    uint8_t data_count = rcv_buf->data[2];
-    uint8_t map_idx = rcv_buf->data[3] >> 4;
-    uint8_t error_code = rcv_buf->data[3] & 0b1111;
-    uint8_t csum = rcv_buf->data[4];
+void adcsmtq_write_complete(adcsmtq_s* a, uint8_t* buf) {
+    uint8_t idx = buf[1];
+    uint8_t data_count = buf[2];
+    uint8_t map_idx = buf[3] >> 4;
+    uint8_t error_code = buf[3] & 0b1111;
+    uint8_t csum = buf[4];
 
     // TODO: verify csum, handle error code
 
@@ -270,6 +248,15 @@ void adcsmtq_write_complete(adcsmtq_s* a, irqbuf_s* rcv_buf) {
     
     fprintf(COM_D, "%s[LPPM] adcsmtq_write_complete: port=%u reg='%s' idx=%u count=%u midx=%u err=%u\r\n", 
             KYEL, a->port, reg->name, idx, data_count, map_idx, error_code);
+}
+
+void adcsmtq_proc_frame(adcsmtq_s* a, uint8_t* buf, uint8_t len) {
+    switch (buf[0]) {
+        case ADCSMTQ_HEAD_READ:
+            adcsmtq_read_complete(a, buf); break;
+        case ADCSMTQ_HEAD_WRITE:
+            adcsmtq_write_complete(a, buf); break;
+    }
 }
 
 void adcsmtq_readback(adcsmtq_s* a) {

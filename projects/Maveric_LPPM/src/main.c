@@ -74,12 +74,14 @@
 
 #define MAX_BUF_LEN     256
 
+#include "hashtable.c"
 #include "cmd.c"
 #include "uart.c"
 #include "adcsmtq.c"
 #include "interrupts.c"
 
 irqmgr_s irqmgr;
+cmdmgr_s cmdmgr;
 adcsmtq_s tad102063;
 
 void system_init(void);
