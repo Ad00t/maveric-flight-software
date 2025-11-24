@@ -1,5 +1,6 @@
 #include "cmd.h"
 #include "circbuf.h"
+#include "hashtable.h"
 #include <cstddef>
 
 #module
@@ -23,79 +24,94 @@ void cmdpkt_clear(cmdpkt_s* cmdpkt) {
     cmdpkt->crc = 0;
 }
 
-// CMD Manager
+uint8_t cmdpkt_nextarg_uint8(cmdpkt_s* pkt) {
+
+}
+
+// Command func declarations
+
+void cmd_set_time(cmdpkt_s* pkt);
+
+// Command Manager
 
 void cmdmgr_init(cmdmgr_s* cmdmgr) {
     cmdmgr_clear(cmdmgr);
+    ht_init(&cmdmgr->cmdfuncs); 
+    ht_set(&cmdmgr->cmdfuncs, "cmd_set_time", cmd_set_time);
 }
 
 void cmdmgr_clear(cmdmgr_s* cmdmgr) {
     size_t b;
     for (b = 0; b < NUM_CMD_BUFS; b++) {
-        cmdpkt_clear(&cmdmgr->rcvbufs[b]);
+        cmdpkt_clear(&cmdmgr->rcvpkts[b]);
     }
 }
 
 void cmdmgr_rcv_fsm(cmdmgr_s* cmdmgr, circbuf_s* irqbuf, cmdpkt_s* rcvpkt) {
-    uint8_t b;
-    if (!cb_pop(irqbuf, 1, &b)) return;
+    uint16_t iter = 0;
+    while (iter < CIRCBUF_MAX_SIZE) {
+        uint8_t b;
+        if (!cb_pop(irqbuf, 1, &b)) return;
 
-    switch (rcvpkt->fsm) {
-        case CMDPKT_FSM_HEAD:
-            if (b == 0xCD) {
-                rcvpkt->fsm = CMDPKT_FSM_ORGN;
-            }
-            break;
-            
-        case CMDPKT_FSM_ORGN:
-            rcvpkt->orgn = b;
-            rcvpkt->fsm = CMDPKT_FSM_DEST;
-            break;
+        switch (rcvpkt->fsm) {
+            case CMDPKT_FSM_HEAD:
+                if (b == 0xCD) {
+                    rcvpkt->fsm = CMDPKT_FSM_ORGN;
+                }
+                break;
+                
+            case CMDPKT_FSM_ORGN:
+                rcvpkt->orgn = b;
+                rcvpkt->fsm = CMDPKT_FSM_DEST;
+                break;
 
-        case CMDPKT_FSM_DEST:
-            rcvpkt->dest = b;
-            rcvpkt->fsm = CMDPKT_FSM_ECHO;
-            break;
+            case CMDPKT_FSM_DEST:
+                rcvpkt->dest = b;
+                rcvpkt->fsm = CMDPKT_FSM_ECHO;
+                break;
 
-        case CMDPKT_FSM_ECHO:
-            rcvpkt->echo = b;
-            rcvpkt->fsm = CMDPKT_FSM_ID;
-            break;
+            case CMDPKT_FSM_ECHO:
+                rcvpkt->echo = b;
+                rcvpkt->fsm = CMDPKT_FSM_ID;
+                break;
 
-        case CMDPKT_FSM_ID:
-            rcvpkt->id[rcvpkt->i_id++] = b;
-            if (rcvpkt->i_id >= MAX_CMD_ID_LEN || b == ' ') {
-                rcvpkt->id[rcvpkt->i_id-1] = '\0';
+            case CMDPKT_FSM_ID:
+                rcvpkt->id[rcvpkt->i_id++] = b;
+                if (rcvpkt->i_id >= MAX_CMD_ID_LEN || b == ' ') {
+                    rcvpkt->id[rcvpkt->i_id-1] = '\0';
+                    rcvpkt->fsm = CMDPKT_FSM_ARGSLEN;
+                }
+                break;
+
+            case CMDPKT_FSM_ARGSLEN:
+                rcvpkt->argslen = b;
                 rcvpkt->fsm = CMDPKT_FSM_ARGSLEN;
-            }
-            break;
+                break;
 
-        case CMDPKT_FSM_ARGSLEN:
-            rcvpkt->argslen = b;
-            rcvpkt->fsm = CMDPKT_FSM_ARGSLEN;
-            break;
+            case CMDPKT_FSM_ARGSSTR:
+                rcvpkt->argsstr[rcvpkt->i_args++] = b;
+                if (rcvpkt->i_args >= MAX_BUF_LEN) {
+                    rcvpkt->fsm = CMDPKT_FSM_ERROR;
+                } else if (rcvpkt->i_args >= rcvpkt->argslen) {
+                    rcvpkt->fsm = CMDPKT_FSM_CRC;
+                }
+                break;
 
-        case CMDPKT_FSM_ARGSSTR:
-            rcvpkt->argsstr[rcvpkt->i_args++] = b;
-            if (rcvpkt->i_args >= MAX_BUF_LEN) {
-                rcvpkt->fsm = CMDPKT_FSM_ERROR;
-            } else if (rcvpkt->i_args >= rcvpkt->argslen) {
-                rcvpkt->fsm = CMDPKT_FSM_CRC;
-            }
-            break;
+            case CMDPKT_FSM_CRC:
+                rcvpkt->crc = b;
+                rcvpkt->fsm = CMDPKT_FSM_DONE;
+                break;
+        }
 
-        case CMDPKT_FSM_CRC:
-            rcvpkt->crc = b;
-            rcvpkt->fsm = CMDPKT_FSM_DONE;
-            break;
-    }
+        switch (rcvpkt->fsm) {
+            case CMDPKT_FSM_DONE:
+                cmdmgr_run_cmd(cmdmgr, rcvpkt);
+            case CMDPKT_FSM_ERROR:
+                rcvpkt_clear(rcvpkt);
+                break;
+        }
 
-    switch (rcvpkt->fsm) {
-        case CMDPKT_FSM_DONE:
-            cmdmgr_run_cmd(cmdmgr, rcvpkt);
-        case CMDPKT_FSM_ERROR:
-            rcvpkt_clear(rcvpkt);
-            break;
+        iter++;
     }
 }
 
@@ -147,20 +163,29 @@ void cmdmgr_run_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
         }
     }
 
-    // TODO: crc check
-
-    // Giant top-level switch statement to run command handling routines
-    switch (cmddef.id) {
-        case 1:
-            uint8_t month = pkt[6];
-            uint8_t day = pkt[7];
-            uint8_t yr = pkt[8];
-            uint8_t weekday = pkt[9];
-            uint8_t hr = pkt[10];    
-            uint8_t min = pkt[11];    
-            uint8_t sec = pkt[12];    
-            break;
+    // TODO: crc check 
+    
+    void* cmdfunc = ht_get(&cmdmgr->cmdfuncs, pkt->id);
+    if (cmdfunc == NULL) {
+        fprintf(COM_D, "%s[LPPM] cmd not recognized\r\n", KRED);
+    } else {
+        pkt->i_args = 0;
+        cmdfunc(pkt);
     }
 
-    cmdmgr_clear(cmdmgr);
+    cmdpkt_clear(cmdpkt);
+}
+
+// COMMAND HANDLERS
+
+void cmd_set_time(cmdpkt_s* pkt) {
+    uint8_t month = cmdpkt_nextarg_uint8(pkt);
+    uint8_t day = cmdpkt_nextarg_uint8(pkt);
+    uint8_t yr = cmdpkt_nextarg_uint8(pkt);
+    uint8_t weekday = cmdpkt_nextarg_uint8(pkt);
+    uint8_t hr = cmdpkt_nextarg_uint8(pkt) 
+    uint8_t min = cmdpkt_nextarg_uint8(pkt);    
+    uint8_t sec = cmdpkt_nextarg_uint8(pkt);    
+
+    fprintf(COM_D, "%s[LPPM] cmd_set_time %u %u %u %u %u %u %u\r\n", KCYN, month, day, yr, weekday, hr, min, sec);
 }

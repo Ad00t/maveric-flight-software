@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "circbuf.h"
+#include "hashtable.h"
 
 #define CMD_START_BYTE  0xCD
 #define NUM_CMD_BUFS    1
@@ -47,6 +48,7 @@ void cmdpkt_clear(cmdpkt_s* cmdpkt);
 
 typedef struct {
     cmdpkt_s rcvpkts[NUM_CMD_BUFS];
+    hashtable_s cmdfuncs;
 } cmdmgr_s;
 
 // Initialize cmdmgr

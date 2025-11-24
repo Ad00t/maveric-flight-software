@@ -277,64 +277,69 @@ void adcsmtq_readback(adcsmtq_s* a) {
 }
 
 void adcsmtq_rcv_fsm(adcsmtq_s* a, circbuf_s* irqbuf) {
-    uint8_t b;
-    if (!cb_pop(irqbuf, 1, &b)) return;
+    uint16_t iter = 0;
+    while (iter < CIRCBUF_MAX_SIZE) {
+        uint8_t b;
+        if (!cb_pop(irqbuf, 1, &b)) return;
 
-    switch (a->rcv_fsm) {
-        case ADCSMTQ_FSM_HEAD:
-            if (b == ADCSMTQ_HEAD_READ || b == ADCSMTQ_HEAD_WRITE) {
+        switch (a->rcv_fsm) {
+            case ADCSMTQ_FSM_HEAD:
+                if (b == ADCSMTQ_HEAD_READ || b == ADCSMTQ_HEAD_WRITE) {
+                    a->rcv_buf[a->rcv_buf_len++] = b;
+                    a->rcv_fsm = ADCSMTQ_FSM_IDX;
+                } 
+                break;
+
+            case ADCSMTQ_FSM_IDX:
                 a->rcv_buf[a->rcv_buf_len++] = b;
-                a->rcv_fsm = ADCSMTQ_FSM_IDX;
-            } 
-            break;
+                a->rcv_fsm = ADCSMTQ_FSM_CNT;
+                break;
 
-        case ADCSMTQ_FSM_IDX:
-            a->rcv_buf[a->rcv_buf_len++] = b;
-            a->rcv_fsm = ADCSMTQ_FSM_CNT;
-            break;
+            case ADCSMTQ_FSM_CNT:
+                a->rcv_buf[a->rcv_buf_len++] = b;
+                a->rcv_fsm = ADCSMTQ_FSM_MIDX;
+                break;
 
-        case ADCSMTQ_FSM_CNT:
-            a->rcv_buf[a->rcv_buf_len++] = b;
-            a->rcv_fsm = ADCSMTQ_FSM_MIDX;
-            break;
-            
-        case ADCSMTQ_FSM_MIDX:
-            a->rcv_buf[a->rcv_buf_len++] = b;
-            switch (a->rcv_buf[0]) {
-                case 0xC8: a->rcv_fsm = ADCSMTQ_FSM_CSUM; break;
-                case 0xC9: a->rcv_fsm = ADCSMTQ_FSM_DATA; break;
-                default: a->rcv_fsm = ADCSMTQ_FSM_ERROR; break;
-            }
-            break;
+            case ADCSMTQ_FSM_MIDX:
+                a->rcv_buf[a->rcv_buf_len++] = b;
+                switch (a->rcv_buf[0]) {
+                    case 0xC8: a->rcv_fsm = ADCSMTQ_FSM_CSUM; break;
+                    case 0xC9: a->rcv_fsm = ADCSMTQ_FSM_DATA; break;
+                    default: a->rcv_fsm = ADCSMTQ_FSM_ERROR; break;
+                }
+                break;
 
-        case ADCSMTQ_FSM_DATA:
-            a->rcv_buf[a->rcv_buf_len++] = b;
-            if (a->rcv_buf_len >= MAX_BUF_LEN) {
-                a->rcv_fsm = ADCSMTQ_FSM_ERROR;
-            } else if (a->rcv_buf_len >= 4+4*a->rcv_buf[2]) {
-                a->rcv_fsm = ADCSMTQ_FSM_CSUM;
-            }
-            break;
-            
-        case ADCSMTQ_FSM_CSUM:
-            a->rcv_buf[a->rcv_buf_len++] = b;
-            a->rcv_fsm = ADCSMTQ_FSM_DONE;
-            break;
-    } 
+            case ADCSMTQ_FSM_DATA:
+                a->rcv_buf[a->rcv_buf_len++] = b;
+                if (a->rcv_buf_len >= MAX_BUF_LEN) {
+                    a->rcv_fsm = ADCSMTQ_FSM_ERROR;
+                } else if (a->rcv_buf_len >= 4+4*a->rcv_buf[2]) {
+                    a->rcv_fsm = ADCSMTQ_FSM_CSUM;
+                }
+                break;
 
-    // Could wait till next superloop iteration or just handle end states immediately (currently doing the latter)
-    switch (a->rcv_fsm) {
-        case ADCSMTQ_FSM_DONE:
-            switch (a->rcv_buf[0]) {
-                case ADCSMTQ_HEAD_READ: adcsmtq_read_complete(a, buf); break;
-                case ADCSMTQ_HEAD_WRITE: adcsmtq_write_complete(a, buf); break;
-            }
+            case ADCSMTQ_FSM_CSUM:
+                a->rcv_buf[a->rcv_buf_len++] = b;
+                a->rcv_fsm = ADCSMTQ_FSM_DONE;
+                break;
+        } 
+
+        // Could wait till next superloop iteration or just handle end states immediately (currently doing the latter)
+        switch (a->rcv_fsm) {
+            case ADCSMTQ_FSM_DONE:
+                switch (a->rcv_buf[0]) {
+                    case ADCSMTQ_HEAD_READ: adcsmtq_read_complete(a, buf); break;
+                    case ADCSMTQ_HEAD_WRITE: adcsmtq_write_complete(a, buf); break;
+                }
             // Fall-through to reset rcv buf & FSM
-        case ADCSMTQ_FSM_ERROR:
-            a->rcv_fsm = ADCSMTQ_FSM_HEAD;
-            a->rcv_buf_len = 0;
-            memset(a->rcv_buf, 0, MAX_BUF_LEN);
-            break;
+            case ADCSMTQ_FSM_ERROR:
+                a->rcv_fsm = ADCSMTQ_FSM_HEAD;
+                a->rcv_buf_len = 0;
+                memset(a->rcv_buf, 0, MAX_BUF_LEN);
+                break;
+        }
+
+        iter++;
     }
 }
 
