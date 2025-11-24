@@ -3,6 +3,7 @@
 
 #include "interrupts.h"
 #include "hashtable.h"
+#include "circbuf.h"
 #include <stddef.h>
 #include <stdint.h>
 
@@ -22,13 +23,24 @@ typedef enum {
     T_CHAR
 } adcsmtq_reg_type_e;
 
+typedef enum {
+    ADCSMTQ_FSM_HEAD = 0,
+    ADCSMTQ_FSM_IDX,
+    ADCSMTQ_FSM_CNT,
+    ADCSMTQ_FSM_MIDX,
+    ADCSMTQ_FSM_DATA,
+    ADCSMTQ_FSM_CSUM,
+    ADCSMTQ_FSM_DONE,
+    ADCSMTQ_FSM_ERROR,
+} adcsmtq_fsm_e;
+
 typedef struct {
     char name[ADCSMTQ_MAX_REG_NAME_LEN];
     uint8_t idx;
     uint8_t data_count;
     uint8_t map_idx;
     adcsmtq_reg_type_e type;
-    void* value;                // Should not ever need to be free'd; lasts for entire duration of program
+    void* value;                // Should be free'd on reinitialization 
     uint8_t value_len;
     int1 dirty;
 } adcsmtq_reg_s;
@@ -38,10 +50,17 @@ typedef struct {
     adcsmtq_reg_s reg_table[ADCSMTQ_REG_TABLE_LEN]; 
     adcsmtq_reg_s* reg_idx_map[ADCSMTQ_MAP_COUNT][ADCSMTQ_MAX_IDX_COUNT];
     hashtable_s reg_name_map;
+    // Inbound packet reading stuff
+    adcsmtq_fsm_e rcv_fsm;
+    uint8_t rcv_buf[MAX_BUF_LEN];
+    uint8_t rcv_buf_len;
 } adcsmtq_s;
 
 // Initialize adcsmtq object
 void adcsmtq_init(adcsmtq_s* a, uint8_t port);
+
+// Destroy adcsmtq object, and all register memory
+void adcsmtq_destroy(adcsmtq_s* a);
 
 // Lookup register by name in reg_name_map
 adcsmtq_reg_s* adcsmtq_get_reg_by_name(adcsmtq_s* a, char* name);
@@ -63,11 +82,11 @@ void adcsmtq_write_start(adcsmtq_s* a, char* name, void* data);
 // Handle write response receieved from adcsmtq
 void adcsmtq_write_complete(adcsmtq_s* a, irqbuf_s* rcv_buf);
 
-// Process a complete frame 
-void adcsmtq_proc_frame(adcsmtq_s* a, uint8_t* buf, uint8_t len);
-
 // Read back values from registers that were recently written
 void adcsmtq_readback(adcsmtq_s* a);
+
+// Check interrupt buffer to advance frame reader FSM & handle packets rcv'd from adcsmtq
+void adcsmtq_rcv_fsm(adcsmtq_s* a, circbuf_s* irqbuf);
 
 /* Register format: [idx, data_count, map_idx, type]
                 idx: Denotes the register that the command will read/write from/to.

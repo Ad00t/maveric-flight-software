@@ -2,38 +2,63 @@
 #define __CMD_H__
 
 #include <stdint.h>
+#include "circbuf.h"
 
 #define CMD_START_BYTE  0xCD
-#define NUM_CMD_BUFS    3
+#define NUM_CMD_BUFS    1
 #define MAX_CMD_ID_LEN  20
 
+// Command packet & reader FSM
+
+typedef enum {
+    CMDPKT_FSM_HEAD = 0,
+    CMDPKT_FSM_ORGN,
+    CMDPKT_FSM_DEST,
+    CMDPKT_FSM_ECHO,
+    CMDPKT_FSM_ID,
+    CMDPKT_FSM_ARGSLEN,
+    CMDPKT_FSM_ARGSSTR,
+    CMDPKT_FSM_CRC,
+    CMDPKT_FSM_DONE,
+    CMDPKT_FSM_ERROR
+} cmdpkt_fsm_e;
+
 typedef struct {
-    int1 busy;
+    // Interrupt parsing metadata
+    cmdpkt_fsm_e fsm;
+    uint8_t i_id, i_args;
+    // Command data
     uint8_t orgn;
     uint8_t dest;
     uint8_t echo;
     char id[MAX_CMD_ID_LEN];
     uint8_t args_len;
     char args_str[MAX_BUF_LEN];
-} cmdbuf_s;
+    uint8_t crc;
+} cmdpkt_s;
 
-// Initialize cmdbuf
-void cmdbuf_init(cmdbuf_s* cmdbuf);
+// Initialize cmdpkt
+void cmdpkt_init(cmdpkt_s* cmdpkt);
 
-// Clear this cmdbuf
-void cmdbuf_clear(cmdbuf_s* cmdbuf);
+// Clear this cmdpkt
+void cmdpkt_clear(cmdpkt_s* cmdpkt);
+
+// Command manager
 
 typedef struct {
-    cmdbuf_s cmdbufs[NUM_CMD_BUFS];
+    cmdpkt_s rcvpkts[NUM_CMD_BUFS];
 } cmdmgr_s;
 
 // Initialize cmdmgr
 void cmdmgr_init(cmdmgr_s* cmdmgr);
 
-// Clear all cmd bufs  
-void cmdmgr_clear_all(cmdmgr_s* cmdmgr);
+// Clear all rcv pkts 
+void cmdmgr_clear(cmdmgr_s* cmdmgr);
 
-// Parse & handle cmd frame 
-void cmdmgr_proc_frame(cmdmgr_s* cmdmgr, uint8_t* buf, uint8_t len);
+// Check interrupt buffer to advance packet reader FSM 
+void cmdmgr_rcv_fsm(cmdmgr_s* cmdmgr, circbuf_s* irqbuf, cmdpkt_s* rcvpkt);
+
+// Execute the actions associated with the cmd in buf 
+void cmdmgr_run_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt);
 
 #endif

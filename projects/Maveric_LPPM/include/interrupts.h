@@ -16,7 +16,7 @@ extern adcsmtq_s tad102063;
 
 typedef struct {
     int1 started;
-    volatile circbuf_s ports[NUM_PORTS];
+    volatile circbuf_s irqbufs[NUM_PORTS];
     // 0 = UART1    1 = UART2    2 = UART3   3 = UART4 
 } irqmgr_s;
 
@@ -26,8 +26,8 @@ void irqmgr_init(irqmgr_s* irqmgr);
 // Clear all interrupt rcv bufs
 void irqmgr_clear(irqmgr_s* irqmgr);
 
-// Check if full frames have been received at each port and process them if so 
-void irqmgr_process_frames(irqmgr_s* irqmgr);
+// Check interrupt buffers and advance port-specific FSM's and irq handling logic 
+void irqmgr_handle_rcv(irqmgr_s* irqmgr);
 
 // Interrupt service routines
 

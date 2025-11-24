@@ -91,8 +91,6 @@ void main(void) {
     system_init();
 
     while (TRUE) {
-//        irqmgr_log_bufs(&irqmgr); // Print all interrupt rcv buffers 
-        irqmgr_handle_rcv(&irqmgr, &tad102063); // Handle all rcv'd interrupts
         housekeeping(); // Housekeeping routine
     }
 }
@@ -106,7 +104,7 @@ void system_init(void) {
 	crc_init(0);
 
     irqmgr_init(&irqmgr);
-    irqmgr.start_flag = TRUE;
+    irqmgr.started = TRUE;
     isr_enable_all();
 
     adcsmtq_init(&tad102063, COM_A);
@@ -116,6 +114,8 @@ void system_init(void) {
 
 void housekeeping(void) {
     fprintf(COM_D, "%s[LPPM] HK COM_D ACTIVE \r\n", KWHT);
+    
+    irqmgr_proc_frames(&irqmgr); // Handle all rcv'd interrupts
     
     adcsmtq_readback(&tad102063);
     
