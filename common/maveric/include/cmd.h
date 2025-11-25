@@ -16,8 +16,8 @@ typedef enum {
     CMDPKT_FSM_ORGN,
     CMDPKT_FSM_DEST,
     CMDPKT_FSM_ECHO,
-    CMDPKT_FSM_ID,
     CMDPKT_FSM_ARGSLEN,
+    CMDPKT_FSM_ID,
     CMDPKT_FSM_ARGSSTR,
     CMDPKT_FSM_CRC,
     CMDPKT_FSM_DONE,
@@ -37,6 +37,8 @@ typedef struct {
     char args_str[MAX_BUF_LEN];
     uint8_t crc;
 } cmdpkt_s;
+
+typedef void (*cmdfunc_f)(cmdpkt_s* pkt);
 
 // Initialize cmdpkt
 void cmdpkt_init(cmdpkt_s* cmdpkt);

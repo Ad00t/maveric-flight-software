@@ -10,6 +10,8 @@
       <itemPath>../../common/maveric/include/i2c.h</itemPath>
       <itemPath>../../common/maveric/include/uart.h</itemPath>
       <itemPath>include/interrupts.h</itemPath>
+      <itemPath>../../common/maveric/include/circbuf.h</itemPath>
+      <itemPath>../../common/maveric/include/hashtable.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -31,12 +33,15 @@
       <itemPath>../../common/maveric/src/i2c.c</itemPath>
       <itemPath>../../common/maveric/src/uart.c</itemPath>
       <itemPath>src/interrupts.c</itemPath>
+      <itemPath>../../common/maveric/src/circbuf.c</itemPath>
+      <itemPath>../../common/maveric/src/hashtable.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
     <Elem>.</Elem>
     <Elem>src</Elem>
     <Elem>../../common/maveric/src</Elem>
+    <Elem>../../common/maveric/include</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -128,10 +133,11 @@
         <property key="UART 4" value="true"/>
         <property key="debugoptions.debug-startup" value="Use system settings"/>
         <property key="debugoptions.reset-behaviour" value="Use system settings"/>
-        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="debugoptions.useswbreakpoints" value="true"/>
         <property key="event.recorder.debugger.behavior" value="Running"/>
         <property key="event.recorder.enabled" value="false"/>
         <property key="event.recorder.scvd.files" value=""/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="lastid" value=""/>
         <property key="memories.aux" value="false"/>

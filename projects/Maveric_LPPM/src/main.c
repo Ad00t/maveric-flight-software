@@ -75,6 +75,7 @@
 #define MAX_BUF_LEN     256
 
 #include "hashtable.c"
+#include "circbuf.c"
 #include "cmd.c"
 #include "uart.c"
 #include "adcsmtq.c"
@@ -104,18 +105,19 @@ void system_init(void) {
 	crc_init(0);
 
     irqmgr_init(&irqmgr);
-    irqmgr.started = TRUE;
-    isr_enable_all();
-
+    cmdmgr_init(&cmdmgr);
     adcsmtq_init(&tad102063, COM_A);
 
-	delay_ms(1000);
-}
-
-void housekeeping(void) {
-    fprintf(COM_D, "%s[LPPM] HK COM_D ACTIVE \r\n", KWHT);
+    irqmgr.started = TRUE;
+    isr_enable_all();
     
-    irqmgr_proc_frames(&irqmgr); // Handle all rcv'd interrupts
+    fprintf(COM_D, "%s[LPPM] System initialized\n", KWHT);
+    delay_ms(1000);
+}
+void housekeeping(void) {
+    fprintf(COM_D, "%s[LPPM] HK COM_D ACTIVE\n", KWHT);
+    
+    irqmgr_handle_rcv(&irqmgr, &cmdmgr, &tad102063); // Handle all rcv'd interrupts
     
     adcsmtq_readback(&tad102063);
     
@@ -123,8 +125,8 @@ void housekeeping(void) {
     
     adcsmtq_read_start(&tad102063, "TIME");
     
-    float mass = 15.0;
-    adcsmtq_write_start(&tad102063, "MASS", &mass);
+//    float mass = 15.0;
+//    adcsmtq_write_start(&tad102063, "MASS", &mass);
     
 //    float axis[3];
 //    axis[0] = 1f;

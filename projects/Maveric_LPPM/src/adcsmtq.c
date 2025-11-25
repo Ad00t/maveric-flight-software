@@ -2,6 +2,7 @@
 #include "interrupts.h"
 #include "uart.h"
 #include <stdint.h>
+#include <stdlibm.h>
 
 #module
 
@@ -51,7 +52,7 @@ void adcsmtq_init(adcsmtq_s* a, uint8_t port) {
             a->reg_idx_map[reg->map_idx][reg->idx] = reg;
 
         // Populate string name hash map
-        int1 ht_status = ht_set(&a->reg_name_map, reg->name, reg);
+        ht_set(&a->reg_name_map, reg->name, reg);
        
         // Allocate register data space
         switch (reg->type) {
@@ -81,16 +82,16 @@ void adcsmtq_init(adcsmtq_s* a, uint8_t port) {
                 break;
         }
         
-//        fprintf(COM_D, "%s %u (%u,%u)\r\n", reg->name, h, reg->map_idx, reg->idx);
+//        fprintf(COM_D, "%s %u (%u,%u)\n", reg->name, h, reg->map_idx, reg->idx);
     }
 
-    fprintf(COM_D, "%s[LPPM] ADCSMTQ initialized on UART%u\r\n", KWHT, a->port);
+    fprintf(COM_D, "%s[LPPM] ADCSMTQ initialized on UART%u\n", KWHT, a->port);
 }
 
 void adcsmtq_destroy(adcsmtq_s* a) {
     size_t i;
     for (i = 0; i < ADCSMTQ_REG_TABLE_LEN; i++) {
-        free(reg->value);
+        free(a->reg_table[i].value);
     }
 
     memset(a->rcv_buf, 0, MAX_BUF_LEN);
@@ -120,7 +121,7 @@ void adcsmtq_read_start(adcsmtq_s* a, adcsmtq_reg_s* reg) {
     w_buf[3] = (reg->map_idx << 4) | 0;
     uint8_t csum = gen_csum(w_buf, 4);
     
-    fprintf(COM_D, "%s[LPPM] adcsmtq_read_start: port=UART%u reg='%s' data=[ 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X ]\r\n", 
+    fprintf(COM_D, "%s[LPPM] adcsmtq_read_start: port=UART%u reg='%s' data=[ 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X ]\n", 
             KYEL, a->port, reg->name, w_buf[0], w_buf[1], w_buf[2], w_buf[3], csum);
     
     uart_write_buf(a->port, w_buf, 4); 
@@ -131,7 +132,7 @@ void adcsmtq_read_start(adcsmtq_s* a, adcsmtq_reg_s* reg) {
 void adcsmtq_read_start(adcsmtq_s* a, char* name) {
     adcsmtq_reg_s* reg = adcsmtq_get_reg_by_name(a, name);
     if (reg == NULL) {
-        fprintf(COM_D, "%s[LPPM] adcsmtq_read_start: register invalid '%s'\r\n", KRED, name);
+        fprintf(COM_D, "%s[LPPM] adcsmtq_read_start: register invalid '%s'\n", KRED, name);
         return;
     }
     adcsmtq_read_start(a, reg);
@@ -148,7 +149,7 @@ void adcsmtq_read_complete(adcsmtq_s* a, uint8_t* buf) {
 
     adcsmtq_reg_s* reg = adcsmtq_get_reg_by_idx(a, map_idx, idx);
     if (reg == NULL) {
-        fprintf(COM_D, "%s[LPPM] adcsmtq_read_complete: register invalid (%u,%u)\r\n", KRED, map_idx, idx);
+        fprintf(COM_D, "%s[LPPM] adcsmtq_read_complete: register invalid (%u,%u)\n", KRED, map_idx, idx);
         return;
     }
         
@@ -194,7 +195,7 @@ void adcsmtq_read_complete(adcsmtq_s* a, uint8_t* buf) {
         }
     }    
 
-    fprintf(COM_D, " ]\r\n");
+    fprintf(COM_D, " ]\n");
 }
 
 void adcsmtq_write_start(adcsmtq_s* a, adcsmtq_reg_s* reg, void* data) {
@@ -230,7 +231,7 @@ void adcsmtq_write_start(adcsmtq_s* a, adcsmtq_reg_s* reg, void* data) {
             KYEL, a->port, reg->name, w_buf_len+1);
     for (i = 0; i < w_buf_len; i++)
         fprintf(COM_D, " 0x%02X", w_buf[i]);
-    fprintf(COM_D, " 0x%02X ]\r\n", csum);
+    fprintf(COM_D, " 0x%02X ]\n", csum);
     
     uart_write_buf(a->port, w_buf, w_buf_len);
     uart_write_buf(a->port, &csum, 1);
@@ -240,7 +241,7 @@ void adcsmtq_write_start(adcsmtq_s* a, adcsmtq_reg_s* reg, void* data) {
 void adcsmtq_write_start(adcsmtq_s* a, char* name, void* data) {
     adcsmtq_reg_s* reg = adcsmtq_get_reg_by_name(a, name);
     if (reg == NULL) {
-        fprintf(COM_D, "%s[LPPM] adcsmtq_write_start: register invalid '%s'\r\n", KRED, name);
+        fprintf(COM_D, "%s[LPPM] adcsmtq_write_start: register invalid '%s'\n", KRED, name);
         return;
     }
     adcsmtq_write_start(a, reg, data);
@@ -250,19 +251,19 @@ void adcsmtq_write_complete(adcsmtq_s* a, uint8_t* buf) {
     uint8_t idx = buf[1];
     uint8_t data_count = buf[2];
     uint8_t map_idx = buf[3] >> 4;
-    uint8_t error_code = buf[3] & 0b1111;'
+    uint8_t error_code = buf[3] & 0b1111;
     uint8_t csum = buf[4];
 
     // TODO: verify csum, handle error code
 
     adcsmtq_reg_s* reg = adcsmtq_get_reg_by_idx(a, map_idx, idx);
     if (reg == NULL) {
-        fprintf(COM_D, "%s[LPPM] adcsmtq_write_complete: register invalid (%u,%u)\r\n", KRED, map_idx, idx);
+        fprintf(COM_D, "%s[LPPM] adcsmtq_write_complete: register invalid (%u,%u)\n", KRED, map_idx, idx);
         return;
     }
     reg->dirty = TRUE;
     
-    fprintf(COM_D, "%s[LPPM] adcsmtq_write_complete: port=%u reg='%s' idx=%u count=%u midx=%u err=%u\r\n", 
+    fprintf(COM_D, "%s[LPPM] adcsmtq_write_complete: port=%u reg='%s' idx=%u count=%u midx=%u err=%u\n", 
             KYEL, a->port, reg->name, idx, data_count, map_idx, error_code);
 }
 
@@ -328,8 +329,8 @@ void adcsmtq_rcv_fsm(adcsmtq_s* a, circbuf_s* irqbuf) {
         switch (a->rcv_fsm) {
             case ADCSMTQ_FSM_DONE:
                 switch (a->rcv_buf[0]) {
-                    case ADCSMTQ_HEAD_READ: adcsmtq_read_complete(a, buf); break;
-                    case ADCSMTQ_HEAD_WRITE: adcsmtq_write_complete(a, buf); break;
+                    case ADCSMTQ_HEAD_READ: adcsmtq_read_complete(a, a->rcv_buf); break;
+                    case ADCSMTQ_HEAD_WRITE: adcsmtq_write_complete(a, a->rcv_buf); break;
                 }
             // Fall-through to reset rcv buf & FSM
             case ADCSMTQ_FSM_ERROR:

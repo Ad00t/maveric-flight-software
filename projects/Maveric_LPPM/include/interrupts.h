@@ -2,15 +2,10 @@
 #define __INTERRUPTS_H__
 
 #include "adcsmtq.h"
+#include "cmd.h"
 #include <stdint.h>
 
 #define NUM_PORTS           4
-#define MAX_PROC_FRAMES     2
-
-// Importing global managers
-extern irqmgr_s irqmgr;
-extern cmdmgr_s cmdmgr;
-extern adcsmtq_s tad102063;
 
 // Interrupt request manager
 
@@ -27,9 +22,11 @@ void irqmgr_init(irqmgr_s* irqmgr);
 void irqmgr_clear(irqmgr_s* irqmgr);
 
 // Check interrupt buffers and advance port-specific FSM's and irq handling logic 
-void irqmgr_handle_rcv(irqmgr_s* irqmgr);
+void irqmgr_handle_rcv(irqmgr_s* irqmgr, cmdmgr_s* cmdmgr, adcsmtq_s* tad102063);
 
 // Interrupt service routines
+
+extern irqmgr_s irqmgr;
 
 // Enable all interrupts
 void isr_enable_all(void);

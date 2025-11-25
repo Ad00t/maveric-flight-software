@@ -18,15 +18,15 @@ void irqmgr_init(irqmgr_s* irqmgr) {
 void irqmgr_clear(irqmgr_s* irqmgr) {
     size_t p;
     for (p = 0; p < NUM_PORTS; p++) {
-        circbuf_clear(&irqmgr->irqbufs[p]);
+        cb_clear(&irqmgr->irqbufs[p]);
     }
 }
 
-void irqmgr_handle_rcv(irqmgr_s* irqmgr) {
+void irqmgr_handle_rcv(irqmgr_s* irqmgr, cmdmgr_s* cmdmgr, adcsmtq_s* tad102063) {
     isr_disable_all();
     
-    adcsmtq_rcv_fsm(&tad102063, &irqmgr.irqbufs[0]);
-    cmdmgr_rcv_fsm(&tad102063, &irqmgr.irqbufs[3], &cmdmgr.rcvpkts[0]); // Handle FTDI commands on cmd rcvpkt 0
+    adcsmtq_rcv_fsm(tad102063, &irqmgr->irqbufs[0]);
+    cmdmgr_rcv_fsm(cmdmgr, &irqmgr->irqbufs[3], &cmdmgr->rcvpkts[0]); // Handle FTDI commands on cmd rcvpkt 0
 
     isr_enable_all();
 }
@@ -70,6 +70,8 @@ void isr_rda3(void) {
 #INT_RDA4
 void isr_rda4(void) {
     if (!irqmgr.started || !uart_byte_avail(COM_D)) return;
-    cb_push(&irqmgr.irqbufs[3], uart_read_byte(COM_D));
+    uint8_t b = uart_read_byte(COM_D);
+    fprintf(COM_D, "push: %02X w=%d r=%d\n", b, irqmgr.irqbufs[3].w, irqmgr.irqbufs[3].r);
+    cb_push(&irqmgr.irqbufs[3], b);
 }
 
