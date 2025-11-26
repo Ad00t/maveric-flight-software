@@ -70,8 +70,6 @@ void isr_rda3(void) {
 #INT_RDA4
 void isr_rda4(void) {
     if (!irqmgr.started || !uart_byte_avail(COM_D)) return;
-    uint8_t b = uart_read_byte(COM_D);
-    fprintf(COM_D, "push: %02X w=%d r=%d\n", b, irqmgr.irqbufs[3].w, irqmgr.irqbufs[3].r);
-    cb_push(&irqmgr.irqbufs[3], b);
+    cb_push(&irqmgr.irqbufs[3], uart_read_byte(COM_D));
 }
 

@@ -75,12 +75,12 @@ void cmdmgr_rcv_fsm(cmdmgr_s* cmdmgr, circbuf_s* irqbuf, cmdpkt_s* rcvpkt) {
 
             case CMDPKT_FSM_ECHO:
                 rcvpkt->echo = b;
-                rcvpkt->fsm = CMDPKT_FSM_ID;
+                rcvpkt->fsm = CMDPKT_FSM_ARGSLEN;
                 break;
                 
             case CMDPKT_FSM_ARGSLEN:
                 rcvpkt->args_len = b;
-                rcvpkt->fsm = CMDPKT_FSM_ARGSLEN;
+                rcvpkt->fsm = CMDPKT_FSM_ID;
                 break;
 
             case CMDPKT_FSM_ID:
