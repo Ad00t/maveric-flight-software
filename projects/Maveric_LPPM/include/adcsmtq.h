@@ -14,6 +14,8 @@
 #define ADCSMTQ_MAX_IDX_COUNT       84      // 256
 #define ADCSMTQ_MAX_REG_NAME_LEN    17
 
+// Register type
+
 typedef enum {
     T_UINT8,
     T_INT8,
@@ -23,37 +25,65 @@ typedef enum {
     T_CHAR
 } adcsmtq_reg_type_e;
 
+// Packet parsing FSM states
+
 typedef enum {
     ADCSMTQ_FSM_HEAD = 0,
     ADCSMTQ_FSM_IDX,
     ADCSMTQ_FSM_CNT,
-    ADCSMTQ_FSM_MIDX,
+    ADCSMTQ_FSM_MIDXERR,
     ADCSMTQ_FSM_DATA,
     ADCSMTQ_FSM_CSUM,
     ADCSMTQ_FSM_DONE,
     ADCSMTQ_FSM_ERROR,
 } adcsmtq_fsm_e;
 
+// ADCSMTQ packet parsing struct
+
+typedef struct {
+    // Packet parsing metadata
+    adcsmtq_fsm_e fsm;
+    uint8_t i_args;
+    // Packet data
+    uint8_t head;
+    uint8_t idx;
+    uint8_t cnt;
+    uint8_t midx;
+    uint8_t err;
+    uint8_t data[MAX_BUF_LEN];
+    uint8_t csum;
+} adcsmtq_pkt_s;
+
+// Initialize adcsmtq pkt 
+void adcsmtq_pkt_init(adcsmtq_pkt_s* pkt);
+
+// Clear this adcsamtq pkt 
+void adcsmtq_pkt_clear(adcsmtq_pkt_s* pkt);
+
+// Verify the packet's checksum is valid
+int1 adcsmtq_pkt_verify_csum(adcsmtq_pkt_s* pkt);
+
+// ADCSMTQ register struct
+
 typedef struct {
     char name[ADCSMTQ_MAX_REG_NAME_LEN];
     uint8_t idx;
-    uint8_t data_count;
-    uint8_t map_idx;
+    uint8_t cnt;
+    uint8_t midx;
     adcsmtq_reg_type_e type;
     void* value;                // Should be free'd on reinitialization 
     uint8_t value_len;
     int1 dirty;
 } adcsmtq_reg_s;
 
+// ADCSMTQ global manager
+
 typedef struct {
     uint8_t port;  
     adcsmtq_reg_s reg_table[ADCSMTQ_REG_TABLE_LEN]; 
     adcsmtq_reg_s* reg_idx_map[ADCSMTQ_MAP_COUNT][ADCSMTQ_MAX_IDX_COUNT];
     hashtable_s reg_name_map;
-    // Inbound packet reading stuff
-    adcsmtq_fsm_e rcv_fsm;
-    uint8_t rcv_buf[MAX_BUF_LEN];
-    uint8_t rcv_buf_len;
+    adcsmtq_pkt_s rcvpkt;
 } adcsmtq_s;
 
 // Initialize adcsmtq object
@@ -66,21 +96,21 @@ void adcsmtq_destroy(adcsmtq_s* a);
 adcsmtq_reg_s* adcsmtq_get_reg_by_name(adcsmtq_s* a, char* name);
 
 // Lookup register by map idx, idx in reg_idx_map
-adcsmtq_reg_s* adcsmtq_get_reg_by_idx(adcsmtq_s* a, uint8_t map_idx, uint8_t idx);
+adcsmtq_reg_s* adcsmtq_get_reg_by_idx(adcsmtq_s* a, uint8_t midx, uint8_t idx);
 
 // Send register read command to adcsmtq
 void adcsmtq_read_start(adcsmtq_s* a, adcsmtq_reg_s* reg);
 void adcsmtq_read_start(adcsmtq_s* a, char* name);
 
 // Handle read data received from adcsmtq
-void adcsmtq_read_complete(adcsmtq_s* a, irqbuf_s* rcv_buf);
+void adcsmtq_read_complete(adcsmtq_s* a, adcsmtq_pkt_s* rcvpkt);
 
 // Send register write command to adcsmtq
 void adcsmtq_write_start(adcsmtq_s* a, adcsmtq_reg_s* reg, void* data);
 void adcsmtq_write_start(adcsmtq_s* a, char* name, void* data);
 
 // Handle write response receieved from adcsmtq
-void adcsmtq_write_complete(adcsmtq_s* a, irqbuf_s* rcv_buf);
+void adcsmtq_write_complete(adcsmtq_s* a, adcsmtq_pkt_s* rcvpkt);
 
 // Read back values from registers that were recently written
 void adcsmtq_readback(adcsmtq_s* a);
@@ -88,10 +118,10 @@ void adcsmtq_readback(adcsmtq_s* a);
 // Check interrupt buffer to advance frame reader FSM & handle packets rcv'd from adcsmtq
 void adcsmtq_rcv_fsm(adcsmtq_s* a, circbuf_s* irqbuf);
 
-/* Register format: [idx, data_count, map_idx, type]
+/* Register format: [idx, cnt, midx, type]
                 idx: Denotes the register that the command will read/write from/to.
-                data_count: Size of register in counts. 4 bytes/count.
-                map_idx: Determins which part of the register is being accesses; always a value from 0 to 2.
+                cnt: Size of register in counts. 4 bytes/count.
+                midx: Determins which part of the register is being accesses; always a value from 0 to 2.
                 type: Indicates the kind of data stored in a register.
 */
 

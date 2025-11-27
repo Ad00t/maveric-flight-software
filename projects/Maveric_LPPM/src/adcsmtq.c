@@ -9,9 +9,9 @@
 // HELPERS
 
 // Compute sum of all bytes in buf
-uint16_t sum_buf(uint8_t* buf, size_t len) {
+uint16_t sum_buf(uint8_t* buf, uint8_t len) {
     uint16_t sum = 0;
-    size_t i;
+    uint8_t i;
     for (i = 0; i < len; i++) {
         sum += buf[i];
     }
@@ -19,37 +19,53 @@ uint16_t sum_buf(uint8_t* buf, size_t len) {
 }
 
 // Generate checksum (two's complement of buf sum, so original sum + checksum should = 0)
-uint8_t gen_csum(uint8_t* buf, size_t len) {
+uint8_t gen_csum(uint8_t* buf, uint8_t len) {
     uint16_t sum = sum_buf(buf, len);
     return 0xFF - sum + 1;
 }
 
-// Check that checksum is valid (buf sum + checksum = 0)
-uint8_t verify_csum(uint8_t* buf, size_t len) {
-    uint16_t sum = sum_buf(buf, len);
-    return sum == 0;
-}   
+// ADCSMTQ Packet
 
-// API
+void adcsmtq_pkt_init(adcsmtq_pkt_s* pkt) {
+    adcsmtq_pkt_clear(pkt);
+}
+
+void adcsmtq_pkt_clear(adcsmtq_pkt_s* pkt) {
+    pkt->fsm = ADCSMTQ_FSM_HEAD;
+    pkt->i_args = 0;
+    pkt->head = 0;
+    pkt->idx = 0;
+    pkt->cnt = 0;
+    pkt->midx = 0;
+    pkt->err = 0;
+    memset(pkt->data, 0, MAX_BUF_LEN);
+    pkt->csum = 0;
+}
+
+int1 adcsmtq_pkt_verify_csum(adcsmtq_pkt_s* pkt) {
+    uint8_t sum = pkt->head + pkt->idx + pkt->cnt + ((pkt->midx << 4) | pkt->err);
+    if (pkt->head == ADCSMTQ_HEAD_READ) sum += sum_buf(pkt->data, 4*pkt->cnt);
+    sum += pkt->csum;
+    return sum == 0;
+}
+
+// ADCSMTQ API 
 
 void adcsmtq_init(adcsmtq_s* a, uint8_t port) {
     a->port = port;
     memcpy(a->reg_table, ADCSMTQ_INIT_REG_TABLE, sizeof(ADCSMTQ_INIT_REG_TABLE));
     memset(a->reg_idx_map, 0, ADCSMTQ_MAP_COUNT * ADCSMTQ_MAX_IDX_COUNT * sizeof(adcsmtq_reg_s*));
     ht_init(&a->reg_name_map);
-
-    a->rcv_fsm = ADCSMTQ_FSM_HEAD;
-    a->rcv_buf_len = 0;
-    memset(a->rcv_buf, 0, MAX_BUF_LEN);
+    adcsmtq_pkt_init(&a->rcvpkt);
 
     // Init idx, name maps, register space
-    size_t i;
+    uint8_t i;
     for (i = 0; i < ADCSMTQ_REG_TABLE_LEN; i++) {
         adcsmtq_reg_s* reg = &a->reg_table[i];
        
         // Populate idx map
-        if (reg->map_idx < ADCSMTQ_MAP_COUNT && reg->idx < ADCSMTQ_MAX_IDX_COUNT)
-            a->reg_idx_map[reg->map_idx][reg->idx] = reg;
+        if (reg->midx < ADCSMTQ_MAP_COUNT && reg->idx < ADCSMTQ_MAX_IDX_COUNT)
+            a->reg_idx_map[reg->midx][reg->idx] = reg;
 
         // Populate string name hash map
         ht_set(&a->reg_name_map, reg->name, reg);
@@ -57,44 +73,44 @@ void adcsmtq_init(adcsmtq_s* a, uint8_t port) {
         // Allocate register data space
         switch (reg->type) {
             case T_UINT8:
-                reg->value_len = 4*reg->data_count / sizeof(uint8_t);
+                reg->value_len = 4*reg->cnt / sizeof(uint8_t);
                 reg->value = calloc(reg->value_len, sizeof(uint8_t));
                 break;
             case T_INT8:
-                reg->value_len = 4*reg->data_count / sizeof(int8_t);
+                reg->value_len = 4*reg->cnt / sizeof(int8_t);
                 reg->value = calloc(reg->value_len, sizeof(int8_t));
                 break;
             case T_UINT16:
-                reg->value_len = 4*reg->data_count / sizeof(uint16_t);
+                reg->value_len = 4*reg->cnt / sizeof(uint16_t);
                 reg->value = calloc(reg->value_len, sizeof(uint16_t));
                 break;
             case T_INT16:
-                reg->value_len = 4*reg->data_count / sizeof(int16_t);
+                reg->value_len = 4*reg->cnt / sizeof(int16_t);
                 reg->value = calloc(reg->value_len, sizeof(int16_t));
                 break;
             case T_FLOAT:
-                reg->value_len = 4*reg->data_count / sizeof(float);
+                reg->value_len = 4*reg->cnt / sizeof(float);
                 reg->value = calloc(reg->value_len, sizeof(float));
                 break;
             case T_CHAR:
-                reg->value_len = 4*reg->data_count / sizeof(char);
+                reg->value_len = 4*reg->cnt / sizeof(char);
                 reg->value = calloc(reg->value_len, sizeof(char));
                 break;
         }
         
-//        fprintf(COM_D, "%s %u (%u,%u)\n", reg->name, h, reg->map_idx, reg->idx);
+//        fprintf(COM_D, "%s %u (%u,%u)\n", reg->name, h, reg->midx, reg->idx);
     }
 
     fprintf(COM_D, "%s[LPPM] ADCSMTQ initialized on UART%u\n", KWHT, a->port);
 }
 
 void adcsmtq_destroy(adcsmtq_s* a) {
-    size_t i;
+    uint8_t i;
     for (i = 0; i < ADCSMTQ_REG_TABLE_LEN; i++) {
         free(a->reg_table[i].value);
     }
 
-    memset(a->rcv_buf, 0, MAX_BUF_LEN);
+    adcsmtq_pkt_clear(&a->rcvpkt);
     ht_clear(&a->reg_name_map);
     memset(a->reg_idx_map, 0, ADCSMTQ_MAP_COUNT * ADCSMTQ_MAX_IDX_COUNT * sizeof(adcsmtq_reg_s*));
     memset(a->reg_table, 0, sizeof(ADCSMTQ_INIT_REG_TABLE));
@@ -104,11 +120,11 @@ adcsmtq_reg_s* adcsmtq_get_reg_by_name(adcsmtq_s* a, char* name) {
     return ht_get(&a->reg_name_map, name);
 }
 
-adcsmtq_reg_s* adcsmtq_get_reg_by_idx(adcsmtq_s* a, uint8_t map_idx, uint8_t idx) {
-    if (map_idx >= ADCSMTQ_MAP_COUNT || idx >= ADCSMTQ_MAX_IDX_COUNT)
+adcsmtq_reg_s* adcsmtq_get_reg_by_idx(adcsmtq_s* a, uint8_t midx, uint8_t idx) {
+    if (midx >= ADCSMTQ_MAP_COUNT || idx >= ADCSMTQ_MAX_IDX_COUNT)
         return NULL;
-    adcsmtq_reg_s* reg = a->reg_idx_map[map_idx][idx];
-    if (reg != NULL && (reg->map_idx != map_idx || reg->idx != idx))
+    adcsmtq_reg_s* reg = a->reg_idx_map[midx][idx];
+    if (reg != NULL && (reg->midx != midx || reg->idx != idx))
         return NULL;
     return reg;
 }
@@ -117,8 +133,8 @@ void adcsmtq_read_start(adcsmtq_s* a, adcsmtq_reg_s* reg) {
     uint8_t w_buf[4];
     w_buf[0] = ADCSMTQ_HEAD_READ;
     w_buf[1] = reg->idx;
-    w_buf[2] = reg->data_count;
-    w_buf[3] = (reg->map_idx << 4) | 0;
+    w_buf[2] = reg->cnt;
+    w_buf[3] = (reg->midx << 4) | 0;
     uint8_t csum = gen_csum(w_buf, 4);
     
     fprintf(COM_D, "%s[LPPM] adcsmtq_read_start: port=UART%u reg='%s' data=[ 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X ]\n", 
@@ -138,28 +154,35 @@ void adcsmtq_read_start(adcsmtq_s* a, char* name) {
     adcsmtq_read_start(a, reg);
 }
 
-void adcsmtq_read_complete(adcsmtq_s* a, uint8_t* buf) {
-    uint8_t idx = buf[1];
-    uint8_t data_count = buf[2];
-    uint8_t map_idx = buf[3] >> 4;
-    uint8_t error_code = buf[3] & 0b1111;
-    uint8_t* body = &buf[4];
+void adcsmtq_read_complete(adcsmtq_s* a, adcsmtq_pkt_s* rcvpkt) {
+    if (!adcsmtq_pkt_verify_csum(rcvpkt)) {
+        fprintf(COM_D, "%s[LPPM] adcsmtq_read_complete: ppm checksum error (%u,%u)\n", KRED, rcvpkt->midx, rcvpkt->idx);
+        return;
+    }
 
-    // TODO: verify csum, handle error code
+    switch (rcvpkt->err) {
+        case 0: break; // No error
+        case 1: // Checksum error
+            fprintf(COM_D, "%s[LPPM] adcsmtq_read_complete: rcv checksum error (%u,%u)\n", KRED, rcvpkt->midx, rcvpkt->idx);
+            return;
+        case 2: // Invalid register
+            fprintf(COM_D, "%s[LPPM] adcsmtq_read_complete: rcv invalid register (%u,%u)\n", KRED, rcvpkt->midx, rcvpkt->idx);
+            return;
+    }
 
-    adcsmtq_reg_s* reg = adcsmtq_get_reg_by_idx(a, map_idx, idx);
+    adcsmtq_reg_s* reg = adcsmtq_get_reg_by_idx(a, rcvpkt->midx, rcvpkt->idx);
     if (reg == NULL) {
-        fprintf(COM_D, "%s[LPPM] adcsmtq_read_complete: register invalid (%u,%u)\n", KRED, map_idx, idx);
+        fprintf(COM_D, "%s[LPPM] adcsmtq_read_complete: ppm invalid register (%u,%u)\n", KRED, rcvpkt->midx, rcvpkt->idx);
         return;
     }
         
-    size_t n_body_bytes = 4*data_count;
-    memcpy(reg->value, body, n_body_bytes);
+    uint8_t n_body_bytes = 4*rcvpkt->cnt;
+    memcpy(reg->value, rcvpkt->data, n_body_bytes);
     
     fprintf(COM_D, "%s[LPPM] adcsmtq_read_complete port=UART%u reg='%s' idx=%u count=%u midx=%u err=%u data=[",
-            KYEL, a->port, reg->name, idx, data_count, map_idx, error_code);
+            KYEL, a->port, reg->name, reg->idx, reg->cnt, reg->midx, rcvpkt->idx);
 
-    size_t i;
+    uint8_t i;
     switch (reg->type) {
         case T_UINT8: {
             for (i = 0; i < n_body_bytes; i++)
@@ -200,17 +223,17 @@ void adcsmtq_read_complete(adcsmtq_s* a, uint8_t* buf) {
 
 void adcsmtq_write_start(adcsmtq_s* a, adcsmtq_reg_s* reg, void* data) {
     uint8_t w_buf[MAX_BUF_LEN];
-    size_t n_body_bytes = 4*reg->data_count;
-    size_t w_buf_len = 4 + n_body_bytes;
+    uint8_t n_body_bytes = 4*reg->cnt;
+    uint8_t w_buf_len = 4 + n_body_bytes;
     w_buf[0] = ADCSMTQ_HEAD_WRITE;
     w_buf[1] = reg->idx;
-    w_buf[2] = reg->data_count;
-    w_buf[3] = (reg->map_idx << 4) | 0;
+    w_buf[2] = reg->cnt;
+    w_buf[3] = (reg->midx << 4) | 0;
     
     memcpy(&w_buf[4], data, n_body_bytes);
     uint8_t csum = gen_csum(w_buf, w_buf_len);
     
-    size_t i;
+    uint8_t i;
     switch (reg->type) {
 //        case T_UINT8:
 //            break;
@@ -247,28 +270,36 @@ void adcsmtq_write_start(adcsmtq_s* a, char* name, void* data) {
     adcsmtq_write_start(a, reg, data);
 }
 
-void adcsmtq_write_complete(adcsmtq_s* a, uint8_t* buf) {
-    uint8_t idx = buf[1];
-    uint8_t data_count = buf[2];
-    uint8_t map_idx = buf[3] >> 4;
-    uint8_t error_code = buf[3] & 0b1111;
-    uint8_t csum = buf[4];
-
-    // TODO: verify csum, handle error code
-
-    adcsmtq_reg_s* reg = adcsmtq_get_reg_by_idx(a, map_idx, idx);
-    if (reg == NULL) {
-        fprintf(COM_D, "%s[LPPM] adcsmtq_write_complete: register invalid (%u,%u)\n", KRED, map_idx, idx);
+void adcsmtq_write_complete(adcsmtq_s* a, adcsmtq_pkt_s* rcvpkt) {
+    if (!adcsmtq_pkt_verify_csum(rcvpkt)) {
+        fprintf(COM_D, "%s[LPPM] adcsmtq_write_complete: ppm checksum error (%u,%u)\n", KRED, rcvpkt->midx, rcvpkt->idx);
         return;
     }
+
+    switch (rcvpkt->err) {
+        case 0: break; // No error
+        case 1: // Checksum error
+            fprintf(COM_D, "%s[LPPM] adcsmtq_write_complete: rcv checksum error (%u,%u)\n", KRED, rcvpkt->midx, rcvpkt->idx);
+            return;
+        case 2: // Invalid register
+            fprintf(COM_D, "%s[LPPM] adcsmtq_write_complete: rcv invalid register (%u,%u)\n", KRED, rcvpkt->midx, rcvpkt->idx);
+            return;
+    }
+
+    adcsmtq_reg_s* reg = adcsmtq_get_reg_by_idx(a, rcvpkt->midx, rcvpkt->idx);
+    if (reg == NULL) {
+        fprintf(COM_D, "%s[LPPM] adcsmtq_write_complete: ppm invalid register (%u,%u)\n", KRED, rcvpkt->midx, rcvpkt->idx);
+        return;
+    }
+    
     reg->dirty = TRUE;
     
     fprintf(COM_D, "%s[LPPM] adcsmtq_write_complete: port=%u reg='%s' idx=%u count=%u midx=%u err=%u\n", 
-            KYEL, a->port, reg->name, idx, data_count, map_idx, error_code);
+            KYEL, a->port, reg->name, reg->idx, reg->cnt, reg->midx, rcvpkt->err);
 }
 
 void adcsmtq_readback(adcsmtq_s* a) {   
-    size_t i;
+    uint8_t i;
     for (i = 0; i < ADCSMTQ_REG_TABLE_LEN; i++) {
         if (a->reg_table[i].dirty) {
             adcsmtq_read_start(a, &a->reg_table[i]);
@@ -278,65 +309,69 @@ void adcsmtq_readback(adcsmtq_s* a) {
 }
 
 void adcsmtq_rcv_fsm(adcsmtq_s* a, circbuf_s* irqbuf) {
+    adcsmtq_pkt_s* rcvpkt = &a->rcvpkt;
     uint16_t iter = 0;
     while (iter < CIRCBUF_MAX_SIZE) {
         uint8_t b;
         if (!cb_pop(irqbuf, 1, &b)) return;
-
-        switch (a->rcv_fsm) {
+      
+        switch (rcvpkt->fsm) {
             case ADCSMTQ_FSM_HEAD:
                 if (b == ADCSMTQ_HEAD_READ || b == ADCSMTQ_HEAD_WRITE) {
-                    a->rcv_buf[a->rcv_buf_len++] = b;
-                    a->rcv_fsm = ADCSMTQ_FSM_IDX;
+                    rcvpkt->head = b;
+                    rcvpkt->fsm = ADCSMTQ_FSM_IDX;
                 } 
                 break;
 
             case ADCSMTQ_FSM_IDX:
-                a->rcv_buf[a->rcv_buf_len++] = b;
-                a->rcv_fsm = ADCSMTQ_FSM_CNT;
+                rcvpkt->idx = b;
+                rcvpkt->fsm = ADCSMTQ_FSM_CNT;
                 break;
 
             case ADCSMTQ_FSM_CNT:
-                a->rcv_buf[a->rcv_buf_len++] = b;
-                a->rcv_fsm = ADCSMTQ_FSM_MIDX;
+                rcvpkt->cnt = b;
+                rcvpkt->fsm = ADCSMTQ_FSM_MIDXERR;
                 break;
 
-            case ADCSMTQ_FSM_MIDX:
-                a->rcv_buf[a->rcv_buf_len++] = b;
-                switch (a->rcv_buf[0]) {
-                    case 0xC8: a->rcv_fsm = ADCSMTQ_FSM_CSUM; break;
-                    case 0xC9: a->rcv_fsm = ADCSMTQ_FSM_DATA; break;
-                    default: a->rcv_fsm = ADCSMTQ_FSM_ERROR; break;
+            case ADCSMTQ_FSM_MIDXERR:
+                rcvpkt->midx = b >> 4;
+                rcvpkt->err = b & 0b1111; 
+                switch (rcvpkt->head) {
+                    case ADCSMTQ_HEAD_WRITE: rcvpkt->fsm = ADCSMTQ_FSM_CSUM; break;
+                    case ADCSMTQ_HEAD_READ: rcvpkt->fsm = ADCSMTQ_FSM_DATA; break;
+                    default: rcvpkt->fsm = ADCSMTQ_FSM_ERROR; break;
                 }
                 break;
 
             case ADCSMTQ_FSM_DATA:
-                a->rcv_buf[a->rcv_buf_len++] = b;
-                if (a->rcv_buf_len >= MAX_BUF_LEN) {
-                    a->rcv_fsm = ADCSMTQ_FSM_ERROR;
-                } else if (a->rcv_buf_len >= 4+4*a->rcv_buf[2]) {
-                    a->rcv_fsm = ADCSMTQ_FSM_CSUM;
+                if (rcvpkt->i_args >= MAX_BUF_LEN) {
+                    rcvpkt->fsm = ADCSMTQ_FSM_ERROR;
+                    break;
+                }
+                rcvpkt->data[rcvpkt->i_args++] = b;
+                if (rcvpkt->i_args >= 4*rcvpkt->cnt) {
+                    rcvpkt->fsm = ADCSMTQ_FSM_CSUM;
                 }
                 break;
 
             case ADCSMTQ_FSM_CSUM:
-                a->rcv_buf[a->rcv_buf_len++] = b;
-                a->rcv_fsm = ADCSMTQ_FSM_DONE;
+                rcvpkt->csum = b;
+                rcvpkt->fsm = ADCSMTQ_FSM_DONE;
                 break;
         } 
 
         // Could wait till next superloop iteration or just handle end states immediately (currently doing the latter)
-        switch (a->rcv_fsm) {
+        switch (rcvpkt->fsm) {
             case ADCSMTQ_FSM_DONE:
-                switch (a->rcv_buf[0]) {
-                    case ADCSMTQ_HEAD_READ: adcsmtq_read_complete(a, a->rcv_buf); break;
-                    case ADCSMTQ_HEAD_WRITE: adcsmtq_write_complete(a, a->rcv_buf); break;
+                switch (rcvpkt->head) {
+                    case ADCSMTQ_HEAD_READ: adcsmtq_read_complete(a, rcvpkt); break;
+                    case ADCSMTQ_HEAD_WRITE: adcsmtq_write_complete(a, rcvpkt); break;
                 }
-            // Fall-through to reset rcv buf & FSM
+                adcsmtq_pkt_clear(rcvpkt);
+                break;
             case ADCSMTQ_FSM_ERROR:
-                a->rcv_fsm = ADCSMTQ_FSM_HEAD;
-                a->rcv_buf_len = 0;
-                memset(a->rcv_buf, 0, MAX_BUF_LEN);
+                fprintf(COM_D, "%s[LPPM] adcsmtq_rcv_fsm: malformed packet\n", KRED);
+                adcsmtq_pkt_clear(rcvpkt);
                 break;
         }
 

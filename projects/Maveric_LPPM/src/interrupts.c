@@ -10,23 +10,23 @@
 
 // Interrupt request manager 
 
-void irqmgr_init(irqmgr_s* irqmgr) {
-    irqmgr->started = FALSE;
-    irqmgr_clear(irqmgr);
+void irq_mgr_init(irq_mgr_s* irq_mgr) {
+    irq_mgr->started = FALSE;
+    irq_mgr_clear(irq_mgr);
 }
 
-void irqmgr_clear(irqmgr_s* irqmgr) {
-    size_t p;
+void irq_mgr_clear(irq_mgr_s* irq_mgr) {
+    uint8_t p;
     for (p = 0; p < NUM_PORTS; p++) {
-        cb_clear(&irqmgr->irqbufs[p]);
+        cb_clear(&irq_mgr->irq_bufs[p]);
     }
 }
 
-void irqmgr_handle_rcv(irqmgr_s* irqmgr, cmdmgr_s* cmdmgr, adcsmtq_s* tad102063) {
+void irq_mgr_handle_rcv(irq_mgr_s* irq_mgr, cmd_mgr_s* cmd_mgr, adcsmtq_s* tad102063) {
     isr_disable_all();
     
-    adcsmtq_rcv_fsm(tad102063, &irqmgr->irqbufs[0]);
-    cmdmgr_rcv_fsm(cmdmgr, &irqmgr->irqbufs[3], &cmdmgr->rcvpkts[0]); // Handle FTDI commands on cmd rcvpkt 0
+    adcsmtq_rcv_fsm(tad102063, &irq_mgr->irq_bufs[0]);
+    cmd_mgr_rcv_fsm(cmd_mgr, &irq_mgr->irq_bufs[3], &cmd_mgr->rcvpkts[0]); // Handle FTDI commands on cmd rcvpkt 0
 
     isr_enable_all();
 }
@@ -51,25 +51,25 @@ void isr_disable_all(void) {
 
 #INT_RDA
 void isr_rda1(void) {
-    if (!irqmgr.started || !uart_byte_avail(COM_A)) return;   
-    cb_push(&irqmgr.irqbufs[0], uart_read_byte(COM_A));
+    if (!irq_mgr.started || !uart_byte_avail(COM_A)) return;   
+    cb_push(&irq_mgr.irq_bufs[0], uart_read_byte(COM_A));
 }
 
 #INT_RDA2
 void isr_rda2(void) {
-    if (!irqmgr.started || !uart_byte_avail(COM_B)) return;
-    cb_push(&irqmgr.irqbufs[1], uart_read_byte(COM_B));
+    if (!irq_mgr.started || !uart_byte_avail(COM_B)) return;
+    cb_push(&irq_mgr.irq_bufs[1], uart_read_byte(COM_B));
 }
 
 #INT_RDA3
 void isr_rda3(void) {
-    if (!irqmgr.started || !uart_byte_avail(COM_C)) return;
-    cb_push(&irqmgr.irqbufs[2], uart_read_byte(COM_C));
+    if (!irq_mgr.started || !uart_byte_avail(COM_C)) return;
+    cb_push(&irq_mgr.irq_bufs[2], uart_read_byte(COM_C));
 }
 
 #INT_RDA4
 void isr_rda4(void) {
-    if (!irqmgr.started || !uart_byte_avail(COM_D)) return;
-    cb_push(&irqmgr.irqbufs[3], uart_read_byte(COM_D));
+    if (!irq_mgr.started || !uart_byte_avail(COM_D)) return;
+    cb_push(&irq_mgr.irq_bufs[3], uart_read_byte(COM_D));
 }
 

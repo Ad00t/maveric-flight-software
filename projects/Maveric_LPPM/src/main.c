@@ -73,7 +73,9 @@
 #define KWHT  "\033[37m"
 
 #define MAX_BUF_LEN     256
+#define NODE_ID         1
 
+#include "crcnew.c"
 #include "hashtable.c"
 #include "circbuf.c"
 #include "cmd.c"
@@ -81,8 +83,8 @@
 #include "adcsmtq.c"
 #include "interrupts.c"
 
-irqmgr_s irqmgr;
-cmdmgr_s cmdmgr;
+irq_mgr_s irq_mgr;
+cmd_mgr_s cmd_mgr;
 adcsmtq_s tad102063;
 
 void system_init(void);
@@ -90,34 +92,29 @@ void housekeeping(void);
 
 void main(void) {	
     system_init();
-
     while (TRUE) {
-        housekeeping(); // Housekeeping routine
+        housekeeping(); 
     }
 }
 
+// System initialization routine
 void system_init(void) {
-	//Interrupt enabling
-	//CRCCON = 0x07;
-	//CRCXOR = 0x0106;
-	setup_crc(8,2,1);
-	delay_ms(1000);
-	crc_init(0);
-
-    irqmgr_init(&irqmgr);
-    cmdmgr_init(&cmdmgr);
+    irq_mgr_init(&irq_mgr);
+    cmd_mgr_init(&cmd_mgr);
     adcsmtq_init(&tad102063, COM_A);
 
-    irqmgr.started = TRUE;
+    irq_mgr.started = TRUE;
     isr_enable_all();
     
-    fprintf(COM_D, "%s[LPPM] System initialized\n", KWHT);
+    fprintf(COM_D, "%s[LPPM] system initialized\n", KWHT);
     delay_ms(1000);
 }
+
+// Housekeeping routine
 void housekeeping(void) {
-    fprintf(COM_D, "%s[LPPM] HK COM_D ACTIVE\n", KWHT);
+    fprintf(COM_D, "%s[LPPM] housekeeping\n", KWHT);
     
-    irqmgr_handle_rcv(&irqmgr, &cmdmgr, &tad102063); // Handle all rcv'd interrupts
+    irq_mgr_handle_rcv(&irq_mgr, &cmd_mgr, &tad102063); // Handle all rcv'd interrupts
     
     adcsmtq_readback(&tad102063);
     

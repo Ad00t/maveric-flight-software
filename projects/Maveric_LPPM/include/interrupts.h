@@ -11,22 +11,22 @@
 
 typedef struct {
     int1 started;
-    volatile circbuf_s irqbufs[NUM_PORTS];
+    volatile circbuf_s irq_bufs[NUM_PORTS];
     // 0 = UART1    1 = UART2    2 = UART3   3 = UART4 
-} irqmgr_s;
+} irq_mgr_s;
 
 // Initialize interrupt requests manager
-void irqmgr_init(irqmgr_s* irqmgr);
+void irq_mgr_init(irq_mgr_s* irq_mgr);
 
 // Clear all interrupt rcv bufs
-void irqmgr_clear(irqmgr_s* irqmgr);
+void irq_mgr_clear(irq_mgr_s* irq_mgr);
 
 // Check interrupt buffers and advance port-specific FSM's and irq handling logic 
-void irqmgr_handle_rcv(irqmgr_s* irqmgr, cmdmgr_s* cmdmgr, adcsmtq_s* tad102063);
+void irq_mgr_handle_rcv(irq_mgr_s* irq_mgr, cmdmgr_s* cmdmgr, adcsmtq_s* tad102063);
 
 // Interrupt service routines
 
-extern irqmgr_s irqmgr;
+extern irq_mgr_s irq_mgr;
 
 // Enable all interrupts
 void isr_enable_all(void);
