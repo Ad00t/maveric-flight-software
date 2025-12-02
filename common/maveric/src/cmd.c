@@ -2,19 +2,20 @@
 #include "circbuf.h"
 #include "hashtable.h"
 #include "crcnew.h"
+#include "cmdfunc.h"
 #include <stdint.h>
 #include <stdlib.h>
 
 #module
 
-// CMD packet 
+// Command packet 
 
-void cmd_pkt_init(cmd_pkt_s* pkt) {
-    cmd_pkt_clear(pkt);
+void cmdpkt_init(cmdpkt_s* pkt) {
+    cmdpkt_clear(pkt);
 }
 
-void cmd_pkt_clear(cmd_pkt_s* pkt) {
-    pkt->fsm = CMD_PKT_FSM_HEAD;
+void cmdpkt_clear(cmdpkt_s* pkt) {
+    pkt->fsm = CMDPKT_FSM_HEAD;
     pkt->i_id = 0;
     pkt->i_args = 0;
     pkt->orgn = 0;
@@ -27,112 +28,106 @@ void cmd_pkt_clear(cmd_pkt_s* pkt) {
     pkt->running_crc = 0;
 }
 
-// Command func declarations
-
-void cmd_func_set_time(cmd_pkt_s* pkt);
-
 // Command Manager
 
-void cmd_mgr_init(cmd_mgr_s* cmd_mgr) {
+void cmdmgr_init(cmdmgr_s* cmdmgr) {
     uint8_t b;
     for (b = 0; b < NUM_CMD_BUFS; b++) {
-        cmd_pkt_init(&cmd_mgr->rcvpkts[b]);
+        cmdpkt_init(&cmdmgr->rcvpkts[b]);
     }
-    ht_init(&cmd_mgr->cmd_funcs); 
-    ht_set(&cmd_mgr->cmd_funcs, "cmd_set_time", (cmd_func_f) cmd_func_set_time);
+    cmdfunc_register_all(cmdmgr);
 }
 
-void cmd_mgr_clear(cmd_mgr_s* cmd_mgr) {
+void cmdmgr_clear(cmdmgr_s* cmdmgr) {
     uint8_t b;
     for (b = 0; b < NUM_CMD_BUFS; b++) {
-        cmd_pkt_clear(&cmd_mgr->rcvpkts[b]);
+        cmdpkt_clear(&cmdmgr->rcvpkts[b]);
     }
 }
 
-void cmd_mgr_rcv_fsm(cmd_mgr_s* cmd_mgr, circbuf_s* irqbuf, cmd_pkt_s* rcvpkt) {
+void cmdmgr_rcv_fsm(cmdmgr_s* cmdmgr, circbuf_s* irqbuf, cmdpkt_s* rcvpkt) {
     uint16_t iter = 0;
-    while (iter < CIRCBUF_MAX_SIZE) {
+    while (iter < 2*CIRCBUF_MAX_SIZE) {
         uint8_t b = 0;
         if (!cb_pop(irqbuf, 1, &b)) return;
 
         switch (rcvpkt->fsm) {
-            case CMD_PKT_FSM_HEAD:
+            case CMDPKT_FSM_HEAD:
                 if (b == 0xCD) {
                     rcvpkt->running_crc = get_crc16_cont(CRC_RESTART, &b, 1);
-                    rcvpkt->fsm = CMD_PKT_FSM_ORGN;
+                    rcvpkt->fsm = CMDPKT_FSM_ORGN;
                 }
                 break;
                 
-            case CMD_PKT_FSM_ORGN:
+            case CMDPKT_FSM_ORGN:
                 rcvpkt->orgn = b;
                 rcvpkt->running_crc = get_crc16_cont(CRC_CONTINUE_PREVIOUS, &b, 1);
-                rcvpkt->fsm = CMD_PKT_FSM_DEST;
+                rcvpkt->fsm = CMDPKT_FSM_DEST;
                 break;
 
-            case CMD_PKT_FSM_DEST:
+            case CMDPKT_FSM_DEST:
                 rcvpkt->dest = b;
                 rcvpkt->running_crc = get_crc16_cont(CRC_CONTINUE_PREVIOUS, &b, 1);
-                rcvpkt->fsm = CMD_PKT_FSM_ECHO;
+                rcvpkt->fsm = CMDPKT_FSM_ECHO;
                 break;
 
-            case CMD_PKT_FSM_ECHO:
+            case CMDPKT_FSM_ECHO:
                 rcvpkt->echo = b;
                 rcvpkt->running_crc = get_crc16_cont(CRC_CONTINUE_PREVIOUS, &b, 1);
-                rcvpkt->fsm = CMD_PKT_FSM_ARGSLEN;
+                rcvpkt->fsm = CMDPKT_FSM_ARGSLEN;
                 break;
                 
-            case CMD_PKT_FSM_ARGSLEN:
+            case CMDPKT_FSM_ARGSLEN:
                 rcvpkt->args_len = b;
                 rcvpkt->running_crc = get_crc16_cont(CRC_CONTINUE_PREVIOUS, &b, 1);
-                rcvpkt->fsm = CMD_PKT_FSM_ID;
+                rcvpkt->fsm = CMDPKT_FSM_ID;
                 break;
 
-            case CMD_PKT_FSM_ID:
+            case CMDPKT_FSM_ID:
                 if (rcvpkt->i_id >= MAX_CMD_ID_LEN) {
-                    rcvpkt->fsm = CMD_PKT_FSM_ERROR;
+                    rcvpkt->fsm = CMDPKT_FSM_ERROR;
                     break;
                 }
                 rcvpkt->id[rcvpkt->i_id++] = b;
                 rcvpkt->running_crc = get_crc16_cont(CRC_CONTINUE_PREVIOUS, &b, 1);
                 if (b == ' ') {
                     rcvpkt->id[rcvpkt->i_id-1] = '\0';
-                    rcvpkt->fsm = CMD_PKT_FSM_ARGSSTR;
+                    rcvpkt->fsm = CMDPKT_FSM_ARGSSTR;
                 }
                 break;
 
-            case CMD_PKT_FSM_ARGSSTR:
+            case CMDPKT_FSM_ARGSSTR:
                 if (rcvpkt->i_args >= MAX_BUF_LEN) {
-                    rcvpkt->fsm = CMD_PKT_FSM_ERROR;
+                    rcvpkt->fsm = CMDPKT_FSM_ERROR;
                     break;
                 }
                 rcvpkt->running_crc = get_crc16_cont(CRC_CONTINUE_PREVIOUS, &b, 1);
-                if (b == ' ') b = '\0';
                 rcvpkt->args_str[rcvpkt->i_args++] = b;
                 if (rcvpkt->i_args >= rcvpkt->args_len) {
                     rcvpkt->id[rcvpkt->i_args] = '\0';
-                    rcvpkt->fsm = CMD_PKT_FSM_CRC1;
+                    rcvpkt->fsm = CMDPKT_FSM_CRC1;
                 }
                 break;
 
-            case CMD_PKT_FSM_CRC1:
+            case CMDPKT_FSM_CRC1:
                 rcvpkt->crc = b;
-                rcvpkt->fsm = CMD_PKT_FSM_CRC2;
+                rcvpkt->fsm = CMDPKT_FSM_CRC2;
                 break;
             
-            case CMD_PKT_FSM_CRC2:
+            case CMDPKT_FSM_CRC2:
                 rcvpkt->crc = ((uint16_t)b << 8) | rcvpkt->crc; // 2 byte CRC stored as little endian in cmd
-                rcvpkt->fsm = CMD_PKT_FSM_DONE;
+                rcvpkt->fsm = CMDPKT_FSM_DONE;
                 break;
         }
 
         switch (rcvpkt->fsm) {
-            case CMD_PKT_FSM_DONE:
-                cmd_mgr_process_cmd(cmd_mgr, rcvpkt);
-                cmd_pkt_clear(rcvpkt);
+            case CMDPKT_FSM_DONE:
+                cmdmgr_process_cmd(cmdmgr, rcvpkt);
+                cmdpkt_clear(rcvpkt);
                 break;
-            case CMD_PKT_FSM_ERROR:
-                fprintf(COM_D, "%s[LPPM] cmd_mgr_rcv_fsm: malformed packet\n", KRED);
-                cmd_pkt_clear(rcvpkt);
+            case CMDPKT_FSM_ERROR:
+                fprintf(COM_D, "%s[%s] cmdmgr_rcv_fsm: malformed packet\n", KRED, NODE_LBL);
+                cmdpkt_clear(rcvpkt);
                 break;
         }
 
@@ -140,40 +135,28 @@ void cmd_mgr_rcv_fsm(cmd_mgr_s* cmd_mgr, circbuf_s* irqbuf, cmd_pkt_s* rcvpkt) {
     }
 }
 
-void cmd_mgr_process_cmd(cmd_mgr_s* cmd_mgr, cmd_pkt_s* pkt) {
+void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
     // Forward
     if (pkt->dest != NODE_ID) {
-        fprintf(COM_D, "%s[LPPM] forwarding cmd '%s'", KRED, pkt->id);
+        fprintf(COM_D, "%s[%s] forwarding cmd '%s'", KRED, NODE_LBL, pkt->id);
         return;
     } 
     
     // CRC check 
     if (pkt->crc != pkt->running_crc) {
-        fprintf(COM_D, "%s[LPPM] crc check failed on cmd '%s' crc:%u calculated:%u\n", KRED, pkt->id, pkt->crc, pkt->running_crc);
+        fprintf(COM_D, "%s[%s] crc check failed on cmd '%s' crc:%u calculated:%u\n", KRED, NODE_LBL,
+                pkt->id, pkt->crc, pkt->running_crc);
         return;
     } 
     
-    cmd_func_f cmd_func = ht_get(&cmd_mgr->cmd_funcs, pkt->id);
-
-    if (cmd_func == NULL) {
-        fprintf(COM_D, "%s[LPPM] cmd not recognized '%s'\n", KRED, pkt->id);
+    // Parse & execute cmd here
+    cmdfunc_f cmdfunc = ht_get(&cmdmgr->cmdfuncs, pkt->id);
+    if (cmdfunc == NULL) {
+        fprintf(COM_D, "%s[%s] cmd not recognized '%s'\n", KRED, NODE_LBL, pkt->id);
         return;
     }
-
-    cmd_func(pkt);
+    cmdfunc(pkt);
 }
 
 // COMMAND HANDLERS
 
-void cmd_func_set_time(cmd_pkt_s* pkt) {
-    uint8_t* astr = pkt->args_str;
-    uint8_t month = atoi(&astr[0]);
-    uint8_t day = atoi(&astr[2]);
-    uint8_t yr = atoi(&astr[4]);
-    uint8_t weekday = atoi(&astr[6]);
-    uint8_t hr = atoi(&astr[8]); 
-    uint8_t min = atoi(&astr[10]);    
-    uint8_t sec = atoi(&astr[12]);    
-
-    fprintf(COM_D, "%s[LPPM] cmd_func_set_time [ %u %u %u %u %u %u %u ]\n", KCYN, month, day, yr, weekday, hr, min, sec);
-}

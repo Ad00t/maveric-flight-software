@@ -10,14 +10,15 @@
 
 #build(stack=0x300)					// Use a larger stack size.
 #fuses NOPROTECT					// Code not protected from reading
-#fuses NOWDT						// No automatic WDT -- it must be enabled by software.
+// #fuses NOWDT						// No automatic WDT -- it must be enabled by software.
+#fuses WDT
 //#fuses XT							// Primary Clock Select
 //#fuses FRC_PLL				    // Internal Fast RC Oscillator with Phase Lock Loop gives 32 MHz
 #fuses HS
 #fuses PR_PLL
 #fuses WPOSTS13						// Watchdog Postscaler.  
-									// At current processor settings: WPOSTS12 = ~12 seconds
-									//								  WPOSTS13 = ~20 seconds
+									// At current processor settings: WPOSTS12 = ~10 seconds
+									//								  WPOSTS13 = ~17 seconds
 									//								  default  = ~120 seconds
 #fuses IESO							// Internal-External Switchover
 //#fuses IOL1WAY					// Locks the I/O Lock after setting it once.
@@ -28,37 +29,21 @@
 
 #use delay(clock=32MHZ,internal=8M)  // Tells compiler what the clock speed is
 
-//========================================
-//  		PIC Registers 
-//========================================
+// PIC registers
+
 #word RCON = 0x0740
 #word OSCCON = getenv("SFR:OSCCON") 
 #bit IOLOCK = OSCCON.6
 #word RPINR20 = getenv("SFR:RPINR20")
 #word RPOR1 = getenv("SFR:RPOR1")
 
-//#word CRCCON = 0x0640
-//#word CRCXOR = 0x0642
-
-/* // DEBUG DISPLAY
-#warning OSCCON is located at getenv("SFR:OSCCON")
-#warning IOLOCK is located at getenv("BIT:IOLOCK")
-#warning RPINR20 is located at getenv("SFR:RPINR20")
-#warning RPOR1 is located at getenv("SFR:RPOR1")
-*/
-
 #include "pinslower.h"            // Add pins Lower PPM Definition
 
-//==================================================================
-//  		Serial Port Initialization
-//===================================================================
-#use rs232(baud=COM_A_BAUD, UART1, bits=8, STREAM=COM_A, ERRORS, PARITY=N, TIMEOUT=1000)
-#use rs232(baud=COM_B_BAUD, UART2, bits=8, STREAM=COM_B, ERRORS, PARITY= N, TIMEOUT=1000)
-#use rs232(baud=COM_C_BAUD, UART3, bits=8, STREAM=COM_C, ERRORS, PARITY=N, TIMEOUT=1000) // To/From other PIC
-#use rs232(baud=COM_D_BAUD, UART4, bits=8, STREAM=COM_D, ERRORS, PARITY= N, TIMEOUT=1000)
-//==================================================================
-//  		I2C Port Initialization
-//===================================================================
+// Ports initialization
+
+#use rs232(baud=COM_A_BAUD, UART1, BITS=8, STREAM=COM_A, ERRORS, PARITY=N, TIMEOUT=1000)
+#use rs232(baud=COM_D_BAUD, UART4, BITS=8, STREAM=COM_D, ERRORS, PARITY= N, TIMEOUT=1000)
+// #use spi(MASTER, DI=SDI1, DO=SDO1, CLK=SCK1OUT, BITS=8)
 //#use i2c(master, sda=PIN_G3, scl=PIN_G2, STREAM=I2C_1)
 //#use i2c(master, sda=PIN_A3, scl=PIN_A2, STREAM=I2C_1)
 //#use i2c(master, sda=PIN_A15, scl=PIN_A14, STREAM=I2C_1)
@@ -74,62 +59,80 @@
 
 #define MAX_BUF_LEN     256
 #define NODE_ID         1
+#define NODE_LBL        "LPPM"
 
 #include "crcnew.c"
 #include "hashtable.c"
 #include "circbuf.c"
+#include "cmdfunc.c"
 #include "cmd.c"
 #include "uart.c"
 #include "adcsmtq.c"
 #include "interrupts.c"
 
-irq_mgr_s irq_mgr;
-cmd_mgr_s cmd_mgr;
-adcsmtq_s tad102063;
-
 void system_init(void);
 void housekeeping(void);
+void system_cleanup(void);
+
+int1 SUPERLOOP_RUNNING = TRUE;
+irqmgr_s irqmgr;
+cmdmgr_s cmdmgr;
+adcsmtq_s tad102063;
 
 void main(void) {	
     system_init();
-    while (TRUE) {
+    while (SUPERLOOP_RUNNING) {
         housekeeping(); 
     }
+    system_cleanup();
 }
 
 // System initialization routine
 void system_init(void) {
-    irq_mgr_init(&irq_mgr);
-    cmd_mgr_init(&cmd_mgr);
+    // Watchdog init
+    setup_wdt(WDT_ON);
+
+    // Submodules init
+    irqmgr_init(&irqmgr);
+    cmdmgr_init(&cmdmgr);
     adcsmtq_init(&tad102063, COM_A);
 
-    irq_mgr.started = TRUE;
+    irqmgr.started = TRUE;
     isr_enable_all();
     
-    fprintf(COM_D, "%s[LPPM] system initialized\n", KWHT);
+    fprintf(COM_D, "%s[%s] system initialized\n", KWHT, NODE_LBL);
     delay_ms(1000);
 }
 
 // Housekeeping routine
 void housekeeping(void) {
-    fprintf(COM_D, "%s[LPPM] housekeeping\n", KWHT);
+    fprintf(COM_D, "%s[%s] housekeeping\n", KWHT, NODE_LBL);
+
+    // Kick the dog
+    restart_wdt();
     
-    irq_mgr_handle_rcv(&irq_mgr, &cmd_mgr, &tad102063); // Handle all rcv'd interrupts
+    // Handle received byte interrupts
+    isr_disable_all();
+    adcsmtq_rcv_fsm(&tad102063, &irqmgr.irqbufs[0]); // Do driver handling before commands so data is up to date
+    cmdmgr_rcv_fsm(&cmdmgr, &irqmgr.irqbufs[1], &cmdmgr.rcvpkts[0]); // Handle COM_D FTDI commands on cmd rcvpkt 0
+    isr_enable_all();
     
     adcsmtq_readback(&tad102063);
     
-//    adcsmtq_read_start(&tad102063, "SNID");
-    
     adcsmtq_read_start(&tad102063, "TIME");
-    
-//    float mass = 15.0;
-//    adcsmtq_write_start(&tad102063, "MASS", &mass);
-    
-//    float axis[3];
-//    axis[0] = 1f;
-//    axis[1] = 0f;
-//    axis[2] = 0f;
-//    adcsmtq_write_start(&tad102063, "POINTING_AXIS", axis);
+    // adcsmtq_read_start(&tad102063, "SNID");    
+    // float mass = 15.0;
+    // adcsmtq_write_start(&tad102063, "MASS", &mass);
+    // float axis[3];
+    // axis[0] = 1f;
+    // axis[1] = 0f;
+    // axis[2] = 0f;
+    // adcsmtq_write_start(&tad102063, "POINTING_AXIS", axis);
 
     delay_ms(1000);
+}
+
+// Cleanup routine
+void system_cleanup(void) {
+    adcsmtq_destroy(&tad102063);
 }

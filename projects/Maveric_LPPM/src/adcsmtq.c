@@ -101,7 +101,7 @@ void adcsmtq_init(adcsmtq_s* a, uint8_t port) {
 //        fprintf(COM_D, "%s %u (%u,%u)\n", reg->name, h, reg->midx, reg->idx);
     }
 
-    fprintf(COM_D, "%s[LPPM] ADCSMTQ initialized on UART%u\n", KWHT, a->port);
+    fprintf(COM_D, "%s[%s] adcsmtq_init: port=%u\n", KWHT, NODE_LBL, a->port);
 }
 
 void adcsmtq_destroy(adcsmtq_s* a) {
@@ -137,8 +137,8 @@ void adcsmtq_read_start(adcsmtq_s* a, adcsmtq_reg_s* reg) {
     w_buf[3] = (reg->midx << 4) | 0;
     uint8_t csum = gen_csum(w_buf, 4);
     
-    fprintf(COM_D, "%s[LPPM] adcsmtq_read_start: port=UART%u reg='%s' data=[ 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X ]\n", 
-            KYEL, a->port, reg->name, w_buf[0], w_buf[1], w_buf[2], w_buf[3], csum);
+    fprintf(COM_D, "%s[%s] adcsmtq_read_start: port=UART%u reg='%s' data=[ 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X ]\n", 
+            KYEL, NODE_LBL, a->port, reg->name, w_buf[0], w_buf[1], w_buf[2], w_buf[3], csum);
     
     uart_write_buf(a->port, w_buf, 4); 
     uart_write_byte(a->port, csum);
@@ -148,7 +148,7 @@ void adcsmtq_read_start(adcsmtq_s* a, adcsmtq_reg_s* reg) {
 void adcsmtq_read_start(adcsmtq_s* a, char* name) {
     adcsmtq_reg_s* reg = adcsmtq_get_reg_by_name(a, name);
     if (reg == NULL) {
-        fprintf(COM_D, "%s[LPPM] adcsmtq_read_start: register invalid '%s'\n", KRED, name);
+        fprintf(COM_D, "%s[%s] adcsmtq_read_start: register invalid '%s'\n", KRED, NODE_LBL, name);
         return;
     }
     adcsmtq_read_start(a, reg);
@@ -156,31 +156,31 @@ void adcsmtq_read_start(adcsmtq_s* a, char* name) {
 
 void adcsmtq_read_complete(adcsmtq_s* a, adcsmtq_pkt_s* rcvpkt) {
     if (!adcsmtq_pkt_verify_csum(rcvpkt)) {
-        fprintf(COM_D, "%s[LPPM] adcsmtq_read_complete: ppm checksum error (%u,%u)\n", KRED, rcvpkt->midx, rcvpkt->idx);
+        fprintf(COM_D, "%s[%s] adcsmtq_read_complete: ppm checksum error (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
         return;
     }
 
     switch (rcvpkt->err) {
         case 0: break; // No error
         case 1: // Checksum error
-            fprintf(COM_D, "%s[LPPM] adcsmtq_read_complete: rcv checksum error (%u,%u)\n", KRED, rcvpkt->midx, rcvpkt->idx);
+            fprintf(COM_D, "%s[%s] adcsmtq_read_complete: rcv checksum error (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
             return;
         case 2: // Invalid register
-            fprintf(COM_D, "%s[LPPM] adcsmtq_read_complete: rcv invalid register (%u,%u)\n", KRED, rcvpkt->midx, rcvpkt->idx);
+            fprintf(COM_D, "%s[%s] adcsmtq_read_complete: rcv invalid register (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
             return;
     }
 
     adcsmtq_reg_s* reg = adcsmtq_get_reg_by_idx(a, rcvpkt->midx, rcvpkt->idx);
     if (reg == NULL) {
-        fprintf(COM_D, "%s[LPPM] adcsmtq_read_complete: ppm invalid register (%u,%u)\n", KRED, rcvpkt->midx, rcvpkt->idx);
+        fprintf(COM_D, "%s[%s] adcsmtq_read_complete: ppm invalid register (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
         return;
     }
         
     uint8_t n_body_bytes = 4*rcvpkt->cnt;
     memcpy(reg->value, rcvpkt->data, n_body_bytes);
     
-    fprintf(COM_D, "%s[LPPM] adcsmtq_read_complete port=UART%u reg='%s' idx=%u count=%u midx=%u err=%u data=[",
-            KYEL, a->port, reg->name, reg->idx, reg->cnt, reg->midx, rcvpkt->idx);
+    fprintf(COM_D, "%s[%s] adcsmtq_read_complete: port=UART%u reg='%s' idx=%u count=%u midx=%u err=%u data=[",
+            KYEL, NODE_LBL, a->port, reg->name, reg->idx, reg->cnt, reg->midx, rcvpkt->idx);
 
     uint8_t i;
     switch (reg->type) {
@@ -250,8 +250,8 @@ void adcsmtq_write_start(adcsmtq_s* a, adcsmtq_reg_s* reg, void* data) {
             break;
     }
     
-    fprintf(COM_D, "%s[LPPM] adcsmtq_write_start: port=%u reg='%s' len=%u data=[", 
-            KYEL, a->port, reg->name, w_buf_len+1);
+    fprintf(COM_D, "%s[%s] adcsmtq_write_start: port=%u reg='%s' len=%u data=[", 
+            KYEL, NODE_LBL a->port, reg->name, w_buf_len+1);
     for (i = 0; i < w_buf_len; i++)
         fprintf(COM_D, " 0x%02X", w_buf[i]);
     fprintf(COM_D, " 0x%02X ]\n", csum);
@@ -264,7 +264,7 @@ void adcsmtq_write_start(adcsmtq_s* a, adcsmtq_reg_s* reg, void* data) {
 void adcsmtq_write_start(adcsmtq_s* a, char* name, void* data) {
     adcsmtq_reg_s* reg = adcsmtq_get_reg_by_name(a, name);
     if (reg == NULL) {
-        fprintf(COM_D, "%s[LPPM] adcsmtq_write_start: register invalid '%s'\n", KRED, name);
+        fprintf(COM_D, "%s[%s] adcsmtq_write_start: register invalid '%s'\n", KRED, NODE_LBL, name);
         return;
     }
     adcsmtq_write_start(a, reg, data);
@@ -272,30 +272,30 @@ void adcsmtq_write_start(adcsmtq_s* a, char* name, void* data) {
 
 void adcsmtq_write_complete(adcsmtq_s* a, adcsmtq_pkt_s* rcvpkt) {
     if (!adcsmtq_pkt_verify_csum(rcvpkt)) {
-        fprintf(COM_D, "%s[LPPM] adcsmtq_write_complete: ppm checksum error (%u,%u)\n", KRED, rcvpkt->midx, rcvpkt->idx);
+        fprintf(COM_D, "%s[%s] adcsmtq_write_complete: ppm checksum error (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
         return;
     }
 
     switch (rcvpkt->err) {
         case 0: break; // No error
         case 1: // Checksum error
-            fprintf(COM_D, "%s[LPPM] adcsmtq_write_complete: rcv checksum error (%u,%u)\n", KRED, rcvpkt->midx, rcvpkt->idx);
+            fprintf(COM_D, "%s[%s] adcsmtq_write_complete: rcv checksum error (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
             return;
         case 2: // Invalid register
-            fprintf(COM_D, "%s[LPPM] adcsmtq_write_complete: rcv invalid register (%u,%u)\n", KRED, rcvpkt->midx, rcvpkt->idx);
+            fprintf(COM_D, "%s[%s] adcsmtq_write_complete: rcv invalid register (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
             return;
     }
 
     adcsmtq_reg_s* reg = adcsmtq_get_reg_by_idx(a, rcvpkt->midx, rcvpkt->idx);
     if (reg == NULL) {
-        fprintf(COM_D, "%s[LPPM] adcsmtq_write_complete: ppm invalid register (%u,%u)\n", KRED, rcvpkt->midx, rcvpkt->idx);
+        fprintf(COM_D, "%s[%s] adcsmtq_write_complete: ppm invalid register (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
         return;
     }
     
     reg->dirty = TRUE;
     
-    fprintf(COM_D, "%s[LPPM] adcsmtq_write_complete: port=%u reg='%s' idx=%u count=%u midx=%u err=%u\n", 
-            KYEL, a->port, reg->name, reg->idx, reg->cnt, reg->midx, rcvpkt->err);
+    fprintf(COM_D, "%s[%s] adcsmtq_write_complete: port=%u reg='%s' idx=%u count=%u midx=%u err=%u\n", 
+            KYEL, NODE_LBL, a->port, reg->name, reg->idx, reg->cnt, reg->midx, rcvpkt->err);
 }
 
 void adcsmtq_readback(adcsmtq_s* a) {   
@@ -311,7 +311,7 @@ void adcsmtq_readback(adcsmtq_s* a) {
 void adcsmtq_rcv_fsm(adcsmtq_s* a, circbuf_s* irqbuf) {
     adcsmtq_pkt_s* rcvpkt = &a->rcvpkt;
     uint16_t iter = 0;
-    while (iter < CIRCBUF_MAX_SIZE) {
+    while (iter < 2*CIRCBUF_MAX_SIZE) {
         uint8_t b;
         if (!cb_pop(irqbuf, 1, &b)) return;
       
@@ -370,7 +370,7 @@ void adcsmtq_rcv_fsm(adcsmtq_s* a, circbuf_s* irqbuf) {
                 adcsmtq_pkt_clear(rcvpkt);
                 break;
             case ADCSMTQ_FSM_ERROR:
-                fprintf(COM_D, "%s[LPPM] adcsmtq_rcv_fsm: malformed packet\n", KRED);
+                fprintf(COM_D, "%s[%s] adcsmtq_rcv_fsm: malformed packet\n", KRED, NODE_LBL);
                 adcsmtq_pkt_clear(rcvpkt);
                 break;
         }

@@ -9,10 +9,11 @@
       <itemPath>../../common/maveric/include/cmd.h</itemPath>
       <itemPath>../../common/maveric/include/i2c.h</itemPath>
       <itemPath>../../common/maveric/include/uart.h</itemPath>
-      <itemPath>include/interrupts.h</itemPath>
       <itemPath>../../common/maveric/include/circbuf.h</itemPath>
       <itemPath>../../common/maveric/include/hashtable.h</itemPath>
       <itemPath>../../common/maveric/include/crcnew.h</itemPath>
+      <itemPath>include/cmdfunc.h</itemPath>
+      <itemPath>include/interrupts.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -33,9 +34,10 @@
       <itemPath>../../common/maveric/src/cmd.c</itemPath>
       <itemPath>../../common/maveric/src/i2c.c</itemPath>
       <itemPath>../../common/maveric/src/uart.c</itemPath>
-      <itemPath>src/interrupts.c</itemPath>
       <itemPath>../../common/maveric/src/circbuf.c</itemPath>
       <itemPath>../../common/maveric/src/hashtable.c</itemPath>
+      <itemPath>../../common/maveric/src/crcnew.c</itemPath>
+      <itemPath>src/cmdfunc.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>

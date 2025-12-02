@@ -12,22 +12,22 @@
 // Command packet & reader FSM
 
 typedef enum {
-    CMD_PKT_FSM_HEAD = 0,
-    CMD_PKT_FSM_ORGN,
-    CMD_PKT_FSM_DEST,
-    CMD_PKT_FSM_ECHO,
-    CMD_PKT_FSM_ARGSLEN,
-    CMD_PKT_FSM_ID,
-    CMD_PKT_FSM_ARGSSTR,
-    CMD_PKT_FSM_CRC1,
-    CMD_PKT_FSM_CRC2,
-    CMD_PKT_FSM_DONE,
-    CMD_PKT_FSM_ERROR
-} cmd_pkt_fsm_e;
+    CMDPKT_FSM_HEAD = 0,
+    CMDPKT_FSM_ORGN,
+    CMDPKT_FSM_DEST,
+    CMDPKT_FSM_ECHO,
+    CMDPKT_FSM_ARGSLEN,
+    CMDPKT_FSM_ID,
+    CMDPKT_FSM_ARGSSTR,
+    CMDPKT_FSM_CRC1,
+    CMDPKT_FSM_CRC2,
+    CMDPKT_FSM_DONE,
+    CMDPKT_FSM_ERROR
+} cmdpkt_fsm_e;
 
 typedef struct {
     // Packet parsing metadata
-    cmd_pkt_fsm_e fsm;
+    cmdpkt_fsm_e fsm;
     uint8_t i_id, i_args;
     // Packet data
     uint8_t orgn;
@@ -38,33 +38,31 @@ typedef struct {
     char args_str[MAX_BUF_LEN];
     uint16_t crc;
     uint16_t running_crc;
-} cmd_pkt_s;
+} cmdpkt_s;
 
-typedef void (*cmd_func_f)(cmd_pkt_s* pkt);
+// Initialize cmdpkt
+void cmdpkt_init(cmdpkt_s* pkt);
 
-// Initialize cmd_pkt
-void cmd_pkt_init(cmd_pkt_s* pkt);
-
-// Clear this cmd_pkt
-void cmd_pkt_clear(cmd_pkt_s* pkt);
+// Clear this cmdpkt
+void cmdpkt_clear(cmdpkt_s* pkt);
 
 // Command manager
 
 typedef struct {
-    cmd_pkt_s rcvpkts[NUM_CMD_BUFS];
-    hashtable_s cmd_funcs;
-} cmd_mgr_s;
+    cmdpkt_s rcvpkts[NUM_CMD_BUFS];
+    hashtable_s cmdfuncs;
+} cmdmgr_s;
 
-// Initialize cmd_mgr
-void cmd_mgr_init(cmd_mgr_s* cmd_mgr);
+// Initialize cmdmgr
+void cmdmgr_init(cmdmgr_s* cmdmgr);
 
 // Clear all rcv pkts 
-void cmd_mgr_clear(cmd_mgr_s* cmd_mgr);
+void cmdmgr_clear(cmdmgr_s* cmdmgr);
 
 // Check interrupt buffer to advance packet reader FSM 
-void cmd_mgr_rcv_fsm(cmd_mgr_s* cmd_mgr, circbuf_s* irqbuf, cmd_pkt_s* rcvpkt);
+void cmdmgr_rcv_fsm(cmdmgr_s* cmdmgr, circbuf_s* irqbuf, cmdpkt_s* rcv_pkt);
 
-// Checks link layer headers and forwards/runs command appropriately
-void cmd_mgr_process_cmd(cmd_mgr_s* cmd_mgr, cmd_pkt_s* pkt);
+// Checks link layer headers, CRC, and forwards/runs command appropriately
+void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt);
 
 #endif
