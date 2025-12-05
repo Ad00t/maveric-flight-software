@@ -5,7 +5,7 @@
 
 // LOWER PPM INTERRUPTS CONFIG
 
-#define NUM_PORTS           3
+#define NUM_PORTS           2
 
 // Interrupt request manager
 
@@ -34,6 +34,5 @@ void isr_disable_all(void);
 // Interrupt Service Routines 
 void isr_uart1(void);
 void isr_uart4(void);
-void isr_spi1(void);
 
 #endif

@@ -58,17 +58,20 @@
 #define KWHT  "\033[37m"
 
 #define MAX_BUF_LEN     256
+#define LOWER_PPM
 #define NODE_ID         1
 #define NODE_LBL        "LPPM"
 
 #include "crcnew.c"
 #include "hashtable.c"
 #include "circbuf.c"
-#include "cmdfunc.c"
-#include "cmd.c"
-#include "uart.c"
-#include "adcsmtq.c"
 #include "interrupts.c"
+#include "cmdfunc.c"
+#include "cmdmgr.c"
+#include "spi.c"
+#include "uart.c"
+#include "gyro.c"
+#include "mtq.c"
 
 void system_init(void);
 void housekeeping(void);
@@ -77,7 +80,8 @@ void system_cleanup(void);
 int1 SUPERLOOP_RUNNING = TRUE;
 irqmgr_s irqmgr;
 cmdmgr_s cmdmgr;
-adcsmtq_s tad102063;
+gyro_s gyro;
+mtq_s mtq;
 
 void main(void) {	
     system_init();
@@ -92,11 +96,16 @@ void system_init(void) {
     // Watchdog init
     setup_wdt(WDT_ON);
 
+    // SPI init
+    setup_spi(SPI_MASTER | SPI_H_TO_L | SPI_CLK_DIV_16)
+    
     // Submodules init
     irqmgr_init(&irqmgr);
     cmdmgr_init(&cmdmgr);
-    adcsmtq_init(&tad102063, COM_A);
+    gyro_init(&gyro, GYROCS1, GYROCS2, GYROCS3, GYRO_ON);
+    mtq_init(&mtq, COM_A);
 
+    // Start interrupts
     irqmgr.started = TRUE;
     isr_enable_all();
     
@@ -113,26 +122,23 @@ void housekeeping(void) {
     
     // Handle received byte interrupts
     isr_disable_all();
-    adcsmtq_rcv_fsm(&tad102063, &irqmgr.irqbufs[0]); // Do driver handling before commands so data is up to date
+    mtq_rcv_fsm(&mtq, &irqmgr.irqbufs[0]); // Do driver handling before commands so data is up to date
     cmdmgr_rcv_fsm(&cmdmgr, &irqmgr.irqbufs[1], &cmdmgr.rcvpkts[0]); // Handle COM_D FTDI commands on cmd rcvpkt 0
     isr_enable_all();
     
-    adcsmtq_readback(&tad102063);
-    
-    adcsmtq_read_start(&tad102063, "TIME");
-    // adcsmtq_read_start(&tad102063, "SNID");    
-    // float mass = 15.0;
-    // adcsmtq_write_start(&tad102063, "MASS", &mass);
-    // float axis[3];
-    // axis[0] = 1f;
-    // axis[1] = 0f;
-    // axis[2] = 0f;
-    // adcsmtq_write_start(&tad102063, "POINTING_AXIS", axis);
+    // Check heartbeats
+    if (!gyro_heartbeat(&gyro)) {
+        fprintf(COM_D, "%s[%s] gyro flatlined\n", KRED, NODE_LBL);
+    }
 
+    // Read all sensors
+    gyro_read_all(&gyro);
+    mtq_read_all(&mtq);
+    
     delay_ms(1000);
 }
 
 // Cleanup routine
 void system_cleanup(void) {
-    adcsmtq_destroy(&tad102063);
+    mtq_destroy(&mtq);
 }
