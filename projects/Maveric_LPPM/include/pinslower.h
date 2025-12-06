@@ -15,7 +15,6 @@
 #define SDO1_PIN 		PIN_D8
 #define SCK1OUT_PIN 	PIN_D10
 
-
 //============================================
 //  		    TX/RX and Handshaking Pins
 //=============================================

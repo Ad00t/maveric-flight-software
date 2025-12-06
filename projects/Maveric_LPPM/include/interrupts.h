@@ -12,7 +12,7 @@
 typedef struct {
     int1 started;
     volatile circbuf_s irqbufs[NUM_PORTS];
-    // 0 = UART1    1 = UART4   2 = SPI1 
+    // 0 = UART1    1 = UART4   
 } irqmgr_s;
 
 // Initialize interrupt requests manager
@@ -33,6 +33,8 @@ void isr_disable_all(void);
 
 // Interrupt Service Routines 
 void isr_uart1(void);
+void isr_uart2(void);
+void isr_uart3(void);
 void isr_uart4(void);
 
 #endif

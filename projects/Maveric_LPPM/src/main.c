@@ -42,8 +42,11 @@
 // Ports initialization
 
 #use rs232(baud=COM_A_BAUD, UART1, BITS=8, STREAM=COM_A, ERRORS, PARITY=N, TIMEOUT=1000)
-#use rs232(baud=COM_D_BAUD, UART4, BITS=8, STREAM=COM_D, ERRORS, PARITY= N, TIMEOUT=1000)
-// #use spi(MASTER, DI=SDI1, DO=SDO1, CLK=SCK1OUT, BITS=8)
+#use rs232(baud=COM_B_BAUD, UART2, BITS=8, STREAM=COM_B, ERRORS, PARITY=N, TIMEOUT=1000)
+#use rs232(baud=COM_C_BAUD, UART3, BITS=8, STREAM=COM_C, ERRORS, PARITY=N, TIMEOUT=1000)
+#use rs232(baud=COM_D_BAUD, UART4, BITS=8, STREAM=COM_D, ERRORS, PARITY=N, TIMEOUT=1000)
+// #use spi(MASTER, DI=SDI1, DO=SDO1, CLK=SCK1OUT, ENABLE=GYRO_ON, BITS=16, STREAM=SPI_1)
+// #use spi(MASTER, SPI1, BITS=16)
 //#use i2c(master, sda=PIN_G3, scl=PIN_G2, STREAM=I2C_1)
 //#use i2c(master, sda=PIN_A3, scl=PIN_A2, STREAM=I2C_1)
 //#use i2c(master, sda=PIN_A15, scl=PIN_A14, STREAM=I2C_1)
@@ -57,19 +60,19 @@
 #define KCYN  "\033[36m"
 #define KWHT  "\033[37m"
 
-#define MAX_BUF_LEN     256
 #define LOWER_PPM
 #define NODE_ID         1
 #define NODE_LBL        "LPPM"
+#define MAX_BUF_LEN     256
 
 #include "crcnew.c"
 #include "hashtable.c"
 #include "circbuf.c"
-#include "interrupts.c"
-#include "cmdfunc.c"
-#include "cmdmgr.c"
 #include "spi.c"
 #include "uart.c"
+#include "interrupts.c"
+#include "cmdmgr.c"
+#include "cmdfunc.c"
 #include "gyro.c"
 #include "mtq.c"
 
@@ -97,7 +100,7 @@ void system_init(void) {
     setup_wdt(WDT_ON);
 
     // SPI init
-    setup_spi(SPI_MASTER | SPI_H_TO_L | SPI_CLK_DIV_16)
+    // spi_set_mode(FLASH_SPI_MODE);
     
     // Submodules init
     irqmgr_init(&irqmgr);
@@ -130,10 +133,13 @@ void housekeeping(void) {
     if (!gyro_heartbeat(&gyro)) {
         fprintf(COM_D, "%s[%s] gyro flatlined\n", KRED, NODE_LBL);
     }
+    if (!mtq_heartbeat(&mtq)) {
+        fprintf(COM_D, "%s[%s] mtq flatlined\n", KRED, NODE_LBL);
+    }
 
     // Read all sensors
     gyro_read_all(&gyro);
-    mtq_read_all(&mtq);
+    mtq_read_ctrl(&mtq);
     
     delay_ms(1000);
 }

@@ -5,8 +5,6 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>include/pinslower.h</itemPath>
-      <itemPath>include/adcsmtq.h</itemPath>
-      <itemPath>../../common/maveric/include/cmd.h</itemPath>
       <itemPath>../../common/maveric/include/i2c.h</itemPath>
       <itemPath>../../common/maveric/include/uart.h</itemPath>
       <itemPath>../../common/maveric/include/circbuf.h</itemPath>
@@ -14,6 +12,10 @@
       <itemPath>../../common/maveric/include/crcnew.h</itemPath>
       <itemPath>include/cmdfunc.h</itemPath>
       <itemPath>include/interrupts.h</itemPath>
+      <itemPath>include/gyro.h</itemPath>
+      <itemPath>include/mtq.h</itemPath>
+      <itemPath>../../common/maveric/include/cmdmgr.h</itemPath>
+      <itemPath>../../common/maveric/include/spi.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -30,14 +32,16 @@
       <itemPath>src/main.c</itemPath>
     </logicalFolder>
     <logicalFolder name="OtherFiles" displayName="Other Files" projectFiles="false">
-      <itemPath>src/adcsmtq.c</itemPath>
-      <itemPath>../../common/maveric/src/cmd.c</itemPath>
       <itemPath>../../common/maveric/src/i2c.c</itemPath>
       <itemPath>../../common/maveric/src/uart.c</itemPath>
       <itemPath>../../common/maveric/src/circbuf.c</itemPath>
       <itemPath>../../common/maveric/src/hashtable.c</itemPath>
       <itemPath>../../common/maveric/src/crcnew.c</itemPath>
       <itemPath>src/cmdfunc.c</itemPath>
+      <itemPath>../../common/maveric/src/cmdmgr.c</itemPath>
+      <itemPath>../../common/maveric/src/spi.c</itemPath>
+      <itemPath>src/gyro.c</itemPath>
+      <itemPath>src/mtq.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
