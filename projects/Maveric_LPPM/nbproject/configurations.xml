@@ -58,7 +58,7 @@
         <targetDevice>PIC24FJ256GA110</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>ICD3PlatformTool</platformTool>
+        <platformTool>noID</platformTool>
         <languageToolchain>CCSC</languageToolchain>
         <languageToolchainVersion>4.124</languageToolchainVersion>
         <platform>3</platform>
@@ -144,7 +144,6 @@
         <property key="event.recorder.debugger.behavior" value="Running"/>
         <property key="event.recorder.enabled" value="false"/>
         <property key="event.recorder.scvd.files" value=""/>
-        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="lastid" value=""/>
         <property key="memories.aux" value="false"/>
@@ -227,7 +226,7 @@
         <property key="uart0io.uartioenabled" value="false"/>
         <property key="uart1io.output" value="window"/>
         <property key="uart1io.outputfile" value=""/>
-        <property key="uart1io.uartioenabled" value="false"/>
+        <property key="uart1io.uartioenabled" value="true"/>
         <property key="uart2io.output" value="window"/>
         <property key="uart2io.outputfile" value=""/>
         <property key="uart2io.uartioenabled" value="false"/>
@@ -236,7 +235,7 @@
         <property key="uart3io.uartioenabled" value="false"/>
         <property key="uart4io.output" value="window"/>
         <property key="uart4io.outputfile" value=""/>
-        <property key="uart4io.uartioenabled" value="false"/>
+        <property key="uart4io.uartioenabled" value="true"/>
         <property key="uart5io.output" value="window"/>
         <property key="uart5io.outputfile" value=""/>
         <property key="uart5io.uartioenabled" value="false"/>
@@ -777,7 +776,7 @@
         <property key="uart0io.uartioenabled" value="false"/>
         <property key="uart1io.output" value="window"/>
         <property key="uart1io.outputfile" value=""/>
-        <property key="uart1io.uartioenabled" value="false"/>
+        <property key="uart1io.uartioenabled" value="true"/>
         <property key="uart2io.output" value="window"/>
         <property key="uart2io.outputfile" value=""/>
         <property key="uart2io.uartioenabled" value="false"/>
@@ -786,7 +785,7 @@
         <property key="uart3io.uartioenabled" value="false"/>
         <property key="uart4io.output" value="window"/>
         <property key="uart4io.outputfile" value=""/>
-        <property key="uart4io.uartioenabled" value="false"/>
+        <property key="uart4io.uartioenabled" value="true"/>
         <property key="uart5io.output" value="window"/>
         <property key="uart5io.outputfile" value=""/>
         <property key="uart5io.uartioenabled" value="false"/>
