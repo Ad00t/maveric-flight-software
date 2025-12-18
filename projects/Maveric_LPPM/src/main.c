@@ -46,7 +46,7 @@
 #use rs232(baud=COM_C_BAUD, UART3, BITS=8, STREAM=COM_C, ERRORS, PARITY=N, TIMEOUT=1000)
 #use rs232(baud=COM_D_BAUD, UART4, BITS=8, STREAM=COM_D, ERRORS, PARITY=N, TIMEOUT=1000)
 // #use spi(MASTER, DI=SDI1, DO=SDO1, CLK=SCK1OUT, ENABLE=GYRO_ON, BITS=16, STREAM=SPI_1)
-// #use spi(MASTER, SPI1, BITS=16)
+#use spi(MASTER, SPI1, BITS=16)
 //#use i2c(master, sda=PIN_G3, scl=PIN_G2, STREAM=I2C_1)
 //#use i2c(master, sda=PIN_A3, scl=PIN_A2, STREAM=I2C_1)
 //#use i2c(master, sda=PIN_A15, scl=PIN_A14, STREAM=I2C_1)
@@ -63,6 +63,7 @@
 #define LOWER_PPM
 #define NODE_ID         1
 #define NODE_LBL        "LPPM"
+#define LOG_LEVEL		LL_INFO
 #define MAX_BUF_LEN     256
 
 #include "crcnew.c"
@@ -70,6 +71,7 @@
 #include "circbuf.c"
 #include "spi.c"
 #include "uart.c"
+// #include "logger.c"
 #include "interrupts.c"
 #include "cmdmgr.c"
 #include "cmdfunc.c"
@@ -99,6 +101,9 @@ void system_init(void) {
     // Watchdog init
     setup_wdt(WDT_ON);
 
+    // RTC init
+    setup_rtc(RTC_ENABLE | RTC_OUTPUT_SECONDS, 0); 
+
     // SPI init
     // spi_set_mode(FLASH_SPI_MODE);
     
@@ -118,7 +123,10 @@ void system_init(void) {
 
 // Housekeeping routine
 void housekeeping(void) {
-    fprintf(COM_D, "%s[%s] housekeeping\n", KWHT, NODE_LBL);
+    rtc_time_t t;
+    rtc_read(&t);
+    fprintf(COM_D, "%s[%s] housekeeping %02u/%02u/20%u %02u:%02u:%02u\n", KWHT, NODE_LBL,
+            t.tm_mon, t.tm_mday, t.tm_year, t.tm_hour, t.tm_min, t.tm_sec);
 
     // Kick the dog
     restart_wdt();
