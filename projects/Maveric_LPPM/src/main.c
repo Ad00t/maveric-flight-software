@@ -83,10 +83,12 @@ void housekeeping(void);
 void system_cleanup(void);
 
 int1 SUPERLOOP_RUNNING = TRUE;
-irqmgr_s irqmgr;
-cmdmgr_s cmdmgr;
-gyro_s gyro;
-mtq_s mtq;
+
+irqmgr_s irqmgr;    // Interrupts manager
+cmdmgr_s cmdmgr;    // Commands manager
+gyro_s gyro;        // Gyroscope (x3)
+nvg_s nvg;          // Naviguider
+mtq_s mtq;          // Magnetorquer
 
 void main(void) {	
     system_init();
@@ -111,6 +113,7 @@ void system_init(void) {
     irqmgr_init(&irqmgr);
     cmdmgr_init(&cmdmgr);
     gyro_init(&gyro, GYROCS1, GYROCS2, GYROCS3, GYRO_ON);
+    nvg_init(&nvg, COM_B);
     mtq_init(&mtq, COM_A);
 
     // Start interrupts
@@ -134,7 +137,8 @@ void housekeeping(void) {
     // Handle received byte interrupts
     isr_disable_all();
     mtq_rcv_fsm(&mtq, &irqmgr.irqbufs[0]); // Do driver handling before commands so data is up to date
-    cmdmgr_rcv_fsm(&cmdmgr, &irqmgr.irqbufs[1], &cmdmgr.rcvpkts[0]); // Handle COM_D FTDI commands on cmd rcvpkt 0
+    nvg_rcv_fsm(&nvg, &irqmgr.irqbufs[1]);
+    cmdmgr_rcv_fsm(&cmdmgr, &irqmgr.irqbufs[2], &cmdmgr.rcvpkts[0]); // Handle COM_D FTDI commands on cmd rcvpkt 0
     isr_enable_all();
     
     // Check heartbeats
@@ -145,7 +149,7 @@ void housekeeping(void) {
         fprintf(COM_D, "%s[%s] mtq flatlined\n", KRED, NODE_LBL);
     }
 
-    // Read all sensors
+    // Send commands to read all sensors
     gyro_read_all(&gyro);
     mtq_read_ctrl(&mtq);
     

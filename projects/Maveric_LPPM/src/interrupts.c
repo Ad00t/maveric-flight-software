@@ -48,6 +48,7 @@ void isr_uart1(void) {
 #INT_RDA2
 void isr_uart2(void) {
     if (!irqmgr.started || !uart_byte_avail(COM_B)) return;   
+    cb_push(&irqmgr.irqbufs[1], uart_read_byte(COM_B));
 }
 
 #INT_RDA3
@@ -58,6 +59,6 @@ void isr_uart3(void) {
 #INT_RDA4
 void isr_uart4(void) {
     if (!irqmgr.started || !uart_byte_avail(COM_D)) return;
-    cb_push(&irqmgr.irqbufs[1], uart_read_byte(COM_D));
+    cb_push(&irqmgr.irqbufs[2], uart_read_byte(COM_D));
 }
 

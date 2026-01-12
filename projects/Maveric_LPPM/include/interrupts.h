@@ -5,7 +5,7 @@
 
 // LOWER PPM INTERRUPTS CONFIG
 
-#define NUM_PORTS           2
+#define NUM_PORTS           3
 
 // Interrupt request manager
 
