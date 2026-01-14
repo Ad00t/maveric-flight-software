@@ -39,26 +39,27 @@ void isr_disable_all(void) {
 
 // Interrupt Service Routines 
 
-#INT_RDA
+#INT_RDA // Magnetorquer
 void isr_uart1(void) {
     if (!irqmgr.started || !uart_byte_avail(COM_A)) return;   
     cb_push(&irqmgr.irqbufs[0], uart_read_byte(COM_A));
 }
 
-#INT_RDA2
+#INT_RDA2 // Upper PPM
 void isr_uart2(void) {
     if (!irqmgr.started || !uart_byte_avail(COM_B)) return;   
-    cb_push(&irqmgr.irqbufs[1], uart_read_byte(COM_B));
+    cb_push(&irqmgr.irqbufs[1], uart_read_byte(COM_C));
 }
 
-#INT_RDA3
+#INT_RDA3 // Naviguider
 void isr_uart3(void) {
     if (!irqmgr.started || !uart_byte_avail(COM_C)) return;   
+    cb_push(&irqmgr.irqbufs[2], uart_read_byte(COM_C));
 }
 
-#INT_RDA4
+#INT_RDA4 // FTDI
 void isr_uart4(void) {
     if (!irqmgr.started || !uart_byte_avail(COM_D)) return;
-    cb_push(&irqmgr.irqbufs[2], uart_read_byte(COM_D));
+    cb_push(&irqmgr.irqbufs[3], uart_read_byte(COM_D));
 }
 

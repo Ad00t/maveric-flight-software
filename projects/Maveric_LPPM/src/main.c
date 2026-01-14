@@ -61,10 +61,11 @@
 #define KWHT  "\033[37m"
 
 #define LOWER_PPM
-#define NODE_ID         1
-#define NODE_LBL        "LPPM"
-#define LOG_LEVEL		LL_INFO
-#define MAX_BUF_LEN     256
+#define NODE_ID             1
+#define NODE_LBL            "LPPM"
+#define LOG_LEVEL		    LL_INFO
+#define MAX_BUF_LEN         256
+#define FLATLINE_TIME_MS    3000
 
 #include "crcnew.c"
 #include "hashtable.c"
@@ -75,8 +76,9 @@
 #include "interrupts.c"
 #include "cmdmgr.c"
 #include "cmdfunc.c"
-#include "gyro.c"
-#include "mtq.c"
+#include "gyroscope.c"
+#include "naviguider.c"
+#include "magnetorquer.c"
 
 void system_init(void);
 void housekeeping(void);
@@ -113,7 +115,7 @@ void system_init(void) {
     irqmgr_init(&irqmgr);
     cmdmgr_init(&cmdmgr);
     gyro_init(&gyro, GYROCS1, GYROCS2, GYROCS3, GYRO_ON);
-    nvg_init(&nvg, COM_B);
+    nvg_init(&nvg, COM_C);
     mtq_init(&mtq, COM_A);
 
     // Start interrupts
@@ -137,13 +139,20 @@ void housekeeping(void) {
     // Handle received byte interrupts
     isr_disable_all();
     mtq_rcv_fsm(&mtq, &irqmgr.irqbufs[0]); // Do driver handling before commands so data is up to date
-    nvg_rcv_fsm(&nvg, &irqmgr.irqbufs[1]);
-    cmdmgr_rcv_fsm(&cmdmgr, &irqmgr.irqbufs[2], &cmdmgr.rcvpkts[0]); // Handle COM_D FTDI commands on cmd rcvpkt 0
+    nvg_rcv_fsm(&nvg, &irqmgr.irqbufs[2]);
+    cmdmgr_rcv_fsm(&cmdmgr, &irqmgr.irqbufs[3], &cmdmgr.rcvpkts[0]); // Handle COM_D FTDI commands on cmd rcvpkt 0
     isr_enable_all();
-    
+  
+    nvg_sensor_s* sens = &nvg.sensors[NVG_ACCEL_LINEAR];
+    fprintf(COM_D, "%s%s: %f %f %f %f %f\n", KGRN, "NVG_ACCEL_LINEAR",
+            sens->ts, sens->data[0], sens->data[1], sens->data[2], sens->data[3]);
+
     // Check heartbeats
     if (!gyro_heartbeat(&gyro)) {
         fprintf(COM_D, "%s[%s] gyro flatlined\n", KRED, NODE_LBL);
+    }
+    if (!nvg_heartbeat(&nvg)) {
+        fprintf(COM_D, "%s[%s] nvg flatlined\n", KRED, NODE_LBL);
     }
     if (!mtq_heartbeat(&mtq)) {
         fprintf(COM_D, "%s[%s] mtq flatlined\n", KRED, NODE_LBL);

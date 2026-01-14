@@ -5,14 +5,13 @@
 
 // LOWER PPM INTERRUPTS CONFIG
 
-#define NUM_PORTS           3
+#define NUM_PORTS   4
 
 // Interrupt request manager
 
 typedef struct {
     int1 started;
     volatile circbuf_s irqbufs[NUM_PORTS];
-    // 0 = UART1    1 = UART4   
 } irqmgr_s;
 
 // Initialize interrupt requests manager

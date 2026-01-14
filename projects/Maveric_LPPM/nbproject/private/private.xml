@@ -8,8 +8,12 @@
             <file>file:/C:/Users/adhit/projects/serc/maveric-flight-software/mavlibs/v2025/include/cmd.h</file>
         </group>
         <group name="maveric">
+            <file>file:/C:/Users/adhit/projects/serc/maveric-flight-software/common/maveric/include/circbuf.h</file>
+            <file>file:/C:/Users/adhit/projects/serc/maveric-flight-software/common/maveric/include/hashtable.h</file>
+            <file>file:/C:/Users/adhit/projects/serc/maveric-flight-software/common/maveric/src/circbuf.c</file>
             <file>file:/C:/Users/adhit/projects/serc/maveric-flight-software/projects/Maveric_LPPM/src/main.c</file>
             <file>file:/C:/Users/adhit/projects/serc/maveric-flight-software/projects/Maveric_LPPM/src/interrupts.c</file>
+            <file>file:/C:/Users/adhit/projects/serc/maveric-flight-software/projects/Maveric_LPPM/src/magnetorquer.c</file>
         </group>
     </open-files>
 </project-private>
