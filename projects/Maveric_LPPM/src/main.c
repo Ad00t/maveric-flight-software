@@ -47,9 +47,9 @@
 #use rs232(baud=COM_D_BAUD, UART4, BITS=8, STREAM=COM_D, ERRORS, PARITY=N, TIMEOUT=1000)
 // #use spi(MASTER, DI=SDI1, DO=SDO1, CLK=SCK1OUT, ENABLE=GYRO_ON, BITS=16, STREAM=SPI_1)
 #use spi(MASTER, SPI1, BITS=16)
-//#use i2c(master, sda=PIN_G3, scl=PIN_G2, STREAM=I2C_1)
-//#use i2c(master, sda=PIN_A3, scl=PIN_A2, STREAM=I2C_1)
-//#use i2c(master, sda=PIN_A15, scl=PIN_A14, STREAM=I2C_1)
+#use i2c(master, sda=PIN_G3, scl=PIN_G2, STREAM=I2C_1)
+// #use i2c(master, sda=PIN_A3, scl=PIN_A2, STREAM=I2C_1)
+// #use i2c(master, sda=PIN_A15, scl=PIN_A14, STREAM=I2C_1)
 
 #define KNRM  "\033[0m"
 #define KRED  "\033[31m"
@@ -70,15 +70,17 @@
 #include "crcnew.c"
 #include "hashtable.c"
 #include "circbuf.c"
-#include "spi.c"
 #include "uart.c"
+#include "spi.c"
+#include "i2c.c"
 // #include "logger.c"
 #include "interrupts.c"
 #include "cmdmgr.c"
 #include "cmdfunc.c"
-#include "gyroscope.c"
+#include "adcsmtq.c"
+#include "adis16260.c"
 #include "naviguider.c"
-#include "magnetorquer.c"
+#include "rm3100.c"
 
 void system_init(void);
 void housekeeping(void);
@@ -88,9 +90,10 @@ int1 SUPERLOOP_RUNNING = TRUE;
 
 irqmgr_s irqmgr;    // Interrupts manager
 cmdmgr_s cmdmgr;    // Commands manager
+mtq_s mtq;          // Magnetorquer
 gyro_s gyro;        // Gyroscope (x3)
 nvg_s nvg;          // Naviguider
-mtq_s mtq;          // Magnetorquer
+rm3100_s im;        // Internal magnetometer
 
 void main(void) {	
     system_init();
@@ -114,9 +117,10 @@ void system_init(void) {
     // Submodules init
     irqmgr_init(&irqmgr);
     cmdmgr_init(&cmdmgr);
+    mtq_init(&mtq, COM_A);
     gyro_init(&gyro, GYROCS1, GYROCS2, GYROCS3, GYRO_ON);
     nvg_init(&nvg, COM_C);
-    mtq_init(&mtq, COM_A);
+    rm3100_init(&im, RM3100_ADDRESS_20);
 
     // Start interrupts
     irqmgr.started = TRUE;
@@ -144,23 +148,27 @@ void housekeeping(void) {
     isr_enable_all();
   
     nvg_sensor_s* sens = &nvg.sensors[NVG_ACCEL_LINEAR];
-    fprintf(COM_D, "%s%s: %f %f %f %f %f\n", KGRN, "NVG_ACCEL_LINEAR",
+    fprintf(COM_D, "%s%s: %f %f %f %f %f\n", KBLU, "NVG_ACCEL_LINEAR",
             sens->ts, sens->data[0], sens->data[1], sens->data[2], sens->data[3]);
 
     // Check heartbeats
+    if (!mtq_heartbeat(&mtq)) {
+        fprintf(COM_D, "%s[%s] mtq flatlined\n", KRED, NODE_LBL);
+    }
     if (!gyro_heartbeat(&gyro)) {
         fprintf(COM_D, "%s[%s] gyro flatlined\n", KRED, NODE_LBL);
     }
     if (!nvg_heartbeat(&nvg)) {
         fprintf(COM_D, "%s[%s] nvg flatlined\n", KRED, NODE_LBL);
     }
-    if (!mtq_heartbeat(&mtq)) {
-        fprintf(COM_D, "%s[%s] mtq flatlined\n", KRED, NODE_LBL);
+    if (!rm3100_heartbeat(&im)) {
+        fprintf(COM_D, "%s[%s] im flatlined\n", KRED, NODE_LBL);
     }
 
     // Send commands to read all sensors
-    gyro_read_all(&gyro);
     mtq_read_ctrl(&mtq);
+    gyro_read_all(&gyro);
+    rm3100_read_data(&im);
     
     delay_ms(1000);
 }
@@ -168,4 +176,5 @@ void housekeeping(void) {
 // Cleanup routine
 void system_cleanup(void) {
     mtq_destroy(&mtq);
+    nvg_destroy(&mtq);
 }

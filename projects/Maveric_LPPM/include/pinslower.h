@@ -152,8 +152,8 @@
 // 				I2C
 //=====================================
 #define I2C_ON						PIN_E5
-#define Device_SDA 					PIN_G3
-#define Device_SCL 					PIN_G2
+#define SCL1                        PIN_G2
+#define SDA1                        PIN_G3
 
 //========================================
 //  		    Enable USB Serial
