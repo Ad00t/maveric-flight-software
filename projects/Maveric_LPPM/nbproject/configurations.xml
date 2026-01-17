@@ -12,11 +12,12 @@
       <itemPath>../../common/maveric/include/crcnew.h</itemPath>
       <itemPath>include/cmdfunc.h</itemPath>
       <itemPath>include/interrupts.h</itemPath>
-      <itemPath>include/gyro.h</itemPath>
       <itemPath>../../common/maveric/include/cmdmgr.h</itemPath>
       <itemPath>../../common/maveric/include/spi.h</itemPath>
-      <itemPath>include/magnetorquer.h</itemPath>
       <itemPath>include/naviguider.h</itemPath>
+      <itemPath>include/adcsmtq.h</itemPath>
+      <itemPath>include/adis16260.h</itemPath>
+      <itemPath>include/rm3100.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -41,8 +42,6 @@
       <itemPath>src/cmdfunc.c</itemPath>
       <itemPath>../../common/maveric/src/cmdmgr.c</itemPath>
       <itemPath>../../common/maveric/src/spi.c</itemPath>
-      <itemPath>src/gyro.c</itemPath>
-      <itemPath>src/magnetorquer.c</itemPath>
       <itemPath>src/naviguider.c</itemPath>
     </logicalFolder>
   </logicalFolder>
