@@ -37,18 +37,20 @@
 #word RPINR20 = getenv("SFR:RPINR20")
 #word RPOR1 = getenv("SFR:RPOR1")
 
-#include "pinslower.h"            // Add pins Lower PPM Definition
-
 // Ports initialization
+
+#include "pinslower.h"            // Add pins Lower PPM Definition
 
 #use rs232(baud=COM_A_BAUD, UART1, BITS=8, STREAM=COM_A, ERRORS, PARITY=N, TIMEOUT=1000)
 #use rs232(baud=COM_B_BAUD, UART2, BITS=8, STREAM=COM_B, ERRORS, PARITY=N, TIMEOUT=1000)
 #use rs232(baud=COM_C_BAUD, UART3, BITS=8, STREAM=COM_C, ERRORS, PARITY=N, TIMEOUT=1000)
 #use rs232(baud=COM_D_BAUD, UART4, BITS=8, STREAM=COM_D, ERRORS, PARITY=N, TIMEOUT=1000)
-#use spi(MASTER, FORCE_HW, SPI1, BAUD=800000, MSB_FIRST, BITS=16, MODE=3, STREAM=SPI_1)
+// #use spi(MASTER, FORCE_HW, SPI1, BAUD=2000000, MSB_FIRST, BITS=16, MODE=3, STREAM=SPI_1)
 #use i2c(MASTER, I2C1, STREAM=I2C_1)
 // #use i2c(master, sda=PIN_A3, scl=PIN_A2, STREAM=I2C_1)
 // #use i2c(master, sda=PIN_A15, scl=PIN_A14, STREAM=I2C_1)
+
+// Global defines
 
 #define KNRM  "\033[0m"
 #define KRED  "\033[31m"
@@ -66,12 +68,14 @@
 #define MAX_BUF_LEN         256
 #define FLATLINE_TIME_MS    3000
 
+// Module includes (.c necessary)
+
 #include "crcnew.c"
 #include "hashtable.c"
 #include "circbuf.c"
 #include "uart.c"
-#include "spi.c"
 #include "i2c.c"
+#include "spi.c"
 // #include "logger.c"
 #include "interrupts.c"
 #include "cmdmgr.c"
@@ -79,7 +83,6 @@
 #include "adcsmtq.c"
 #include "adis16260.c"
 #include "naviguider.c"
-#include "rm3100.c"
 
 void system_init(void);
 void housekeeping(void);
@@ -92,7 +95,6 @@ cmdmgr_s cmdmgr;    // Commands manager
 mtq_s mtq;          // Magnetorquer
 gyro_s gyro;        // Gyroscope (x3)
 nvg_s nvg;          // Naviguider
-rm3100_s im;        // Internal magnetometer
 
 void main(void) {	
     system_init();
@@ -107,20 +109,22 @@ void system_init(void) {
     // Watchdog init
     setup_wdt(WDT_ON);
 
-    // RTC init
-    setup_rtc(RTC_ENABLE | RTC_OUTPUT_SECONDS, 0); 
-
     // SPI init
-    // setup_spi(SPI_MASTER | SPI_CLK_DIV_16);
-    // spi_set_mode(GYRO_SPI_MODE);
+	output_high(FLASH_CHIP_SELECT);
+	output_high(SECOND_FLASH_CS);
+	spi_set_mode(GYRO_SPI_MODE);
+	// setup_spi(SPI_MASTER | SPI_XMIT_L_TO_H | SPI_CLK_DIV_16 | SPI_SCK_IDLE_HIGH);
+
+    // RTC init 
+    setup_rtc(RTC_ENABLE | RTC_OUTPUT_SECONDS, 0); 
     
     // Submodules init
     irqmgr_init(&irqmgr);
     cmdmgr_init(&cmdmgr);
     // mtq_init(&mtq, COM_A);
-    gyro_init(&gyro, GYROCS1, GYROCS2, GYROCS3, GYRO_ON);
+    // mtq_set_conf(&mtq, 0, MTQ_MODE_DETUMBLING);
+    gyro_init(&gyro, GYRO_CS1, GYRO_CS2, GYRO_CS3, GYRO_ON);
     // nvg_init(&nvg, COM_C);
-    // rm3100_init(&im, RM3100_ADDRESS_20);
 
     // Start interrupts
     irqmgr.started = TRUE;
@@ -132,17 +136,17 @@ void system_init(void) {
 
 // Housekeeping routine
 void housekeeping(void) {
+    // Kick the dog
+    restart_wdt();
+    
     rtc_time_t t;
     rtc_read(&t);
     fprintf(COM_D, "%s[%s] housekeeping %02u/%02u/20%u %02u:%02u:%02u\n", KWHT, NODE_LBL,
             t.tm_mon, t.tm_mday, t.tm_year, t.tm_hour, t.tm_min, t.tm_sec);
 
-    // Kick the dog
-    restart_wdt();
-    
     // Handle received byte interrupts
     isr_disable_all();
-    // mtq_rcv_fsm(&mtq, &irqmgr.irqbufs[0]); // Do driver handling before commands so data is up to date
+    mtq_rcv_fsm(&mtq, &irqmgr.irqbufs[0]); // Do driver handling before commands so data is up to date
     // nvg_rcv_fsm(&nvg, &irqmgr.irqbufs[2]);
     cmdmgr_rcv_fsm(&cmdmgr, &irqmgr.irqbufs[3], &cmdmgr.rcvpkts[0]); // Handle COM_D FTDI commands on cmd rcvpkt 0
     isr_enable_all();
@@ -161,12 +165,10 @@ void housekeeping(void) {
     // if (!nvg_heartbeat(&nvg)) {
     //     fprintf(COM_D, "%s[%s] nvg flatlined\n", KRED, NODE_LBL);
     // }
-    // if (!rm3100_heartbeat(&im)) {
-    //     fprintf(COM_D, "%s[%s] im flatlined\n", KRED, NODE_LBL);
-    // }
 
     // Send commands to read all sensors
     // mtq_read_ctrl(&mtq);
+    // mtq_read_fast(&mtq);
     gyro_read_all(&gyro);
     // rm3100_read_data(&im);
     

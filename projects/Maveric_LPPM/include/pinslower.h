@@ -1,19 +1,23 @@
+#ifndef __PINSLOWER_H__
+#define __PINSLOWER_H__
+
 //=====================================
 // 			    SPI	
 //=====================================
 
-#define SPI_1       1
-#pin_select SDI1 = PIN_D9 
+#define SPI_1       1   // Stream SPI 1
 #pin_select SDO1 = PIN_D8 
+#pin_select SDI1 = PIN_D9
 #pin_select SCK1OUT = PIN_D10 
-//
-// #pin_select SDI1 = PIN_D10
-// #pin_select SDO1 = PIN_D0
-// #pin_select SCK1OUT = PIN_D11
 
-// #pin_select SDI1 = PIN_G8
-// #pin_select SDO1 = PIN_G6
-// #pin_select SCK1OUT = PIN_D15
+// #pin_select SDO1 = PIN_F8 
+// #pin_select SDI1 = PIN_F7 
+// #pin_select SCK1OUT = PIN_D9 
+
+// #define SPI_2       2 
+// #pin_select SDO2 = PIN_G8 
+// #pin_select SDI2 = PIN_G7 
+// #pin_select SCK2OUT = PIN_G6 
 
 //=====================================
 // 				I2C
@@ -21,15 +25,15 @@
 
 // NOTE -- these pins are default and not remappable. pinouts included for completeness.
 
-#define I2C_1       1 // Stream I2C
+#define I2C_1       1 // Stream I2C 1
 #pin_select SCL1            PIN_G2
 #pin_select SDA1            PIN_G3
 
-#define I2C_2       2 // Stream I2C
+#define I2C_2       2 // Stream I2C 2 
 #pin_select SCL2            PIN_A2
 #pin_select SDA2            PIN_A3
 
-#define I2C_3       3 // Stream I2C
+#define I2C_3       3 // Stream I2C 3
 #pin_select SCL3            PIN_E6
 #pin_select SDA3            PIN_E7
 
@@ -67,12 +71,12 @@
 //				Magnetometer Pins
 //========================================
 
-#define MAG_I2CEN                   PIN_E5
+// #define MAG_I2CEN                   PIN_E5
 
 // Bezouska: The magnetometer uses SPI-1, so we only need to define 3 additional pins
-#define MAG_SSNOT					PIN_B14 
-#define MAG_DRDY					PIN_B12 
-#define MAG_RESET					PIN_B13
+// #define MAG_SSNOT					PIN_B14 
+// #define MAG_DRDY					PIN_B12 
+// #define MAG_RESET					PIN_B13
 
 // Bezouska: Note, this is for Pumpkin Development Board
 //#define MAG_RESET					PIN_D14 //H1.11		
@@ -97,9 +101,9 @@
 //========================================
 
 // Flight Settings
-#define GYROCS1 					PIN_B11   	// X Side, next to programming cable (short side)
-#define GYROCS2 					PIN_B15  	// Y Side, not by programming cable (long side)
-#define GYROCS3 					PIN_B10  	// Z Top
+#define GYRO_CS1 					PIN_B11   	// X Side, next to programming cable (short side)
+#define GYRO_CS2 					PIN_B15  	// Y Side, not by programming cable (long side)
+#define GYRO_CS3 					PIN_B10  	// Z Top
 
 // Gyro Power Pin
 #define GYRO_ON						PIN_A1
@@ -117,3 +121,5 @@
 #define FLASH_CHIP_SELECT			PIN_B7	
 #define FLASH_WRITE_PROTECT			PIN_D6	
 #define SECOND_FLASH_CS				PIN_B9
+
+#endif

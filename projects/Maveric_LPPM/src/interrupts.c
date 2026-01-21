@@ -1,7 +1,6 @@
 #include "interrupts.h"
 #include "circbuf.h"
 #include "uart.h"
-#include "spi.h"
 #include <stdint.h>
 #include <stdio.h>
 

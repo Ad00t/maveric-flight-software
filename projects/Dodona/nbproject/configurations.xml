@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="65">
+  <logicalFolder name="root" displayName="root" projectFiles="true">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <logicalFolder name="src" displayName="src" projectFiles="true">
+        <logicalFolder name="GomSpace" displayName="GomSpace" projectFiles="true">
+          <itemPath>../../common/aeneas/src/GomSpace/crc32.c</itemPath>
+          <itemPath>../../common/aeneas/src/GomSpace/cspHeader.c</itemPath>
+          <itemPath>../../common/aeneas/src/GomSpace/frame.c</itemPath>
+          <itemPath>../../common/aeneas/src/GomSpace/kiss.c</itemPath>
+        </logicalFolder>
+        <itemPath>../../common/aeneas/src/adc.c</itemPath>
+        <itemPath>../../common/aeneas/src/burn.c</itemPath>
+        <itemPath>../../common/aeneas/src/clocktest.c</itemPath>
+        <itemPath>../../common/aeneas/src/commandmanager.c</itemPath>
+        <itemPath>../../common/aeneas/src/crc.c</itemPath>
+        <itemPath>../../common/aeneas/src/debug.c</itemPath>
+        <itemPath>../../common/aeneas/src/downlinkmessage.c</itemPath>
+        <itemPath>../../common/aeneas/src/eps.c</itemPath>
+        <itemPath>../../common/aeneas/src/errors.c</itemPath>
+        <itemPath>../../common/aeneas/src/flashmanager.c</itemPath>
+        <itemPath>../../common/aeneas/src/flash_AT25DF641.c</itemPath>
+        <itemPath>../../common/aeneas/src/fredtime.c</itemPath>
+        <itemPath>../../common/aeneas/src/FSW.c</itemPath>
+        <itemPath>../../common/aeneas/src/geomag.c</itemPath>
+        <itemPath>../../common/aeneas/src/gyro.c</itemPath>
+        <itemPath>../../common/aeneas/src/hyperterm.c</itemPath>
+        <itemPath>../../common/aeneas/src/i2c.c</itemPath>
+        <itemPath>../../common/aeneas/src/imi100.c</itemPath>
+        <itemPath>../../common/aeneas/src/inet.c</itemPath>
+        <itemPath>../../common/aeneas/src/itag.c</itemPath>
+        <itemPath>../../common/aeneas/src/labview.c</itemPath>
+        <itemPath>../../common/aeneas/src/linkmanager.c</itemPath>
+        <itemPath>../../common/aeneas/src/loader_pcd.c</itemPath>
+        <itemPath>../../common/aeneas/src/lower_tx.c</itemPath>
+        <itemPath>../../common/aeneas/src/macros.c</itemPath>
+        <itemPath>../../common/aeneas/src/maestro.c</itemPath>
+        <itemPath>../../common/aeneas/src/maestro_flash.c</itemPath>
+        <itemPath>../../common/aeneas/src/mag.c</itemPath>
+        <itemPath>../../common/aeneas/src/mystack.c</itemPath>
+        <itemPath>../../common/aeneas/src/Neon.c</itemPath>
+        <itemPath>../../common/aeneas/src/nonblock.c</itemPath>
+        <itemPath>../../common/aeneas/src/orbit.c</itemPath>
+        <itemPath>../../common/aeneas/src/payloadmanager.c</itemPath>
+        <itemPath>../../common/aeneas/src/payload_smartsat.c</itemPath>
+        <itemPath>../../common/aeneas/src/ports.c</itemPath>
+        <itemPath>../../common/aeneas/src/schedule.c</itemPath>
+        <itemPath>../../common/aeneas/src/spi.c</itemPath>
+        <itemPath>../../common/aeneas/src/stensat.c</itemPath>
+        <itemPath>../../common/aeneas/src/sunsensor.c</itemPath>
+        <itemPath>../../common/aeneas/src/telemetry.c</itemPath>
+        <itemPath>../../common/aeneas/src/time.c</itemPath>
+        <itemPath>../../common/aeneas/src/transceiver_gomspace.c</itemPath>
+        <itemPath>../../common/aeneas/src/tx_manager.c</itemPath>
+        <itemPath>../../common/aeneas/src/uplinkmessage.c</itemPath>
+      </logicalFolder>
+      <itemPath>../../common/aeneas/src/24FJ256GA110.h</itemPath>
+      <itemPath>../../common/aeneas/src/Neon.h</itemPath>
+      <itemPath>../../common/aeneas/src/PCD_Bootloader.h</itemPath>
+      <itemPath>../../common/aeneas/src/adc.h</itemPath>
+      <itemPath>../../common/aeneas/src/address.h</itemPath>
+      <itemPath>../../common/aeneas/src/address_lower.h</itemPath>
+      <itemPath>../../common/aeneas/src/address_upper.h</itemPath>
+      <itemPath>../../common/aeneas/src/burn.h</itemPath>
+      <itemPath>../../common/aeneas/src/commandmanager.h</itemPath>
+      <itemPath>../../common/aeneas/src/common.h</itemPath>
+      <itemPath>../../common/aeneas/src/config.h</itemPath>
+      <itemPath>../../common/aeneas/src/crc.h</itemPath>
+      <itemPath>../../common/aeneas/src/debug.h</itemPath>
+      <itemPath>../../common/aeneas/src/downlinkmessage.h</itemPath>
+      <itemPath>../../common/aeneas/src/eps.h</itemPath>
+      <itemPath>../../common/aeneas/src/errors.h</itemPath>
+      <itemPath>../../common/aeneas/src/flash.h</itemPath>
+      <itemPath>../../common/aeneas/src/flashmanager.h</itemPath>
+      <itemPath>../../common/aeneas/src/fredtime.h</itemPath>
+      <itemPath>../../common/aeneas/src/fsw.h</itemPath>
+      <itemPath>../../common/aeneas/src/geomag.h</itemPath>
+      <itemPath>../../common/aeneas/src/globals.h</itemPath>
+      <itemPath>../../common/aeneas/src/gyro.h</itemPath>
+      <itemPath>../../common/aeneas/src/hyperterm.h</itemPath>
+      <itemPath>../../common/aeneas/src/i2c.h</itemPath>
+      <itemPath>../../common/aeneas/src/imi100.h</itemPath>
+      <itemPath>../../common/aeneas/src/inet.h</itemPath>
+      <itemPath>../../common/aeneas/src/itag.h</itemPath>
+      <itemPath>../../common/aeneas/src/labview.h</itemPath>
+      <itemPath>../../common/aeneas/src/linalg.h</itemPath>
+      <itemPath>../../common/aeneas/src/linkmanager.h</itemPath>
+      <itemPath>../../common/aeneas/src/lower_tx.h</itemPath>
+      <itemPath>../../common/aeneas/src/macros.h</itemPath>
+      <itemPath>../../common/aeneas/src/maestro.h</itemPath>
+      <itemPath>../../common/aeneas/src/maestro_flash.h</itemPath>
+      <itemPath>../../common/aeneas/src/mag.h</itemPath>
+      <itemPath>../../common/aeneas/src/menu.h</itemPath>
+      <itemPath>../../common/aeneas/src/mystack.h</itemPath>
+      <itemPath>../../common/aeneas/src/nonblock.h</itemPath>
+      <itemPath>../../common/aeneas/src/orbit.h</itemPath>
+      <itemPath>../../common/aeneas/src/payload.h</itemPath>
+      <itemPath>../../common/aeneas/src/payloadmanager.h</itemPath>
+      <itemPath>../../common/aeneas/src/pins.h</itemPath>
+      <itemPath>../../common/aeneas/src/pinscustom.h</itemPath>
+      <itemPath>../../common/aeneas/src/pinslower.h</itemPath>
+      <itemPath>../../common/aeneas/src/pinsupper.h</itemPath>
+      <itemPath>../../common/aeneas/src/ports.h</itemPath>
+      <itemPath>../../common/aeneas/src/schedule.h</itemPath>
+      <itemPath>../../common/aeneas/src/spi.h</itemPath>
+      <itemPath>../../common/aeneas/src/stensat.h</itemPath>
+      <itemPath>../../common/aeneas/src/sunsensor.h</itemPath>
+      <itemPath>../../common/aeneas/src/telemetry.h</itemPath>
+      <itemPath>../../common/aeneas/src/time.h</itemPath>
+      <itemPath>../../common/aeneas/src/transceiver.h</itemPath>
+      <itemPath>../../common/aeneas/src/tx_manager.h</itemPath>
+      <itemPath>../../common/aeneas/src/unsorted.h</itemPath>
+      <itemPath>../../common/aeneas/src/uplinkmessage.h</itemPath>
+      <itemPath>../../common/aeneas/src/wmm.h</itemPath>
+      <itemPath>../../common/aeneas/src/wmmrows.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="true">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+    <logicalFolder name="LinkerScript"
+                   displayName="Linker Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <itemPath>../../common/aeneas/src/main.c</itemPath>
+    </logicalFolder>
+    <logicalFolder name="OtherFiles" displayName="Other Files" projectFiles="false">
+      <itemPath>../../README.md</itemPath>
+      <itemPath>../../common/aeneas/src/FSW.c</itemPath>
+      <itemPath>../../common/aeneas/src/Neon.c</itemPath>
+      <itemPath>../../common/aeneas/src/adc.c</itemPath>
+      <itemPath>../../common/aeneas/src/burn.c</itemPath>
+      <itemPath>../../common/aeneas/src/clocktest.c</itemPath>
+      <itemPath>../../common/aeneas/src/commandmanager.c</itemPath>
+      <itemPath>../../common/aeneas/src/crc.c</itemPath>
+      <itemPath>../../common/aeneas/src/debug.c</itemPath>
+      <itemPath>../../common/aeneas/src/downlinkmessage.c</itemPath>
+      <itemPath>../../common/aeneas/src/eps.c</itemPath>
+      <itemPath>../../common/aeneas/src/errors.c</itemPath>
+      <itemPath>../../common/aeneas/src/flash_AT25DF641.c</itemPath>
+      <itemPath>../../common/aeneas/src/flashmanager.c</itemPath>
+      <itemPath>../../common/aeneas/src/fredtime.c</itemPath>
+      <itemPath>../../common/aeneas/src/fsw.h</itemPath>
+      <itemPath>../../common/aeneas/src/geomag.c</itemPath>
+      <itemPath>../../common/aeneas/src/gyro.c</itemPath>
+      <itemPath>../../common/aeneas/src/hyperterm.c</itemPath>
+      <itemPath>../../common/aeneas/src/i2c.c</itemPath>
+      <itemPath>../../common/aeneas/src/imi100.c</itemPath>
+      <itemPath>../../common/aeneas/src/inet.c</itemPath>
+      <itemPath>../../common/aeneas/src/itag.c</itemPath>
+      <itemPath>../../common/aeneas/src/labview.c</itemPath>
+      <itemPath>../../common/aeneas/src/linkmanager.c</itemPath>
+      <itemPath>../../common/aeneas/src/loader_pcd.c</itemPath>
+      <itemPath>../../common/aeneas/src/lower_tx.c</itemPath>
+      <itemPath>../../common/aeneas/src/macros.c</itemPath>
+      <itemPath>../../common/aeneas/src/maestro.c</itemPath>
+      <itemPath>../../common/aeneas/src/maestro_flash.c</itemPath>
+      <itemPath>../../common/aeneas/src/mag.c</itemPath>
+      <itemPath>../../common/aeneas/src/mystack.c</itemPath>
+      <itemPath>../../common/aeneas/src/nonblock.c</itemPath>
+      <itemPath>../../common/aeneas/src/orbit.c</itemPath>
+      <itemPath>../../common/aeneas/src/payload_smartsat.c</itemPath>
+      <itemPath>../../common/aeneas/src/payloadmanager.c</itemPath>
+      <itemPath>../../common/aeneas/src/ports.c</itemPath>
+      <itemPath>../../common/aeneas/src/schedule.c</itemPath>
+      <itemPath>../../common/aeneas/src/spi.c</itemPath>
+      <itemPath>../../common/aeneas/src/stensat.c</itemPath>
+      <itemPath>../../common/aeneas/src/sunsensor.c</itemPath>
+      <itemPath>../../common/aeneas/src/telemetry.c</itemPath>
+      <itemPath>../../common/aeneas/src/time.c</itemPath>
+      <itemPath>../../common/aeneas/src/transceiver_gomspace.c</itemPath>
+      <itemPath>../../common/aeneas/src/tx_manager.c</itemPath>
+      <itemPath>../../common/aeneas/src/uplinkmessage.c</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceRootList>
+    <Elem>.</Elem>
+    <Elem>../../common/aeneas/src</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="default" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC24FJ256GA110</targetDevice>
+        <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
+        <platformTool>ICD3PlatformTool</platformTool>
+        <languageToolchain>CCSC</languageToolchain>
+        <languageToolchainVersion>4.124</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <packs>
+        <pack name="PIC24F-GA-GB_DFP" vendor="Microchip" version="1.10.375"/>
+      </packs>
+      <ScriptingSettings>
+      </ScriptingSettings>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+        <archiverTool>
+        </archiverTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <parseOnProdLoad>false</parseOnProdLoad>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
+        <subordinates>
+        </subordinates>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeUseCleanTarget>false</makeUseCleanTarget>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
+      <ICD3PlatformTool>
+        <property key="ADC 1" value="true"/>
+        <property key="AutoSelectMemRanges" value="auto"/>
+        <property key="CLOCK CONTROL" value="true"/>
+        <property key="COMPARATOR" value="true"/>
+        <property key="CRC" value="true"/>
+        <property key="Freeze All Other Peripherals" value="true"/>
+        <property key="I2C1" value="true"/>
+        <property key="I2C2" value="true"/>
+        <property key="I2C3" value="true"/>
+        <property key="INPUT CAPTURE 1" value="true"/>
+        <property key="INPUT CAPTURE 2" value="true"/>
+        <property key="INPUT CAPTURE 3" value="true"/>
+        <property key="INPUT CAPTURE 4" value="true"/>
+        <property key="INPUT CAPTURE 5" value="true"/>
+        <property key="INPUT CAPTURE 6" value="true"/>
+        <property key="INPUT CAPTURE 7" value="true"/>
+        <property key="INPUT CAPTURE 8" value="true"/>
+        <property key="INPUT CAPTURE 9" value="true"/>
+        <property key="OUTPUT COMPARE 1" value="true"/>
+        <property key="OUTPUT COMPARE 2" value="true"/>
+        <property key="OUTPUT COMPARE 3" value="true"/>
+        <property key="OUTPUT COMPARE 4" value="true"/>
+        <property key="OUTPUT COMPARE 5" value="true"/>
+        <property key="OUTPUT COMPARE 6" value="true"/>
+        <property key="OUTPUT COMPARE 7" value="true"/>
+        <property key="OUTPUT COMPARE 8" value="true"/>
+        <property key="OUTPUT COMPARE 9" value="true"/>
+        <property key="PARALLEL MASTER/SLAVE PORT" value="true"/>
+        <property key="SPI 1" value="true"/>
+        <property key="SPI 2" value="true"/>
+        <property key="SPI 3" value="true"/>
+        <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
+        <property key="TIMER1" value="true"/>
+        <property key="TIMER2" value="true"/>
+        <property key="TIMER3" value="true"/>
+        <property key="TIMER4" value="true"/>
+        <property key="TIMER5" value="true"/>
+        <property key="ToolFirmwareFilePath"
+                  value="Press to browse for a specific firmware version"/>
+        <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
+        <property key="UART 1" value="true"/>
+        <property key="UART 2" value="true"/>
+        <property key="UART 3" value="true"/>
+        <property key="UART 4" value="true"/>
+        <property key="debugoptions.debug-startup" value="Use system settings"/>
+        <property key="debugoptions.reset-behaviour" value="Use system settings"/>
+        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="event.recorder.debugger.behavior" value="Running"/>
+        <property key="event.recorder.enabled" value="false"/>
+        <property key="event.recorder.scvd.files" value=""/>
+        <property key="hwtoolclock.frcindebug" value="false"/>
+        <property key="lastid" value=""/>
+        <property key="memories.aux" value="false"/>
+        <property key="memories.bootflash" value="false"/>
+        <property key="memories.configurationmemory" value="true"/>
+        <property key="memories.configurationmemory2" value="true"/>
+        <property key="memories.dataflash" value="true"/>
+        <property key="memories.eeprom" value="true"/>
+        <property key="memories.flashdata" value="true"/>
+        <property key="memories.id" value="true"/>
+        <property key="memories.instruction.ram" value="true"/>
+        <property key="memories.instruction.ram.ranges"
+                  value="${memories.instruction.ram.ranges}"/>
+        <property key="memories.programmemory" value="true"/>
+        <property key="memories.programmemory.ranges" value="0-2abf7"/>
+        <property key="poweroptions.powerenable" value="false"/>
+        <property key="programoptions.donoteraseauxmem" value="false"/>
+        <property key="programoptions.eraseb4program" value="true"/>
+        <property key="programoptions.preservedataflash" value="false"/>
+        <property key="programoptions.preservedataflash.ranges" value=""/>
+        <property key="programoptions.preserveeeprom" value="false"/>
+        <property key="programoptions.preserveeeprom.ranges" value=""/>
+        <property key="programoptions.preserveprogram.ranges" value=""/>
+        <property key="programoptions.preserveprogramrange" value="false"/>
+        <property key="programoptions.preserveuserid" value="false"/>
+        <property key="programoptions.programcalmem" value="false"/>
+        <property key="programoptions.programuserotp" value="false"/>
+        <property key="programoptions.testmodeentrymethod" value="VDDFirst"/>
+        <property key="programoptions.usehighvoltageonmclr" value="false"/>
+        <property key="programoptions.uselvpprogramming" value="false"/>
+        <property key="voltagevalue" value="3.25"/>
+      </ICD3PlatformTool>
+      <Tool>
+        <property key="ADC 1" value="true"/>
+        <property key="AutoSelectMemRanges" value="auto"/>
+        <property key="CLOCK CONTROL" value="true"/>
+        <property key="COMPARATOR" value="true"/>
+        <property key="CRC" value="true"/>
+        <property key="Freeze All Other Peripherals" value="true"/>
+        <property key="I2C1" value="true"/>
+        <property key="I2C2" value="true"/>
+        <property key="I2C3" value="true"/>
+        <property key="INPUT CAPTURE 1" value="true"/>
+        <property key="INPUT CAPTURE 2" value="true"/>
+        <property key="INPUT CAPTURE 3" value="true"/>
+        <property key="INPUT CAPTURE 4" value="true"/>
+        <property key="INPUT CAPTURE 5" value="true"/>
+        <property key="INPUT CAPTURE 6" value="true"/>
+        <property key="INPUT CAPTURE 7" value="true"/>
+        <property key="INPUT CAPTURE 8" value="true"/>
+        <property key="INPUT CAPTURE 9" value="true"/>
+        <property key="OUTPUT COMPARE 1" value="true"/>
+        <property key="OUTPUT COMPARE 2" value="true"/>
+        <property key="OUTPUT COMPARE 3" value="true"/>
+        <property key="OUTPUT COMPARE 4" value="true"/>
+        <property key="OUTPUT COMPARE 5" value="true"/>
+        <property key="OUTPUT COMPARE 6" value="true"/>
+        <property key="OUTPUT COMPARE 7" value="true"/>
+        <property key="OUTPUT COMPARE 8" value="true"/>
+        <property key="OUTPUT COMPARE 9" value="true"/>
+        <property key="PARALLEL MASTER/SLAVE PORT" value="true"/>
+        <property key="SPI 1" value="true"/>
+        <property key="SPI 2" value="true"/>
+        <property key="SPI 3" value="true"/>
+        <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
+        <property key="TIMER1" value="true"/>
+        <property key="TIMER2" value="true"/>
+        <property key="TIMER3" value="true"/>
+        <property key="TIMER4" value="true"/>
+        <property key="TIMER5" value="true"/>
+        <property key="ToolFirmwareFilePath"
+                  value="Press to browse for a specific firmware version"/>
+        <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
+        <property key="UART 1" value="true"/>
+        <property key="UART 2" value="true"/>
+        <property key="UART 3" value="true"/>
+        <property key="UART 4" value="true"/>
+        <property key="debugoptions.debug-startup" value="Use system settings"/>
+        <property key="debugoptions.reset-behaviour" value="Use system settings"/>
+        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="event.recorder.debugger.behavior" value="Running"/>
+        <property key="event.recorder.enabled" value="false"/>
+        <property key="event.recorder.scvd.files" value=""/>
+        <property key="hwtoolclock.frcindebug" value="false"/>
+        <property key="lastid" value=""/>
+        <property key="memories.aux" value="false"/>
+        <property key="memories.bootflash" value="false"/>
+        <property key="memories.configurationmemory" value="true"/>
+        <property key="memories.configurationmemory2" value="true"/>
+        <property key="memories.dataflash" value="true"/>
+        <property key="memories.eeprom" value="true"/>
+        <property key="memories.flashdata" value="true"/>
+        <property key="memories.id" value="true"/>
+        <property key="memories.instruction.ram" value="true"/>
+        <property key="memories.instruction.ram.ranges"
+                  value="${memories.instruction.ram.ranges}"/>
+        <property key="memories.programmemory" value="true"/>
+        <property key="memories.programmemory.ranges" value="0-2abf7"/>
+        <property key="poweroptions.powerenable" value="false"/>
+        <property key="programoptions.donoteraseauxmem" value="false"/>
+        <property key="programoptions.eraseb4program" value="true"/>
+        <property key="programoptions.preservedataflash" value="false"/>
+        <property key="programoptions.preservedataflash.ranges" value=""/>
+        <property key="programoptions.preserveeeprom" value="false"/>
+        <property key="programoptions.preserveeeprom.ranges" value=""/>
+        <property key="programoptions.preserveprogram.ranges" value=""/>
+        <property key="programoptions.preserveprogramrange" value="false"/>
+        <property key="programoptions.preserveuserid" value="false"/>
+        <property key="programoptions.programcalmem" value="false"/>
+        <property key="programoptions.programuserotp" value="false"/>
+        <property key="programoptions.testmodeentrymethod" value="VDDFirst"/>
+        <property key="programoptions.usehighvoltageonmclr" value="false"/>
+        <property key="programoptions.uselvpprogramming" value="false"/>
+        <property key="tracecontrol.disablemacros" value="true"/>
+        <property key="tracecontrol.medium" value="0"/>
+        <property key="tracecontrol.select" value="0"/>
+        <property key="voltagevalue" value="3.25"/>
+      </Tool>
+      <ccscompiler>
+        <property key="cc-compat" value="0"/>
+        <property key="ccs-insert-device" value="false"/>
+        <property key="close-after-compile" value="true"/>
+        <property key="compile-for-icd" value="false"/>
+        <property key="create-call-tree" value="true"/>
+        <property key="create-project-file" value="true"/>
+        <property key="create-stats-tree" value="true"/>
+        <property key="create-symbol-file" value="true"/>
+        <property key="debug-file" value="false"/>
+        <property key="errors-and-warnings" value="+EA"/>
+        <property key="extra-include-directories"
+                  value="C:\Program Files (x86)\PICC\Drivers;C:\Program Files (x86)\PICC\Devices;..\..\common\aeneas"/>
+        <property key="keep-after-compile" value="false"/>
+        <property key="keep-for-xx-seconds" value=""/>
+        <property key="keep-if-errors" value="false"/>
+        <property key="keep-if-no-errors" value="false"/>
+        <property key="keep-scratch-files-on-disk" value="true"/>
+        <property key="list-file" value="+LN"/>
+        <property key="list-file-extension" value=""/>
+        <property key="old-error-file-format" value="false"/>
+        <property key="opt-level" value="9"/>
+        <property key="output-flags" value=""/>
+        <property key="preprocessor-macros-linux" value=""/>
+        <property key="preprocessor-macros-windows" value=""/>
+      </ccscompiler>
+    </conf>
+  </confs>
+</configurationDescriptor>

@@ -13,11 +13,9 @@
       <itemPath>include/cmdfunc.h</itemPath>
       <itemPath>include/interrupts.h</itemPath>
       <itemPath>../../common/maveric/include/cmdmgr.h</itemPath>
-      <itemPath>../../common/maveric/include/spi.h</itemPath>
       <itemPath>include/naviguider.h</itemPath>
       <itemPath>include/adcsmtq.h</itemPath>
       <itemPath>include/adis16260.h</itemPath>
-      <itemPath>include/rm3100.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -41,8 +39,9 @@
       <itemPath>../../common/maveric/src/crcnew.c</itemPath>
       <itemPath>src/cmdfunc.c</itemPath>
       <itemPath>../../common/maveric/src/cmdmgr.c</itemPath>
-      <itemPath>../../common/maveric/src/spi.c</itemPath>
       <itemPath>src/naviguider.c</itemPath>
+      <itemPath>src/adcsmtq.c</itemPath>
+      <itemPath>src/adis16260.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
