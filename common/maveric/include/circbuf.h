@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define CIRCBUF_MAX_SIZE    256 
+#define CIRCBUF_MAX_SIZE    1600 
 
 typedef struct {
     uint16_t w, r;

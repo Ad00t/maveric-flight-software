@@ -11,6 +11,7 @@
 void irqmgr_init(irqmgr_s* irqmgr) {
     irqmgr->started = FALSE;
     irqmgr_clear(irqmgr);
+    isr_disable_all();
 }
 
 void irqmgr_clear(irqmgr_s* irqmgr) {
@@ -38,19 +39,22 @@ void isr_disable_all(void) {
 
 // Interrupt Service Routines 
 
+extern irqmgr_s irqmgr;
+
 #INT_RDA // Magnetorquer
 void isr_uart1(void) {
     if (!irqmgr.started || !uart_byte_avail(COM_A)) return;   
     cb_push(&irqmgr.irqbufs[0], uart_read_byte(COM_A));
 }
 
-#INT_RDA2 // Upper PPM
+#INT_RDA2 // Naviguider 
 void isr_uart2(void) {
-    if (!irqmgr.started || !uart_byte_avail(COM_B)) return;   
-    cb_push(&irqmgr.irqbufs[1], uart_read_byte(COM_C));
+    if (!irqmgr.started || !uart_byte_avail(COM_B)) return;
+    cb_push(&irqmgr.irqbufs[1], uart_read_byte(COM_B));
+    // fprintf(COM_D, "%s%u", KCYN, s);
 }
 
-#INT_RDA3 // Naviguider
+#INT_RDA3 // Upper PPM 
 void isr_uart3(void) {
     if (!irqmgr.started || !uart_byte_avail(COM_C)) return;   
     cb_push(&irqmgr.irqbufs[2], uart_read_byte(COM_C));

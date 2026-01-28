@@ -42,6 +42,7 @@
       <itemPath>src/naviguider.c</itemPath>
       <itemPath>src/adcsmtq.c</itemPath>
       <itemPath>src/adis16260.c</itemPath>
+      <itemPath>src/interrupts.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
@@ -77,7 +78,7 @@
         </archiverTool>
         <loading>
           <useAlternateLoadableFile>false</useAlternateLoadableFile>
-          <parseOnProdLoad>true</parseOnProdLoad>
+          <parseOnProdLoad>false</parseOnProdLoad>
           <alternateLoadableFile></alternateLoadableFile>
         </loading>
         <subordinates>
@@ -144,7 +145,6 @@
         <property key="event.recorder.debugger.behavior" value="Running"/>
         <property key="event.recorder.enabled" value="false"/>
         <property key="event.recorder.scvd.files" value=""/>
-        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="lastid" value=""/>
         <property key="memories.aux" value="false"/>

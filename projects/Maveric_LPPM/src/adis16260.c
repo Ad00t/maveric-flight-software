@@ -69,22 +69,22 @@ void gyro_set_power(gyro_s* gyro, int1 on) {
 void gyro_read_reg(gyro_s* gyro, uint8_t reg, uint16_t* res) {
     uint16_t req = (0 << 15) | ((uint16_t)reg << 8);
     fprintf(COM_D, "%s[%s] gyro_read_reg: 0x%02X%02X\n", KMAG, NODE_LBL, req >> 8, req & 0x00FF);
-	spi_set_mode(GYRO_SPI_MODE);
+	// spi_set_mode(GYRO_SPI_MODE);
 
     output_low(gyro->cs_x); 
-    spi_write(req >> 8); 			      
-    spi_write(req & 0x00FF); 		     
+    // spi_write(req >> 8); 			      
+    // spi_write(req & 0x00FF); 		     
     // uint16_t d0 = spi_xfer(SPI_1, req, 16);
     // res[1] = spi_xfer(SPI_1, 0, 16);
-    // spi_xfer(SPI_1, req);
+    spi_xfer(SPI_1, req);
     output_high(gyro->cs_x); 
    
     delay_us(15);
 
     output_low(gyro->cs_x); 
     // res[0] = make16(spi_read(req >> 8), spi_read(req & 0x00FF));	            
-    res[0] = make16(spi_read(0), spi_read(0));
-    // res[0] = spi_xfer(SPI_1, 0);
+    // res[0] = make16(spi_read(0), spi_read(0));
+    res[0] = spi_xfer(SPI_1, 0xFFFF);
     output_high(gyro->cs_x);
 
     delay_us(15);

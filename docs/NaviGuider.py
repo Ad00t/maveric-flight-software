@@ -31,9 +31,8 @@ class NaviGuider:
             command (str): The command string to send (e.g., 'v', 'n', 'O', etc.).
         """
         if self.ser:
-            command_str = command + '\r'  # Append carriage return
-            self.ser.write(command_str.encode('ascii'))
-            print(f"Sent command: {command}")
+            self.ser.write(command.encode('ascii'))
+            print(f"Sent command: {repr(command)}")
 
     def read_response(self, i=1):
         """
@@ -189,14 +188,21 @@ if __name__ == "__main__":
         naviguider = NaviGuider('COM3')
     
         if naviguider.ser:  # Only proceed if the connection was successful
-            naviguider.restart()
-            naviguider.Set_Mounting_Option()
-            #naviguider.display_version()
-            #naviguider.get_sensor_information()
-    
-            # Start all sensors at a rate of 1 Hz
-            naviguider.start_all_sensors()
-            #naviguider.Magnetometer_Mode()
+            naviguider.send_command("X")
+            print(naviguider.read_response())
+            naviguider.send_command("M2\r")
+            print(naviguider.read_response())
+            naviguider.send_command("s 1,1\r")
+            print(naviguider.read_response())
+
+            # naviguider.restart()
+            # naviguider.Set_Mounting_Option()
+            # #naviguider.display_version()
+            # #naviguider.get_sensor_information()
+            #
+            # # Start all sensors at a rate of 1 Hz
+            # naviguider.start_all_sensors()
+            # #naviguider.Magnetometer_Mode()
     
             # Read some data for a short time
             for _ in range(100):
@@ -207,7 +213,7 @@ if __name__ == "__main__":
                 #time.sleep(.1) # Sleep .1 seconds
                 
             # Stop all sensors
-            naviguider.stop_all_sensors
+            naviguider.stop_all_sensors()
             
             # Power down the device
             naviguider.power_down()

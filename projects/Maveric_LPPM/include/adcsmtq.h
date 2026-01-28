@@ -11,8 +11,6 @@
 #define MTQ_REG_TABLE_LEN       116      // 116
 #define MTQ_MAP_COUNT           3
 #define MTQ_MAX_IDX_COUNT       256      // 256
-#define MTQ_NUM_FAST_REGS       15
-#define MTQ_NUM_CTRL_REGS       8
 
 // Register type
 
@@ -118,6 +116,9 @@ void mtq_rcv_fsm(mtq_s* mtq, circbuf_s* irqbuf);
 
 // Check if we're still receiving from the mtq
 int1 mtq_heartbeat(mtq_s* mtq);
+
+// Write 1 to nvm register to reset
+void mtq_reset(mtq_s* mtq);
 
 // Read all user registers
 void mtq_read_all(mtq_s* mtq);
@@ -262,13 +263,15 @@ void mtq_set_conf(mtq_s* mtq, uint8_t elevation, uint8_t mode);
 #define MTQ_STR1_ORIEN_BS       2 << 8 | 89
 #define MTQ_NVM                 2 << 8 | 255
 
+#define MTQ_NUM_FAST_REGS       17
 static const uint16_t MTQ_FAST_FRAME_REGS[] = {
     MTQ_CONF, MTQ_TIME, MTQ_DATE, MTQ_MTQ_USER, MTQ_STAT, MTQ_ACT_ERR, MTQ_SEN_ERR,
-    MTQ_CSS_ERR, MTQ_Q, MTQ_RATE, MTQ_LLA, MTQ_ATT_ERROR, MTQ_ATT_ERROR_RATE, MTQ_SV, MTQ_MAG
+    MTQ_CSS_ERR, MTQ_Q, MTQ_RATE, MTQ_LLA, MTQ_ATT_ERROR, MTQ_ATT_ERROR_RATE, MTQ_SV, MTQ_MAG, MTQ_MTQ, MTQ_MTQ_USER
 };
 
+#define MTQ_NUM_CTRL_REGS       10
 static const uint16_t MTQ_CTRL_FRAME_REGS[] = {
-    MTQ_Q, MTQ_RATE, MTQ_LLA, MTQ_MAG, MTQ_IMU0_S, MTQ_IMU1_S, MTQ_IMU2_S, MTQ_IMU3_S
+    MTQ_Q, MTQ_RATE, MTQ_LLA, MTQ_MAG, MTQ_IMU0_S, MTQ_IMU1_S, MTQ_IMU2_S, MTQ_IMU3_S, MTQ_MTQ, MTQ_MTQ_USER
 };
 
 /* Register format: [idx, cnt, midx, type, data, len]

@@ -104,9 +104,9 @@ USAGE:
 #define PAYLOAD_SMARTSAT_PORT 3
 #else
 #define IMI_PORT 0 // IMI-100 Port
-#define USER_PORT 1 // USB Hyperterminal Port
+#define USER_PORT 3 // USB Hyperterminal Port
 #define OTHER_PPM_PORT 2 // To/From Other PPM
-#define SUN_PORT 3 // Sun Sensor Port
+#define SUN_PORT 1 // Sun Sensor Port
 #endif
 
 // An extra setting for use on the Dev Board only
@@ -114,7 +114,7 @@ USAGE:
 #undef USER_PORT
 #undef MHX_PORT
 #define USER_PORT \
-	1 // This is most likely the USB on the Dev Board, though it depends on how the pins are set up
+	3 // This is most likely the USB on the Dev Board, though it depends on how the pins are set up
 #define MHX_PORT \
 	30 // If greater than 4 and not 99, this effectively dumps all characters sent to the MHX_PORT.
 	   // Useful on the dev board.

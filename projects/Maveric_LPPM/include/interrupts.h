@@ -22,8 +22,6 @@ void irqmgr_clear(irqmgr_s* irqmgr);
 
 // Interrupt service routines
 
-extern irqmgr_s irqmgr;
-
 // Enable all interrupts
 void isr_enable_all(void);
 

@@ -4,59 +4,6 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <logicalFolder name="src" displayName="src" projectFiles="true">
-        <logicalFolder name="GomSpace" displayName="GomSpace" projectFiles="true">
-          <itemPath>../../common/aeneas/src/GomSpace/crc32.c</itemPath>
-          <itemPath>../../common/aeneas/src/GomSpace/cspHeader.c</itemPath>
-          <itemPath>../../common/aeneas/src/GomSpace/frame.c</itemPath>
-          <itemPath>../../common/aeneas/src/GomSpace/kiss.c</itemPath>
-        </logicalFolder>
-        <itemPath>../../common/aeneas/src/adc.c</itemPath>
-        <itemPath>../../common/aeneas/src/burn.c</itemPath>
-        <itemPath>../../common/aeneas/src/clocktest.c</itemPath>
-        <itemPath>../../common/aeneas/src/commandmanager.c</itemPath>
-        <itemPath>../../common/aeneas/src/crc.c</itemPath>
-        <itemPath>../../common/aeneas/src/debug.c</itemPath>
-        <itemPath>../../common/aeneas/src/downlinkmessage.c</itemPath>
-        <itemPath>../../common/aeneas/src/eps.c</itemPath>
-        <itemPath>../../common/aeneas/src/errors.c</itemPath>
-        <itemPath>../../common/aeneas/src/flashmanager.c</itemPath>
-        <itemPath>../../common/aeneas/src/flash_AT25DF641.c</itemPath>
-        <itemPath>../../common/aeneas/src/fredtime.c</itemPath>
-        <itemPath>../../common/aeneas/src/FSW.c</itemPath>
-        <itemPath>../../common/aeneas/src/geomag.c</itemPath>
-        <itemPath>../../common/aeneas/src/gyro.c</itemPath>
-        <itemPath>../../common/aeneas/src/hyperterm.c</itemPath>
-        <itemPath>../../common/aeneas/src/i2c.c</itemPath>
-        <itemPath>../../common/aeneas/src/imi100.c</itemPath>
-        <itemPath>../../common/aeneas/src/inet.c</itemPath>
-        <itemPath>../../common/aeneas/src/itag.c</itemPath>
-        <itemPath>../../common/aeneas/src/labview.c</itemPath>
-        <itemPath>../../common/aeneas/src/linkmanager.c</itemPath>
-        <itemPath>../../common/aeneas/src/loader_pcd.c</itemPath>
-        <itemPath>../../common/aeneas/src/lower_tx.c</itemPath>
-        <itemPath>../../common/aeneas/src/macros.c</itemPath>
-        <itemPath>../../common/aeneas/src/maestro.c</itemPath>
-        <itemPath>../../common/aeneas/src/maestro_flash.c</itemPath>
-        <itemPath>../../common/aeneas/src/mag.c</itemPath>
-        <itemPath>../../common/aeneas/src/mystack.c</itemPath>
-        <itemPath>../../common/aeneas/src/Neon.c</itemPath>
-        <itemPath>../../common/aeneas/src/nonblock.c</itemPath>
-        <itemPath>../../common/aeneas/src/orbit.c</itemPath>
-        <itemPath>../../common/aeneas/src/payloadmanager.c</itemPath>
-        <itemPath>../../common/aeneas/src/payload_smartsat.c</itemPath>
-        <itemPath>../../common/aeneas/src/ports.c</itemPath>
-        <itemPath>../../common/aeneas/src/schedule.c</itemPath>
-        <itemPath>../../common/aeneas/src/spi.c</itemPath>
-        <itemPath>../../common/aeneas/src/stensat.c</itemPath>
-        <itemPath>../../common/aeneas/src/sunsensor.c</itemPath>
-        <itemPath>../../common/aeneas/src/telemetry.c</itemPath>
-        <itemPath>../../common/aeneas/src/time.c</itemPath>
-        <itemPath>../../common/aeneas/src/transceiver_gomspace.c</itemPath>
-        <itemPath>../../common/aeneas/src/tx_manager.c</itemPath>
-        <itemPath>../../common/aeneas/src/uplinkmessage.c</itemPath>
-      </logicalFolder>
-      <itemPath>../../common/aeneas/src/24FJ256GA110.h</itemPath>
       <itemPath>../../common/aeneas/src/Neon.h</itemPath>
       <itemPath>../../common/aeneas/src/PCD_Bootloader.h</itemPath>
       <itemPath>../../common/aeneas/src/adc.h</itemPath>
@@ -146,7 +93,6 @@
       <itemPath>../../common/aeneas/src/flash_AT25DF641.c</itemPath>
       <itemPath>../../common/aeneas/src/flashmanager.c</itemPath>
       <itemPath>../../common/aeneas/src/fredtime.c</itemPath>
-      <itemPath>../../common/aeneas/src/fsw.h</itemPath>
       <itemPath>../../common/aeneas/src/geomag.c</itemPath>
       <itemPath>../../common/aeneas/src/gyro.c</itemPath>
       <itemPath>../../common/aeneas/src/hyperterm.c</itemPath>
@@ -309,6 +255,8 @@
         <property key="programoptions.uselvpprogramming" value="false"/>
         <property key="voltagevalue" value="3.25"/>
       </ICD3PlatformTool>
+      <item path="Makefile" ex="true" overriding="false">
+      </item>
       <Tool>
         <property key="ADC 1" value="true"/>
         <property key="AutoSelectMemRanges" value="auto"/>

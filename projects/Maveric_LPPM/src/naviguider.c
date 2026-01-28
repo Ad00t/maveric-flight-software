@@ -30,10 +30,15 @@ void nvg_init(nvg_s* nvg, uint8_t port) {
         nvg->sensors[i].data = calloc(nvg->sensors[i].len, sizeof(float));
     }
    
-    nvg_restart(nvg);
-    nvg_set_mounting_option(nvg);
-    nvg_start_all_sensors(nvg);
-    fprintf(COM_D, "%s[%s] nvg_init: port=%u\n", KBLU, NODE_LBL, nvg->port);
+    // nvg_restart(nvg); 
+    // nvg_set_mounting_option(nvg);
+    // nvg_start_all_sensors(nvg);
+    // nvg_start_sensor(nvg, NVG_ACCELEROMETER, 1);
+    nvg_send_command(nvg, "X");
+    nvg_send_command(nvg, "V0");
+    nvg_send_command(nvg, "M2\r");
+    nvg_send_command(nvg, "s 1,1\r");
+    fprintf(COM_D, "%s[%s] nvg_init: port=%u\n", KGRN, NODE_LBL, nvg->port);
 }
 
 void nvg_destroy(nvg_s* nvg) {
@@ -46,7 +51,7 @@ void nvg_destroy(nvg_s* nvg) {
             free(nvg->sensors[i].data);
     }
     
-    fprintf(COM_D, "%s[%s] nvg_destroy\n", KBLU, NODE_LBL);
+    fprintf(COM_D, "%s[%s] nvg_destroy\n", KGRN, NODE_LBL);
 }
 
 void nvg_clear(nvg_s* nvg) {
@@ -59,22 +64,25 @@ void nvg_clear(nvg_s* nvg) {
     }
     nvg_pkt_clear(&nvg->rcvpkt);
     
-    fprintf(COM_D, "%s[%s] nvg_clear\n", KBLU, NODE_LBL);
+    fprintf(COM_D, "%s[%s] nvg_clear\n", KGRN, NODE_LBL);
 }
 
 void nvg_send_command(nvg_s* nvg, char* cmd) {
-    uart_write_buf(nvg->port, cmd, strlen(cmd));
-    delay_ms(10);
-    fprintf(COM_D, "%s[%s] nvg_send_command: \"%s\"\n", KBLU, NODE_LBL, cmd);
+    uint8_t len = strlen(cmd);
+    uart_write_buf(nvg->port, cmd, len);
+    fprintf(COM_D, "%s[%s] nvg_send_command: len=%u \"%s\"\n", KGRN, NODE_LBL, len, cmd);
+    delay_ms(100);
 } 
 
 void nvg_rcv_fsm(nvg_s* nvg, circbuf_s* irqbuf) {
     nvg_pkt_s* rcvpkt = &nvg->rcvpkt;
     uint16_t iter = 0;
-    while (iter < 2*CIRCBUF_MAX_SIZE) {
+    fprintf(COM_D, "%sNVG_FSM: r=%u w=%u\n", KGRN, irqbuf->r, irqbuf->w);
+    while (iter < 5*CIRCBUF_MAX_SIZE) {
         uint8_t b;
         if (!cb_pop(irqbuf, 1, &b)) return;
-      
+        fprintf(COM_D, "%s%c", KGRN, b);
+
         switch (rcvpkt->fsm) {
             case NVG_FSM_TS:
                 if (b == '\n' || b == '\r' || b == ' ') break;
@@ -170,7 +178,7 @@ void nvg_rcv_complete(nvg_s* nvg) {
     sens->ts = nvg->rcvpkt->ts;
     memcpy(sens->data, nvg->rcvpkt->payload, sens->len * sizeof(float));
     
-    fprintf(COM_D, "%s[%s] nvg_rcv_complete: %.3f, %u, ", KBLU, NODE_LBL, sens->ts, sens->id);
+    fprintf(COM_D, "%s[%s] nvg_rcv_complete: %.3f, %u, ", KGRN, NODE_LBL, sens->ts, sens->id);
     uint8_t i;
     for (i = 0; i < sens->len-1; i++) {
         fprintf(COM_D, "%.3f, ", sens->data[i]);
@@ -181,9 +189,10 @@ void nvg_rcv_complete(nvg_s* nvg) {
 // HIGH LEVEL API
 
 void nvg_start_sensor(nvg_s* nvg, uint8_t id, uint16_t rate) {
-    fprintf(COM_C, "%u,%u\r", id, rate);
+    uint8_t buf[10];
+    sprintf(buf, "s %u,%u\r", id, rate);
+    nvg_send_command(nvg, buf); 
     delay_ms(10);
-    fprintf(COM_D, "%s[%s] nvg_start_sensor: \"%u,%u\"\n", KBLU, NODE_LBL, id, rate);
 }
 
 void nvg_start_all_sensors(nvg_s* nvg) {
@@ -224,7 +233,7 @@ void nvg_restart(nvg_s* nvg) {
 }
 
 void nvg_set_mounting_option(nvg_s* nvg) {
-    nvg_send_command(nvg, "M2");
+    nvg_send_command(nvg, "M2\r");
 }
 
 void nvg_magnetometer_mode(nvg_s* nvg) {

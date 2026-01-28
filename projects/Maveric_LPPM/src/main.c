@@ -27,7 +27,7 @@
 #fuses CKSFSM						// Clock fail-safe monitor	
 #pragma case						// Makes all code case-sensitive
 
-#use delay(clock=32MHZ,internal=8M)  // Tells compiler what the clock speed is
+#use delay(clock=32MHZ, internal=8M)  // Tells compiler what the clock speed is
 
 // PIC registers
 
@@ -41,11 +41,11 @@
 
 #include "pinslower.h"            // Add pins Lower PPM Definition
 
-#use rs232(baud=COM_A_BAUD, UART1, BITS=8, STREAM=COM_A, ERRORS, PARITY=N, TIMEOUT=1000)
-#use rs232(baud=COM_B_BAUD, UART2, BITS=8, STREAM=COM_B, ERRORS, PARITY=N, TIMEOUT=1000)
-#use rs232(baud=COM_C_BAUD, UART3, BITS=8, STREAM=COM_C, ERRORS, PARITY=N, TIMEOUT=1000)
-#use rs232(baud=COM_D_BAUD, UART4, BITS=8, STREAM=COM_D, ERRORS, PARITY=N, TIMEOUT=1000)
-// #use spi(MASTER, FORCE_HW, SPI1, BAUD=2000000, MSB_FIRST, BITS=16, MODE=3, STREAM=SPI_1)
+#use rs232(baud=COM_A_BAUD, UART1, BITS=8, STREAM=COM_A, ERRORS, PARITY=N, STOP=1, TIMEOUT=1000)
+#use rs232(baud=COM_B_BAUD, UART2, BITS=8, STREAM=COM_B, ERRORS, PARITY=N, STOP=1, TIMEOUT=1000)
+#use rs232(baud=COM_C_BAUD, UART3, BITS=8, STREAM=COM_C, ERRORS, PARITY=N, STOP=1, TIMEOUT=1000)
+#use rs232(baud=COM_D_BAUD, UART4, BITS=8, STREAM=COM_D, ERRORS, PARITY=N, STOP=1, TIMEOUT=1000)
+#use spi(MASTER, FORCE_HW, SPI1, BAUD=2000000, MSB_FIRST, BITS=16, MODE=3, STREAM=SPI_1)
 #use i2c(MASTER, I2C1, STREAM=I2C_1)
 // #use i2c(master, sda=PIN_A3, scl=PIN_A2, STREAM=I2C_1)
 // #use i2c(master, sda=PIN_A15, scl=PIN_A14, STREAM=I2C_1)
@@ -110,25 +110,25 @@ void system_init(void) {
     setup_wdt(WDT_ON);
 
     // SPI init
-	output_high(FLASH_CHIP_SELECT);
-	output_high(SECOND_FLASH_CS);
-	spi_set_mode(GYRO_SPI_MODE);
+	// output_high(FLASH_CHIP_SELECT);
+	// output_high(SECOND_FLASH_CS);
+	// spi_set_mode(GYRO_SPI_MODE);
 	// setup_spi(SPI_MASTER | SPI_XMIT_L_TO_H | SPI_CLK_DIV_16 | SPI_SCK_IDLE_HIGH);
 
     // RTC init 
     setup_rtc(RTC_ENABLE | RTC_OUTPUT_SECONDS, 0); 
     
-    // Submodules init
-    irqmgr_init(&irqmgr);
-    cmdmgr_init(&cmdmgr);
-    // mtq_init(&mtq, COM_A);
-    // mtq_set_conf(&mtq, 0, MTQ_MODE_DETUMBLING);
-    gyro_init(&gyro, GYRO_CS1, GYRO_CS2, GYRO_CS3, GYRO_ON);
-    // nvg_init(&nvg, COM_C);
-
     // Start interrupts
+    irqmgr_init(&irqmgr);
     irqmgr.started = TRUE;
     isr_enable_all();
+    
+    // Submodules init
+    cmdmgr_init(&cmdmgr);
+    mtq_init(&mtq, COM_A);
+    mtq_set_conf(&mtq, 0, MTQ_MODE_DETUMBLING);
+    // gyro_init(&gyro, GYRO_CS1, GYRO_CS2, GYRO_CS3, GYRO_ON);
+    nvg_init(&nvg, COM_B);
     
     fprintf(COM_D, "%s[%s] system initialized\n", KWHT, NODE_LBL);
     delay_ms(1000);
@@ -147,21 +147,21 @@ void housekeeping(void) {
     // Handle received byte interrupts
     isr_disable_all();
     mtq_rcv_fsm(&mtq, &irqmgr.irqbufs[0]); // Do driver handling before commands so data is up to date
-    // nvg_rcv_fsm(&nvg, &irqmgr.irqbufs[2]);
+    nvg_rcv_fsm(&nvg, &irqmgr.irqbufs[1]);
     cmdmgr_rcv_fsm(&cmdmgr, &irqmgr.irqbufs[3], &cmdmgr.rcvpkts[0]); // Handle COM_D FTDI commands on cmd rcvpkt 0
     isr_enable_all();
   
-    // nvg_sensor_s* sens = &nvg.sensors[NVG_ACCEL_LINEAR];
-    // fprintf(COM_D, "%s%s: %f %f %f %f %f\n", KBLU, "NVG_ACCEL_LINEAR",
-    //         sens->ts, sens->data[0], sens->data[1], sens->data[2], sens->data[3]);
+    nvg_sensor_s* sens = &nvg.sensors[NVG_ACCELEROMETER];
+    fprintf(COM_D, "%s%s: %f %f %f %f %f\n", KGRN, "NVG",
+            sens->ts, sens->data[0], sens->data[1], sens->data[2], sens->data[3]);
 
     // Check heartbeats
-    // if (!mtq_heartbeat(&mtq)) {
-    //     fprintf(COM_D, "%s[%s] mtq flatlined\n", KRED, NODE_LBL);
-    // }
-    if (!gyro_heartbeat(&gyro)) {
-        fprintf(COM_D, "%s[%s] gyro flatlined\n", KRED, NODE_LBL);
+    if (!mtq_heartbeat(&mtq)) {
+        fprintf(COM_D, "%s[%s] mtq flatlined\n", KRED, NODE_LBL);
     }
+    // if (!gyro_heartbeat(&gyro)) {
+    //     fprintf(COM_D, "%s[%s] gyro flatlined\n", KRED, NODE_LBL);
+    // }
     // if (!nvg_heartbeat(&nvg)) {
     //     fprintf(COM_D, "%s[%s] nvg flatlined\n", KRED, NODE_LBL);
     // }
@@ -169,8 +169,7 @@ void housekeeping(void) {
     // Send commands to read all sensors
     // mtq_read_ctrl(&mtq);
     // mtq_read_fast(&mtq);
-    gyro_read_all(&gyro);
-    // rm3100_read_data(&im);
+    // gyro_read_all(&gyro);
     
     delay_ms(1000);
 }
@@ -178,5 +177,5 @@ void housekeeping(void) {
 // Cleanup routine
 void system_cleanup(void) {
     mtq_destroy(&mtq);
-    nvg_destroy(&mtq);
+    nvg_destroy(&nvg);
 }

@@ -388,6 +388,11 @@ int1 mtq_heartbeat(mtq_s* mtq) {
     return heartbeat;
 }
 
+void mtq_reset(mtq_s* mtq) {
+    uint8_t req = 1;
+    mtq_write_start(mtq, MTQ_NVM, &req);
+}
+
 // NOT WORKING. may need to use state machine to read 1 reg per superloop iteration.
 void mtq_read_all(mtq_s* mtq) {
     uint8_t i;
@@ -431,6 +436,6 @@ void mtq_set_conf(mtq_s* mtq, uint8_t elevation, uint8_t mode) {
     conf[3] = elevation;
     conf[2] = 0; // Unused
     conf[1] = 0; // Unused
-    conf[0] = mode;
-    // mtq_write_start(mtq, MTQ_CONF, conf);
+    conf[0] = mode | (1 << 7);
+    mtq_write_start(mtq, MTQ_CONF, conf);
 }

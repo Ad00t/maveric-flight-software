@@ -1,7 +1,6 @@
 #ifndef __NAVIGUIDER_H__
 #define __NAVIGUIDER_H__
 
-#include "interrupts.h"
 #include "circbuf.h"
 #include <stddef.h>
 #include <stdint.h>
