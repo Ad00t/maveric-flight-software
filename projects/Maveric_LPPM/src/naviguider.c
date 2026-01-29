@@ -2,11 +2,46 @@
 #include "interrupts.h"
 #include "circbuf.h"
 #include "uart.h"
+#include <stdio.h>
+#include <stddef.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdlibm.h>
 
 #module
+
+// HELPERS
+
+int1 is_data_line(char* line, uint8_t len) {
+    uint8_t i;
+    for (i = 0; i < len; i++) {
+        char c = line[i];
+        if (!isdigit(c) && c != ',' && c != ' ' && c != '.')
+            return FALSE;
+    }
+    return TRUE;
+}
+
+static uint8_t split_csv(char* buf, uint16_t len, char** argv, uint8_t max_args) {
+    uint8_t argc = 0;
+    uint16_t start = 0;
+    uint16_t i;
+
+    for (i = 0; i <= len && argc < max_args; i++) {
+        char c = (i < len) ? buf[i] : '\0';
+        if (c == ',' || c == '\0') {
+            /* Trim leading spaces */
+            while (start < i && buf[start] == ' ')
+                start++;
+            argv[argc++] = &buf[start];
+            /* Null-terminate token */
+            buf[i] = '\0';
+            start = i + 1;
+        }
+    }
+
+    return argc;
+}
 
 // Naviguider packet 
 
@@ -20,24 +55,19 @@ void nvg_pkt_clear(nvg_pkt_s* pkt) {
 
 // Naviguider
 
-void nvg_init(nvg_s* nvg, uint8_t port) {
-    nvg->port = port;
+void nvg_init(nvg_s* nvg, uint8_t port) { nvg->port = port;
     memcpy(nvg->sensors, NVG_INIT_SENSOR_TABLE, sizeof(NVG_INIT_SENSOR_TABLE));
     nvg_pkt_init(&nvg->rcvpkt);
 
     uint8_t i;
-    for (i = 0; i < NVG_NUM_SENSORS; i++) {
-        nvg->sensors[i].data = calloc(nvg->sensors[i].len, sizeof(float));
+    for (i = 0; i < NVG_SENSOR_TABLE_LEN; i++) {
+        if (nvg->sensors[i].id != 0)
+            nvg->sensors[i].data = (float*) calloc(nvg->sensors[i].len, sizeof(float));
     }
    
-    // nvg_restart(nvg); 
-    // nvg_set_mounting_option(nvg);
-    // nvg_start_all_sensors(nvg);
-    // nvg_start_sensor(nvg, NVG_ACCELEROMETER, 1);
-    nvg_send_command(nvg, "X");
-    nvg_send_command(nvg, "V0");
-    nvg_send_command(nvg, "M2\r");
-    nvg_send_command(nvg, "s 1,1\r");
+    nvg_reset(nvg);
+    nvg_start_sensor(nvg, NVG_ACCELEROMETER, 1);
+
     fprintf(COM_D, "%s[%s] nvg_init: port=%u\n", KGRN, NODE_LBL, nvg->port);
 }
 
@@ -46,7 +76,7 @@ void nvg_destroy(nvg_s* nvg) {
     nvg_power_down(nvg);
 
     uint8_t i;
-    for (i = 0; i < NVG_NUM_SENSORS; i++) {
+    for (i = 0; i < NVG_SENSOR_TABLE_LEN; i++) {
         if (nvg->sensors[i].data != NULL)
             free(nvg->sensors[i].data);
     }
@@ -56,7 +86,7 @@ void nvg_destroy(nvg_s* nvg) {
 
 void nvg_clear(nvg_s* nvg) {
     uint8_t i;
-    for (i = 0; i < NVG_NUM_SENSORS; i++) {
+    for (i = 0; i < NVG_SENSOR_TABLE_LEN; i++) {
         nvg_sensor_s* sens = &nvg->sensors[i];
         if (sens->data != NULL)
             memset(sens->data, 0, sens->len * sizeof(float)); 
@@ -74,116 +104,101 @@ void nvg_send_command(nvg_s* nvg, char* cmd) {
     delay_ms(100);
 } 
 
-void nvg_rcv_fsm(nvg_s* nvg, circbuf_s* irqbuf) {
+void nvg_rcv_parser(nvg_s* nvg, circbuf_s* irqbuf) {
     nvg_pkt_s* rcvpkt = &nvg->rcvpkt;
-    uint16_t iter = 0;
-    fprintf(COM_D, "%sNVG_FSM: r=%u w=%u\n", KGRN, irqbuf->r, irqbuf->w);
-    while (iter < 5*CIRCBUF_MAX_SIZE) {
-        uint8_t b;
-        if (!cb_pop(irqbuf, 1, &b)) return;
-        fprintf(COM_D, "%s%c", KGRN, b);
 
-        switch (rcvpkt->fsm) {
-            case NVG_FSM_TS:
-                if (b == '\n' || b == '\r' || b == ' ') break;
-                if (isdigit(b)) {
-                    // Check if we are receiving too many characters in one arg
-                    if (rcvpkt->i_arg >= MAX_NVG_ARG_SIZE) {
-                        rcvpkt->fsm = NVG_FSM_ERROR;
-                        break;
-                    }
-                    rcvpkt->curr_arg[rcvpkt->i_arg++] = b;
-                } else if (b == ',') {
-                    rcvpkt->fsm = NVG_FSM_ID;
-                    rcvpkt->ts = atof(rcvpkt->curr_arg) / 32000.0;
-                    memset(rcvpkt->curr_arg, 0, sizeof(rcvpkt->curr_arg));
-                    rcvpkt->i_arg = 0;
-                } else {
-                    if (rcvpkt->i_arg > 0)
-                        rcvpkt->fsm = NVG_FSM_ERROR;
-                }
-                break;
+    uint16_t iter;
+    for (iter = 0; iter < 2 * CIRCBUF_MAX_SIZE; iter++) {
+        uint8_t c;
+        if (!cb_pop(irqbuf, 1, &c))
+            return;
 
-            case NVG_FSM_ID:
-                if (b == ' ') break;
-                if (isdigit(b)) {
-                    if (rcvpkt->i_arg >= MAX_NVG_ARG_SIZE) {
-                        rcvpkt->fsm = NVG_FSM_ERROR;
-                        break;
-                    }
-                    rcvpkt->curr_arg[rcvpkt->i_arg++] = b;
-                } else if (b == ',') {
-                    rcvpkt->fsm = NVG_FSM_PAYLOAD;
-                    rcvpkt->id = atoi(rcvpkt->curr_arg);
-                    // Check if id is valid
-                    if (rcvpkt->id < 1 || rcvpkt->id > 20 || nvg->sensors[rcvpkt->id].id == 0) {
-                        rcvpkt->fsm = NVG_FSM_ERROR;
-                        break;
-                    }
-                    memset(rcvpkt->curr_arg, 0, sizeof(rcvpkt->curr_arg));
-                    rcvpkt->i_arg = 0;
-                } else {
-                    rcvpkt->fsm = NVG_FSM_ERROR;
-                }                
-                break;
-
-            case NVG_FSM_PAYLOAD:
-                if (b == ' ') break;
-                if (isdigit(b)) {
-                    if (rcvpkt->i_arg >= MAX_NVG_ARG_SIZE) {
-                        rcvpkt->fsm = NVG_FSM_ERROR;
-                        break;
-                    }
-                    rcvpkt->curr_arg[rcvpkt->i_arg++] = b;
-                } else if (b == ',') {
-                    // Check if we are receiving more payloads than expected
-                    if (rcvpkt->i_payload >= nvg->sensors[rcvpkt->id].len) {
-                        rcvpkt->fsm = NVG_FSM_ERROR;
-                        break;
-                    }
-                    rcvpkt->payload[rcvpkt->i_payload++] = atof(rcvpkt->curr_arg);
-                    memset(rcvpkt->curr_arg, 0, sizeof(rcvpkt->curr_arg));
-                    rcvpkt->i_arg = 0;
-                } else if (b == '\n') {
-                    // Check if we've received too few payload args
-                    if (rcvpkt->i_payload != nvg->sensors[rcvpkt->id].len) {
-                        rcvpkt->fsm = NVG_FSM_ERROR;
-                        break;
-                    }
-                    rcvpkt->fsm = NVG_FSM_DONE;
-                } else {
-                    rcvpkt->fsm = NVG_FSM_ERROR;
-                }
-                break;
-        } 
-
-        // Could wait till next superloop iteration or just handle end states immediately (currently doing the latter)
-        switch (nvg->fsm) {
-            case NVG_FSM_DONE:
-                nvg_rcv_complete(nvg);
+        /* Accumulate characters until line end */
+        if (c != '\r' && c != '\n') {
+            if (rcvpkt->rl_len < MAX_BUF_LEN - 1) {
+                rcvpkt->rcvline[rcvpkt->rl_len++] = c;
+                rcvpkt->rcvline[rcvpkt->rl_len] = '\0';
+            } else {
                 nvg_pkt_clear(rcvpkt);
-                break;
-            case NVG_FSM_ERROR:
-                fprintf(COM_D, "%s[%s] nvg_rcv_fsm: malformed packet\n", KRED, NODE_LBL);
-                nvg_pkt_clear(rcvpkt);
-                break;
+            }
+            continue;
         }
 
-        iter++;
+        /* Line end detected */
+
+        if (rcvpkt->rl_len <= 8) {
+            nvg_pkt_clear(rcvpkt);
+            continue;
+        }
+
+        if (!is_data_line(rcvpkt->rcvline, rcvpkt->rl_len)) {
+            fprintf(COM_D, "%s[%s] nvg_rcv_parser: info: len=%u \"%s\"\n",
+                    KGRN, NODE_LBL, rcvpkt->rl_len, rcvpkt->rcvline);
+            nvg_pkt_clear(rcvpkt);
+            continue;
+        }
+
+        /* ---- CSV parsing starts here ---- */
+
+        // fprintf(COM_D, "%s[%s] nvg_rcv_parser: data: len=%u \"%s\"\n",
+        //         KGRN, NODE_LBL, rcvpkt->rl_len, rcvpkt->rcvline);
+
+        /* Tokenize */
+        char* argv[16];
+        uint8_t argc = split_csv(rcvpkt->rcvline, rcvpkt->rl_len, argv, 16);
+        if (argc < 3) goto malformed;
+
+        /* ---- Timestamp ---- */
+        char* endp;
+        uint32_t ts_raw = strtoul(argv[0], &endp, 10);
+        if (*endp != '\0' && *endp != ',' && *endp != ' ')
+            goto malformed;
+        rcvpkt->ts = ts_raw / 32000.0f;
+
+        /* ---- Sensor ID ---- */
+        uint8_t id = atoi(argv[1]);
+        if (id < 1 || id > 20 || nvg->sensors[id].id == 0) goto malformed;
+        rcvpkt->id = id;
+
+        /* ---- Payload length check ---- */
+        uint8_t expected = nvg->sensors[id].len;
+        if (argc != 2 + expected) goto malformed;
+
+        /* ---- Payload parsing ---- */
+        uint8_t i;
+        for (i = 0; i < expected; i++) {
+            char *arg = argv[2 + i];
+            if (!arg) goto malformed;
+
+            rcvpkt->payload[i] = strtof(arg, &endp);
+            if (*endp != '\0' && *endp != ',' && *endp != ' ')
+                goto malformed;
+        }
+
+        /* ---- Success ---- */
+        nvg_rcv_complete(nvg);
+        nvg_pkt_clear(rcvpkt);
+        continue;
+
+    malformed:
+        fprintf(COM_D, "%s[%s] nvg_rcv_parser: malformed: len=%u \"%s\"\n",
+                KRED, NODE_LBL, rcvpkt->rl_len, rcvpkt->rcvline);
+        nvg_pkt_clear(rcvpkt);
     }
 }
 
 void nvg_rcv_complete(nvg_s* nvg) {
     nvg_sensor_s* sens = &nvg->sensors[nvg->rcvpkt.id];
-    sens->ts = nvg->rcvpkt->ts;
-    memcpy(sens->data, nvg->rcvpkt->payload, sens->len * sizeof(float));
+    if (sens->len == 0) return;
+    sens->ts = nvg->rcvpkt.ts;
+    memcpy(sens->data, nvg->rcvpkt.payload, sens->len * sizeof(float));
     
-    fprintf(COM_D, "%s[%s] nvg_rcv_complete: %.3f, %u, ", KGRN, NODE_LBL, sens->ts, sens->id);
+    fprintf(COM_D, "%s[%s] nvg_rcv_complete: ts=%.3f id=%u [ ", KGRN, NODE_LBL, sens->ts, sens->id);
     uint8_t i;
     for (i = 0; i < sens->len-1; i++) {
-        fprintf(COM_D, "%.3f, ", sens->data[i]);
+        fprintf(COM_D, "%.3f ", sens->data[i]);
     }
-    fprintf(COM_D, "%.3f\n", sens->data[sens->len-1]);
+    fprintf(COM_D, "%.3f ]\n", sens->data[sens->len-1]);
 }
 
 // HIGH LEVEL API
@@ -197,15 +212,17 @@ void nvg_start_sensor(nvg_s* nvg, uint8_t id, uint16_t rate) {
 
 void nvg_start_all_sensors(nvg_s* nvg) {
     uint8_t i;
-    for (i = 0; i < NVG_NUM_SENSORS; i++) {
-        nvg_start_sensor(nvg, NVG_SENSOR_IDS[i], 1);
+    for (i = 0; i < NVG_SENSOR_TABLE_LEN; i++) {
+        if (nvg->sensors[i].id != 0)
+            nvg_start_sensor(nvg, NVG_SENSOR_IDS[i], 1);
     } 
 }
         
 void nvg_stop_all_sensors(nvg_s* nvg) {
     uint8_t i;
-    for (i = 0; i < NVG_NUM_SENSORS; i++) {
-        nvg_start_sensor(nvg, NVG_SENSOR_IDS[i], 0);
+    for (i = 0; i < NVG_SENSOR_TABLE_LEN; i++) {
+        if (nvg->sensors[i].id != 0)
+            nvg_start_sensor(nvg, NVG_SENSOR_IDS[i], 0);
     } 
 }
         
@@ -214,8 +231,8 @@ void nvg_stop_all_sensors(nvg_s* nvg) {
 int1 nvg_heartbeat(nvg_s* nvg) {
     uint8_t i;
     int1 heartbeat = TRUE;
-    for (i = 0; i < NVG_NUM_SENSORS; i++) {
-        if (nvg->sensors[i].ts - nvg->last_heartbeat > FLATLINE_TIME_MS/1000) {
+    for (i = 0; i < NVG_SENSOR_TABLE_LEN; i++) {
+        if (nvg->sensors[i].id != 0 && nvg->sensors[i].ts - nvg->last_heartbeat > FLATLINE_TIME_MS/1000) {
             heartbeat = FALSE;
             break;
         }
@@ -228,11 +245,9 @@ void nvg_power_down(nvg_s* nvg) {
     nvg_send_command(nvg, "P");
 }
 
-void nvg_restart(nvg_s* nvg) {
+void nvg_reset(nvg_s* nvg) {
     nvg_send_command(nvg, "X");
-}
-
-void nvg_set_mounting_option(nvg_s* nvg) {
+    nvg_send_command(nvg, "V0");
     nvg_send_command(nvg, "M2\r");
 }
 

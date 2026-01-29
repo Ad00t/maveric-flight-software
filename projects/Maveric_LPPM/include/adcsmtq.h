@@ -110,7 +110,7 @@ void mtq_write_start(mtq_s* mtq, uint16_t key, void* data);
 void mtq_write_complete(mtq_s* mtq);
 
 // Check interrupt buffer to advance frame reader FSM & handle packets rcv'd from mtq
-void mtq_rcv_fsm(mtq_s* mtq, circbuf_s* irqbuf);
+void mtq_rcv_parser(mtq_s* mtq, circbuf_s* irqbuf);
 
 // HIGH LEVEL API
 

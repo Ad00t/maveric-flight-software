@@ -78,7 +78,7 @@
         </archiverTool>
         <loading>
           <useAlternateLoadableFile>false</useAlternateLoadableFile>
-          <parseOnProdLoad>false</parseOnProdLoad>
+          <parseOnProdLoad>true</parseOnProdLoad>
           <alternateLoadableFile></alternateLoadableFile>
         </loading>
         <subordinates>
@@ -1211,7 +1211,7 @@
         <property key="cc-compat" value="0"/>
         <property key="ccs-insert-device" value="false"/>
         <property key="close-after-compile" value="true"/>
-        <property key="compile-for-icd" value="false"/>
+        <property key="compile-for-icd" value="true"/>
         <property key="create-call-tree" value="true"/>
         <property key="create-project-file" value="true"/>
         <property key="create-stats-tree" value="true"/>

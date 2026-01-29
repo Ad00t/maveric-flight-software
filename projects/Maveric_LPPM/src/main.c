@@ -127,7 +127,7 @@ void system_init(void) {
     cmdmgr_init(&cmdmgr);
     mtq_init(&mtq, COM_A);
     mtq_set_conf(&mtq, 0, MTQ_MODE_DETUMBLING);
-    // gyro_init(&gyro, GYRO_CS1, GYRO_CS2, GYRO_CS3, GYRO_ON);
+    gyro_init(&gyro, GYRO_CS1, GYRO_CS2, GYRO_CS3, GYRO_ON);
     nvg_init(&nvg, COM_B);
     
     fprintf(COM_D, "%s[%s] system initialized\n", KWHT, NODE_LBL);
@@ -146,14 +146,15 @@ void housekeeping(void) {
 
     // Handle received byte interrupts
     isr_disable_all();
-    mtq_rcv_fsm(&mtq, &irqmgr.irqbufs[0]); // Do driver handling before commands so data is up to date
-    nvg_rcv_fsm(&nvg, &irqmgr.irqbufs[1]);
-    cmdmgr_rcv_fsm(&cmdmgr, &irqmgr.irqbufs[3], &cmdmgr.rcvpkts[0]); // Handle COM_D FTDI commands on cmd rcvpkt 0
+    mtq_rcv_parser(&mtq, &irqmgr.irqbufs[0]); // Do driver handling before commands so data is up to date
+    nvg_rcv_parser(&nvg, &irqmgr.irqbufs[1]);
+    cmdmgr_rcv_parser(&cmdmgr, &irqmgr.irqbufs[3], &cmdmgr.rcvpkts[0]); // Handle COM_D FTDI commands on cmd rcvpkt 0
     isr_enable_all();
-  
-    nvg_sensor_s* sens = &nvg.sensors[NVG_ACCELEROMETER];
-    fprintf(COM_D, "%s%s: %f %f %f %f %f\n", KGRN, "NVG",
-            sens->ts, sens->data[0], sens->data[1], sens->data[2], sens->data[3]);
+   
+    nvg_sensor_s sens = nvg.sensors[NVG_ACCELEROMETER];
+    fprintf(COM_D, "%sACC id=%u len=%u ts=%.3f data=[ %.3f ]\n", KCYN,
+            sens.id, sens.len, sens.ts, sens.data[0]);
+
 
     // Check heartbeats
     if (!mtq_heartbeat(&mtq)) {

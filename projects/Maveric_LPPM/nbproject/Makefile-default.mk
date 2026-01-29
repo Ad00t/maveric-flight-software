@@ -96,11 +96,11 @@ ${OBJECTDIR}/src/main.o: src/main.c  nbproject/Makefile-${CND_CONF}.mk
 	${MKDIR} ${OBJECTDIR}/src 
 ifeq (1,1) 
 	${MKDIR} ${DISTDIR} 
-	${MP_CC}  out="${OBJECTDIR}\src"  src/main.c +FD +DF +CC #__DEBUG=1 +ICD +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="..\..\common\maveric\include" I+="include" I+="..\..\common\maveric\src" +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 
+	${MP_CC}  out="${OBJECTDIR}\src"  src/main.c +FD +DF +CC #__DEBUG=1 +ICD +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="..\..\common\maveric\include" I+="include" I+="..\..\common\maveric\src" +DF +LN +T +A +M +J +Z +ICD -P #__PIC24FJ256GA110__=1 
 	@mv ${OBJECTDIR}/src/main.cof "${DISTDIR}/Maveric_LPPM.${IMAGE_TYPE}.cof" 
 	@mv ${OBJECTDIR}/src/main.hex "${DISTDIR}/Maveric_LPPM.${IMAGE_TYPE}.hex"
 else 
-	${MP_CC}  out=""${OBJECTDIR}\src"" src/main.c +EXPORT +FD +DF +CC #__DEBUG=1 +ICD +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="..\..\common\maveric\include" I+="include" I+="..\..\common\maveric\src" +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 +EXPORTD="${OBJECTDIR}/src"  
+	${MP_CC}  out=""${OBJECTDIR}\src"" src/main.c +EXPORT +FD +DF +CC #__DEBUG=1 +ICD +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="..\..\common\maveric\include" I+="include" I+="..\..\common\maveric\src" +DF +LN +T +A +M +J +Z +ICD -P #__PIC24FJ256GA110__=1 +EXPORTD="${OBJECTDIR}/src"  
 	
 endif 
 	
@@ -109,11 +109,11 @@ ${OBJECTDIR}/src/main.o: src/main.c  nbproject/Makefile-${CND_CONF}.mk
 	${MKDIR} ${OBJECTDIR}/src 
 ifeq (1,1) 
 	${MKDIR} ${DISTDIR} 
-	${MP_CC}  out="${OBJECTDIR}\src"  src/main.c +FD +DF +CC +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="..\..\common\maveric\include" I+="include" I+="..\..\common\maveric\src" +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 
+	${MP_CC}  out="${OBJECTDIR}\src"  src/main.c +FD +DF +CC +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="..\..\common\maveric\include" I+="include" I+="..\..\common\maveric\src" +DF +LN +T +A +M +J +Z +ICD -P #__PIC24FJ256GA110__=1 
 	@mv ${OBJECTDIR}/src/main.cof "${DISTDIR}/Maveric_LPPM.${IMAGE_TYPE}.cof" 
 	@mv ${OBJECTDIR}/src/main.hex "${DISTDIR}/Maveric_LPPM.${IMAGE_TYPE}.hex"
 else 
-	${MP_CC}  out=""${OBJECTDIR}\src"" src/main.c +EXPORT +FD +DF +CC +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="..\..\common\maveric\include" I+="include" I+="..\..\common\maveric\src" +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 +EXPORTD="${OBJECTDIR}/src"  
+	${MP_CC}  out=""${OBJECTDIR}\src"" src/main.c +EXPORT +FD +DF +CC +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="..\..\common\maveric\include" I+="include" I+="..\..\common\maveric\src" +DF +LN +T +A +M +J +Z +ICD -P #__PIC24FJ256GA110__=1 +EXPORTD="${OBJECTDIR}/src"  
 	
 endif 
 	
@@ -127,7 +127,7 @@ ${DISTDIR}/Maveric_LPPM.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbprojec
 ifeq (1,1) 
 	
 else 
-	${MP_LD}   out="${DISTDIR}"  +FD +DF +CC LINK=Maveric_LPPM.${IMAGE_TYPE}.hex=${OBJECTDIR}/src/main.o +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="..\..\common\maveric\include" I+="include" I+="..\..\common\maveric\src" +DF +LN +T +A +M +J +Z -P
+	${MP_LD}   out="${DISTDIR}"  +FD +DF +CC LINK=Maveric_LPPM.${IMAGE_TYPE}.hex=${OBJECTDIR}/src/main.o +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="..\..\common\maveric\include" I+="include" I+="..\..\common\maveric\src" +DF +LN +T +A +M +J +Z +ICD -P
 	
 endif 
 	
@@ -137,7 +137,7 @@ ${DISTDIR}/Maveric_LPPM.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbprojec
 ifeq (1,1) 
 	
 else 
-	${MP_LD}   out="${DISTDIR}"  +FD +DF +CC LINK=Maveric_LPPM.${IMAGE_TYPE}.hex=${OBJECTDIR}/src/main.o +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="..\..\common\maveric\include" I+="include" I+="..\..\common\maveric\src" +DF +LN +T +A +M +J +Z -P
+	${MP_LD}   out="${DISTDIR}"  +FD +DF +CC LINK=Maveric_LPPM.${IMAGE_TYPE}.hex=${OBJECTDIR}/src/main.o +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="..\..\common\maveric\include" I+="include" I+="..\..\common\maveric\src" +DF +LN +T +A +M +J +Z +ICD -P
 	
 endif 
 	

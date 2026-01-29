@@ -7,6 +7,7 @@
 
 #define MAX_NVG_ARG_SIZE        20
 #define MAX_NVG_PAYLOAD_LEN     7
+#define NVG_SENSOR_TABLE_LEN    21
 
 // Naviguider UART FSM
 
@@ -18,15 +19,17 @@ typedef enum {
    NVG_FSM_ERROR
 } nvg_fsm_e;
 
-// Naviguider reception packet
+// Naviguider sensor data reception packet
 
 typedef struct {
+    uint8_t rcvline[MAX_BUF_LEN];
     float payload[MAX_NVG_PAYLOAD_LEN];
     char curr_arg[MAX_NVG_ARG_SIZE];
     float ts;
     uint8_t id;
-    uint8_t i_arg;
-    uint8_t i_payload;
+    uint8_t arg_len;
+    uint8_t pay_len;
+    uint8_t rl_len;
     nvg_fsm_e fsm;
 } nvg_pkt_s;
 
@@ -48,9 +51,8 @@ typedef struct {
 // Naviguider object
 
 typedef struct {
-    nvg_sensor_s sensors[21];
+    nvg_sensor_s sensors[NVG_SENSOR_TABLE_LEN];
     nvg_pkt_s rcvpkt;
-    nvg_fsm_e fsm;
     uint8_t port;
     float last_heartbeat;
 } nvg_s;
@@ -68,9 +70,9 @@ void nvg_clear(nvg_s* nvg);
 void nvg_send_command(nvg_s* nvg, char* cmd); 
 
 // Advance naviguider fsm & packet parsinvg
-void nvg_rcv_fsm(nvg_s* nvg, circbuf_s* irqbuf);
+void nvg_rcv_parser(nvg_s* nvg, circbuf_s* irqbuf);
 
-// Read back sensor data into naviguider object on successful full packet reception
+// Read back sensor data into naviguider object on successful full data packet reception
 void nvg_rcv_complete(nvg_s* nvg);
 
 // HIGH LEVEL API
@@ -100,14 +102,11 @@ Returns
 */
 int1 nvg_heartbeat(nvg_s* nvg);
 
-// Sends the 'P' command to power down the sensor.
+// Sends the 'P' command to toggle sensor power
 void nvg_power_down(nvg_s* nvg);
 
-// Sends the 'X' command to restart the sensor.
-void nvg_restart(nvg_s* nvg);
-
-// Sends the 'M2' command to set the units mounting orientation to "X" up 0.
-void nvg_set_mounting_option(nvg_s* nvg);
+// Standard reset initialization sequence 
+void nvg_reset(nvg_s* nvg);
 
 // Starts magnetometer sensors at continuous 1 Hz.
 void nvg_magnetometer_mode(nvg_s* nvg);

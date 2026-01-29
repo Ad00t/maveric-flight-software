@@ -45,7 +45,7 @@ void cmdmgr_clear(cmdmgr_s* cmdmgr) {
     }
 }
 
-void cmdmgr_rcv_fsm(cmdmgr_s* cmdmgr, circbuf_s* irqbuf, cmdpkt_s* rcvpkt) {
+void cmdmgr_rcv_parser(cmdmgr_s* cmdmgr, circbuf_s* irqbuf, cmdpkt_s* rcvpkt) {
     uint16_t iter = 0;
     while (iter < 2*CIRCBUF_MAX_SIZE) {
         uint8_t b = 0;
@@ -126,7 +126,7 @@ void cmdmgr_rcv_fsm(cmdmgr_s* cmdmgr, circbuf_s* irqbuf, cmdpkt_s* rcvpkt) {
                 cmdpkt_clear(rcvpkt);
                 break;
             case CMDPKT_FSM_ERROR:
-                fprintf(COM_D, "%s[%s] cmdmgr_rcv_fsm: malformed packet\n", KRED, NODE_LBL);
+                fprintf(COM_D, "%s[%s] cmdmgr_rcv_parser: malformed packet\n", KRED, NODE_LBL);
                 cmdpkt_clear(rcvpkt);
                 break;
         }

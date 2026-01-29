@@ -60,7 +60,7 @@ void cmdmgr_init(cmdmgr_s* cmdmgr);
 void cmdmgr_clear(cmdmgr_s* cmdmgr);
 
 // Check interrupt buffer to advance packet reader FSM 
-void cmdmgr_rcv_fsm(cmdmgr_s* cmdmgr, circbuf_s* irqbuf, cmdpkt_s* rcv_pkt);
+void cmdmgr_rcv_parser(cmdmgr_s* cmdmgr, circbuf_s* irqbuf, cmdpkt_s* rcv_pkt);
 
 // Checks link layer headers, CRC, and forwards/runs command appropriately
 void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt);

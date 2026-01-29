@@ -256,6 +256,8 @@
         <property key="voltagevalue" value="3.25"/>
       </ICD3PlatformTool>
       <item path="Makefile" ex="true" overriding="false">
+        <ccscompiler>
+        </ccscompiler>
       </item>
       <Tool>
         <property key="ADC 1" value="true"/>

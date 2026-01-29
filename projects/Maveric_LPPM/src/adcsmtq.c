@@ -302,7 +302,7 @@ void mtq_write_complete(mtq_s* mtq) {
             KYEL, NODE_LBL, mtq->port, reg->midx, reg->idx, reg->cnt, rcvpkt->err);
 }
 
-void mtq_rcv_fsm(mtq_s* mtq, circbuf_s* irqbuf) {
+void mtq_rcv_parser(mtq_s* mtq, circbuf_s* irqbuf) {
     mtq_pkt_s* rcvpkt = &mtq->rcvpkt;
     uint16_t iter = 0;
     while (iter < 2*CIRCBUF_MAX_SIZE) {
@@ -364,7 +364,7 @@ void mtq_rcv_fsm(mtq_s* mtq, circbuf_s* irqbuf) {
                 mtq_pkt_clear(rcvpkt);
                 break;
             case MTQ_FSM_ERROR:
-                fprintf(COM_D, "%s[%s] mtq_rcv_fsm: malformed packet\n", KRED, NODE_LBL);
+                fprintf(COM_D, "%s[%s] mtq_rcv_parser: malformed packet\n", KRED, NODE_LBL);
                 mtq_pkt_clear(rcvpkt);
                 break;
         }
