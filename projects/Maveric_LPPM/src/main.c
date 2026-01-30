@@ -79,10 +79,12 @@
 // #include "logger.c"
 #include "interrupts.c"
 #include "cmdmgr.c"
-#include "cmdfunc.c"
 #include "adcsmtq.c"
 #include "adis16260.c"
 #include "naviguider.c"
+#include "m41t81s.c"
+#include "scheduler.c"
+#include "cmdfunc.c"
 
 void system_init(void);
 void housekeeping(void);
@@ -90,11 +92,13 @@ void system_cleanup(void);
 
 int1 SUPERLOOP_RUNNING = TRUE;
 
-irqmgr_s irqmgr;    // Interrupts manager
-cmdmgr_s cmdmgr;    // Commands manager
-mtq_s mtq;          // Magnetorquer
-gyro_s gyro;        // Gyroscope (x3)
-nvg_s nvg;          // Naviguider
+irqmgr_s irqmgr;            // Interrupts manager
+cmdmgr_s cmdmgr;            // Commands manager
+scheduler_s scheduler;      // Schedules manager
+ertc_s ertc;                // External RTC (on motherboard)
+mtq_s mtq;                  // Magnetorquer
+gyro_s gyro;                // Gyroscope (x3)
+nvg_s nvg;                  // Naviguider
 
 void main(void) {	
     system_init();
@@ -116,7 +120,8 @@ void system_init(void) {
 	// setup_spi(SPI_MASTER | SPI_XMIT_L_TO_H | SPI_CLK_DIV_16 | SPI_SCK_IDLE_HIGH);
 
     // RTC init 
-    setup_rtc(RTC_ENABLE | RTC_OUTPUT_SECONDS, 0); 
+    // setup_rtc(RTC_ENABLE | RTC_OUTPUT_SECONDS, 0); 
+    ertc_init(&ertc, 0, 0, 0, 0, 0, 0, 0);
     
     // Start interrupts
     irqmgr_init(&irqmgr);
@@ -124,11 +129,11 @@ void system_init(void) {
     isr_enable_all();
     
     // Submodules init
+    // mtq_init(&mtq, COM_A);
+    // mtq_set_conf(&mtq, 0, MTQ_MODE_DETUMBLING);
+    // gyro_init(&gyro, GYRO_CS1, GYRO_CS2, GYRO_CS3, GYRO_ON);
+    // nvg_init(&nvg, COM_B);
     cmdmgr_init(&cmdmgr);
-    mtq_init(&mtq, COM_A);
-    mtq_set_conf(&mtq, 0, MTQ_MODE_DETUMBLING);
-    gyro_init(&gyro, GYRO_CS1, GYRO_CS2, GYRO_CS3, GYRO_ON);
-    nvg_init(&nvg, COM_B);
     
     fprintf(COM_D, "%s[%s] system initialized\n", KWHT, NODE_LBL);
     delay_ms(1000);
@@ -139,27 +144,32 @@ void housekeeping(void) {
     // Kick the dog
     restart_wdt();
     
-    rtc_time_t t;
-    rtc_read(&t);
-    fprintf(COM_D, "%s[%s] housekeeping %02u/%02u/20%u %02u:%02u:%02u\n", KWHT, NODE_LBL,
-            t.tm_mon, t.tm_mday, t.tm_year, t.tm_hour, t.tm_min, t.tm_sec);
+    // rtc_time_t t;
+    // rtc_read(&t);
+    // fprintf(COM_D, "%s[%s] housekeeping %02u/%02u/20%u %02u:%02u:%02u\n", KWHT, NODE_LBL,
+    //         t.tm_mon, t.tm_mday, t.tm_year, t.tm_hour, t.tm_min, t.tm_sec);
+
+    ertc_get_time(&ertc);
+    fprintf(COM_D, "%s[%s] housekeeping %02u, %02u/%02u/20%02u %02u:%02u:%02u\n", KWHT, NODE_LBL, 
+            ertc.wday, ertc.month, ertc.mday, ertc.year, ertc.hour, ertc.min, ertc.sec);
+
 
     // Handle received byte interrupts
     isr_disable_all();
-    mtq_rcv_parser(&mtq, &irqmgr.irqbufs[0]); // Do driver handling before commands so data is up to date
-    nvg_rcv_parser(&nvg, &irqmgr.irqbufs[1]);
+    // mtq_rcv_parser(&mtq, &irqmgr.irqbufs[0]); // Do driver handling before commands so data is up to date
+    // nvg_rcv_parser(&nvg, &irqmgr.irqbufs[1]);
     cmdmgr_rcv_parser(&cmdmgr, &irqmgr.irqbufs[3], &cmdmgr.rcvpkts[0]); // Handle COM_D FTDI commands on cmd rcvpkt 0
     isr_enable_all();
    
-    nvg_sensor_s sens = nvg.sensors[NVG_ACCELEROMETER];
-    fprintf(COM_D, "%sACC id=%u len=%u ts=%.3f data=[ %.3f ]\n", KCYN,
-            sens.id, sens.len, sens.ts, sens.data[0]);
-
+    // float data[5];
+    // nvg_get_sensor_data(&nvg, NVG_QUAT_GEOMAG, data);
+    // fprintf(COM_D, "%sNVG data=[ %.3f %.3f %.3f %.3f %.3f ]\n", KCYN,
+    //         data[0], data[1], data[2], data[3], data[4]);
 
     // Check heartbeats
-    if (!mtq_heartbeat(&mtq)) {
-        fprintf(COM_D, "%s[%s] mtq flatlined\n", KRED, NODE_LBL);
-    }
+    // if (!mtq_heartbeat(&mtq)) {
+    //     fprintf(COM_D, "%s[%s] mtq flatlined\n", KRED, NODE_LBL);
+    // }
     // if (!gyro_heartbeat(&gyro)) {
     //     fprintf(COM_D, "%s[%s] gyro flatlined\n", KRED, NODE_LBL);
     // }
@@ -177,6 +187,6 @@ void housekeeping(void) {
 
 // Cleanup routine
 void system_cleanup(void) {
-    mtq_destroy(&mtq);
-    nvg_destroy(&nvg);
+    // mtq_destroy(&mtq);
+    // nvg_destroy(&nvg);
 }

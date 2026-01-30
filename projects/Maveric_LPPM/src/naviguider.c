@@ -16,7 +16,7 @@ int1 is_data_line(char* line, uint8_t len) {
     uint8_t i;
     for (i = 0; i < len; i++) {
         char c = line[i];
-        if (!isdigit(c) && c != ',' && c != ' ' && c != '.')
+        if (!isdigit(c) && c != ',' && c != ' ' && c != '.' && c != '-')
             return FALSE;
     }
     return TRUE;
@@ -60,13 +60,12 @@ void nvg_init(nvg_s* nvg, uint8_t port) { nvg->port = port;
     nvg_pkt_init(&nvg->rcvpkt);
 
     uint8_t i;
-    for (i = 0; i < NVG_SENSOR_TABLE_LEN; i++) {
-        if (nvg->sensors[i].id != 0)
-            nvg->sensors[i].data = (float*) calloc(nvg->sensors[i].len, sizeof(float));
+    for (i = 0; i < NVG_NUM_SENSORS; i++) {
+        nvg->sensors[NVG_SENSOR_IDS[i]].data = (float*) calloc(nvg->sensors[NVG_SENSOR_IDS[i]].len, sizeof(float));
     }
    
     nvg_reset(nvg);
-    nvg_start_sensor(nvg, NVG_ACCELEROMETER, 1);
+    nvg_start_all_sensors(nvg);
 
     fprintf(COM_D, "%s[%s] nvg_init: port=%u\n", KGRN, NODE_LBL, nvg->port);
 }
@@ -76,9 +75,9 @@ void nvg_destroy(nvg_s* nvg) {
     nvg_power_down(nvg);
 
     uint8_t i;
-    for (i = 0; i < NVG_SENSOR_TABLE_LEN; i++) {
-        if (nvg->sensors[i].data != NULL)
-            free(nvg->sensors[i].data);
+    for (i = 0; i < NVG_NUM_SENSORS; i++) {
+        if (nvg->sensors[NVG_SENSOR_IDS[i]].data != NULL)
+            free(nvg->sensors[NVG_SENSOR_IDS[i]].data);
     }
     
     fprintf(COM_D, "%s[%s] nvg_destroy\n", KGRN, NODE_LBL);
@@ -201,6 +200,15 @@ void nvg_rcv_complete(nvg_s* nvg) {
     fprintf(COM_D, "%.3f ]\n", sens->data[sens->len-1]);
 }
 
+void nvg_get_sensor_data(nvg_s* nvg, uint8_t id, float* out) {
+    nvg_sensor_s* sens = &nvg->sensors[id];
+    if (sens->len == 0 || sens->data == NULL) {
+        out = NULL;
+        return;
+    };
+    memcpy(out, sens->data, sens->len * sizeof(float));
+}
+
 // HIGH LEVEL API
 
 void nvg_start_sensor(nvg_s* nvg, uint8_t id, uint16_t rate) {
@@ -212,17 +220,15 @@ void nvg_start_sensor(nvg_s* nvg, uint8_t id, uint16_t rate) {
 
 void nvg_start_all_sensors(nvg_s* nvg) {
     uint8_t i;
-    for (i = 0; i < NVG_SENSOR_TABLE_LEN; i++) {
-        if (nvg->sensors[i].id != 0)
-            nvg_start_sensor(nvg, NVG_SENSOR_IDS[i], 1);
+    for (i = 0; i < NVG_NUM_SENSORS; i++) {
+        nvg_start_sensor(nvg, NVG_SENSOR_IDS[i], 1);
     } 
 }
         
 void nvg_stop_all_sensors(nvg_s* nvg) {
     uint8_t i;
-    for (i = 0; i < NVG_SENSOR_TABLE_LEN; i++) {
-        if (nvg->sensors[i].id != 0)
-            nvg_start_sensor(nvg, NVG_SENSOR_IDS[i], 0);
+    for (i = 0; i < NVG_NUM_SENSORS; i++) {
+        nvg_start_sensor(nvg, NVG_SENSOR_IDS[i], 0);
     } 
 }
         
@@ -248,7 +254,8 @@ void nvg_power_down(nvg_s* nvg) {
 void nvg_reset(nvg_s* nvg) {
     nvg_send_command(nvg, "X");
     nvg_send_command(nvg, "V0");
-    nvg_send_command(nvg, "M2\r");
+    nvg_send_command(nvg, "M1\r");
+    nvg_send_command(nvg, "D1");
 }
 
 void nvg_magnetometer_mode(nvg_s* nvg) {

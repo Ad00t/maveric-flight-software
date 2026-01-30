@@ -4,8 +4,6 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <itemPath>../../common/aeneas/src/Neon.h</itemPath>
-      <itemPath>../../common/aeneas/src/PCD_Bootloader.h</itemPath>
       <itemPath>../../common/aeneas/src/adc.h</itemPath>
       <itemPath>../../common/aeneas/src/address.h</itemPath>
       <itemPath>../../common/aeneas/src/address_lower.h</itemPath>
@@ -34,6 +32,8 @@
       <itemPath>../../common/aeneas/src/labview.h</itemPath>
       <itemPath>../../common/aeneas/src/linalg.h</itemPath>
       <itemPath>../../common/aeneas/src/linkmanager.h</itemPath>
+      <itemPath>../../common/aeneas/src/Neon.h</itemPath>
+      <itemPath>../../common/aeneas/src/PCD_Bootloader.h</itemPath>
       <itemPath>../../common/aeneas/src/lower_tx.h</itemPath>
       <itemPath>../../common/aeneas/src/macros.h</itemPath>
       <itemPath>../../common/aeneas/src/maestro.h</itemPath>
@@ -78,9 +78,7 @@
       <itemPath>../../common/aeneas/src/main.c</itemPath>
     </logicalFolder>
     <logicalFolder name="OtherFiles" displayName="Other Files" projectFiles="false">
-      <itemPath>../../README.md</itemPath>
       <itemPath>../../common/aeneas/src/FSW.c</itemPath>
-      <itemPath>../../common/aeneas/src/Neon.c</itemPath>
       <itemPath>../../common/aeneas/src/adc.c</itemPath>
       <itemPath>../../common/aeneas/src/burn.c</itemPath>
       <itemPath>../../common/aeneas/src/clocktest.c</itemPath>
@@ -96,6 +94,7 @@
       <itemPath>../../common/aeneas/src/geomag.c</itemPath>
       <itemPath>../../common/aeneas/src/gyro.c</itemPath>
       <itemPath>../../common/aeneas/src/hyperterm.c</itemPath>
+      <itemPath>../../common/aeneas/src/Neon.c</itemPath>
       <itemPath>../../common/aeneas/src/i2c.c</itemPath>
       <itemPath>../../common/aeneas/src/imi100.c</itemPath>
       <itemPath>../../common/aeneas/src/inet.c</itemPath>
@@ -223,6 +222,7 @@
         <property key="event.recorder.debugger.behavior" value="Running"/>
         <property key="event.recorder.enabled" value="false"/>
         <property key="event.recorder.scvd.files" value=""/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="lastid" value=""/>
         <property key="memories.aux" value="false"/>

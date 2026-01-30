@@ -1,5 +1,7 @@
 #include "i2c.h"
 
+#module
+
 uint8_t i2c_read_8(uint8_t add, uint8_t reg) {
 	//I2C 1  byte reading routine
 	//int8(i2c address), int8(i2c register)  -> int8

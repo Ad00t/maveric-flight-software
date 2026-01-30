@@ -75,6 +75,9 @@ void nvg_rcv_parser(nvg_s* nvg, circbuf_s* irqbuf);
 // Read back sensor data into naviguider object on successful full data packet reception
 void nvg_rcv_complete(nvg_s* nvg);
 
+// Return a copy of the data for a sensor
+void nvg_get_sensor_data(nvg_s* nvg, uint8_t id, float* out);
+
 // HIGH LEVEL API
 
 /*

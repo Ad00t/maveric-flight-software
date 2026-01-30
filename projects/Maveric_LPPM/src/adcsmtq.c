@@ -92,6 +92,8 @@ void mtq_init(mtq_s* mtq, uint8_t port) {
                 break;
         }
     }
+    
+    mtq_set_conf(&mtq, 0, MTQ_MODE_SAFE);
 
     fprintf(COM_D, "%s[%s] mtq_init: port=%u\n", KYEL, NODE_LBL, mtq->port);
 }
