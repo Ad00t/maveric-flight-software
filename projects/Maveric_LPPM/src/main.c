@@ -47,6 +47,7 @@
 #use rs232(baud=COM_D_BAUD, UART4, BITS=8, STREAM=COM_D, ERRORS, PARITY=N, STOP=1, TIMEOUT=1000)
 #use spi(MASTER, FORCE_HW, SPI1, BAUD=2000000, MSB_FIRST, BITS=16, MODE=3, STREAM=SPI_1)
 #use i2c(MASTER, I2C1, STREAM=I2C_1)
+// #use timer(TIMER=1, TICK=1ns, BITS=16, ISR)
 // #use i2c(master, sda=PIN_A3, scl=PIN_A2, STREAM=I2C_1)
 // #use i2c(master, sda=PIN_A15, scl=PIN_A14, STREAM=I2C_1)
 
@@ -70,6 +71,8 @@
 
 // Module includes (.c necessary)
 
+#include <time.h>
+#include <time.c>
 #include "crcnew.c"
 #include "hashtable.c"
 #include "circbuf.c"
@@ -78,6 +81,7 @@
 #include "spi.c"
 // #include "logger.c"
 #include "interrupts.c"
+#include "systime.c"
 #include "cmdmgr.c"
 #include "adcsmtq.c"
 #include "adis16260.c"
@@ -113,6 +117,9 @@ void system_init(void) {
     // Watchdog init
     setup_wdt(WDT_ON);
 
+    // MS timer init
+	setup_timer1(TMR_INTERNAL | TMR_DIV_BY_64, 0x00FA); 
+
     // SPI init
 	// output_high(FLASH_CHIP_SELECT);
 	// output_high(SECOND_FLASH_CS);
@@ -121,19 +128,29 @@ void system_init(void) {
 
     // RTC init 
     // setup_rtc(RTC_ENABLE | RTC_OUTPUT_SECONDS, 0); 
-    ertc_init(&ertc, 0, 0, 0, 0, 0, 0, 0);
     
-    // Start interrupts
+    // Init interrupts 
     irqmgr_init(&irqmgr);
     irqmgr.started = TRUE;
     isr_enable_all();
+
+    // Init rtc, system time 
+    struct_tm it;
+    it.tm_mon = 1;
+    it.tm_mday = 1;
+    it.tm_year = 26;
+    it.tm_hour = 0;
+    it.tm_min = 0;
+    it.tm_sec = 0;
+    ertc_init(&ertc, it);
+    systime_init(&irqmgr.ms, &ertc.time);
     
     // Submodules init
     // mtq_init(&mtq, COM_A);
     // mtq_set_conf(&mtq, 0, MTQ_MODE_DETUMBLING);
     // gyro_init(&gyro, GYRO_CS1, GYRO_CS2, GYRO_CS3, GYRO_ON);
     // nvg_init(&nvg, COM_B);
-    cmdmgr_init(&cmdmgr);
+    // cmdmgr_init(&cmdmgr);
     
     fprintf(COM_D, "%s[%s] system initialized\n", KWHT, NODE_LBL);
     delay_ms(1000);
@@ -144,15 +161,10 @@ void housekeeping(void) {
     // Kick the dog
     restart_wdt();
     
-    // rtc_time_t t;
-    // rtc_read(&t);
-    // fprintf(COM_D, "%s[%s] housekeeping %02u/%02u/20%u %02u:%02u:%02u\n", KWHT, NODE_LBL,
-    //         t.tm_mon, t.tm_mday, t.tm_year, t.tm_hour, t.tm_min, t.tm_sec);
-
     ertc_get_time(&ertc);
-    fprintf(COM_D, "%s[%s] housekeeping %02u, %02u/%02u/20%02u %02u:%02u:%02u\n", KWHT, NODE_LBL, 
-            ertc.wday, ertc.month, ertc.mday, ertc.year, ertc.hour, ertc.min, ertc.sec);
-
+    fprintf(COM_D, "%s[%s] housekeeping %02u, %02u/%02u/20%02u %02u:%02u:%02u (%u)\n", KWHT, NODE_LBL, 
+            ertc.time.tm_wday, ertc.time.tm_mon, ertc.time.tm_mday, ertc.time.tm_year, 
+            ertc.time.tm_hour, ertc.time.tm_min, ertc.time.tm_sec, systime_epoch_ms());
 
     // Handle received byte interrupts
     isr_disable_all();
@@ -182,7 +194,7 @@ void housekeeping(void) {
     // mtq_read_fast(&mtq);
     // gyro_read_all(&gyro);
     
-    delay_ms(1000);
+    delay_ms(100);
 }
 
 // Cleanup routine

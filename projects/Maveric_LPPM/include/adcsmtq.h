@@ -5,6 +5,7 @@
 #include "circbuf.h"
 #include <stddef.h>
 #include <stdint.h>
+#include <time.h>
 
 #define MTQ_HEAD_READ           0xC9
 #define MTQ_HEAD_WRITE          0xC8
@@ -130,7 +131,7 @@ void mtq_read_fast(mtq_s* mtq);
 void mtq_read_ctrl(mtq_s* mtq);
 
 // Set date and time registers (absolute time)
-void mtq_set_date_time(mtq_s* mtq, uint8_t month, uint8_t day, uint8_t year, uint8_t hour, uint8_t min, uint8_t sec);
+void mtq_set_date_time(mtq_s* mtq, struct_tm rtc);
 
 #define MTQ_MODE_MANUAL             7 
 #define MTQ_MODE_SUN_SPIN           6

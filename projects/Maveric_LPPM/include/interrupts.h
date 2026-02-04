@@ -12,6 +12,7 @@
 typedef struct {
     int1 started;
     volatile circbuf_s irqbufs[NUM_PORTS];
+    volatile uint64_t ms;
 } irqmgr_s;
 
 // Initialize interrupt requests manager
@@ -33,5 +34,6 @@ void isr_uart1(void);
 void isr_uart2(void);
 void isr_uart3(void);
 void isr_uart4(void);
+void isr_timer1(void);
 
 #endif

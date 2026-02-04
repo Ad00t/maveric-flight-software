@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlibm.h>
+#include <time.h>
 
 #module
 
@@ -417,18 +418,18 @@ void mtq_read_ctrl(mtq_s* mtq) {
     }
 }
 
-void mtq_set_date_time(mtq_s* mtq, uint8_t month, uint8_t day, uint8_t year, uint8_t hour, uint8_t min, uint8_t sec) {
+void mtq_set_date_time(mtq_s* mtq, struct_tm rtc) {
     uint8_t date[4]; 
-    date[3] = to_bcd(year);
-    date[2] = to_bcd(month);
-    date[1] = to_bcd(day);
-    date[0] = to_bcd(0); // Ignoring weekday field because it's not necessary
+    date[3] = to_bcd(rtc.tm_year);
+    date[2] = to_bcd(rtc.tm_mon);
+    date[1] = to_bcd(rtc.tm_mday);
+    date[0] = to_bcd(rtc.tm_wday); 
     mtq_write_start(mtq, MTQ_DATE, date);
     
     uint8_t time[4];
-    time[3] = to_bcd(hour);
-    time[2] = to_bcd(min);
-    time[1] = to_bcd(sec);
+    time[3] = to_bcd(rtc.tm_hour);
+    time[2] = to_bcd(rtc.tm_min);
+    time[1] = to_bcd(rtc.tm_sec);
     time[0] = to_bcd(0); // Unused
     mtq_write_start(mtq, MTQ_TIME, time);
 }
