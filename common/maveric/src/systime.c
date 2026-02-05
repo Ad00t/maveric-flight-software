@@ -39,7 +39,7 @@ uint64_t systime_epoch_ms(void) {
     isr_disable_all();
     uint64_t ms_now = *_s_irq_ms_ptr;
     isr_enable_all();
-    uint64_t diff = ms_now - _s_ms_sync;
+    uint64_t diff = ms_now - _s_ms_sync; // THIS SEPARATION OF ARITHMETIC STEPS IS NECESSARY.
     uint64_t now = _s_epoch_sec_sync + diff;
     return now;
 }
