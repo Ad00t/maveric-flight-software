@@ -6,6 +6,9 @@
 
 // THIS MODULE IS NOT OBJECT ORIENTED. STATIC GLOBAL SERVICE IS INTENTIONAL
 
+// Converts a rtc time struct to unix ms time format
+uint64_t rtc_to_epoch_ms(struct_tm rtc);
+
 // Initializes system time service
 void systime_init(uint64_t* irq_ms_ptr, struct_tm* rtc_ptr);
 

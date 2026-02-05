@@ -46,7 +46,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>CCSC</languageToolchain>
-        <languageToolchainVersion>4.124</languageToolchainVersion>
+        <languageToolchainVersion>5.081</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>

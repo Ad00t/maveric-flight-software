@@ -145,13 +145,13 @@ void system_init(void) {
     ertc_init(&ertc, it);
     systime_init(&irqmgr.ms, &ertc.time);
     
-    // Submodules init
+    // Submodules & services init
     // mtq_init(&mtq, COM_A);
     // mtq_set_conf(&mtq, 0, MTQ_MODE_DETUMBLING);
     // gyro_init(&gyro, GYRO_CS1, GYRO_CS2, GYRO_CS3, GYRO_ON);
     // nvg_init(&nvg, COM_B);
     // cmdmgr_init(&cmdmgr);
-    
+   
     fprintf(COM_D, "%s[%s] system initialized\n", KWHT, NODE_LBL);
     delay_ms(1000);
 }
@@ -162,9 +162,10 @@ void housekeeping(void) {
     restart_wdt();
     
     ertc_get_time(&ertc);
+    uint64_t now = systime_epoch_ms();
     fprintf(COM_D, "%s[%s] housekeeping %02u, %02u/%02u/20%02u %02u:%02u:%02u (%u)\n", KWHT, NODE_LBL, 
             ertc.time.tm_wday, ertc.time.tm_mon, ertc.time.tm_mday, ertc.time.tm_year, 
-            ertc.time.tm_hour, ertc.time.tm_min, ertc.time.tm_sec, systime_epoch_ms());
+            ertc.time.tm_hour, ertc.time.tm_min, ertc.time.tm_sec, now);
 
     // Handle received byte interrupts
     isr_disable_all();

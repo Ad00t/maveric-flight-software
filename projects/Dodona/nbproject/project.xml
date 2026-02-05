@@ -10,7 +10,7 @@
             <make-dep-projects/>
             <sourceRootList>
                 <sourceRootElem>.</sourceRootElem>
-                <sourceRootElem>../../common/aeneas/src</sourceRootElem>
+                <sourceRootElem>../../archive/aeneas/src</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
