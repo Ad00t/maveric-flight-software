@@ -95,7 +95,6 @@ void mtq_init(mtq_s* mtq, uint8_t port) {
     }
     
     mtq_set_conf(&mtq, 0, MTQ_MODE_SAFE);
-
     fprintf(COM_D, "%s[%s] mtq_init: port=%u\n", KYEL, NODE_LBL, mtq->port);
 }
 
@@ -381,14 +380,19 @@ void mtq_rcv_parser(mtq_s* mtq, circbuf_s* irqbuf) {
 int1 mtq_heartbeat(mtq_s* mtq) {
     mtq_reg_s* reg = mtq_get_reg(mtq, MTQ_SNID);
     if (reg == NULL) return FALSE;
-    
     char* snid = (char*) reg->value;
-    fprintf(COM_D, "%s[%s] mtq_heartbeat: \"%s\"\n", KYEL, NODE_LBL, snid);
-    int1 heartbeat = strncmp(snid, "TAD102063", reg->value_len) == 0; 
+    int1 hb = strncmp(snid, "TAD102063", reg->value_len) == 0; 
+    
+    if (!hb) {
+        fprintf(COM_D, "%s[%s] mtq_heartbeat: flatlined. resetting...\n", KRED, NODE_LBL);
+        uint8_t port = mtq->port;
+        mtq_destroy(mtq);
+        mtq_init(mtq, port);
+    }
     
     memset(snid, 0, reg->value_len);
     mtq_read_start(mtq, MTQ_SNID);
-    return heartbeat;
+    return hb;
 }
 
 void mtq_reset(mtq_s* mtq) {

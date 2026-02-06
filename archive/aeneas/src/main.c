@@ -479,7 +479,7 @@ static unsigned char I2C_Clock_OK =
 	TRUE; // Used to indicate the I2C clock status.  Needs to be incorporated into a Time driver.
 unsigned char showTimeFlag = showTimeOFF; // Used to decide how to show the time in once_per_second
 #ifdef __I2C__
-unsigned char halted_time[7]; // time array used for finding when last reboot was.
+unsigned char halted_time[7]; // time array used for finding when last reboot was.main.c
 #endif
 rtc_time_t rtcTime; // Real time clock
 unsigned char time[7]; // 7-byte timetag used in scheduling.

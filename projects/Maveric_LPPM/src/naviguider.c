@@ -65,6 +65,7 @@ void nvg_init(nvg_s* nvg, uint8_t port) { nvg->port = port;
     }
    
     nvg_reset(nvg);
+    nvg_start_sensor(nvg, NVG_TEMPERATURE, 1);
     nvg_start_all_sensors(nvg);
 
     fprintf(COM_D, "%s[%s] nvg_init: port=%u\n", KGRN, NODE_LBL, nvg->port);
@@ -73,6 +74,7 @@ void nvg_init(nvg_s* nvg, uint8_t port) { nvg->port = port;
 void nvg_destroy(nvg_s* nvg) {
     nvg_stop_all_sensors(nvg);
     nvg_power_down(nvg);
+    nvg_clear(nvg);
 
     uint8_t i;
     for (i = 0; i < NVG_NUM_SENSORS; i++) {
@@ -235,16 +237,16 @@ void nvg_stop_all_sensors(nvg_s* nvg) {
 // COMMAND FUNCTIONS
 
 int1 nvg_heartbeat(nvg_s* nvg) {
-    uint8_t i;
-    int1 heartbeat = TRUE;
-    for (i = 0; i < NVG_SENSOR_TABLE_LEN; i++) {
-        if (nvg->sensors[i].id != 0 && nvg->sensors[i].ts - nvg->last_heartbeat > FLATLINE_TIME_MS/1000) {
-            heartbeat = FALSE;
-            break;
-        }
-    } 
-    nvg->last_heartbeat += 1; // TODO: rework heartbeat timing to use rtcc
-    return heartbeat;
+    int1 hb = (nvg->sensors[NVG_TEMPERATURE].ts > 0);
+    if (!hb) {
+        fprintf(COM_D, "%s[%s] nvg_heartbeat: flatlined. resetting...\n", KRED, NODE_LBL);
+        uint8_t port = nvg->port;
+        nvg_destroy(nvg);
+        delay_ms(500);
+        nvg_init(nvg, port);
+    }
+    memset(&nvg->sensors[NVG_TEMPERATURE], 0, sizeof(nvg_sensor_s));
+    return hb;
 }
 
 void nvg_power_down(nvg_s* nvg) {

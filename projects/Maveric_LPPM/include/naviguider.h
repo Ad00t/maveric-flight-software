@@ -54,7 +54,6 @@ typedef struct {
     nvg_sensor_s sensors[NVG_SENSOR_TABLE_LEN];
     nvg_pkt_s rcvpkt;
     uint8_t port;
-    float last_heartbeat;
 } nvg_s;
 
 // Initialize naviguider on provided COM port

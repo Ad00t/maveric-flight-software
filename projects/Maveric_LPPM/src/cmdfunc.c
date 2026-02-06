@@ -2,6 +2,8 @@
 #include "cmdmgr.h"
 #include "systime.h"
 #include "hashtable.h"
+#include "interrupts.h"
+#include "scheduler.h"
 #include "adcsmtq.h"
 #include "m41t81s.h"
 #include "adis16260.h"
@@ -18,7 +20,7 @@ extern mtq_s mtq;                   // Magnetorquer
 extern gyro_s gyro;                 // Gyroscope (x3)
 extern nvg_s nvg;                   // Naviguider
 
-void cmdfunc_register_all(cmdmgr_s* cmdmgr) {
+void cmdmgr_register_funcs(cmdmgr_s* cmdmgr) {
     ht_init(&cmdmgr->cmdfuncs); 
     ht_set(&cmdmgr->cmdfuncs, "cmd_set_time", (cmdfunc_f) cmdfunc_set_time);
 }

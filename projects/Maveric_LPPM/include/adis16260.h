@@ -108,6 +108,9 @@ typedef struct {
 // Initialize gyro with given pins & turn on
 void gyro_init(gyro_s* gyro, uint8_t cs_x, uint8_t cs_y, uint8_t cs_z, uint8_t on);
 
+// Clear gyro data
+void gyro_clear(gyro_s* gyro);
+
 // Set gyro power pin
 void gyro_set_power(gyro_s* gyro, int1 on);
 

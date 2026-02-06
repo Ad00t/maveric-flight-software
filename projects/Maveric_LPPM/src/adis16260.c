@@ -61,6 +61,10 @@ void gyro_init(gyro_s* gyro, uint8_t cs_x, uint8_t cs_y, uint8_t cs_z, uint8_t o
             KMAG, NODE_LBL, gyro->cs_x, gyro->cs_y, gyro->cs_z, gyro->on); 
 }	
 
+void gyro_clear(gyro_s* gyro) {
+    memset(gyro, 0, sizeof(gyro_s));
+}
+
 void gyro_set_power(gyro_s* gyro, int1 on) {
     if (on) output_high(gyro->on);
     else    output_low(gyro->on);
@@ -143,17 +147,30 @@ void gyro_write_reg(gyro_s* gyro, uint8_t reg, uint16_t data) {
 
 int1 gyro_heartbeat(gyro_s* gyro) {
     uint16_t res[NUM_GYROS];
-    res[0] = 0xABCD;
-    res[1] = 0xABCD;
-    res[2] = 0xABCD;
+    memset(res, 0, NUM_GYROS * sizeof(uint16_t));
     gyro_read_reg(gyro, GYRO_PRODUCT_ID, res);
-    fprintf(COM_D, "%s[%s] gyro_heartbeat: x=0x%02X%02X y=0x%02X%02X z=0x%02X%02X\n", 
-            KMAG, NODE_LBL, res[0] >> 8, res[0] & 0x00FF, res[1] >> 8, res[1] & 0x00FF, res[2] >> 8, res[2] & 0x00FF);
+    // fprintf(COM_D, "%s[%s] gyro_heartbeat: x=0x%02X%02X y=0x%02X%02X z=0x%02X%02X\n", 
+    //         KMAG, NODE_LBL, res[0] >> 8, res[0] & 0x00FF, res[1] >> 8, res[1] & 0x00FF, res[2] >> 8, res[2] & 0x00FF);
     uint8_t i;
+    int1 hb = TRUE;
     for (i = 0; i < NUM_GYROS; i++) {
-        if (res[i] != 0x3F84) return FALSE;
+        if (res[i] != 0x3F84) {
+            hb = FALSE;
+            break;
+        }
     }
-    return TRUE;    
+    if (!hb) {
+        fprintf(COM_D, "%s[%s] gyro_heartbeat: flatlined. resetting...\n", KRED, NODE_LBL);
+        gyro_set_power(gyro, FALSE);
+        delay_ms(500);
+        uint8_t cs_x = gyro->cs_x;
+        uint8_t cs_y = gyro->cs_y;
+        uint8_t cs_z = gyro->cs_z;
+        uint8_t on = gyro->on;
+        gyro_clear(gyro);
+        gyro_init(gyro, cs_x, cs_y, cs_z, on);
+    }
+    return hb;
 }
 
 void gyro_read_all(gyro_s* gyro) {

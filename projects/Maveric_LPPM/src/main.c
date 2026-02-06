@@ -82,12 +82,14 @@
 // #include "logger.c"
 #include "interrupts.c"
 #include "systime.c"
-#include "cmdmgr.c"
 #include "adcsmtq.c"
 #include "adis16260.c"
 #include "naviguider.c"
 #include "m41t81s.c"
+#include "scheduler.h" // Needed for some reason
+#include "schedfunc.c"
 #include "scheduler.c"
+#include "cmdmgr.c"
 #include "cmdfunc.c"
 
 void system_init(void);
@@ -135,14 +137,15 @@ void system_init(void) {
     isr_enable_all();
 
     // Init rtc, system time 
-    struct_tm it;
-    it.tm_mon = 1;
-    it.tm_mday = 1;
-    it.tm_year = 26;
-    it.tm_hour = 0;
-    it.tm_min = 0;
-    it.tm_sec = 0;
-    ertc_init(&ertc, it);
+    struct_tm dfl_time;
+    dfl_time.tm_wday = 3;
+    dfl_time.tm_mon = 1;
+    dfl_time.tm_mday = 1;
+    dfl_time.tm_year = 26;
+    dfl_time.tm_hour = 0;
+    dfl_time.tm_min = 0;
+    dfl_time.tm_sec = 0;
+    ertc_init(&ertc, dfl_time);
     systime_init(&irqmgr.ms, &ertc.time);
     
     // Submodules & services init
@@ -151,7 +154,8 @@ void system_init(void) {
     // gyro_init(&gyro, GYRO_CS1, GYRO_CS2, GYRO_CS3, GYRO_ON);
     // nvg_init(&nvg, COM_B);
     // cmdmgr_init(&cmdmgr);
-   
+    scheduler_init(&scheduler);
+
     fprintf(COM_D, "%s[%s] system initialized\n", KWHT, NODE_LBL);
     delay_ms(1000);
 }
@@ -160,12 +164,6 @@ void system_init(void) {
 void housekeeping(void) {
     // Kick the dog
     restart_wdt();
-    
-    ertc_get_time(&ertc);
-    uint64_t now = systime_epoch_ms();
-    fprintf(COM_D, "%s[%s] housekeeping %02u, %02u/%02u/20%02u %02u:%02u:%02u (%u)\n", KWHT, NODE_LBL, 
-            ertc.time.tm_wday, ertc.time.tm_mon, ertc.time.tm_mday, ertc.time.tm_year, 
-            ertc.time.tm_hour, ertc.time.tm_min, ertc.time.tm_sec, now);
 
     // Handle received byte interrupts
     isr_disable_all();
@@ -174,28 +172,12 @@ void housekeeping(void) {
     cmdmgr_rcv_parser(&cmdmgr, &irqmgr.irqbufs[3], &cmdmgr.rcvpkts[0]); // Handle COM_D FTDI commands on cmd rcvpkt 0
     isr_enable_all();
    
-    // float data[5];
-    // nvg_get_sensor_data(&nvg, NVG_QUAT_GEOMAG, data);
-    // fprintf(COM_D, "%sNVG data=[ %.3f %.3f %.3f %.3f %.3f ]\n", KCYN,
-    //         data[0], data[1], data[2], data[3], data[4]);
-
-    // Check heartbeats
-    // if (!mtq_heartbeat(&mtq)) {
-    //     fprintf(COM_D, "%s[%s] mtq flatlined\n", KRED, NODE_LBL);
-    // }
-    // if (!gyro_heartbeat(&gyro)) {
-    //     fprintf(COM_D, "%s[%s] gyro flatlined\n", KRED, NODE_LBL);
-    // }
-    // if (!nvg_heartbeat(&nvg)) {
-    //     fprintf(COM_D, "%s[%s] nvg flatlined\n", KRED, NODE_LBL);
-    // }
+    scheduler_run_tasks(&scheduler);
 
     // Send commands to read all sensors
     // mtq_read_ctrl(&mtq);
     // mtq_read_fast(&mtq);
     // gyro_read_all(&gyro);
-    
-    delay_ms(100);
 }
 
 // Cleanup routine
