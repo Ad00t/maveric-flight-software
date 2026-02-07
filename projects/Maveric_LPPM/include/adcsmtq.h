@@ -131,7 +131,7 @@ void mtq_read_fast(mtq_s* mtq);
 void mtq_read_ctrl(mtq_s* mtq);
 
 // Set date and time registers (absolute time)
-void mtq_set_date_time(mtq_s* mtq, struct_tm rtc);
+void mtq_set_date_time(mtq_s* mtq, struct_tm* rtc);
 
 #define MTQ_MODE_MANUAL             7 
 #define MTQ_MODE_SUN_SPIN           6

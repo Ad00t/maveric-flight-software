@@ -7,7 +7,7 @@
 
 Company: USC/ISI
 License: Proprietary
-Author(s): Stephen Hunt, Adhit Siripurapu
+Author(s): Stephen Hunt
 
 Purpose: Provides a base definition for interfacing with the AX100 transceiver 
 

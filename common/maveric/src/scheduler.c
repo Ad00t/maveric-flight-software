@@ -12,7 +12,7 @@ void schedule_task(scheduler_s* s, schedtask_s task) {
     while (s->tasks[s->i_free].active) {
         s->i_free = (s->i_free + 1) % SCHEDULER_MAX_TASKS;
         if (s->i_free == start) {
-            fprintf(COM_D, "%s[%s] schedule_task: scheduler tasks full\n", KRED, NODE_LBL);
+            fprintf(FTDI_PORT, "%s[%s] schedule_task: scheduler tasks full\n", KRED, NODE_LBL);
             return;
         }
     }

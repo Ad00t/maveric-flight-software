@@ -1,8 +1,8 @@
 #include "cmdmgr.h"
+#include "cmdfunc.h"
 #include "circbuf.h"
 #include "hashtable.h"
 #include "crcnew.h"
-#include "cmdfunc.h"
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -126,7 +126,7 @@ void cmdmgr_rcv_parser(cmdmgr_s* cmdmgr, circbuf_s* irqbuf, cmdpkt_s* rcvpkt) {
                 cmdpkt_clear(rcvpkt);
                 break;
             case CMDPKT_FSM_ERROR:
-                fprintf(COM_D, "%s[%s] cmdmgr_rcv_fsm: malformed packet\n", KRED, NODE_LBL);
+                fprintf(FTDI_PORT, "%s[%s] cmdmgr_rcv_fsm: malformed packet\n", KRED, NODE_LBL);
                 cmdpkt_clear(rcvpkt);
                 break;
         }
@@ -138,13 +138,13 @@ void cmdmgr_rcv_parser(cmdmgr_s* cmdmgr, circbuf_s* irqbuf, cmdpkt_s* rcvpkt) {
 void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
     // Forward
     if (pkt->dest != NODE_ID) {
-        fprintf(COM_D, "%s[%s] forwarding cmd '%s'\n", KCYN, NODE_LBL, pkt->id);
+        fprintf(FTDI_PORT, "%s[%s] forwarding cmd '%s'\n", KCYN, NODE_LBL, pkt->id);
         return;
     } 
     
     // CRC check
     if (pkt->crc != pkt->running_crc) {
-        fprintf(COM_D, "%s[%s] crc check failed on cmd '%s' crc:%u calculated:%u\n", KRED, NODE_LBL,
+        fprintf(FTDI_PORT, "%s[%s] crc check failed on cmd '%s' crc:%u calculated:%u\n", KRED, NODE_LBL,
                 pkt->id, pkt->crc, pkt->running_crc);
         return;
     } 
@@ -152,7 +152,7 @@ void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
     // Parse & execute cmd here
     cmdfunc_f cmdfunc = ht_get(&cmdmgr->cmdfuncs, pkt->id);
     if (cmdfunc == NULL) {
-        fprintf(COM_D, "%s[%s] cmd not recognized '%s'\n", KRED, NODE_LBL, pkt->id);
+        fprintf(FTDI_PORT, "%s[%s] cmd not recognized '%s'\n", KRED, NODE_LBL, pkt->id);
         return;
     }
     cmdfunc(pkt);

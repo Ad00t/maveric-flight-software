@@ -1,225 +1,39 @@
-#ifndef __INTERRUPT__
-#define __INTERRUPT__
+#ifndef __INTERRUPTS_H__
+#define __INTERRUPTS_H__
 
-BYTE start_flag, cmd_flag;
-unsigned char rcv_cmd[256];
-unsigned int8 max;
-unsigned int8 len;
+#include <stdint.h>
 
-void enable_all_interrupts(void);
-void disable_all_interrupts(void);
+// UPPER PPM INTERRUPTS CONFIG
 
-#INT_RDA
-void RDA_isr()
-{
-	BYTE state;
-   	char c;
-	disable_all_interrupts();
-	max = 255;
-   	len=0;
-	state = kbhit(COM_A);
-	if(state&&start_flag)
-	{
-		do 
-		{
-			c=fgetc(COM_A);
-	     	if(c==8) 
-			{  // Backspace
-	        	if(len>0) 
-				{
-	          	len--;
-	        	}
-	     	} 
-			else if ((c>=' ')&&(c<='~'))
-	       	{
-				if(len<=max) 
-				{
-			 		rcv_cmd[len++]=c;
-	       		}
-				else
-				{
-					break;
-				}
-			}
-			else if (c!=13) 
-			{
-				if(len<=max) 
-				{
-			 		len++;
-	       		}
-				else
-				{
-					break;
-				}
-			}
-		} while((c!=13));
-		rcv_cmd[len]=0;
-	}
-	cmd_flag = TRUE;
-	fprintf(COM_A,"\033[33m[COM_A] Data received: %s\n\r",rcv_cmd);
-	delay_ms(1);
-	enable_all_interrupts();
-}
+#define NUM_PORTS   4
 
+// Interrupt request manager
 
-#INT_RDA2
-void RDA2_isr()
-{
-	BYTE state;
-   	char c;
-	disable_all_interrupts();
-	max = 255;
-   	len=0;
-	state = kbhit(COM_B);
-	if(state&&start_flag)
-	{
-	   do 
-		{
-			c=fgetc(COM_B);
-	     	if(c==8) 
-			{  // Backspace
-	        	if(len>0) 
-				{
-	          	len--;
-	        	}
-	     	} 
-			else if ((c>=' ')&&(c<='~'))
-	       	{
-				if(len<=max) 
-				{
-			 		rcv_cmd[len++]=c;
-	       		}
-				else
-				{
-					break;
-				}
-			}
-			else if (c!=13)
-			{
-				if(len<=max) 
-				{
-			 		len++;
-	       		}
-				else
-				{
-					break;
-				}
-			}
-		} while((c!=13));
-	   	//strB[len]=0;
-		rcv_cmd[len]=0;
-	}
-	cmd_flag = TRUE;
-	fprintf(COM_B,"\033[33m[COM_B] Data received: %s\n\r",rcv_cmd);
-	delay_ms(1);
-	enable_all_interrupts();
-}
+typedef struct {
+    int1 started;
+    volatile circbuf_s irqbufs[NUM_PORTS];
+    volatile uint64_t ms;
+} irqmgr_s;
 
+// Initialize interrupt requests manager
+void irqmgr_init(irqmgr_s* irqmgr);
 
-#INT_RDA3
-void RDA3_isr()
-{
-	BYTE state;
-   	char c;
-	disable_all_interrupts();
-	max = 255;
-   	len=0;
+// Clear all interrupt rcv bufs
+void irqmgr_clear(irqmgr_s* irqmgr);
 
-	state = kbhit(COM_C);
-	if(state&&start_flag)
-	{
-	   do 
-		{
-			c=fgetc(COM_C);
-	     	if(c==8) 
-			{  // Backspace
-	        	if(len>0) 
-				{
-	          	len--;
-	        	}
-	     	} 
-			else if ((c>=' ')&&(c<='~'))
-	       	{
-				if(len<=max) 
-				{
-			 		rcv_cmd[len++]=c;
-	       		}
-				else
-				{
-					break;
-				}
-			}
-			else if (c!=13)
-			{
-				if(len<=max) 
-				{
-			 		len++;
-	       		}
-				else
-				{
-					break;
-				}
-			}
-		} while((c!=13));
-		rcv_cmd[len]=0;
-	}
-	cmd_flag = TRUE;
-	//fprintf(COM_C,"\033[33m[COM_C] Data received: %s\n\r",rcv_cmd);
-	delay_ms(1);
-	enable_all_interrupts();
-}
+// Interrupt service routines
 
-#INT_RDA4
-void RDA4_isr()
-{
-	BYTE state;
-   	char c;
-	disable_all_interrupts();
-	max = 255;
-   	len=0;
+// Enable all interrupts
+void isr_enable_all(void);
 
-	state = kbhit(COM_D);
-	if(state&&start_flag)
-	{
-	   do 
-		{
-			c=fgetc(COM_D);
-	     	if(c==8) 
-			{  // Backspace
-	        	if(len>0) 
-				{
-	          	len--;
-	        	}
-	     	} 
-			else if ((c>=' ')&&(c<='~'))
-	       	{
-				if(len<=max) 
-				{
-			 		rcv_cmd[len++]=c;
-	       		}
-				else
-				{
-					break;
-				}
-			}
-			else if (c!=13)
-			{
-				if(len<=max) 
-				{
-			 		len++;
-	       		}
-				else
-				{
-					break;
-				}
-			}
-		} while((c!=13));
-		rcv_cmd[len]=0;
-	}
-	cmd_flag = TRUE;
-	fprintf(COM_D,"\033[33m[COM_D] Data received: %s\n\r",rcv_cmd);
-	delay_ms(1);
-	enable_all_interrupts();	
-}
+// Disable all interrupts
+void isr_disable_all(void);
+
+// Interrupt Service Routines 
+void isr_uart1(void);
+void isr_uart2(void);
+void isr_uart3(void);
+void isr_uart4(void);
+void isr_timer1(void);
+
 #endif
-#include "interrupts.c"

@@ -23,12 +23,13 @@ extern nvg_s nvg;                   // Naviguider
 void scheduler_init_schedules(scheduler_s* scheduler) {
     scheduler_schedule_in(scheduler, 1, schedfunc_get_ertc_time, 1000, SCHEDULE_REPS_INFINITE, 500);
     scheduler_schedule_in(scheduler, 2, schedfunc_systime_sync, 1000, SCHEDULE_REPS_INFINITE, 5000);
-    scheduler_schedule_in(scheduler, 3, schedfunc_print_hk, 1000, SCHEDULE_REPS_INFINITE, 1000);
+    scheduler_schedule_in(scheduler, 3, schedfunc_print_hk, 1000, SCHEDULE_REPS_INFINITE, 500);
     scheduler_schedule_in(scheduler, 4, schedfunc_heartbeats, 1000, SCHEDULE_REPS_INFINITE, 3000);
+    scheduler_schedule_in(scheduler, 5, schedfunc_read_sensors, 1000, SCHEDULE_REPS_INFINITE, 1000);
+    // scheduler_schedule_in(scheduler, 6, schedfunc_test_disable_ertc, 15000, 1, 0);
 }
 
 // SCHEDULE FUNCTIONS
-
 void schedfunc_get_ertc_time(void) {
     ertc_get_time(&ertc); 
 }
@@ -39,9 +40,9 @@ void schedfunc_systime_sync(void) {
 
 void schedfunc_print_hk(void) {
     uint64_t now = systime_epoch_ms();
-    fprintf(COM_D, "%s[%s] housekeeping %02u, %02u/%02u/20%02u %02u:%02u:%02u (%u)\n", KWHT, NODE_LBL, 
+    fprintf(FTDI_PORT, "%s[%s] housekeeping %02u, %02u/%02u/20%02u %02u:%02u:%02u (%u) ertc=%u\n", KWHT, NODE_LBL, 
             ertc.time.tm_wday, ertc.time.tm_mon, ertc.time.tm_mday, ertc.time.tm_year, 
-            ertc.time.tm_hour, ertc.time.tm_min, ertc.time.tm_sec, now);
+            ertc.time.tm_hour, ertc.time.tm_min, ertc.time.tm_sec, now, ertc.is_using_ertc);
 }
 
 void schedfunc_heartbeats(void) {
@@ -50,4 +51,14 @@ void schedfunc_heartbeats(void) {
     // int1 hb_nvg = nvg_heartbeat(&nvg);
     // int1 hb_gyro = gyro_heartbeat(&gyro);
 }
+
+void schedfunc_read_sensors(void) {
+    // mtq_read_ctrl(&mtq);
+    // mtq_read_fast(&mtq);
+    // gyro_read_all(&gyro);
+}
+
+void schedfunc_test_disable_ertc(void) {
+    ertc.is_using_ertc = FALSE;
+} 
 

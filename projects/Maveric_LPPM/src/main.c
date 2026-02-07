@@ -1,6 +1,5 @@
 //=============================================================================================================
 // Lower PPM main.c
-// Testing routine template for components connected into the PPMs
 //=============================================================================================================
 
 #include <24FJ256GA110.h>			// Device Header File.  Switched to brackets to use version in PICC Library
@@ -53,33 +52,22 @@
 
 // Global defines
 
-#define KNRM  "\033[0m"
-#define KRED  "\033[31m"
-#define KGRN  "\033[32m"
-#define KYEL  "\033[33m"
-#define KBLU  "\033[34m"
-#define KMAG  "\033[35m"
-#define KCYN  "\033[36m"
-#define KWHT  "\033[37m"
-
 #define LOWER_PPM
 #define NODE_ID             1
 #define NODE_LBL            "LPPM"
-#define LOG_LEVEL		    LL_INFO
 #define MAX_BUF_LEN         256
-#define FLATLINE_TIME_MS    3000
 
 // Module includes (.c necessary)
 
 #include <time.h>
 #include <time.c>
+#include "colors.h"
 #include "crcnew.c"
 #include "hashtable.c"
 #include "circbuf.c"
 #include "uart.c"
 #include "i2c.c"
 #include "spi.c"
-// #include "logger.c"
 #include "interrupts.c"
 #include "systime.c"
 #include "adcsmtq.c"
@@ -89,8 +77,8 @@
 #include "scheduler.h" // Needed for some reason
 #include "schedfunc.c"
 #include "scheduler.c"
-#include "cmdmgr.c"
 #include "cmdfunc.c"
+#include "cmdmgr.c"
 
 void system_init(void);
 void housekeeping(void);
@@ -116,10 +104,8 @@ void main(void) {
 
 // System initialization routine
 void system_init(void) {
-    // Watchdog init
+    // Watchdog, millisecond timer init
     setup_wdt(WDT_ON);
-
-    // MS timer init
 	setup_timer1(TMR_INTERNAL | TMR_DIV_BY_64, 0x00FA); 
 
     // SPI init
@@ -128,15 +114,12 @@ void system_init(void) {
 	// spi_set_mode(GYRO_SPI_MODE);
 	// setup_spi(SPI_MASTER | SPI_XMIT_L_TO_H | SPI_CLK_DIV_16 | SPI_SCK_IDLE_HIGH);
 
-    // RTC init 
-    // setup_rtc(RTC_ENABLE | RTC_OUTPUT_SECONDS, 0); 
-    
     // Init interrupts 
     irqmgr_init(&irqmgr);
     irqmgr.started = TRUE;
     isr_enable_all();
 
-    // Init rtc, system time 
+    // Init ertc, irtc, system time 
     struct_tm dfl_time;
     dfl_time.tm_wday = 3;
     dfl_time.tm_mon = 1;
@@ -145,7 +128,7 @@ void system_init(void) {
     dfl_time.tm_hour = 0;
     dfl_time.tm_min = 0;
     dfl_time.tm_sec = 0;
-    ertc_init(&ertc, dfl_time);
+    ertc_init(&ertc, &dfl_time);
     systime_init(&irqmgr.ms, &ertc.time);
     
     // Submodules & services init
@@ -153,10 +136,10 @@ void system_init(void) {
     // mtq_set_conf(&mtq, 0, MTQ_MODE_DETUMBLING);
     // gyro_init(&gyro, GYRO_CS1, GYRO_CS2, GYRO_CS3, GYRO_ON);
     // nvg_init(&nvg, COM_B);
-    // cmdmgr_init(&cmdmgr);
+    cmdmgr_init(&cmdmgr);
     scheduler_init(&scheduler);
 
-    fprintf(COM_D, "%s[%s] system initialized\n", KWHT, NODE_LBL);
+    fprintf(FTDI_PORT, "%s[%s] system initialized\n", KWHT, NODE_LBL);
     delay_ms(1000);
 }
 
@@ -169,15 +152,11 @@ void housekeeping(void) {
     isr_disable_all();
     // mtq_rcv_parser(&mtq, &irqmgr.irqbufs[0]); // Do driver handling before commands so data is up to date
     // nvg_rcv_parser(&nvg, &irqmgr.irqbufs[1]);
-    cmdmgr_rcv_parser(&cmdmgr, &irqmgr.irqbufs[3], &cmdmgr.rcvpkts[0]); // Handle COM_D FTDI commands on cmd rcvpkt 0
+    cmdmgr_rcv_parser(&cmdmgr, &irqmgr.irqbufs[2], &cmdmgr.rcvpkts[1]); // Handle upper PPM commands on cmd rcvpkt 1
+    cmdmgr_rcv_parser(&cmdmgr, &irqmgr.irqbufs[3], &cmdmgr.rcvpkts[0]); // Handle FTDI commands on cmd rcvpkt 0
     isr_enable_all();
    
     scheduler_run_tasks(&scheduler);
-
-    // Send commands to read all sensors
-    // mtq_read_ctrl(&mtq);
-    // mtq_read_fast(&mtq);
-    // gyro_read_all(&gyro);
 }
 
 // Cleanup routine

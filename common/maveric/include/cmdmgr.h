@@ -6,7 +6,7 @@
 #include "hashtable.h"
 
 #define CMD_START_BYTE  0xCD
-#define NUM_CMD_BUFS    1
+#define NUM_CMD_BUFS    2
 #define MAX_CMD_ID_LEN  20
 
 // Command packet & reader FSM

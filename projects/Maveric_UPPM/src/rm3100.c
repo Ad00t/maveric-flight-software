@@ -34,7 +34,7 @@ void rm3100_init(rm3100_s* m, uint8_t add) {
 	//example: rm3100_init(RM3100_ADDRESS_20) returns a no-zerobyte if there is a RM3100 connected in that direction, otherwise return zero byte
     m->add = add;
     rm3100_clear(m);
-    fprintf(COM_D, "%s[%s] rm3100_init: addr=0x%02X\n", KGRN, NODE_LBL, m->add);
+    fprintf(FTDI_PORT, "%s[%s] rm3100_init: addr=0x%02X\n", KGRN, NODE_LBL, m->add);
 }
 
 void rm3100_clear(rm3100_s* m) {
@@ -45,25 +45,25 @@ void rm3100_clear(rm3100_s* m) {
 
 int1 rm3100_heartbeat(rm3100_s* m) {
 	uint8_t heartbeat = rm3100_read_8(m, RM3100_REGISTER_REVID);
-    fprintf(COM_D, "%s[%s] rm3100_heartbeat: %u\n", KGRN, NODE_LBL, heartbeat);
+    fprintf(FTDI_PORT, "%s[%s] rm3100_heartbeat: %u\n", KGRN, NODE_LBL, heartbeat);
     return TRUE;
 }
 
 void rm3100_set_max_rate(rm3100_s* m, uint8_t rate = RM3100_037HZ) {
 	rm3100_write_8(m, RM3100_REGISTER_WTMRC, rate);
-    fprintf(COM_D, "%s[%s] rm3100_set_max_rate: %u\n", KGRN, NODE_LBL, rate);
+    fprintf(FTDI_PORT, "%s[%s] rm3100_set_max_rate: %u\n", KGRN, NODE_LBL, rate);
 }
 
 void rm3100_set_cycle(rm3100_s* m, uint16_t count_x = RM3100_COUNT, uint16_t count_y = RM3100_COUNT, uint16_t count_z = RM3100_COUNT) {
 	rm3100_write_16(m, RM3100_REGISTER_CMX, count_x);
 	rm3100_write_16(m, RM3100_REGISTER_CMY, count_y);
 	rm3100_write_16(m, RM3100_REGISTER_CMZ, count_z);
-    fprintf(COM_D, "%s[%s] rm3100_set_cycle: %u %u %u\n", KGRN, NODE_LBL, count_x, count_y, count_z);
+    fprintf(FTDI_PORT, "%s[%s] rm3100_set_cycle: %u %u %u\n", KGRN, NODE_LBL, count_x, count_y, count_z);
 }
 
 void rm3100_set_mode(rm3100_s* m, uint8_t mode = RM3100_MODE_CMM) {
 	rm3100_write_8(m, RM3100_REGISTER_CMM, mode);
-    fprintf(COM_D, "%s[%s] rm3100_set_mode: %u\n", KGRN, NODE_LBL, mode);
+    fprintf(FTDI_PORT, "%s[%s] rm3100_set_mode: %u\n", KGRN, NODE_LBL, mode);
 }
 
 void rm3100_read_data(rm3100_s* m) {	
@@ -98,5 +98,5 @@ void rm3100_read_data(rm3100_s* m) {
 	m->mag_z += (int32_t)read_data[8] << 8;
 	m->mag_z += (int32_t)read_data[9];
 
-    fprintf(COM_D, "%s[%s] rm3100_read_data: %u %u %u\n", KGRN, NODE_LBL, m->mag_x, m->mag_y, m->mag_z);
+    fprintf(FTDI_PORT, "%s[%s] rm3100_read_data: %u %u %u\n", KGRN, NODE_LBL, m->mag_x, m->mag_y, m->mag_z);
 }

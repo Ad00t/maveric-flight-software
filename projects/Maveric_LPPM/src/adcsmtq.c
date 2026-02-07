@@ -95,7 +95,7 @@ void mtq_init(mtq_s* mtq, uint8_t port) {
     }
     
     mtq_set_conf(&mtq, 0, MTQ_MODE_SAFE);
-    fprintf(COM_D, "%s[%s] mtq_init: port=%u\n", KYEL, NODE_LBL, mtq->port);
+    fprintf(FTDI_PORT, "%s[%s] mtq_init: port=%u\n", KYEL, NODE_LBL, mtq->port);
 }
 
 void mtq_destroy(mtq_s* mtq) {
@@ -105,7 +105,7 @@ void mtq_destroy(mtq_s* mtq) {
             free(mtq->reg_table[i].value);
     }
     
-    fprintf(COM_D, "%s[%s] mtq_destroy\n", KYEL, NODE_LBL);
+    fprintf(FTDI_PORT, "%s[%s] mtq_destroy\n", KYEL, NODE_LBL);
 }
 
 void mtq_clear(mtq_s* mtq) {
@@ -119,7 +119,7 @@ void mtq_clear(mtq_s* mtq) {
     memset(mtq->reg_idx_map, 0, MTQ_MAP_COUNT * MTQ_MAX_IDX_COUNT * sizeof(mtq_reg_s*));
     memset(mtq->reg_table, 0, sizeof(MTQ_INIT_REG_TABLE));
     
-    fprintf(COM_D, "%s[%s] mtq_clear\n", KYEL, NODE_LBL);
+    fprintf(FTDI_PORT, "%s[%s] mtq_clear\n", KYEL, NODE_LBL);
 }
 
 mtq_reg_s* mtq_get_reg(mtq_s* mtq, uint8_t midx, uint8_t idx) {
@@ -143,7 +143,7 @@ void mtq_read_start(mtq_s* mtq, mtq_reg_s* reg) {
     w_buf[3] = (reg->midx << 4) | 0;
     uint8_t csum = gen_csum(w_buf, 4);
     
-    fprintf(COM_D, "%s[%s] mtq_read_start: port=UART%u reg=(%u,%u) data=[ 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X ]\n", 
+    fprintf(FTDI_PORT, "%s[%s] mtq_read_start: port=UART%u reg=(%u,%u) data=[ 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X ]\n", 
             KYEL, NODE_LBL, mtq->port, reg->midx, reg->idx, w_buf[0], w_buf[1], w_buf[2], w_buf[3], csum);
     
     uart_write_buf(mtq->port, w_buf, 4); 
@@ -154,7 +154,7 @@ void mtq_read_start(mtq_s* mtq, mtq_reg_s* reg) {
 void mtq_read_start(mtq_s* mtq, uint16_t key) {
     mtq_reg_s* reg = mtq_get_reg(mtq, key);
     if (reg == NULL) {
-        fprintf(COM_D, "%s[%s] mtq_read_start: register invalid (%u,%u)\n", KRED, NODE_LBL, key >> 8, key & 0x00FF);
+        fprintf(FTDI_PORT, "%s[%s] mtq_read_start: register invalid (%u,%u)\n", KRED, NODE_LBL, key >> 8, key & 0x00FF);
         return;
     }
     mtq_read_start(mtq, reg);
@@ -163,69 +163,69 @@ void mtq_read_start(mtq_s* mtq, uint16_t key) {
 void mtq_read_complete(mtq_s* mtq) {
     mtq_pkt_s* rcvpkt = &mtq->rcvpkt;
     if (!mtq_pkt_verify_csum(rcvpkt)) {
-        fprintf(COM_D, "%s[%s] mtq_read_complete: ppm checksum error (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
+        fprintf(FTDI_PORT, "%s[%s] mtq_read_complete: ppm checksum error (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
         return;
     }
 
     switch (rcvpkt->err) {
         case 0: break; // No error
         case 1: // Checksum error
-            fprintf(COM_D, "%s[%s] mtq_read_complete: rcv checksum error (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
+            fprintf(FTDI_PORT, "%s[%s] mtq_read_complete: rcv checksum error (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
             return;
         case 2: // Invalid register
-            fprintf(COM_D, "%s[%s] mtq_read_complete: rcv invalid register (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
+            fprintf(FTDI_PORT, "%s[%s] mtq_read_complete: rcv invalid register (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
             return;
     }
 
     mtq_reg_s* reg = mtq_get_reg(mtq, rcvpkt->midx, rcvpkt->idx);
     if (reg == NULL) {
-        fprintf(COM_D, "%s[%s] mtq_read_complete: ppm invalid register (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
+        fprintf(FTDI_PORT, "%s[%s] mtq_read_complete: ppm invalid register (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
         return;
     }
         
     uint8_t n_body_bytes = 4*rcvpkt->cnt;
     memcpy(reg->value, rcvpkt->data, n_body_bytes);
     
-    fprintf(COM_D, "%s[%s] mtq_read_complete: port=UART%u reg=(%u,%u) count=%u err=%u data=[",
+    fprintf(FTDI_PORT, "%s[%s] mtq_read_complete: port=UART%u reg=(%u,%u) count=%u err=%u data=[",
             KYEL, NODE_LBL, mtq->port, reg->midx, reg->idx, reg->cnt, rcvpkt->err);
 
     uint8_t i;
     switch (reg->type) {
         case T_UINT8: {
             for (i = 0; i < n_body_bytes; i++)
-                fprintf(COM_D, " %u", ((uint8_t*)reg->value)[i]);
+                fprintf(FTDI_PORT, " %u", ((uint8_t*)reg->value)[i]);
             break;
         }
         case T_INT8: {
             for (i = 0; i < n_body_bytes/2; i++)
-                fprintf(COM_D, " %d", ((int8_t*)reg->value)[i]);
+                fprintf(FTDI_PORT, " %d", ((int8_t*)reg->value)[i]);
             break;
         }
         case T_UINT16: {
             for (i = 0; i < n_body_bytes/2; i++)
-                fprintf(COM_D, " %u", ((uint16_t*)reg->value)[i]);
+                fprintf(FTDI_PORT, " %u", ((uint16_t*)reg->value)[i]);
             break;
         }
         case T_INT16: {
             for (i = 0; i < n_body_bytes/2; i++)
-                fprintf(COM_D, " %d", ((int16_t*)reg->value)[i]);
+                fprintf(FTDI_PORT, " %d", ((int16_t*)reg->value)[i]);
             break;
         }
         case T_FLOAT: {
 //            for (i = 0; i < n_body_bytes; i++)
-//                fprintf(COM_D, " 0x%02X", reg->value[i]);
+//                fprintf(FTDI_PORT, " 0x%02X", reg->value[i]);
             for (i = 0; i < n_body_bytes/4; i++) 
-                fprintf(COM_D, " %.2f", ((float*)reg->value)[i]);
+                fprintf(FTDI_PORT, " %.2f", ((float*)reg->value)[i]);
             break;
         }
         case T_CHAR: {
             ((char*)reg->value)[n_body_bytes] = '\0'; // Null terminate
-            fprintf(COM_D, " '%s'", (char*)reg->value);
+            fprintf(FTDI_PORT, " '%s'", (char*)reg->value);
             break;
         }
     }    
 
-    fprintf(COM_D, " ]\n");
+    fprintf(FTDI_PORT, " ]\n");
 }
 
 void mtq_write_start(mtq_s* mtq, mtq_reg_s* reg, void* data) {
@@ -257,11 +257,11 @@ void mtq_write_start(mtq_s* mtq, mtq_reg_s* reg, void* data) {
             break;
     }
     
-    fprintf(COM_D, "%s[%s] mtq_write_start: port=%u reg=(%u,%u) len=%u data=[", 
+    fprintf(FTDI_PORT, "%s[%s] mtq_write_start: port=%u reg=(%u,%u) len=%u data=[", 
             KYEL, NODE_LBL mtq->port, reg->midx, reg->idx, w_buf_len+1);
     for (i = 0; i < w_buf_len; i++)
-        fprintf(COM_D, " 0x%02X", w_buf[i]);
-    fprintf(COM_D, " 0x%02X ]\n", csum);
+        fprintf(FTDI_PORT, " 0x%02X", w_buf[i]);
+    fprintf(FTDI_PORT, " 0x%02X ]\n", csum);
     
     uart_write_buf(mtq->port, w_buf, w_buf_len);
     uart_write_buf(mtq->port, &csum, 1);
@@ -271,7 +271,7 @@ void mtq_write_start(mtq_s* mtq, mtq_reg_s* reg, void* data) {
 void mtq_write_start(mtq_s* mtq, uint16_t key, void* data) {
     mtq_reg_s* reg = mtq_get_reg(mtq, key);
     if (reg == NULL) {
-        fprintf(COM_D, "%s[%s] mtq_write_start: register invalid (%u,%u)\n", KRED, NODE_LBL, key >> 8, key & 0x00FF);
+        fprintf(FTDI_PORT, "%s[%s] mtq_write_start: register invalid (%u,%u)\n", KRED, NODE_LBL, key >> 8, key & 0x00FF);
         return;
     }
     mtq_write_start(mtq, reg, data);
@@ -280,27 +280,27 @@ void mtq_write_start(mtq_s* mtq, uint16_t key, void* data) {
 void mtq_write_complete(mtq_s* mtq) {
     mtq_pkt_s* rcvpkt = &mtq->rcvpkt;
     if (!mtq_pkt_verify_csum(rcvpkt)) {
-        fprintf(COM_D, "%s[%s] mtq_write_complete: ppm checksum error (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
+        fprintf(FTDI_PORT, "%s[%s] mtq_write_complete: ppm checksum error (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
         return;
     }
 
     switch (rcvpkt->err) {
         case 0: break; // No error
         case 1: // Checksum error
-            fprintf(COM_D, "%s[%s] mtq_write_complete: rcv checksum error (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
+            fprintf(FTDI_PORT, "%s[%s] mtq_write_complete: rcv checksum error (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
             return;
         case 2: // Invalid register
-            fprintf(COM_D, "%s[%s] mtq_write_complete: rcv invalid register (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
+            fprintf(FTDI_PORT, "%s[%s] mtq_write_complete: rcv invalid register (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
             return;
     }
 
     mtq_reg_s* reg = mtq_get_reg(mtq, rcvpkt->midx, rcvpkt->idx);
     if (reg == NULL) {
-        fprintf(COM_D, "%s[%s] mtq_write_complete: ppm invalid register (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
+        fprintf(FTDI_PORT, "%s[%s] mtq_write_complete: ppm invalid register (%u,%u)\n", KRED, NODE_LBL, rcvpkt->midx, rcvpkt->idx);
         return;
     }
     
-    fprintf(COM_D, "%s[%s] mtq_write_complete: port=%u reg=(%u,%u) count=%u err=%u\n", 
+    fprintf(FTDI_PORT, "%s[%s] mtq_write_complete: port=%u reg=(%u,%u) count=%u err=%u\n", 
             KYEL, NODE_LBL, mtq->port, reg->midx, reg->idx, reg->cnt, rcvpkt->err);
 }
 
@@ -366,7 +366,7 @@ void mtq_rcv_parser(mtq_s* mtq, circbuf_s* irqbuf) {
                 mtq_pkt_clear(rcvpkt);
                 break;
             case MTQ_FSM_ERROR:
-                fprintf(COM_D, "%s[%s] mtq_rcv_parser: malformed packet\n", KRED, NODE_LBL);
+                fprintf(FTDI_PORT, "%s[%s] mtq_rcv_parser: malformed packet\n", KRED, NODE_LBL);
                 mtq_pkt_clear(rcvpkt);
                 break;
         }
@@ -384,7 +384,7 @@ int1 mtq_heartbeat(mtq_s* mtq) {
     int1 hb = strncmp(snid, "TAD102063", reg->value_len) == 0; 
     
     if (!hb) {
-        fprintf(COM_D, "%s[%s] mtq_heartbeat: flatlined. resetting...\n", KRED, NODE_LBL);
+        fprintf(FTDI_PORT, "%s[%s] mtq_heartbeat: flatlined. resetting...\n", KRED, NODE_LBL);
         uint8_t port = mtq->port;
         mtq_destroy(mtq);
         mtq_init(mtq, port);
@@ -422,18 +422,18 @@ void mtq_read_ctrl(mtq_s* mtq) {
     }
 }
 
-void mtq_set_date_time(mtq_s* mtq, struct_tm rtc) {
+void mtq_set_date_time(mtq_s* mtq, struct_tm* rtc) {
     uint8_t date[4]; 
-    date[3] = to_bcd(rtc.tm_year);
-    date[2] = to_bcd(rtc.tm_mon);
-    date[1] = to_bcd(rtc.tm_mday);
-    date[0] = to_bcd(rtc.tm_wday); 
+    date[3] = to_bcd(rtc->tm_year);
+    date[2] = to_bcd(rtc->tm_mon);
+    date[1] = to_bcd(rtc->tm_mday);
+    date[0] = to_bcd(rtc->tm_wday); 
     mtq_write_start(mtq, MTQ_DATE, date);
     
     uint8_t time[4];
-    time[3] = to_bcd(rtc.tm_hour);
-    time[2] = to_bcd(rtc.tm_min);
-    time[1] = to_bcd(rtc.tm_sec);
+    time[3] = to_bcd(rtc->tm_hour);
+    time[2] = to_bcd(rtc->tm_min);
+    time[1] = to_bcd(rtc->tm_sec);
     time[0] = to_bcd(0); // Unused
     mtq_write_start(mtq, MTQ_TIME, time);
 }

@@ -1,16 +1,74 @@
-#module					// !!! Important: This command makes everything below scoped only to this file.
+#include "interrupts.h"
+#include "circbuf.h"
+#include "uart.h"
+#include <stdint.h>
+#include <stdio.h>
 
-void enable_all_interrupts(void)
-{
+#module
+
+// Interrupt request manager 
+
+void irqmgr_init(irqmgr_s* irqmgr) {
+    irqmgr->started = FALSE;
+    irqmgr->ms = 0;
+    irqmgr_clear(irqmgr);
+    isr_disable_all();
+}
+
+void irqmgr_clear(irqmgr_s* irqmgr) {
+    uint8_t p;
+    for (p = 0; p < NUM_PORTS; p++) {
+        cb_clear(&irqmgr->irqbufs[p]);
+    }
+}
+
+// Interrupt service routines
+
+void isr_enable_all(void) {
 	enable_interrupts(INT_RDA);
 	enable_interrupts(INT_RDA2);
 	enable_interrupts(INT_RDA3);
 	enable_interrupts(INT_RDA4);
+    enable_interrupts(INT_TIMER1);
 }
-void disable_all_interrupts(void)
-{
+
+void isr_disable_all(void) {
 	disable_interrupts(INT_RDA);
 	disable_interrupts(INT_RDA2);
 	disable_interrupts(INT_RDA3);
 	disable_interrupts(INT_RDA4);
+    disable_interrupts(INT_TIMER1);
+}
+
+// Interrupt Service Routines 
+
+extern irqmgr_s irqmgr;
+
+#INT_RDA 
+void isr_uart1(void) {
+    if (!irqmgr.started || !uart_byte_avail(COM_A)) return;   
+    cb_push(&irqmgr.irqbufs[0], uart_read_byte(COM_A));
+}
+
+#INT_RDA2 
+void isr_uart2(void) {
+    if (!irqmgr.started || !uart_byte_avail(COM_B)) return;
+    cb_push(&irqmgr.irqbufs[1], uart_read_byte(COM_B));
+}
+
+#INT_RDA3 
+void isr_uart3(void) {
+    if (!irqmgr.started || !uart_byte_avail(COM_C)) return;   
+    cb_push(&irqmgr.irqbufs[2], uart_read_byte(COM_C));
+}
+
+#INT_RDA4 
+void isr_uart4(void) {
+    if (!irqmgr.started || !uart_byte_avail(COM_D)) return;
+    cb_push(&irqmgr.irqbufs[3], uart_read_byte(COM_D));
+}
+
+#INT_TIMER1 // MS TIMER
+void isr_timer1(void) {
+    irqmgr.ms++;
 }

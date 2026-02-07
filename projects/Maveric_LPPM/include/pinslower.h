@@ -41,22 +41,23 @@
 //  		        UART
 //=============================================
 
-#define COM_A		1 // Stream Port 1
+#define COM_A		1 // Magnetorquer
 #define COM_A_BAUD  115200 
 #pin_select U1TX = PIN_F3 
 #pin_select U1RX = PIN_F5 
 
-#define COM_B       2 // Stream Port 2
+#define COM_B       2 // Naviguider
 #define COM_B_BAUD  115200  
 #pin_select U2TX = PIN_F2 
 #pin_select U2RX = PIN_F4 
 
-#define COM_C       3 // Stream Port 3
+#define COM_C       3 // Upper PPM 
 #define COM_C_BAUD  115200
 #pin_select U3TX = PIN_D2 
 #pin_select U3RX = PIN_D3 
 
-#define COM_D       4 // Stream Port 4
+#define COM_D       4 // FTDI 
+#define FTDI_PORT   COM_D
 #define COM_D_BAUD  115200 
 #pin_select U4TX = PIN_D4 
 #pin_select U4RX = PIN_D12 
