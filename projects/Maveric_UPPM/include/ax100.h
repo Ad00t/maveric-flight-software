@@ -14,25 +14,42 @@ Purpose: Provides a base definition for interfacing with the AX100 transceiver
 ***************************************************************************/
 
 #include <stdint.h>
+#include "circbuf.h"
+
+// kiss header size (2), csp header size (4), crc32 size (4), kiss footer size (1)
+#define MIN_MESSAGE_SIZE        11
+#define MAX_MESSAGE_SIZE        248
+
+#define FEND                    0xC0
+#define FESC                    0xDB
+#define TFEND                   0xDC
+#define TFESC                   0xDD
+
+#define DATA_FRAME              0x00
+
+#define CSP_NORMAL_PRIORITY     2L
+#define FSW_NODE                8L
+#define TX_NODE                 0L
+#define GOMSPACE_NODE           5L
+// mimic csp lib default (cnofig's port_max_bind)
+#define MIN_PING_SRC_PORT       24L
+#define GND_WDT_RESET_PORT      9L
 
 // MAIN TRANSCEIVER INTERFACE
 
-typedef enum
-{
-	TRANSCEIVER_OFF = 0,
-	TRANSCEIVER_ON = 1
-} TransceiverPower;
+typedef struct {
+    uint8_t port; 
+    circbuf_s cmdbuf;
+} ax100_s;
 
-void TurnTransceiverPower(TransceiverPower state);
-TransceiverPower GetTransceiverPowerState();
-uint16_t GetAvailableMessageFromTransceiver(char* messageBuffer, uint16_t sizeOfMessageBuffer);
-void TransmitMessage(char* message, uint16_t messageSize);
+void ax100_init(ax100_s* a, uint8_t port);
+void ax100_set_power(ax100_s* a, int1 on);
+int1 ax100_is_on(ax100_s* a);
+uint8_t ax100_get_avail_msg(ax100_s* a, circbuf_s* irqbuf);
+void ax100_transmit_msg(ax100_s* a, uint8_t* buf, uint8_t len);
 
 // FRAME
 
-// const int MAX_MESSAGE_SIZE = 248;
-// kiss header size, csp header size, crc32 size, kiss footer size
-#define MIN_MESSAGE_SIZE (2 + 4 + 4 + 1)
 
 /*
   Takes in a message and builds a frame, adding KISS header/footer, CSP header, and a CRC
@@ -50,13 +67,12 @@ void setupFrame(uint8_t* message, uint16_t messageLength, uint8_t* frame, uint16
   Looks through a buffer to see if a full frame is available for processing. Used
   for data coming from GomSpace
 */
-void findFrame(uint8_t* msg, uint16_t msgLen, int* msgStartIdx, int* msgEndIdx);
+int1 findFrame(circbuf_s* irqbuf, int* frameStartIdx, int* frameEndIdx, uint16_t minFrameSize);
 
 /*
   Takes a frame and extracts the message out of it. Used for data coming from GomSpace
 */
-void extractMessageFromFrame(uint8_t* msg, uint16_t msgLength, int msgStartIdx, uint8_t* frame,
-							 uint16_t* frameLength);
+void extractMessageFromFrame(uint8_t* framebuf, uint16_t frameLength, circbuf_s* cmdbuf, uint16_t* msgLength);
 
 void setupWdtReset(uint8_t* msg, uint16_t* msgLength);
 

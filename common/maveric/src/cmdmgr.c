@@ -45,11 +45,11 @@ void cmdmgr_clear(cmdmgr_s* cmdmgr) {
     }
 }
 
-void cmdmgr_rcv_parser(cmdmgr_s* cmdmgr, circbuf_s* irqbuf, cmdpkt_s* rcvpkt) {
+void cmdmgr_rcv_parser(cmdmgr_s* cmdmgr, circbuf_s* rcvbuf, cmdpkt_s* rcvpkt) {
     uint16_t iter = 0;
     while (iter < 2*CIRCBUF_MAX_SIZE) {
         uint8_t b = 0;
-        if (!cb_pop(irqbuf, 1, &b)) return;
+        if (!cb_pop(rcvbuf, 1, &b)) return;
 
         switch (rcvpkt->fsm) {
             case CMDPKT_FSM_HEAD:
@@ -135,27 +135,27 @@ void cmdmgr_rcv_parser(cmdmgr_s* cmdmgr, circbuf_s* irqbuf, cmdpkt_s* rcvpkt) {
     }
 }
 
-void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
+void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* rcvpkt) {
     // Forward
-    if (pkt->dest != NODE_ID) {
-        fprintf(FTDI_PORT, "%s[%s] forwarding cmd '%s'\n", KCYN, NODE_LBL, pkt->id);
+    if (rcvpkt->dest != NODE_ID) {
+        fprintf(FTDI_PORT, "%s[%s] forwarding cmd '%s'\n", KCYN, NODE_LBL, rcvpkt->id);
         return;
     } 
     
     // CRC check
-    if (pkt->crc != pkt->running_crc) {
+    if (rcvpkt->crc != rcvpkt->running_crc) {
         fprintf(FTDI_PORT, "%s[%s] crc check failed on cmd '%s' crc:%u calculated:%u\n", KRED, NODE_LBL,
-                pkt->id, pkt->crc, pkt->running_crc);
+                rcvpkt->id, rcvpkt->crc, rcvpkt->running_crc);
         return;
     } 
     
     // Parse & execute cmd here
-    cmdfunc_f cmdfunc = ht_get(&cmdmgr->cmdfuncs, pkt->id);
+    cmdfunc_f cmdfunc = ht_get(&cmdmgr->cmdfuncs, rcvpkt->id);
     if (cmdfunc == NULL) {
-        fprintf(FTDI_PORT, "%s[%s] cmd not recognized '%s'\n", KRED, NODE_LBL, pkt->id);
+        fprintf(FTDI_PORT, "%s[%s] cmd not recognized '%s'\n", KRED, NODE_LBL, rcvpkt->id);
         return;
     }
-    cmdfunc(pkt);
+    cmdfunc(rcvpkt);
 }
 
 // COMMAND HANDLERS

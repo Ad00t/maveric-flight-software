@@ -1,72 +1,59 @@
 #include "ax100.h"
 #include "crcnew.h"
+#include "uart.h"
+#include "circbuf.h"
 
 // MAIN TRANSCEIVER INTERFACE
 
-static void TurnTransceiverPowerOn();
-static void TurnTransceiverPowerOff();
-static uint16_t FindIncomingMessage(int8_t* msgBuffer, int sizeOfMsgBuffer);
-
-void TurnTransceiverPower(TransceiverPower state) {
-	if (state == TRANSCEIVER_ON) {
-		TurnTransceiverPowerOn();
-	} else if (state == TRANSCEIVER_OFF) {
-		TurnTransceiverPowerOff();
-	}
-	return;
-}
-static void TurnTransceiverPowerOn() {
-	output_high(TRANSCEIVER_PWR);
-	return;
-}
-static void TurnTransceiverPowerOff() {
-	output_low(TRANSCEIVER_PWR);
-	return;
+void ax100_init(ax100_s* a, uint8_t port) {
+    a->port = port;
+    cb_init(&a->cmdbuf);
+    ax100_set_power(a, TRUE);
 }
 
-TransceiverPower GetTransceiverPowerState() {
-	return (TransceiverPower)input_state(TRANSCEIVER_PWR);
+void ax100_set_power(ax100_s* a, int1 on) {
+    if (on) {
+        output_high(AX100_PWR);
+    } else {
+        output_low(AX100_PWR);
+    }
 }
 
-uint16_t GetAvailableMessageFromTransceiver(int8_t* messageBuffer, uint16_t sizeOfMessageBuffer) {
-	// Find a message within the receive buffer
-	return FindIncomingMessage(messageBuffer, sizeOfMessageBuffer);
+int1 ax100_is_on(ax100_s* a) {
+	return (int1) input_state(AX100_PWR);
 }
-static uint16_t FindIncomingMessage(int8_t* msgBuffer, int sizeOfMsgBuffer) {
-	if (CheckByte(TRANSCEIVER_PORT) <=
-		CRC32_SIZE + getKissFooterSize() + getKissHeaderSize() + getCspHeaderSize()) {
+
+uint8_t ax100_get_avail_msg(ax100_s* a, circbuf_s* irqbuf) {
+	if (cb_len(irqbuf) <= CRC32_SIZE + getKissFooterSize() + getKissHeaderSize() + getCspHeaderSize()) {
 		return 0;
 	}
 
 	int frameStartIdx = 0;
 	int frameEndIdx = 0;
 	// Look through the incoming buffer on the desired port and see if there is an available frame
-	uint8_t incomingBuffer[BUFFER_SIZE_B] = {0};
-	getNumBytesOnPort(TRANSCEIVER_PORT, CheckByte(TRANSCEIVER_PORT), incomingBuffer);
-	findFrame(incomingBuffer, CheckByte(TRANSCEIVER_PORT), &frameStartIdx, &frameEndIdx);
+	if (!findFrame(irqbuf, &frameStartIdx, &frameEndIdx, 1)) {
+        return 0;
+    }
 
 	// If there is, grab the message contained in the frame
-	uint16_t msgLength = 0;
-	if (frameStartIdx >= 0 && frameEndIdx >= 0) {
-		uint16_t frameLength = frameEndIdx - frameStartIdx + 1;
-		extractMessageFromFrame(incomingBuffer, frameLength, frameStartIdx, msgBuffer, &msgLength);
-		incrementNumReadBytesBy(TRANSCEIVER_PORT, frameLength);
-	}
+    // We are waiting for a full frame to enter the irqbuf before processing it. Could replace with FSM.
+	uint8_t msgLength = 0;
+    uint8_t frameLength = frameEndIdx - frameStartIdx + 1;
+    uint8_t framebuf[MAX_BUF_LEN] = {0};
+    cb_pop(irqbuf, frameStartIdx, NULL);
+    cb_pop(irqbuf, frameLength, framebuf);
+    extractMessageFromFrame(framebuf, frameLength, &a->cmdbuf, &msgLength);
 	return msgLength;
 }
 
-void TransmitMessage(char* message, uint16_t messageSize) {
-	uint8_t frame[512] = {0};
-	uint16_t frameLength = 0;
-	setupFrame((uint8_t*)message, messageSize, frame, &frameLength);
-	sendMSG(TRANSCEIVER_PORT, frame, (int)frameLength);
-	return;
+void ax100_transmit_msg(ax100_s* a, uint8_t* buf, uint8_t len) {
+	uint8_t frame[MAX_BUF_LEN] = {0};
+	uint8_t frameLength = 0;
+	setupFrame(buf, len, frame, &frameLength);
+    uart_write_buf(a->port, frame, frameLength);
 }
 
 // FRAME
-
-static void findFrameMinFrameSize(uint8_t* msg, uint16_t msgLen, int* msgStartIdx, int* msgEndIdx,
-								  uint16_t minFrameSize);
 
 void setupFrame(uint8_t* message, uint16_t messageLength, uint8_t* frame, uint16_t* frameLength) {
 	addKissHeader(frame, frameLength);
@@ -84,52 +71,47 @@ void setupFrame(uint8_t* message, uint16_t messageLength, uint8_t* frame, uint16
 	addKissFooter(frame, frameLength);
 }
 
-void findFrame(uint8_t* incomingBuffer, uint16_t bufferLen, int* frameStartIdx, int* frameEndIdx) {
-	findFrameMinFrameSize(incomingBuffer, bufferLen, frameStartIdx, frameEndIdx, 1);
-}
-
-static void findFrameMinFrameSize(uint8_t* incomingBuffer, uint16_t bufferLen, int* frameStartIdx,
-								  int* frameEndIdx, uint16_t minFrameSize) {
+int1 findFrame(circbuf_s* irqbuf, int* frameStartIdx, int* frameEndIdx, uint16_t minFrameSize) {
 	*frameStartIdx = -1;
 	*frameEndIdx = -1;
 
+    uint8_t bufferLen = cb_len(irqbuf);
 	int startLimit = bufferLen - 1;
-
-	int idx;
+	uint8_t idx;
 	for (idx = 0; idx < startLimit; idx++) {
-		if ((*(incomingBuffer + idx) == FEND) && (*(incomingBuffer + idx + 1) != FEND)) {
-			*frameStartIdx = idx;
+        uint8_t b1, b2;
+        cb_peek(irqbuf, idx, &b1);
+        cb_peek(irqbuf, idx+1, &b2);
+		if (b1 == FEND && b2 != FEND) {
+            *frameStartIdx = idx;
 			break;
-		} else {
-			incrementNumReadBytesBy(TRANSCEIVER_PORT, 1);
-		}
+        }
 	}
 
 	if (*frameStartIdx < 0) {
-		return;
+		return FALSE;
 	}
 
 	for (idx = *frameStartIdx + 1 + minFrameSize; idx < bufferLen; idx++) {
-		if (*(incomingBuffer + idx) == FEND) {
+        uint8_t b;
+        cb_peek(irqbuf, idx, &b);
+		if (b == FEND) {
 			*frameEndIdx = idx;
-			return;
+			return TRUE;
 		}
 	}
+
+    return FALSE;
 }
 
-#define CRC32_SIZE 4
-void extractMessageFromFrame(uint8_t* incomingBuffer, uint16_t frameLength, int frameStartIdx,
-							 uint8_t* msg, uint16_t* msgLength) {
-	removeKissByteCheck(incomingBuffer, frameLength, msg, msgLength, frameStartIdx);
-
+void extractMessageFromFrame(uint8_t* framebuf, uint16_t frameLength, circbuf_s* cmdbuf, uint16_t* msgLength) {
+    uint8_t msgbuf[MAX_BUF_LEN] = {0};
+	removeKissByteCheck(framebuf, frameLength, msgbuf, msgLength, 0);
 	*msgLength -= getKissHeaderSize() + getCspHeaderSize() + CRC32_SIZE + getKissFooterSize();
-
-	int i;
+	uint8_t i;
 	for (i = 0; i < *msgLength; ++i) {
-		msg[i] = msg[i + getKissHeaderSize() + getCspHeaderSize()];
+		cb_push(cmdbuf, msgbuf[i + getKissHeaderSize() + getCspHeaderSize()]);
 	}
-
-	return;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -186,18 +168,6 @@ uint16_t ntohs(uint16_t netShort) {
 
 // CSPHEADER
 
-#define CSP_NORMAL_PRIORITY 2L
-
-#define FSW_NODE 8L
-
-#define TX_NODE 0L
-#define GOMSPACE_NODE 5L
-
-// mimic csp lib default (cnofig's port_max_bind)
-#define MIN_PING_SRC_PORT 24L
-
-#define GND_WDT_RESET_PORT 9L
-
 void addCspHeader(uint8_t* msg, uint16_t* msgLength, uint16_t startLocation) {
 	CSPHeader header;
 	memset(&header, 0, sizeof(CSPHeader));
@@ -234,12 +204,6 @@ void addCspHeaderWdtReset(uint8_t* msg, uint16_t* msgLength, uint16_t startLocat
 
 // KISS
 
-static const int FEND = 0xc0;
-static const int FESC = 0xdb;
-static const int TFEND = 0xdc;
-static const int TFESC = 0xdd;
-
-#define DATA_FRAME 0x00
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -294,8 +258,7 @@ void applyKissByteCheck(uint8_t* message, uint16_t messageLength, uint8_t* frame
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void removeKissByteCheck(uint8_t* incomingBuffer, uint16_t frameLength, uint8_t* msg,
-						 uint16_t* msgLength, uint16_t frameStartIdx) {
+void removeKissByteCheck(uint8_t* incomingBuffer, uint16_t frameLength, uint8_t* msg, uint16_t* msgLength, uint16_t frameStartIdx) {
 	int len = frameLength;
 	int spot = 0;
 

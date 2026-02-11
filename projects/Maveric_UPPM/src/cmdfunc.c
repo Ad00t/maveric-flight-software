@@ -1,6 +1,7 @@
 #include "cmdfunc.h"
 #include "cmdmgr.h"
 #include "systime.h"
+#include "ax100.h"
 #include "hashtable.h"
 #include "interrupts.h"
 #include "scheduler.h"
@@ -8,10 +9,11 @@
 #include <stdlib.h>
 #include <time.h>
 
-extern irqmgr_s irqmgr;             // Interrupts manager
-extern cmdmgr_s cmdmgr;             // Commands manager
-extern scheduler_s scheduler;       // Schedules manager
+extern irqmgr_s g_irqmgr;           // Interrupts manager
+extern cmdmgr_s g_cmdmgr;           // Commands manager
+extern scheduler_s g_scheduler;     // Schedules manager
 extern struct_tm g_rtc_time;        // Global RTC time tracking instance (from lower PPM)       
+extern ax100_s g_ax100;             // AX100 transceiver driver 
 
 void cmdmgr_register_funcs(cmdmgr_s* cmdmgr) {
     ht_init(&cmdmgr->cmdfuncs); 

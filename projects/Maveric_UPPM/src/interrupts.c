@@ -42,33 +42,33 @@ void isr_disable_all(void) {
 
 // Interrupt Service Routines 
 
-extern irqmgr_s irqmgr;
+extern irqmgr_s g_irqmgr;
 
 #INT_RDA 
 void isr_uart1(void) {
-    if (!irqmgr.started || !uart_byte_avail(COM_A)) return;   
-    cb_push(&irqmgr.irqbufs[0], uart_read_byte(COM_A));
+    if (!g_irqmgr.started || !uart_byte_avail(COM_A)) return;   
+    cb_push(&g_irqmgr.irqbufs[0], uart_read_byte(COM_A));
 }
 
 #INT_RDA2 
 void isr_uart2(void) {
-    if (!irqmgr.started || !uart_byte_avail(COM_B)) return;
-    cb_push(&irqmgr.irqbufs[1], uart_read_byte(COM_B));
+    if (!g_irqmgr.started || !uart_byte_avail(COM_B)) return;
+    cb_push(&g_irqmgr.irqbufs[1], uart_read_byte(COM_B));
 }
 
 #INT_RDA3 
 void isr_uart3(void) {
-    if (!irqmgr.started || !uart_byte_avail(COM_C)) return;   
-    cb_push(&irqmgr.irqbufs[2], uart_read_byte(COM_C));
+    if (!g_irqmgr.started || !uart_byte_avail(COM_C)) return;   
+    cb_push(&g_irqmgr.irqbufs[2], uart_read_byte(COM_C));
 }
 
 #INT_RDA4 
 void isr_uart4(void) {
-    if (!irqmgr.started || !uart_byte_avail(COM_D)) return;
-    cb_push(&irqmgr.irqbufs[3], uart_read_byte(COM_D));
+    if (!g_irqmgr.started || !uart_byte_avail(COM_D)) return;
+    cb_push(&g_irqmgr.irqbufs[3], uart_read_byte(COM_D));
 }
 
 #INT_TIMER1 // MS TIMER
 void isr_timer1(void) {
-    irqmgr.ms++;
+    g_irqmgr.ms++;
 }

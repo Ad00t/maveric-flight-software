@@ -10,6 +10,8 @@
 
 // Schedule task (as generic as possible)
 
+typedef void (*schedfunc_f)(void);
+
 typedef struct {
     schedfunc_f func;
     uint64_t next_release;

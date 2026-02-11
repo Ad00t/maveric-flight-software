@@ -57,10 +57,13 @@
 #pin_select U3RX = PIN_D3 
 
 #define COM_D       4 // FTDI 
-#define FTDI_PORT   COM_D
 #define COM_D_BAUD  115200 
 #pin_select U4TX = PIN_D4 
 #pin_select U4RX = PIN_D12 
+
+#define MTQ_PORT    COM_A
+#define NVG_PORT    COM_B
+#define FTDI_PORT   COM_D
 
 //========================================
 //		Master Clear Pin

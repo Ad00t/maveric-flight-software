@@ -6,7 +6,7 @@
 #include "hashtable.h"
 
 #define CMD_START_BYTE  0xCD
-#define NUM_CMD_BUFS    2
+#define NUM_CMD_BUFS    3
 #define MAX_CMD_ID_LEN  20
 
 // Command packet & reader FSM
@@ -48,6 +48,8 @@ void cmdpkt_clear(cmdpkt_s* pkt);
 
 // Command manager
 
+typedef void (*cmdfunc_f)(cmdpkt_s* pkt);
+
 typedef struct {
     cmdpkt_s rcvpkts[NUM_CMD_BUFS];
     hashtable_s cmdfuncs;
@@ -60,9 +62,9 @@ void cmdmgr_init(cmdmgr_s* cmdmgr);
 void cmdmgr_clear(cmdmgr_s* cmdmgr);
 
 // Check interrupt buffer to advance packet reader FSM 
-void cmdmgr_rcv_parser(cmdmgr_s* cmdmgr, circbuf_s* irqbuf, cmdpkt_s* rcv_pkt);
+void cmdmgr_rcv_parser(cmdmgr_s* cmdmgr, circbuf_s* rcvbuf, cmdpkt_s* rcvpkt);
 
 // Checks link layer headers, CRC, and forwards/runs command appropriately
-void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt);
+void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* rcvpkt);
 
 #endif

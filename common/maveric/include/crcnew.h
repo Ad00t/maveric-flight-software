@@ -28,7 +28,7 @@ Usage: See the descriptions of each function below.
 //========================================
 #define CRC_CONTINUE_PREVIOUS 	0		// For use with getCRCCont()
 #define CRC_RESTART 			1		// For use with getCRCCont()
-
+#define CRC32_SIZE              4
 
 //========================================
 //  			Globals

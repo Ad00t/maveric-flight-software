@@ -3,8 +3,6 @@
 
 #include "scheduler.h"
 
-typedef void (*schedfunc_f)(void);
-
 void scheduler_init_schedules(scheduler_s* scheduler);
 
 // SCHEDULE FUNCTIONS
@@ -12,5 +10,6 @@ void scheduler_init_schedules(scheduler_s* scheduler);
 void schedfunc_print_hk(void);
 void schedfunc_heartbeats(void);
 void schedfunc_read_sensors(void);
+void schedfunc_test_ax100(void);
 
 #endif // !__SCHEDFUNC_H__

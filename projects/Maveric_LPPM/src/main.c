@@ -74,7 +74,6 @@
 #include "adis16260.c"
 #include "naviguider.c"
 #include "m41t81s.c"
-#include "scheduler.h" // Needed for some reason
 #include "schedfunc.c"
 #include "scheduler.c"
 #include "cmdfunc.c"
@@ -86,13 +85,13 @@ void system_cleanup(void);
 
 int1 SUPERLOOP_RUNNING = TRUE;
 
-irqmgr_s irqmgr;            // Interrupts manager
-cmdmgr_s cmdmgr;            // Commands manager
-scheduler_s scheduler;      // Schedules manager
-ertc_s ertc;                // External RTC (on motherboard)
-mtq_s mtq;                  // Magnetorquer
-gyro_s gyro;                // Gyroscope (x3)
-nvg_s nvg;                  // Naviguider
+irqmgr_s g_irqmgr;            // Interrupts manager
+cmdmgr_s g_cmdmgr;            // Commands manager
+scheduler_s g_scheduler;      // Schedules manager
+ertc_s g_ertc;                // External RTC (on motherboard)
+mtq_s g_mtq;                  // Magnetorquer
+gyro_s g_gyro;                // Gyroscope (x3)
+nvg_s g_nvg;                  // Naviguider
 
 void main(void) {	
     system_init();
@@ -115,8 +114,8 @@ void system_init(void) {
 	// setup_spi(SPI_MASTER | SPI_XMIT_L_TO_H | SPI_CLK_DIV_16 | SPI_SCK_IDLE_HIGH);
 
     // Init interrupts 
-    irqmgr_init(&irqmgr);
-    irqmgr.started = TRUE;
+    irqmgr_init(&g_irqmgr);
+    g_irqmgr.started = TRUE;
     isr_enable_all();
 
     // Init ertc, irtc, system time 
@@ -128,16 +127,16 @@ void system_init(void) {
     dfl_time.tm_hour = 0;
     dfl_time.tm_min = 0;
     dfl_time.tm_sec = 0;
-    ertc_init(&ertc, &dfl_time);
-    systime_init(&irqmgr.ms, &ertc.time);
+    ertc_init(&g_ertc, &dfl_time);
+    systime_init(&g_irqmgr.ms, &g_ertc.time);
     
     // Submodules & services init
-    // mtq_init(&mtq, COM_A);
-    // mtq_set_conf(&mtq, 0, MTQ_MODE_DETUMBLING);
-    // gyro_init(&gyro, GYRO_CS1, GYRO_CS2, GYRO_CS3, GYRO_ON);
-    // nvg_init(&nvg, COM_B);
-    cmdmgr_init(&cmdmgr);
-    scheduler_init(&scheduler);
+    mtq_init(&g_mtq, MTQ_PORT);
+    // mtq_set_conf(&g_mtq, 0, MTQ_MODE_DETUMBLING);
+    // gyro_init(&g_gyro, GYRO_CS1, GYRO_CS2, GYRO_CS3, GYRO_ON);
+    nvg_init(&g_nvg, NVG_PORT);
+    cmdmgr_init(&g_cmdmgr);
+    scheduler_init(&g_scheduler);
 
     fprintf(FTDI_PORT, "%s[%s] system initialized\n", KWHT, NODE_LBL);
     delay_ms(1000);
@@ -150,17 +149,17 @@ void housekeeping(void) {
 
     // Handle received byte interrupts
     isr_disable_all();
-    // mtq_rcv_parser(&mtq, &irqmgr.irqbufs[0]); // Do driver handling before commands so data is up to date
-    // nvg_rcv_parser(&nvg, &irqmgr.irqbufs[1]);
-    cmdmgr_rcv_parser(&cmdmgr, &irqmgr.irqbufs[2], &cmdmgr.rcvpkts[1]); // Handle upper PPM commands on cmd rcvpkt 1
-    cmdmgr_rcv_parser(&cmdmgr, &irqmgr.irqbufs[3], &cmdmgr.rcvpkts[0]); // Handle FTDI commands on cmd rcvpkt 0
+    mtq_rcv_parser(&g_mtq, &g_irqmgr.irqbufs[0]); // Do driver handling before commands so data is up to date
+    nvg_rcv_parser(&g_nvg, &g_irqmgr.irqbufs[1]);
+    // cmdmgr_rcv_parser(&g_cmdmgr, &g_irqmgr.irqbufs[2], &g_cmdmgr.rcvpkts[0]); // Handle UPPM commands 
+    cmdmgr_rcv_parser(&g_cmdmgr, &g_irqmgr.irqbufs[3], &g_cmdmgr.rcvpkts[1]); // Handle FTDI commands
     isr_enable_all();
    
-    scheduler_run_tasks(&scheduler);
+    scheduler_run_tasks(&g_scheduler);
 }
 
 // Cleanup routine
 void system_cleanup(void) {
-    // mtq_destroy(&mtq);
-    // nvg_destroy(&nvg);
+    mtq_destroy(&g_mtq);
+    nvg_destroy(&g_nvg);
 }

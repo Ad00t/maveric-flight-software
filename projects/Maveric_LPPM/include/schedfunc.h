@@ -3,8 +3,6 @@
 
 #include "scheduler.h"
 
-typedef void (*schedfunc_f)(void);
-
 void scheduler_init_schedules(scheduler_s* scheduler);
 
 // SCHEDULE FUNCTIONS

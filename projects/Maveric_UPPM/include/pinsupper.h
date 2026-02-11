@@ -13,19 +13,38 @@
 //========================================
 //  		    MHX Pins
 //========================================
-#define TRANSCEIVER_PWR                     PIN_B1
-#define TRANSCEIVER_OUTPUT_ENABLE           PIN_E2
-#define TRANSCEIVER_RESET                   PIN_D1
-#define TRANSCEIVER_DATA_TERMINAL_READY     PIN_D2
-#define TRANSCEIVER_DATA_SEND_READY         PIN_C3
-#define TRANSCEIVER_REQUEST_TO_SEND         PIN_D5
-#define TRANSCEIVER_CLEAR_TO_SEND           PIN_C4
-#define TRANSCEIVER_CARRIER_DETECT          PIN_C2
+#define AX100_PWR                     PIN_B9
+#define AX100_OUTPUT_ENABLE           PIN_E2
+#define AX100_RESET                   PIN_D1
+#define AX100_DATA_TERMINAL_READY     PIN_D2
+#define AX100_DATA_SEND_READY         PIN_C3
+#define AX100_REQUEST_TO_SEND         PIN_D5
+#define AX100_CLEAR_TO_SEND           PIN_C4
+#define AX100_CARRIER_DETECT          PIN_C2
 
 //========================================
 //  		    Enable USB Serial
 //========================================
 #define USB_OE						PIN_C1
+
+//=====================================
+// 				I2C
+//=====================================
+
+// NOTE -- these pins are default and not remappable. pinouts included for completeness.
+
+#define I2C_1       1 // Stream I2C 1
+#pin_select SCL1            PIN_G2
+#pin_select SDA1            PIN_G3
+
+#define I2C_2       2 // Stream I2C 2 
+#pin_select SCL2            PIN_A2
+#pin_select SDA2            PIN_A3
+
+#define I2C_3       3 // Stream I2C 3
+#pin_select SCL3            PIN_E6
+#pin_select SDA3            PIN_E7
+
 
 //========================================
 //				Flash Pins
@@ -52,12 +71,12 @@
 #pin_select U1TX = PIN_F3 
 #pin_select U1RX = PIN_F2 
 
-#define COM_B       2 // Transceiver 
+#define COM_B       2 // AX100 
 #define COM_B_BAUD  115200  
 #pin_select U2TX = PIN_F5 
 #pin_select U2RX = PIN_F4 
-#define U2CTS_PIN	TRANSCEIVER_CLEAR_TO_SEND
-#define U2RTS_PIN	TRANSCEIVER_REQUEST_TO_SEND
+#define U2CTS_PIN	AX100_CLEAR_TO_SEND
+#define U2RTS_PIN	AX100_REQUEST_TO_SEND
 
 #define COM_C       3 // Stream Port 3
 #define COM_C_BAUD  115200
@@ -65,7 +84,9 @@
 #pin_select U3RX = PIN_D3 
 
 #define COM_D       4 // FTDI 
-#define FTDI_PORT   COM_D
 #define COM_D_BAUD  115200 
 #pin_select U4TX = PIN_D4 
 #pin_select U4RX = PIN_D12 
+
+#define AX100_PORT  COM_B
+#define FTDI_PORT   COM_D

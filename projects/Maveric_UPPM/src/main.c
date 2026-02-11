@@ -45,6 +45,7 @@
 #use rs232(baud=COM_C_BAUD, UART3, BITS=8, STREAM=COM_C, ERRORS, PARITY=N, STOP=1, TIMEOUT=1000)
 #use rs232(baud=COM_D_BAUD, UART4, BITS=8, STREAM=COM_D, ERRORS, PARITY=N, STOP=1, TIMEOUT=1000)
 #use spi(MASTER, FORCE_HW, SPI1, BAUD=2000000, MSB_FIRST, BITS=16, MODE=3, STREAM=SPI_1)
+#use i2c(MASTER, I2C1, STREAM=I2C_1)
 
 // Global defines
 
@@ -66,7 +67,7 @@
 #include "spi.c"
 #include "interrupts.c"
 #include "systime.c"
-#include "scheduler.h" // Needed for some reason
+#include "ax100.c"
 #include "schedfunc.c"
 #include "scheduler.c"
 #include "cmdfunc.c"
@@ -78,10 +79,11 @@ void system_cleanup(void);
 
 int1 SUPERLOOP_RUNNING = TRUE;
 
-irqmgr_s irqmgr;            // Interrupts manager
-cmdmgr_s cmdmgr;            // Commands manager
-scheduler_s scheduler;      // Schedules manager
+irqmgr_s g_irqmgr;          // Interrupts manager
+cmdmgr_s g_cmdmgr;          // Commands manager
+scheduler_s g_scheduler;    // Schedules manager
 struct_tm g_rtc_time;       // Global RTC time tracking instance (from lower PPM)       
+ax100_s g_ax100;            // AX100 transceiver driver
 
 void main(void) {	
     system_init();
@@ -104,8 +106,8 @@ void system_init(void) {
 	// setup_spi(SPI_MASTER | SPI_XMIT_L_TO_H | SPI_CLK_DIV_16 | SPI_SCK_IDLE_HIGH);
 
     // Init interrupts 
-    irqmgr_init(&irqmgr);
-    irqmgr.started = TRUE;
+    irqmgr_init(&g_irqmgr);
+    g_irqmgr.started = TRUE;
     isr_enable_all();
 
     // Init rtc time, system time 
@@ -116,11 +118,12 @@ void system_init(void) {
     g_rtc_time.tm_hour = 0;
     g_rtc_time.tm_min = 0;
     g_rtc_time.tm_sec = 0;
-    systime_init(&irqmgr.ms, &g_rtc_time);
+    systime_init(&g_irqmgr.ms, &g_rtc_time);
     
     // Submodules & services init
-    cmdmgr_init(&cmdmgr);
-    scheduler_init(&scheduler);
+    ax100_init(&g_ax100, AX100_PORT);
+    cmdmgr_init(&g_cmdmgr);
+    scheduler_init(&g_scheduler);
 
     fprintf(FTDI_PORT, "%s[%s] system initialized", KWHT, NODE_LBL);
     delay_ms(1000);
@@ -133,11 +136,12 @@ void housekeeping(void) {
 
     // Handle received byte interrupts
     isr_disable_all();
-    cmdmgr_rcv_parser(&cmdmgr, &irqmgr.irqbufs[1], &cmdmgr.rcvpkts[1]); // Handle lower PPM commands on cmd rcvpkt 1
-    cmdmgr_rcv_parser(&cmdmgr, &irqmgr.irqbufs[3], &cmdmgr.rcvpkts[0]); // Handle FTDI commands on cmd rcvpkt 0
+    // cmdmgr_rcv_parser(&g_cmdmgr, &g_ax100.cmdbuf, &g_cmdmgr.rcvpkts[0]); // Handle AX100 commands
+    // cmdmgr_rcv_parser(&g_cmdmgr, &g_irqmgr.irqbufs[1], &g_cmdmgr.rcvpkts[1]); // Handle LPPM commands 
+    cmdmgr_rcv_parser(&g_cmdmgr, &g_irqmgr.irqbufs[3], &g_cmdmgr.rcvpkts[2]); // Handle FTDI commands 
     isr_enable_all();
    
-    scheduler_run_tasks(&scheduler);
+    scheduler_run_tasks(&g_scheduler);
 }
 
 // Cleanup routine

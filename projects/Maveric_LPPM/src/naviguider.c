@@ -55,7 +55,8 @@ void nvg_pkt_clear(nvg_pkt_s* pkt) {
 
 // Naviguider
 
-void nvg_init(nvg_s* nvg, uint8_t port) { nvg->port = port;
+void nvg_init(nvg_s* nvg, uint8_t port) {
+    nvg->port = port;
     memcpy(nvg->sensors, NVG_INIT_SENSOR_TABLE, sizeof(NVG_INIT_SENSOR_TABLE));
     nvg_pkt_init(&nvg->rcvpkt);
 
@@ -245,7 +246,7 @@ int1 nvg_heartbeat(nvg_s* nvg) {
         delay_ms(500);
         nvg_init(nvg, port);
     }
-    memset(&nvg->sensors[NVG_TEMPERATURE], 0, sizeof(nvg_sensor_s));
+    nvg->sensors[NVG_TEMPERATURE].ts = 0;
     return hb;
 }
 
@@ -262,6 +263,6 @@ void nvg_reset(nvg_s* nvg) {
 
 void nvg_magnetometer_mode(nvg_s* nvg) {
     nvg_stop_all_sensors(nvg);
-    nvg_start_sensor(nvg, 2, 1);
-    nvg_start_sensor(nvg, 14, 1);
+    nvg_start_sensor(nvg, NVG_MAGNETOMETER_UNCAL, 1);
+    nvg_start_sensor(nvg, NVG_MAGNETOMETER_CAL, 1);
 }

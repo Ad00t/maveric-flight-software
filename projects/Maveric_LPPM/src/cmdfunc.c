@@ -12,13 +12,13 @@
 #include <stdlib.h>
 #include <time.h>
 
-extern irqmgr_s irqmgr;             // Interrupts manager
-extern cmdmgr_s cmdmgr;             // Commands manager
-extern scheduler_s scheduler;       // Schedules manager
-extern ertc_s ertc;                 // External RTC (on motherboard)
-extern mtq_s mtq;                   // Magnetorquer
-extern gyro_s gyro;                 // Gyroscope (x3)
-extern nvg_s nvg;                   // Naviguider
+extern irqmgr_s g_irqmgr;             // Interrupts manager
+extern cmdmgr_s g_cmdmgr;             // Commands manager
+extern scheduler_s g_scheduler;       // Schedules manager
+extern ertc_s g_ertc;                 // External RTC (on motherboard)
+extern mtq_s g_mtq;                   // Magnetorquer
+extern gyro_s g_gyro;                 // Gyroscope (x3)
+extern nvg_s g_nvg;                   // Naviguider
 
 void cmdmgr_register_funcs(cmdmgr_s* cmdmgr) {
     ht_init(&cmdmgr->cmdfuncs); 
@@ -37,11 +37,11 @@ void cmdfunc_set_time(cmdpkt_s* pkt) {
     time.tm_min = strtoul(p, &p, 10);
     time.tm_sec = strtoul(p, &p, 10);
 
-    ertc_set_time(&ertc, &time);
+    ertc_set_time(&g_ertc, &time);
     systime_sync();
-    mtq_set_date_time(&mtq, &time); 
+    mtq_set_date_time(&g_mtq, &time); 
 
     fprintf(FTDI_PORT, "%s[%s] cmdfunc_set_time [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]\n", KCYN, NODE_LBL, 
-            ertc.time.tm_wday, ertc.time.tm_mon, ertc.time.tm_mday, ertc.time.tm_year, 
-            ertc.time.tm_hour, ertc.time.tm_min, ertc.time.tm_sec);
+            g_ertc.time.tm_wday, g_ertc.time.tm_mon, g_ertc.time.tm_mday, g_ertc.time.tm_year, 
+            g_ertc.time.tm_hour, g_ertc.time.tm_min, g_ertc.time.tm_sec);
 }
