@@ -1,5 +1,6 @@
 #include "adis16260.h"
 #include "spi.h"
+#include "common.h"
 #include <stdint.h>
 
 #module
@@ -57,8 +58,7 @@ void gyro_init(gyro_s* gyro, uint8_t cs_x, uint8_t cs_y, uint8_t cs_z, uint8_t o
     output_high(gyro->cs_x);
     output_high(gyro->cs_y);
     output_high(gyro->cs_z);
-    fprintf(FTDI_PORT, "%s[%s] gyro_init: x=%u y=%u z=%u en=%u\n", 
-            KMAG, NODE_LBL, gyro->cs_x, gyro->cs_y, gyro->cs_z, gyro->on); 
+    sprintf(LOGBUF, "gyro_init: x=%u y=%u z=%u en=%u", gyro->cs_x, gyro->cs_y, gyro->cs_z, gyro->on); log_flush(LL_INFO); 
 }	
 
 void gyro_clear(gyro_s* gyro) {
@@ -72,7 +72,7 @@ void gyro_set_power(gyro_s* gyro, int1 on) {
 
 void gyro_read_reg(gyro_s* gyro, uint8_t reg, uint16_t* res) {
     uint16_t req = (0 << 15) | ((uint16_t)reg << 8);
-    fprintf(FTDI_PORT, "%s[%s] gyro_read_reg: 0x%02X%02X\n", KMAG, NODE_LBL, req >> 8, req & 0x00FF);
+    sprintf(LOGBUF, "gyro_read_reg: 0x%02X%02X", req >> 8, req & 0x00FF); log_flush(LL_TRACE);
 	// spi_set_mode(GYRO_SPI_MODE);
 
     output_low(gyro->cs_x); 
@@ -123,7 +123,7 @@ void gyro_read_reg(gyro_s* gyro, uint8_t reg, uint16_t* res) {
 
 void gyro_write_reg(gyro_s* gyro, uint8_t reg, uint16_t data) {
     uint16_t req = (1 << 15) | ((uint16_t)reg << 8);
-    fprintf(FTDI_PORT, "%s[%s] gyro_write_reg: 0x%02X%02X\n", KMAG, NODE_LBL, req >> 8, req & 0x00FF);
+    sprintf(LOGBUF, "gyro_write_reg: 0x%02X%02X", req >> 8, req & 0x00FF); log_flush(LL_TRACE);
 	// spi_set_mode(GYRO_SPI_MODE);
 	//
 	//    output_low(gyro->cs_x); 				        // Select chip for given gyro
@@ -149,8 +149,8 @@ int1 gyro_heartbeat(gyro_s* gyro) {
     uint16_t res[NUM_GYROS];
     memset(res, 0, NUM_GYROS * sizeof(uint16_t));
     gyro_read_reg(gyro, GYRO_PRODUCT_ID, res);
-    // fprintf(FTDI_PORT, "%s[%s] gyro_heartbeat: x=0x%02X%02X y=0x%02X%02X z=0x%02X%02X\n", 
-    //         KMAG, NODE_LBL, res[0] >> 8, res[0] & 0x00FF, res[1] >> 8, res[1] & 0x00FF, res[2] >> 8, res[2] & 0x00FF);
+    // sprintf(LOGBUF, "gyro_heartbeat: x=0x%02X%02X y=0x%02X%02X z=0x%02X%02X", 
+    //         res[0] >> 8, res[0] & 0x00FF, res[1] >> 8, res[1] & 0x00FF, res[2] >> 8, res[2] & 0x00FF);
     uint8_t i;
     int1 hb = TRUE;
     for (i = 0; i < NUM_GYROS; i++) {
@@ -160,7 +160,7 @@ int1 gyro_heartbeat(gyro_s* gyro) {
         }
     }
     if (!hb) {
-        fprintf(FTDI_PORT, "%s[%s] gyro_heartbeat: flatlined. resetting...\n", KRED, NODE_LBL);
+        sprintf(LOGBUF, "gyro_heartbeat: flatlined. resetting..."); log_flush(LL_ERROR);
         gyro_set_power(gyro, FALSE);
         delay_ms(500);
         uint8_t cs_x = gyro->cs_x;
@@ -177,9 +177,9 @@ void gyro_read_all(gyro_s* gyro) {
     gyro_read_reg(gyro, GYRO_GYRO_OUT, gyro->rate_raw);
     gyro_read_reg(gyro, GYRO_TEMP_OUT, gyro->temp_raw);
     gyro_read_reg(gyro, GYRO_DIAG_STAT, gyro->error);
-    fprintf(FTDI_PORT, "rate %u %u %u\n", gyro->rate_raw[0], gyro->rate_raw[1], gyro->rate_raw[2]);
-    fprintf(FTDI_PORT, "temp %u %u %u\n", gyro->temp_raw[0], gyro->temp_raw[1], gyro->temp_raw[2]);
-    fprintf(FTDI_PORT, "error %u %u %u\n", gyro->error[0], gyro->error[1], gyro->error[2]);
+    sprintf(LOGBUF, "rate %u %u %u", gyro->rate_raw[0], gyro->rate_raw[1], gyro->rate_raw[2]); log_flush(LL_INFO);
+    sprintf(LOGBUF, "temp %u %u %u", gyro->temp_raw[0], gyro->temp_raw[1], gyro->temp_raw[2]); log_flush(LL_INFO);
+    sprintf(LOGBUF, "error %u %u %u", gyro->error[0], gyro->error[1], gyro->error[2]); log_flush(LL_INFO);
     uint8_t i;
     for (i = 0; i < NUM_GYROS; i++) {
         // Check for new data (MSB or 15th bit) and error alarm (14th bit)

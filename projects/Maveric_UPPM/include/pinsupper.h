@@ -66,7 +66,7 @@
 //  		        UART
 //=============================================
 
-#define COM_A		1 // Stream Port 1
+#define COM_A		1
 #define COM_A_BAUD  115200 
 #pin_select U1TX = PIN_F3 
 #pin_select U1RX = PIN_F2 
@@ -78,15 +78,15 @@
 #define U2CTS_PIN	AX100_CLEAR_TO_SEND
 #define U2RTS_PIN	AX100_REQUEST_TO_SEND
 
-#define COM_C       3 // Stream Port 3
+#define COM_C       3 // LPPM 
 #define COM_C_BAUD  115200
 #pin_select U3TX = PIN_D8 
 #pin_select U3RX = PIN_D3 
 
-#define COM_D       4 // FTDI 
+#define COM_D       4 
 #define COM_D_BAUD  115200 
 #pin_select U4TX = PIN_D4 
 #pin_select U4RX = PIN_D12 
 
 #define AX100_PORT  COM_B
-#define FTDI_PORT   COM_D
+#define LPPM_PORT   COM_C

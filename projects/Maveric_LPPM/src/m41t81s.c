@@ -1,6 +1,7 @@
 #include "m41t81s.h"
 #include "systime.h"
 #include "i2c.h"
+#include "common.h"
 #include <stdint.h>
 #include <time.h>
 
@@ -123,7 +124,7 @@ void ertc_set_time(ertc_s* ertc, struct_tm* time) {
 
 int1 ertc_heartbeat(ertc_s* ertc) {
     if (!ertc->is_using_ertc) {
-        fprintf(FTDI_PORT, "%s[%s] ertc_heartbeat: flatlined. resetting...\n", KRED, NODE_LBL);
+        sprintf(LOGBUF, "ertc_heartbeat: flatlined. resetting..."); log_flush(LL_ERROR);
         struct_tm init_time;
         memcpy(&init_time, &ertc->time, sizeof(struct_tm));
         ertc_init(ertc, &init_time); 

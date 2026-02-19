@@ -2,6 +2,7 @@
 #include "crcnew.h"
 #include "uart.h"
 #include "circbuf.h"
+#include "common.h"
 
 // MAIN TRANSCEIVER INTERFACE
 
@@ -9,6 +10,7 @@ void ax100_init(ax100_s* a, uint8_t port) {
     a->port = port;
     cb_init(&a->cmdbuf);
     ax100_set_power(a, TRUE);
+    sprintf(LOGBUF, "ax100_init"); log_flush(KWHT);
 }
 
 void ax100_set_power(ax100_s* a, int1 on) {
@@ -39,7 +41,7 @@ uint8_t ax100_get_avail_msg(ax100_s* a, circbuf_s* irqbuf) {
     // We are waiting for a full frame to enter the irqbuf before processing it. Could replace with FSM.
 	uint8_t msgLength = 0;
     uint8_t frameLength = frameEndIdx - frameStartIdx + 1;
-    uint8_t framebuf[MAX_BUF_LEN] = {0};
+    uint8_t framebuf[AX100_MAX_FRAME_SIZE] = {0};
     cb_pop(irqbuf, frameStartIdx, NULL);
     cb_pop(irqbuf, frameLength, framebuf);
     extractMessageFromFrame(framebuf, frameLength, &a->cmdbuf, &msgLength);
@@ -47,10 +49,18 @@ uint8_t ax100_get_avail_msg(ax100_s* a, circbuf_s* irqbuf) {
 }
 
 void ax100_transmit_msg(ax100_s* a, uint8_t* buf, uint8_t len) {
-	uint8_t frame[MAX_BUF_LEN] = {0};
+	uint8_t frame[AX100_MAX_FRAME_SIZE] = {0};
 	uint8_t frameLength = 0;
 	setupFrame(buf, len, frame, &frameLength);
     uart_write_buf(a->port, frame, frameLength);
+  
+    uint16_t p;
+    uint8_t i;
+    p += sprintf(LOGBUF, "ax100_transmit_msg: len=%u [", frameLength); 
+    for (i = 0; i < frameLength - 1; i++) 
+        p += sprintf(LOGBUF, "0x%02X", buf[i]); 
+    p += sprintf(LOGBUF, "0x%02X ]", buf[frameLength - 1]); 
+    log_flush(LL_TRACE);
 }
 
 // FRAME
@@ -105,7 +115,7 @@ int1 findFrame(circbuf_s* irqbuf, int* frameStartIdx, int* frameEndIdx, uint16_t
 }
 
 void extractMessageFromFrame(uint8_t* framebuf, uint16_t frameLength, circbuf_s* cmdbuf, uint16_t* msgLength) {
-    uint8_t msgbuf[MAX_BUF_LEN] = {0};
+    uint8_t msgbuf[AX100_MAX_FRAME_SIZE] = {0};
 	removeKissByteCheck(framebuf, frameLength, msgbuf, msgLength, 0);
 	*msgLength -= getKissHeaderSize() + getCspHeaderSize() + CRC32_SIZE + getKissFooterSize();
 	uint8_t i;

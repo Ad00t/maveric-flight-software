@@ -35,7 +35,7 @@ void cmdfunc_set_time(cmdpkt_s* pkt) {
     memcpy(&g_rtc_time, &time, sizeof(struct_tm));
     systime_sync(); // Since Lower PPM is source of truth for timing, this sync should be the only sync in Upper PPM
 
-    fprintf(FTDI_PORT, "%s[%s] cmdfunc_set_time [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]\n", KCYN, NODE_LBL, 
+    sprintf(LOGBUF, "cmdfunc_set_time [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", 
             g_rtc_time.tm_wday, g_rtc_time.tm_mon, g_rtc_time.tm_mday, g_rtc_time.tm_year, 
-            g_rtc_time.tm_hour, g_rtc_time.tm_min, g_rtc_time.tm_sec);
+            g_rtc_time.tm_hour, g_rtc_time.tm_min, g_rtc_time.tm_sec); log_flush(LL_INFO);
 }

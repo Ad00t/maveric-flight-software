@@ -8,6 +8,7 @@
 #include "m41t81s.h"
 #include "adis16260.h"
 #include "naviguider.h"
+#include "common.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
@@ -41,7 +42,12 @@ void cmdfunc_set_time(cmdpkt_s* pkt) {
     systime_sync();
     mtq_set_date_time(&g_mtq, &time); 
 
-    fprintf(FTDI_PORT, "%s[%s] cmdfunc_set_time [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]\n", KCYN, NODE_LBL, 
+    sprintf(LOGBUF, "cmdfunc_set_time [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", 
             g_ertc.time.tm_wday, g_ertc.time.tm_mon, g_ertc.time.tm_mday, g_ertc.time.tm_year, 
-            g_ertc.time.tm_hour, g_ertc.time.tm_min, g_ertc.time.tm_sec);
+            g_ertc.time.tm_hour, g_ertc.time.tm_min, g_ertc.time.tm_sec); log_flush(LL_INFO);
+}
+
+void cmdfunc_ftdi_log(cmdpkt_s* pkt) {
+    char* p = pkt->args_str;
+    fprintf(FTDI_PORT, "%s", p);
 }

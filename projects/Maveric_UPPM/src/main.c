@@ -52,17 +52,18 @@
 #define UPPER_PPM
 #define NODE_ID             3
 #define NODE_LBL            "UPPM"
-#define MAX_BUF_LEN         256
+#define LOG_LEVEL           LL_TRACE
 
 // Module includes (.c necessary)
 
 #include <time.h>
 #include <time.c>
 #include "colors.h"
+#include "uart.c"
 #include "crcnew.c"
+#include "common.c"
 #include "hashtable.c"
 #include "circbuf.c"
-#include "uart.c"
 #include "i2c.c"
 #include "spi.c"
 #include "interrupts.c"
@@ -95,9 +96,10 @@ void main(void) {
 
 // System initialization routine
 void system_init(void) {
-    // Watchdog, millisecond timer init
+    // Watchdog, millisecond timer, logbuf init
     setup_wdt(WDT_ON);
 	setup_timer1(TMR_INTERNAL | TMR_DIV_BY_64, 0x00FA); 
+    memset(LOGBUF, 0, sizeof(LOGBUF));
 
     // SPI init
 	// output_high(FLASH_CHIP_SELECT);
@@ -125,7 +127,7 @@ void system_init(void) {
     cmdmgr_init(&g_cmdmgr);
     scheduler_init(&g_scheduler);
 
-    fprintf(FTDI_PORT, "%s[%s] system initialized", KWHT, NODE_LBL);
+    sprintf(LOGBUF, "system initialized"); log_flush(LL_INFO);
     delay_ms(1000);
 }
 

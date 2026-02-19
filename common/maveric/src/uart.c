@@ -24,8 +24,8 @@ uint8_t uart_read_byte(uint8_t port) {
     }
 }
 
-void uart_read_buf(uint8_t port, uint8_t* buf, uint8_t len) {
-    uint8_t i;
+void uart_read_buf(uint8_t port, uint8_t* buf, uint16_t len) {
+    uint16_t i;
     for (i = 0; i < len; i++) {
         buf[i] = uart_read_byte(port);
     }
@@ -41,8 +41,8 @@ void uart_write_byte(uint8_t port, uint8_t c) {
     }
 }
 
-void uart_write_buf(uint8_t port, uint8_t* buf, uint8_t len) {
-    uint8_t i;
+void uart_write_buf(uint8_t port, uint8_t* buf, uint16_t len) {
+    uint16_t i;
     for (i = 0; i < len; i++) {
         uart_write_byte(port, buf[i]);
     }

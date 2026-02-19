@@ -8,6 +8,7 @@
 #include "m41t81s.h"
 #include "adis16260.h"
 #include "naviguider.h"
+#include "common.h"
 #include <stdint.h>
 
 #module
@@ -39,21 +40,20 @@ void schedfunc_systime_sync(void) {
 }
 
 void schedfunc_print_hk(void) {
-    uint64_t now = systime_epoch_ms();
-    fprintf(FTDI_PORT, "%s[%s] housekeeping %02u, %02u/%02u/20%02u %02u:%02u:%02u (%u) ertc=%u\n", KWHT, NODE_LBL, 
+    sprintf(LOGBUF, "housekeeping %02u, %02u/%02u/20%02u %02u:%02u:%02u ertc=%u", 
             g_ertc.time.tm_wday, g_ertc.time.tm_mon, g_ertc.time.tm_mday, g_ertc.time.tm_year, 
-            g_ertc.time.tm_hour, g_ertc.time.tm_min, g_ertc.time.tm_sec, now, g_ertc.is_using_ertc);
+            g_ertc.time.tm_hour, g_ertc.time.tm_min, g_ertc.time.tm_sec, g_ertc.is_using_ertc); log_flush(LL_INFO);
 }
 
 void schedfunc_heartbeats(void) {
     int1 hb_ertc = ertc_heartbeat(&g_ertc);
     // int1 hb_mtq = mtq_heartbeat(&g_mtq);
-    // int1 hb_nvg = nvg_heartbeat(&g_nvg);
+    int1 hb_nvg = nvg_heartbeat(&g_nvg);
     // int1 hb_gyro = gyro_heartbeat(&g_gyro);
 }
 
 void schedfunc_read_sensors(void) {
-    mtq_read_ctrl(&g_mtq);
+    // mtq_read_ctrl(&g_mtq);
     // mtq_read_fast(&g_mtq);
     // gyro_read_all(&g_gyro);
 }

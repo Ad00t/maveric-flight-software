@@ -3,6 +3,7 @@
 #include "circbuf.h"
 #include "hashtable.h"
 #include "crcnew.h"
+#include "common.h"
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -21,9 +22,9 @@ void cmdpkt_clear(cmdpkt_s* pkt) {
     pkt->orgn = 0;
     pkt->dest = 0;
     pkt->echo = 0;
-    memset(pkt->id, 0, MAX_CMD_ID_LEN);
+    memset(pkt->id, 0, CMD_MAX_ID_LEN);
     pkt->args_len = 0;
-    memset(pkt->args_str, 0, MAX_BUF_LEN);
+    memset(pkt->args_str, 0, CMD_MAX_ARGSSTR_LEN);
     pkt->crc = 0;
     pkt->running_crc = 0;
 }
@@ -32,7 +33,7 @@ void cmdpkt_clear(cmdpkt_s* pkt) {
 
 void cmdmgr_init(cmdmgr_s* cmdmgr) {
     uint8_t b;
-    for (b = 0; b < NUM_CMD_BUFS; b++) {
+    for (b = 0; b < CMD_NUM_BUFS; b++) {
         cmdpkt_init(&cmdmgr->rcvpkts[b]);
     }
     cmdmgr_register_funcs(cmdmgr);
@@ -40,14 +41,14 @@ void cmdmgr_init(cmdmgr_s* cmdmgr) {
 
 void cmdmgr_clear(cmdmgr_s* cmdmgr) {
     uint8_t b;
-    for (b = 0; b < NUM_CMD_BUFS; b++) {
+    for (b = 0; b < CMD_NUM_BUFS; b++) {
         cmdpkt_clear(&cmdmgr->rcvpkts[b]);
     }
 }
 
 void cmdmgr_rcv_parser(cmdmgr_s* cmdmgr, circbuf_s* rcvbuf, cmdpkt_s* rcvpkt) {
     uint16_t iter = 0;
-    while (iter < 2*CIRCBUF_MAX_SIZE) {
+    while (iter < 2 * CIRCBUF_MAX_SIZE) {
         uint8_t b = 0;
         if (!cb_pop(rcvbuf, 1, &b)) return;
 
@@ -84,7 +85,7 @@ void cmdmgr_rcv_parser(cmdmgr_s* cmdmgr, circbuf_s* rcvbuf, cmdpkt_s* rcvpkt) {
                 break;
 
             case CMDPKT_FSM_ID:
-                if (rcvpkt->i_id >= MAX_CMD_ID_LEN) {
+                if (rcvpkt->i_id >= CMD_MAX_ID_LEN) {
                     rcvpkt->fsm = CMDPKT_FSM_ERROR;
                     break;
                 }
@@ -97,7 +98,7 @@ void cmdmgr_rcv_parser(cmdmgr_s* cmdmgr, circbuf_s* rcvbuf, cmdpkt_s* rcvpkt) {
                 break;
 
             case CMDPKT_FSM_ARGSSTR:
-                if (rcvpkt->i_args >= MAX_BUF_LEN) {
+                if (rcvpkt->i_args >= CMD_MAX_ARGSSTR_LEN) {
                     rcvpkt->fsm = CMDPKT_FSM_ERROR;
                     break;
                 }
@@ -126,7 +127,7 @@ void cmdmgr_rcv_parser(cmdmgr_s* cmdmgr, circbuf_s* rcvbuf, cmdpkt_s* rcvpkt) {
                 cmdpkt_clear(rcvpkt);
                 break;
             case CMDPKT_FSM_ERROR:
-                fprintf(FTDI_PORT, "%s[%s] cmdmgr_rcv_fsm: malformed packet\n", KRED, NODE_LBL);
+                sprintf(LOGBUF, "cmdmgr_rcv_fsm: malformed packet"); log_flush(LL_ERROR);
                 cmdpkt_clear(rcvpkt);
                 break;
         }
@@ -138,25 +139,24 @@ void cmdmgr_rcv_parser(cmdmgr_s* cmdmgr, circbuf_s* rcvbuf, cmdpkt_s* rcvpkt) {
 void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* rcvpkt) {
     // Forward
     if (rcvpkt->dest != NODE_ID) {
-        fprintf(FTDI_PORT, "%s[%s] forwarding cmd '%s'\n", KCYN, NODE_LBL, rcvpkt->id);
+        sprintf(LOGBUF, "cmdmgr_process_cmd: forwarding cmd '%s'", rcvpkt->id); log_flush(LL_INFO);
         return;
     } 
     
     // CRC check
     if (rcvpkt->crc != rcvpkt->running_crc) {
-        fprintf(FTDI_PORT, "%s[%s] crc check failed on cmd '%s' crc:%u calculated:%u\n", KRED, NODE_LBL,
-                rcvpkt->id, rcvpkt->crc, rcvpkt->running_crc);
+        sprintf(LOGBUF, "cmdmgr_process_cmd: crc check failed on cmd '%s' crc:%u calculated:%u",
+                rcvpkt->id, rcvpkt->crc, rcvpkt->running_crc); log_flush(LL_ERROR);
         return;
     } 
     
     // Parse & execute cmd here
     cmdfunc_f cmdfunc = ht_get(&cmdmgr->cmdfuncs, rcvpkt->id);
     if (cmdfunc == NULL) {
-        fprintf(FTDI_PORT, "%s[%s] cmd not recognized '%s'\n", KRED, NODE_LBL, rcvpkt->id);
+        sprintf(LOGBUF, "cmdmgr_process_cmd: cmd not recognized '%s'", rcvpkt->id); log_flush(LL_ERROR);
         return;
     }
     cmdfunc(rcvpkt);
 }
 
-// COMMAND HANDLERS
 

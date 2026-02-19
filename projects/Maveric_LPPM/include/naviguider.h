@@ -5,8 +5,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define MAX_NVG_ARG_SIZE        20
-#define MAX_NVG_PAYLOAD_LEN     7
+#define NVG_MAX_LINE_LEN        256 
+#define NVG_MAX_ARG_SIZE        20
+#define NVG_MAX_PAYLOAD_LEN     7
 #define NVG_SENSOR_TABLE_LEN    21
 
 // Naviguider UART FSM
@@ -22,14 +23,12 @@ typedef enum {
 // Naviguider sensor data reception packet
 
 typedef struct {
-    uint8_t rcvline[MAX_BUF_LEN];
-    float payload[MAX_NVG_PAYLOAD_LEN];
-    char curr_arg[MAX_NVG_ARG_SIZE];
+    uint8_t rcvline[NVG_MAX_LINE_LEN];
+    float payload[NVG_MAX_PAYLOAD_LEN];
+    char curr_arg[NVG_MAX_ARG_SIZE];
     float ts;
     uint8_t id;
-    uint8_t arg_len;
-    uint8_t pay_len;
-    uint8_t rl_len;
+    uint16_t rl_len;
     nvg_fsm_e fsm;
 } nvg_pkt_s;
 

@@ -17,8 +17,9 @@ Purpose: Provides a base definition for interfacing with the AX100 transceiver
 #include "circbuf.h"
 
 // kiss header size (2), csp header size (4), crc32 size (4), kiss footer size (1)
-#define MIN_MESSAGE_SIZE        11
-#define MAX_MESSAGE_SIZE        248
+#define AX100_MAX_FRAME_SIZE          256
+#define AX100_MIN_MESSAGE_SIZE        11
+#define AX100_MAX_MESSAGE_SIZE        AX100_MAX_FRAME_SIZE - AX100_MIN_MESSAGE_SIZE
 
 #define FEND                    0xC0
 #define FESC                    0xDB

@@ -22,9 +22,9 @@ uint16_t cb_len(circbuf_s* buf) {
 }
 
 // Get byte at offset without advancing pointers
-int1 cb_peek(circbuf_s* buf, uint8_t off, uint8_t* out) {
+int1 cb_peek(circbuf_s* buf, uint16_t off, uint8_t* out) {
     if (off >= cb_len(buf)) return 0;
-    uint8_t i = (buf->r + off) % CIRCBUF_MAX_SIZE;
+    uint16_t i = (buf->r + off) % CIRCBUF_MAX_SIZE;
     *out = buf->data[i];
     return 1;
 }

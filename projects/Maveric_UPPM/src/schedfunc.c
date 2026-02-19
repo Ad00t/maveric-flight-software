@@ -5,6 +5,7 @@
 #include "cmdmgr.h"
 #include "interrupts.h"
 #include "hashtable.h"
+#include "common.h"
 #include <stdint.h>
 #include <time.h>
 #include <string.h>
@@ -27,9 +28,9 @@ void scheduler_init_schedules(scheduler_s* scheduler) {
 // SCHEDULE FUNCTIONS
 void schedfunc_print_hk(void) {
     uint64_t now = systime_epoch_ms();
-    fprintf(FTDI_PORT, "%s[%s] housekeeping %02u, %02u/%02u/20%02u %02u:%02u:%02u (%u)\n", KWHT, NODE_LBL, 
+    sprintf(LOGBUF, "housekeeping %02u, %02u/%02u/20%02u %02u:%02u:%02u", 
             g_rtc_time.tm_wday, g_rtc_time.tm_mon, g_rtc_time.tm_mday, g_rtc_time.tm_year, 
-            g_rtc_time.tm_hour, g_rtc_time.tm_min, g_rtc_time.tm_sec, now);
+            g_rtc_time.tm_hour, g_rtc_time.tm_min, g_rtc_time.tm_sec); log_flush(LL_INFO);
 }
 
 void schedfunc_heartbeats(void) {

@@ -9,5 +9,6 @@ void cmdmgr_register_funcs(cmdmgr* cmdmgr);
 // COMMAND FUNCTIONS
 
 void cmdfunc_set_time(cmdpkt_s* pkt);
+void cmdfunc_ftdi_log(cmdpkt_s* pkt);
 
 #endif 

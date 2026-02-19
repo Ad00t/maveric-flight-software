@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <time.h>
 
+#define MTQ_MAX_DATA_LEN        256
 #define MTQ_HEAD_READ           0xC9
 #define MTQ_HEAD_WRITE          0xC8
 #define MTQ_REG_TABLE_LEN       116      // 116
@@ -40,7 +41,7 @@ typedef enum {
 // MTQ packet parsing struct
 
 typedef struct {
-    uint8_t data[MAX_BUF_LEN];
+    uint8_t data[MTQ_MAX_DATA_LEN];
     // Packet parsing metadata
     mtq_fsm_e fsm;
     uint8_t i_args;

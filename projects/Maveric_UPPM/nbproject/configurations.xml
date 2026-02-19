@@ -20,6 +20,7 @@
       <itemPath>include/pinsupper.h</itemPath>
       <itemPath>include/rm3100.h</itemPath>
       <itemPath>include/schedfunc.h</itemPath>
+      <itemPath>../../common/maveric/include/common.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -50,6 +51,7 @@
       <itemPath>../../common/maveric/src/spi.c</itemPath>
       <itemPath>../../common/maveric/src/systime.c</itemPath>
       <itemPath>../../common/maveric/src/uart.c</itemPath>
+      <itemPath>../../common/maveric/src/common.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>

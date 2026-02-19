@@ -55,7 +55,7 @@
 #define LOWER_PPM
 #define NODE_ID             1
 #define NODE_LBL            "LPPM"
-#define MAX_BUF_LEN         256
+#define LOG_LEVEL           LL_TRACE 
 
 // Module includes (.c necessary)
 
@@ -63,9 +63,10 @@
 #include <time.c>
 #include "colors.h"
 #include "crcnew.c"
+#include "uart.c"
+#include "common.c"
 #include "hashtable.c"
 #include "circbuf.c"
-#include "uart.c"
 #include "i2c.c"
 #include "spi.c"
 #include "interrupts.c"
@@ -106,6 +107,7 @@ void system_init(void) {
     // Watchdog, millisecond timer init
     setup_wdt(WDT_ON);
 	setup_timer1(TMR_INTERNAL | TMR_DIV_BY_64, 0x00FA); 
+    memset(LOGBUF, 0, sizeof(LOGBUF));
 
     // SPI init
 	// output_high(FLASH_CHIP_SELECT);
@@ -131,14 +133,14 @@ void system_init(void) {
     systime_init(&g_irqmgr.ms, &g_ertc.time);
     
     // Submodules & services init
-    mtq_init(&g_mtq, MTQ_PORT);
+    // mtq_init(&g_mtq, MTQ_PORT);
     // mtq_set_conf(&g_mtq, 0, MTQ_MODE_DETUMBLING);
     // gyro_init(&g_gyro, GYRO_CS1, GYRO_CS2, GYRO_CS3, GYRO_ON);
     nvg_init(&g_nvg, NVG_PORT);
     cmdmgr_init(&g_cmdmgr);
     scheduler_init(&g_scheduler);
 
-    fprintf(FTDI_PORT, "%s[%s] system initialized\n", KWHT, NODE_LBL);
+    sprintf(LOGBUF, "system initialized"); log_flush(LL_INFO);
     delay_ms(1000);
 }
 
@@ -149,9 +151,10 @@ void housekeeping(void) {
 
     // Handle received byte interrupts
     isr_disable_all();
-    mtq_rcv_parser(&g_mtq, &g_irqmgr.irqbufs[0]); // Do driver handling before commands so data is up to date
-    nvg_rcv_parser(&g_nvg, &g_irqmgr.irqbufs[1]);
-    // cmdmgr_rcv_parser(&g_cmdmgr, &g_irqmgr.irqbufs[2], &g_cmdmgr.rcvpkts[0]); // Handle UPPM commands 
+    // Do driver handling before commands so data is up to date
+    // mtq_rcv_parser(&g_mtq, &g_irqmgr.irqbufs[0]); // Handle magnetorquer data
+    nvg_rcv_parser(&g_nvg, &g_irqmgr.irqbufs[1]); // Handle naviguider data
+    cmdmgr_rcv_parser(&g_cmdmgr, &g_irqmgr.irqbufs[2], &g_cmdmgr.rcvpkts[0]); // Handle UPPM commands 
     cmdmgr_rcv_parser(&g_cmdmgr, &g_irqmgr.irqbufs[3], &g_cmdmgr.rcvpkts[1]); // Handle FTDI commands
     isr_enable_all();
    

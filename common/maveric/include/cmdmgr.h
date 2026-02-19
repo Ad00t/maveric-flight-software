@@ -5,9 +5,10 @@
 #include "circbuf.h"
 #include "hashtable.h"
 
-#define CMD_START_BYTE  0xCD
-#define NUM_CMD_BUFS    3
-#define MAX_CMD_ID_LEN  20
+#define CMD_MAX_ARGSSTR_LEN     256
+#define CMD_START_BYTE          0xCD
+#define CMD_NUM_BUFS            3
+#define CMD_MAX_ID_LEN          20
 
 // Command packet & reader FSM
 
@@ -33,9 +34,9 @@ typedef struct {
     uint8_t orgn;
     uint8_t dest;
     uint8_t echo;
-    char id[MAX_CMD_ID_LEN];
+    char id[CMD_MAX_ID_LEN];
     uint8_t args_len;
-    char args_str[MAX_BUF_LEN];
+    char args_str[CMD_MAX_ARGSSTR_LEN];
     uint16_t crc;
     uint16_t running_crc;
 } cmdpkt_s;
@@ -51,7 +52,7 @@ void cmdpkt_clear(cmdpkt_s* pkt);
 typedef void (*cmdfunc_f)(cmdpkt_s* pkt);
 
 typedef struct {
-    cmdpkt_s rcvpkts[NUM_CMD_BUFS];
+    cmdpkt_s rcvpkts[CMD_NUM_BUFS];
     hashtable_s cmdfuncs;
 } cmdmgr_s;
 

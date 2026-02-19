@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define CIRCBUF_MAX_SIZE    MAX_BUF_LEN 
+#define CIRCBUF_MAX_SIZE    256 
 
 typedef struct {
     uint16_t w, r;
@@ -20,12 +20,12 @@ void cb_clear(circbuf_s* buf);
 uint16_t cb_len(circbuf_s* buf);
 
 // Get byte at offset without advancing pointers
-int1 cb_peek(circbuf_s* buf, uint8_t off, uint8_t* out);
+int1 cb_peek(circbuf_s* buf, uint16_t off, uint8_t* out);
 
 // Push a byte into the buffer
 int1 cb_push(circbuf_s* buf, uint8_t b);
 
 // Pop n bytes from the buffer; pass NULL for out to just drop n bytes
-int1 cb_pop(circbuf_s* buf, uint8_t n, uint8_t* out);
+int1 cb_pop(circbuf_s* buf, uint16_t n, uint8_t* out);
 
 #endif
