@@ -35,9 +35,10 @@ void log_flush(log_level_e lvl) {
         #if NODE_ID == 1
             uart_write_buf(FTDI_PORT, logfmt, strlen(logfmt));
         #else
-            uint8_t cmd[LOGBUF_MAX_LEN] = {0};
-            uint8_t len = create_cmd(NODE_ID, 1, 0, "cmd_ftdi_log", logfmt, cmd);
-            uart_write_buf(LPPM_PORT, cmd, len);
+            uart_write_buf(COM_D, logfmt, strlen(logfmt));
+            // uint8_t cmd[LOGBUF_MAX_LEN] = {0};
+            // uint8_t len = create_cmd(NODE_ID, 1, 0, "cmd_ftdi_log", logfmt, cmd);
+            // uart_write_buf(LPPM_PORT, cmd, len);
         #endif
     }
    

@@ -72,7 +72,7 @@
 #pin_select U1RX = PIN_F2 
 
 #define COM_B       2 // AX100 
-#define COM_B_BAUD  115200  
+#define COM_B_BAUD  115200 
 #pin_select U2TX = PIN_F5 
 #pin_select U2RX = PIN_F4 
 #define U2CTS_PIN	AX100_CLEAR_TO_SEND

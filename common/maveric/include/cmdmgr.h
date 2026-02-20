@@ -5,10 +5,11 @@
 #include "circbuf.h"
 #include "hashtable.h"
 
-#define CMD_MAX_ARGSSTR_LEN     256
+#define CMD_MAX_LEN             256
+#define CMD_MAX_ID_LEN          20
+#define CMD_MAX_ARGSSTR_LEN     CMD_MAX_LEN - CMD_MAX_ID_LEN - 7
 #define CMD_START_BYTE          0xCD
 #define CMD_NUM_BUFS            3
-#define CMD_MAX_ID_LEN          20
 
 // Command packet & reader FSM
 

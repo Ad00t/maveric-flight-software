@@ -100,6 +100,8 @@ void system_init(void) {
     setup_wdt(WDT_ON);
 	setup_timer1(TMR_INTERNAL | TMR_DIV_BY_64, 0x00FA); 
     memset(LOGBUF, 0, sizeof(LOGBUF));
+    
+    fprintf(COM_D, "test\n");
 
     // SPI init
 	// output_high(FLASH_CHIP_SELECT);

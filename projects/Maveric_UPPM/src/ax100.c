@@ -54,7 +54,7 @@ void ax100_transmit_msg(ax100_s* a, uint8_t* buf, uint8_t len) {
 	setupFrame(buf, len, frame, &frameLength);
     uart_write_buf(a->port, frame, frameLength);
   
-    uint16_t p;
+    uint16_t p = 0;
     uint8_t i;
     p += sprintf(LOGBUF, "ax100_transmit_msg: len=%u [", frameLength); 
     for (i = 0; i < frameLength - 1; i++) 

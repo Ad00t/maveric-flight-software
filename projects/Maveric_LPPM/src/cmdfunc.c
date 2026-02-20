@@ -24,6 +24,7 @@ extern nvg_s g_nvg;                   // Naviguider
 void cmdmgr_register_funcs(cmdmgr_s* cmdmgr) {
     ht_init(&cmdmgr->cmdfuncs); 
     ht_set(&cmdmgr->cmdfuncs, "cmd_set_time", (cmdfunc_f) cmdfunc_set_time);
+    ht_set(&cmdmgr->cmdfuncs, "cmd_ftdi_log", (cmdfunc_f) cmdfunc_ftdi_log);
 }
 
 void cmdfunc_set_time(cmdpkt_s* pkt) {

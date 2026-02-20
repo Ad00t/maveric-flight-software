@@ -51,17 +51,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=../../common/aeneas/src/main.c
+SOURCEFILES_QUOTED_IF_SPACED=../../archive/aeneas/src/main.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/_ext/885629990/main.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/_ext/885629990/main.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/_ext/1205493807/main.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/_ext/1205493807/main.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/_ext/885629990/main.o
+OBJECTFILES=${OBJECTDIR}/_ext/1205493807/main.o
 
 # Source Files
-SOURCEFILES=../../common/aeneas/src/main.c
+SOURCEFILES=../../archive/aeneas/src/main.c
 
 
 
@@ -92,28 +92,28 @@ sourceline.gcccompat=sourceline="\#device ANSI" sourceline="\#device PASS_STRING
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: compile
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
-${OBJECTDIR}/_ext/885629990/main.o: ../../common/aeneas/src/main.c  nbproject/Makefile-${CND_CONF}.mk 
-	${MKDIR} ${OBJECTDIR}/_ext/885629990 
+${OBJECTDIR}/_ext/1205493807/main.o: ../../archive/aeneas/src/main.c  nbproject/Makefile-${CND_CONF}.mk 
+	${MKDIR} ${OBJECTDIR}/_ext/1205493807 
 ifeq (1,1) 
 	${MKDIR} ${DISTDIR} 
-	${MP_CC}  out="${OBJECTDIR}\_ext\885629990"  ../../common/aeneas/src/main.c +FD +DF +CC #__DEBUG=1 +ICD +Y=9 +EA I+="C:\Program Files (x86)\PICC\Drivers" I+="C:\Program Files (x86)\PICC\Devices" I+="..\..\common\aeneas" +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 
-	@mv ${OBJECTDIR}/_ext/885629990/main.cof "${DISTDIR}/Dodona.${IMAGE_TYPE}.cof" 
-	@mv ${OBJECTDIR}/_ext/885629990/main.hex "${DISTDIR}/Dodona.${IMAGE_TYPE}.hex"
+	${MP_CC}  out="${OBJECTDIR}\_ext\1205493807"  ../../archive/aeneas/src/main.c +FD +DF +CC #__DEBUG=1 +ICD +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="C:\Users\adhit\projects\serc\maveric-flight-software\archive\aeneas\src" +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 
+	@mv ${OBJECTDIR}/_ext/1205493807/main.cof "${DISTDIR}/Dodona.${IMAGE_TYPE}.cof" 
+	@mv ${OBJECTDIR}/_ext/1205493807/main.hex "${DISTDIR}/Dodona.${IMAGE_TYPE}.hex"
 else 
-	${MP_CC}  out=""${OBJECTDIR}\_ext\885629990"" ../../common/aeneas/src/main.c +EXPORT +FD +DF +CC #__DEBUG=1 +ICD +Y=9 +EA I+="C:\Program Files (x86)\PICC\Drivers" I+="C:\Program Files (x86)\PICC\Devices" I+="..\..\common\aeneas" +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 +EXPORTD="${OBJECTDIR}/_ext/885629990"  
+	${MP_CC}  out=""${OBJECTDIR}\_ext\1205493807"" ../../archive/aeneas/src/main.c +EXPORT +FD +DF +CC #__DEBUG=1 +ICD +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="C:\Users\adhit\projects\serc\maveric-flight-software\archive\aeneas\src" +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 +EXPORTD="${OBJECTDIR}/_ext/1205493807"  
 	
 endif 
 	
 else
-${OBJECTDIR}/_ext/885629990/main.o: ../../common/aeneas/src/main.c  nbproject/Makefile-${CND_CONF}.mk 
-	${MKDIR} ${OBJECTDIR}/_ext/885629990 
+${OBJECTDIR}/_ext/1205493807/main.o: ../../archive/aeneas/src/main.c  nbproject/Makefile-${CND_CONF}.mk 
+	${MKDIR} ${OBJECTDIR}/_ext/1205493807 
 ifeq (1,1) 
 	${MKDIR} ${DISTDIR} 
-	${MP_CC}  out="${OBJECTDIR}\_ext\885629990"  ../../common/aeneas/src/main.c +FD +DF +CC +Y=9 +EA I+="C:\Program Files (x86)\PICC\Drivers" I+="C:\Program Files (x86)\PICC\Devices" I+="..\..\common\aeneas" +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 
-	@mv ${OBJECTDIR}/_ext/885629990/main.cof "${DISTDIR}/Dodona.${IMAGE_TYPE}.cof" 
-	@mv ${OBJECTDIR}/_ext/885629990/main.hex "${DISTDIR}/Dodona.${IMAGE_TYPE}.hex"
+	${MP_CC}  out="${OBJECTDIR}\_ext\1205493807"  ../../archive/aeneas/src/main.c +FD +DF +CC +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="C:\Users\adhit\projects\serc\maveric-flight-software\archive\aeneas\src" +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 
+	@mv ${OBJECTDIR}/_ext/1205493807/main.cof "${DISTDIR}/Dodona.${IMAGE_TYPE}.cof" 
+	@mv ${OBJECTDIR}/_ext/1205493807/main.hex "${DISTDIR}/Dodona.${IMAGE_TYPE}.hex"
 else 
-	${MP_CC}  out=""${OBJECTDIR}\_ext\885629990"" ../../common/aeneas/src/main.c +EXPORT +FD +DF +CC +Y=9 +EA I+="C:\Program Files (x86)\PICC\Drivers" I+="C:\Program Files (x86)\PICC\Devices" I+="..\..\common\aeneas" +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 +EXPORTD="${OBJECTDIR}/_ext/885629990"  
+	${MP_CC}  out=""${OBJECTDIR}\_ext\1205493807"" ../../archive/aeneas/src/main.c +EXPORT +FD +DF +CC +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="C:\Users\adhit\projects\serc\maveric-flight-software\archive\aeneas\src" +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 +EXPORTD="${OBJECTDIR}/_ext/1205493807"  
 	
 endif 
 	
@@ -127,7 +127,7 @@ ${DISTDIR}/Dodona.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Make
 ifeq (1,1) 
 	
 else 
-	${MP_LD}   out="${DISTDIR}"  +FD +DF +CC LINK=Dodona.${IMAGE_TYPE}.hex=${OBJECTDIR}/_ext/885629990/main.o +Y=9 +EA I+="C:\Program Files (x86)\PICC\Drivers" I+="C:\Program Files (x86)\PICC\Devices" I+="..\..\common\aeneas" +DF +LN +T +A +M +J +Z -P
+	${MP_LD}   out="${DISTDIR}"  +FD +DF +CC LINK=Dodona.${IMAGE_TYPE}.hex=${OBJECTDIR}/_ext/1205493807/main.o +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="C:\Users\adhit\projects\serc\maveric-flight-software\archive\aeneas\src" +DF +LN +T +A +M +J +Z -P
 	
 endif 
 	
@@ -137,7 +137,7 @@ ${DISTDIR}/Dodona.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Make
 ifeq (1,1) 
 	
 else 
-	${MP_LD}   out="${DISTDIR}"  +FD +DF +CC LINK=Dodona.${IMAGE_TYPE}.hex=${OBJECTDIR}/_ext/885629990/main.o +Y=9 +EA I+="C:\Program Files (x86)\PICC\Drivers" I+="C:\Program Files (x86)\PICC\Devices" I+="..\..\common\aeneas" +DF +LN +T +A +M +J +Z -P
+	${MP_LD}   out="${DISTDIR}"  +FD +DF +CC LINK=Dodona.${IMAGE_TYPE}.hex=${OBJECTDIR}/_ext/1205493807/main.o +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="C:\Users\adhit\projects\serc\maveric-flight-software\archive\aeneas\src" +DF +LN +T +A +M +J +Z -P
 	
 endif 
 	

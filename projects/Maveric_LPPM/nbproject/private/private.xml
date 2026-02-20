@@ -7,8 +7,6 @@
             <file>file:/C:/Users/adhit/projects/serc/maveric-flight-software/projects/Maveric_LPPM/src/main.c</file>
             <file>file:/C:/Users/adhit/projects/serc/maveric-flight-software/mavlibs/v2025/include/cmd.h</file>
         </group>
-        <group name="maveric">
-            <file>file:/C:/Users/adhit/projects/serc/maveric-flight-software/projects/Maveric_LPPM/src/m41t81s.c</file>
-        </group>
+        <group name="maveric"/>
     </open-files>
 </project-private>

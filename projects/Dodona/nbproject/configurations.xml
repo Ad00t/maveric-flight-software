@@ -4,64 +4,68 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <itemPath>../../common/aeneas/src/adc.h</itemPath>
-      <itemPath>../../common/aeneas/src/address.h</itemPath>
-      <itemPath>../../common/aeneas/src/address_lower.h</itemPath>
-      <itemPath>../../common/aeneas/src/address_upper.h</itemPath>
-      <itemPath>../../common/aeneas/src/burn.h</itemPath>
-      <itemPath>../../common/aeneas/src/commandmanager.h</itemPath>
-      <itemPath>../../common/aeneas/src/common.h</itemPath>
-      <itemPath>../../common/aeneas/src/config.h</itemPath>
-      <itemPath>../../common/aeneas/src/crc.h</itemPath>
-      <itemPath>../../common/aeneas/src/debug.h</itemPath>
-      <itemPath>../../common/aeneas/src/downlinkmessage.h</itemPath>
-      <itemPath>../../common/aeneas/src/eps.h</itemPath>
-      <itemPath>../../common/aeneas/src/errors.h</itemPath>
-      <itemPath>../../common/aeneas/src/flash.h</itemPath>
-      <itemPath>../../common/aeneas/src/flashmanager.h</itemPath>
-      <itemPath>../../common/aeneas/src/fredtime.h</itemPath>
-      <itemPath>../../common/aeneas/src/fsw.h</itemPath>
-      <itemPath>../../common/aeneas/src/geomag.h</itemPath>
-      <itemPath>../../common/aeneas/src/globals.h</itemPath>
-      <itemPath>../../common/aeneas/src/gyro.h</itemPath>
-      <itemPath>../../common/aeneas/src/hyperterm.h</itemPath>
-      <itemPath>../../common/aeneas/src/i2c.h</itemPath>
-      <itemPath>../../common/aeneas/src/imi100.h</itemPath>
-      <itemPath>../../common/aeneas/src/inet.h</itemPath>
-      <itemPath>../../common/aeneas/src/itag.h</itemPath>
-      <itemPath>../../common/aeneas/src/labview.h</itemPath>
-      <itemPath>../../common/aeneas/src/linalg.h</itemPath>
-      <itemPath>../../common/aeneas/src/linkmanager.h</itemPath>
-      <itemPath>../../common/aeneas/src/Neon.h</itemPath>
-      <itemPath>../../common/aeneas/src/PCD_Bootloader.h</itemPath>
-      <itemPath>../../common/aeneas/src/lower_tx.h</itemPath>
-      <itemPath>../../common/aeneas/src/macros.h</itemPath>
-      <itemPath>../../common/aeneas/src/maestro.h</itemPath>
-      <itemPath>../../common/aeneas/src/maestro_flash.h</itemPath>
-      <itemPath>../../common/aeneas/src/mag.h</itemPath>
-      <itemPath>../../common/aeneas/src/menu.h</itemPath>
-      <itemPath>../../common/aeneas/src/mystack.h</itemPath>
-      <itemPath>../../common/aeneas/src/nonblock.h</itemPath>
-      <itemPath>../../common/aeneas/src/orbit.h</itemPath>
-      <itemPath>../../common/aeneas/src/payload.h</itemPath>
-      <itemPath>../../common/aeneas/src/payloadmanager.h</itemPath>
-      <itemPath>../../common/aeneas/src/pins.h</itemPath>
-      <itemPath>../../common/aeneas/src/pinscustom.h</itemPath>
-      <itemPath>../../common/aeneas/src/pinslower.h</itemPath>
-      <itemPath>../../common/aeneas/src/pinsupper.h</itemPath>
-      <itemPath>../../common/aeneas/src/ports.h</itemPath>
-      <itemPath>../../common/aeneas/src/schedule.h</itemPath>
-      <itemPath>../../common/aeneas/src/spi.h</itemPath>
-      <itemPath>../../common/aeneas/src/stensat.h</itemPath>
-      <itemPath>../../common/aeneas/src/sunsensor.h</itemPath>
-      <itemPath>../../common/aeneas/src/telemetry.h</itemPath>
-      <itemPath>../../common/aeneas/src/time.h</itemPath>
-      <itemPath>../../common/aeneas/src/transceiver.h</itemPath>
-      <itemPath>../../common/aeneas/src/tx_manager.h</itemPath>
-      <itemPath>../../common/aeneas/src/unsorted.h</itemPath>
-      <itemPath>../../common/aeneas/src/uplinkmessage.h</itemPath>
-      <itemPath>../../common/aeneas/src/wmm.h</itemPath>
-      <itemPath>../../common/aeneas/src/wmmrows.h</itemPath>
+      <logicalFolder name="f1" displayName="GomSpace" projectFiles="true">
+        <itemPath>../../archive/aeneas/src/GomSpace/crc32.h</itemPath>
+        <itemPath>../../archive/aeneas/src/GomSpace/cspHeader.h</itemPath>
+        <itemPath>../../archive/aeneas/src/GomSpace/frame.h</itemPath>
+        <itemPath>../../archive/aeneas/src/GomSpace/kiss.h</itemPath>
+      </logicalFolder>
+      <itemPath>../../archive/aeneas/src/Neon.h</itemPath>
+      <itemPath>../../archive/aeneas/src/PCD_Bootloader.h</itemPath>
+      <itemPath>../../archive/aeneas/src/adc.h</itemPath>
+      <itemPath>../../archive/aeneas/src/address.h</itemPath>
+      <itemPath>../../archive/aeneas/src/address_lower.h</itemPath>
+      <itemPath>../../archive/aeneas/src/address_upper.h</itemPath>
+      <itemPath>../../archive/aeneas/src/burn.h</itemPath>
+      <itemPath>../../archive/aeneas/src/commandmanager.h</itemPath>
+      <itemPath>../../archive/aeneas/src/common.h</itemPath>
+      <itemPath>../../archive/aeneas/src/config.h</itemPath>
+      <itemPath>../../archive/aeneas/src/crc.h</itemPath>
+      <itemPath>../../archive/aeneas/src/debug.h</itemPath>
+      <itemPath>../../archive/aeneas/src/downlinkmessage.h</itemPath>
+      <itemPath>../../archive/aeneas/src/eps.h</itemPath>
+      <itemPath>../../archive/aeneas/src/errors.h</itemPath>
+      <itemPath>../../archive/aeneas/src/flash.h</itemPath>
+      <itemPath>../../archive/aeneas/src/flashmanager.h</itemPath>
+      <itemPath>../../archive/aeneas/src/fredtime.h</itemPath>
+      <itemPath>../../archive/aeneas/src/fsw.h</itemPath>
+      <itemPath>../../archive/aeneas/src/geomag.h</itemPath>
+      <itemPath>../../archive/aeneas/src/globals.h</itemPath>
+      <itemPath>../../archive/aeneas/src/gyro.h</itemPath>
+      <itemPath>../../archive/aeneas/src/hyperterm.h</itemPath>
+      <itemPath>../../archive/aeneas/src/i2c.h</itemPath>
+      <itemPath>../../archive/aeneas/src/imi100.h</itemPath>
+      <itemPath>../../archive/aeneas/src/inet.h</itemPath>
+      <itemPath>../../archive/aeneas/src/itag.h</itemPath>
+      <itemPath>../../archive/aeneas/src/labview.h</itemPath>
+      <itemPath>../../archive/aeneas/src/linalg.h</itemPath>
+      <itemPath>../../archive/aeneas/src/linkmanager.h</itemPath>
+      <itemPath>../../archive/aeneas/src/lower_tx.h</itemPath>
+      <itemPath>../../archive/aeneas/src/macros.h</itemPath>
+      <itemPath>../../archive/aeneas/src/maestro.h</itemPath>
+      <itemPath>../../archive/aeneas/src/maestro_flash.h</itemPath>
+      <itemPath>../../archive/aeneas/src/mag.h</itemPath>
+      <itemPath>../../archive/aeneas/src/menu.h</itemPath>
+      <itemPath>../../archive/aeneas/src/mhx.h</itemPath>
+      <itemPath>../../archive/aeneas/src/mystack.h</itemPath>
+      <itemPath>../../archive/aeneas/src/nonblock.h</itemPath>
+      <itemPath>../../archive/aeneas/src/orbit.h</itemPath>
+      <itemPath>../../archive/aeneas/src/payload.h</itemPath>
+      <itemPath>../../archive/aeneas/src/payloadmanager.h</itemPath>
+      <itemPath>../../archive/aeneas/src/pins.h</itemPath>
+      <itemPath>../../archive/aeneas/src/pinscustom.h</itemPath>
+      <itemPath>../../archive/aeneas/src/pinslower.h</itemPath>
+      <itemPath>../../archive/aeneas/src/pinsupper.h</itemPath>
+      <itemPath>../../archive/aeneas/src/ports.h</itemPath>
+      <itemPath>../../archive/aeneas/src/schedule.h</itemPath>
+      <itemPath>../../archive/aeneas/src/spi.h</itemPath>
+      <itemPath>../../archive/aeneas/src/time.h</itemPath>
+      <itemPath>../../archive/aeneas/src/transceiver.h</itemPath>
+      <itemPath>../../archive/aeneas/src/tx_manager.h</itemPath>
+      <itemPath>../../archive/aeneas/src/unsorted.h</itemPath>
+      <itemPath>../../archive/aeneas/src/uplinkmessage.h</itemPath>
+      <itemPath>../../archive/aeneas/src/wmm.h</itemPath>
+      <itemPath>../../archive/aeneas/src/wmmrows.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -75,53 +79,61 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>../../common/aeneas/src/main.c</itemPath>
+      <itemPath>../../archive/aeneas/src/main.c</itemPath>
     </logicalFolder>
     <logicalFolder name="OtherFiles" displayName="Other Files" projectFiles="false">
-      <itemPath>../../common/aeneas/src/FSW.c</itemPath>
-      <itemPath>../../common/aeneas/src/adc.c</itemPath>
-      <itemPath>../../common/aeneas/src/burn.c</itemPath>
-      <itemPath>../../common/aeneas/src/clocktest.c</itemPath>
-      <itemPath>../../common/aeneas/src/commandmanager.c</itemPath>
-      <itemPath>../../common/aeneas/src/crc.c</itemPath>
-      <itemPath>../../common/aeneas/src/debug.c</itemPath>
-      <itemPath>../../common/aeneas/src/downlinkmessage.c</itemPath>
-      <itemPath>../../common/aeneas/src/eps.c</itemPath>
-      <itemPath>../../common/aeneas/src/errors.c</itemPath>
-      <itemPath>../../common/aeneas/src/flash_AT25DF641.c</itemPath>
-      <itemPath>../../common/aeneas/src/flashmanager.c</itemPath>
-      <itemPath>../../common/aeneas/src/fredtime.c</itemPath>
-      <itemPath>../../common/aeneas/src/geomag.c</itemPath>
-      <itemPath>../../common/aeneas/src/gyro.c</itemPath>
-      <itemPath>../../common/aeneas/src/hyperterm.c</itemPath>
-      <itemPath>../../common/aeneas/src/Neon.c</itemPath>
-      <itemPath>../../common/aeneas/src/i2c.c</itemPath>
-      <itemPath>../../common/aeneas/src/imi100.c</itemPath>
-      <itemPath>../../common/aeneas/src/inet.c</itemPath>
-      <itemPath>../../common/aeneas/src/itag.c</itemPath>
-      <itemPath>../../common/aeneas/src/labview.c</itemPath>
-      <itemPath>../../common/aeneas/src/linkmanager.c</itemPath>
-      <itemPath>../../common/aeneas/src/loader_pcd.c</itemPath>
-      <itemPath>../../common/aeneas/src/lower_tx.c</itemPath>
-      <itemPath>../../common/aeneas/src/macros.c</itemPath>
-      <itemPath>../../common/aeneas/src/maestro.c</itemPath>
-      <itemPath>../../common/aeneas/src/maestro_flash.c</itemPath>
-      <itemPath>../../common/aeneas/src/mag.c</itemPath>
-      <itemPath>../../common/aeneas/src/mystack.c</itemPath>
-      <itemPath>../../common/aeneas/src/nonblock.c</itemPath>
-      <itemPath>../../common/aeneas/src/orbit.c</itemPath>
-      <itemPath>../../common/aeneas/src/payload_smartsat.c</itemPath>
-      <itemPath>../../common/aeneas/src/payloadmanager.c</itemPath>
-      <itemPath>../../common/aeneas/src/ports.c</itemPath>
-      <itemPath>../../common/aeneas/src/schedule.c</itemPath>
-      <itemPath>../../common/aeneas/src/spi.c</itemPath>
-      <itemPath>../../common/aeneas/src/stensat.c</itemPath>
-      <itemPath>../../common/aeneas/src/sunsensor.c</itemPath>
-      <itemPath>../../common/aeneas/src/telemetry.c</itemPath>
-      <itemPath>../../common/aeneas/src/time.c</itemPath>
-      <itemPath>../../common/aeneas/src/transceiver_gomspace.c</itemPath>
-      <itemPath>../../common/aeneas/src/tx_manager.c</itemPath>
-      <itemPath>../../common/aeneas/src/uplinkmessage.c</itemPath>
+      <itemPath>../../README.md</itemPath>
+      <itemPath>../../archive/aeneas/src/GomSpace/crc32.c</itemPath>
+      <itemPath>../../archive/aeneas/src/GomSpace/cspHeader.c</itemPath>
+      <itemPath>../../archive/aeneas/src/GomSpace/frame.c</itemPath>
+      <itemPath>../../archive/aeneas/src/GomSpace/kiss.c</itemPath>
+      <itemPath>../../archive/aeneas/src/adc.c</itemPath>
+      <itemPath>../../archive/aeneas/src/burn.c</itemPath>
+      <itemPath>../../archive/aeneas/src/clocktest.c</itemPath>
+      <itemPath>../../archive/aeneas/src/commandmanager.c</itemPath>
+      <itemPath>../../archive/aeneas/src/crc.c</itemPath>
+      <itemPath>../../archive/aeneas/src/debug.c</itemPath>
+      <itemPath>../../archive/aeneas/src/downlinkmessage.c</itemPath>
+      <itemPath>../../archive/aeneas/src/eps.c</itemPath>
+      <itemPath>../../archive/aeneas/src/errors.c</itemPath>
+      <itemPath>../../archive/aeneas/src/flash_AT25DF641.c</itemPath>
+      <itemPath>../../archive/aeneas/src/flash_M25PE20.c</itemPath>
+      <itemPath>../../archive/aeneas/src/flashmanager.c</itemPath>
+      <itemPath>../../archive/aeneas/src/FSW.c</itemPath>
+      <itemPath>../../archive/aeneas/src/Neon.c</itemPath>
+      <itemPath>../../archive/aeneas/src/fredtime.c</itemPath>
+      <itemPath>../../archive/aeneas/src/geomag.c</itemPath>
+      <itemPath>../../archive/aeneas/src/gyro.c</itemPath>
+      <itemPath>../../archive/aeneas/src/hyperterm.c</itemPath>
+      <itemPath>../../archive/aeneas/src/i2c.c</itemPath>
+      <itemPath>../../archive/aeneas/src/imi100.c</itemPath>
+      <itemPath>../../archive/aeneas/src/inet.c</itemPath>
+      <itemPath>../../archive/aeneas/src/itag.c</itemPath>
+      <itemPath>../../archive/aeneas/src/labview.c</itemPath>
+      <itemPath>../../archive/aeneas/src/linkmanager.c</itemPath>
+      <itemPath>../../archive/aeneas/src/loader_pcd.c</itemPath>
+      <itemPath>../../archive/aeneas/src/lower_tx.c</itemPath>
+      <itemPath>../../archive/aeneas/src/macros.c</itemPath>
+      <itemPath>../../archive/aeneas/src/maestro.c</itemPath>
+      <itemPath>../../archive/aeneas/src/maestro_flash.c</itemPath>
+      <itemPath>../../archive/aeneas/src/mag.c</itemPath>
+      <itemPath>../../archive/aeneas/src/main.c</itemPath>
+      <itemPath>../../archive/aeneas/src/mhx.c</itemPath>
+      <itemPath>../../archive/aeneas/src/mystack.c</itemPath>
+      <itemPath>../../archive/aeneas/src/nonblock.c</itemPath>
+      <itemPath>../../archive/aeneas/src/orbit.c</itemPath>
+      <itemPath>../../archive/aeneas/src/payload_smartsat.c</itemPath>
+      <itemPath>../../archive/aeneas/src/payloadmanager.c</itemPath>
+      <itemPath>../../archive/aeneas/src/ports.c</itemPath>
+      <itemPath>../../archive/aeneas/src/schedule.c</itemPath>
+      <itemPath>../../archive/aeneas/src/spi.c</itemPath>
+      <itemPath>../../archive/aeneas/src/stensat.c</itemPath>
+      <itemPath>../../archive/aeneas/src/sunsensor.c</itemPath>
+      <itemPath>../../archive/aeneas/src/telemetry.c</itemPath>
+      <itemPath>../../archive/aeneas/src/time.c</itemPath>
+      <itemPath>../../archive/aeneas/src/transceiver_gomspace.c</itemPath>
+      <itemPath>../../archive/aeneas/src/tx_manager.c</itemPath>
+      <itemPath>../../archive/aeneas/src/uplinkmessage.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
@@ -138,7 +150,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>CCSC</languageToolchain>
-        <languageToolchainVersion>4.124</languageToolchainVersion>
+        <languageToolchainVersion>5.081</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>
@@ -309,7 +321,6 @@
         <property key="event.recorder.debugger.behavior" value="Running"/>
         <property key="event.recorder.enabled" value="false"/>
         <property key="event.recorder.scvd.files" value=""/>
-        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="lastid" value=""/>
         <property key="memories.aux" value="false"/>
@@ -357,7 +368,7 @@
         <property key="debug-file" value="false"/>
         <property key="errors-and-warnings" value="+EA"/>
         <property key="extra-include-directories"
-                  value="C:\Program Files (x86)\PICC\Drivers;C:\Program Files (x86)\PICC\Devices;..\..\common\aeneas"/>
+                  value="C:\Program Files (x86)\PICC\Devices;C:\Program Files (x86)\PICC\Drivers;C:\Users\adhit\projects\serc\maveric-flight-software\archive\aeneas\src"/>
         <property key="keep-after-compile" value="false"/>
         <property key="keep-for-xx-seconds" value=""/>
         <property key="keep-if-errors" value="false"/>

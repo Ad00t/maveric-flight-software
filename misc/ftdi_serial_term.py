@@ -22,7 +22,7 @@ SCROLL_SPEED = 3
 MAX_LOGS = 10000
 
 crcalc = Calculator(Crc16.XMODEM)
-ftdi = serial.Serial('COM4', baudrate=115200, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, timeout=1)
+ftdi = serial.Serial('COM5', baudrate=115200, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, timeout=1)
 
 log_lines = []
 is_manual_scrolling = False

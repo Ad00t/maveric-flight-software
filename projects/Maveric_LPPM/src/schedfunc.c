@@ -36,6 +36,10 @@ void schedfunc_get_ertc_time(void) {
 }
 
 void schedfunc_systime_sync(void) {
+    // char cmd[CMD_MAX_LEN] = {0};
+    // char args[CMD_MAX_ARGSSTR_LEN] = {0};
+    // sprintf(args, "%u %u %u %u %u %u %u", )
+    // create_cmd(NODE_ID, 2, 0, "cmd_set_time", , cmd);
     systime_sync();
 }
 
