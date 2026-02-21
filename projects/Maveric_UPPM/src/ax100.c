@@ -58,8 +58,8 @@ void ax100_transmit_msg(ax100_s* a, uint8_t* buf, uint8_t len) {
     uint8_t i;
     p += sprintf(LOGBUF, "ax100_transmit_msg: len=%u [", frameLength); 
     for (i = 0; i < frameLength - 1; i++) 
-        p += sprintf(LOGBUF, "0x%02X", buf[i]); 
-    p += sprintf(LOGBUF, "0x%02X ]", buf[frameLength - 1]); 
+        p += sprintf(&LOGBUF[p], "0x%02X", buf[i]); 
+    p += sprintf(&LOGBUF[p], "0x%02X ]", buf[frameLength - 1]); 
     log_flush(LL_TRACE);
 }
 

@@ -1,5 +1,4 @@
 #include "cmdmgr.h"
-#include "cmdfunc.h"
 #include "circbuf.h"
 #include "hashtable.h"
 #include "crcnew.h"
@@ -32,11 +31,8 @@ void cmdpkt_clear(cmdpkt_s* pkt) {
 // Command Manager
 
 void cmdmgr_init(cmdmgr_s* cmdmgr) {
-    uint8_t b;
-    for (b = 0; b < CMD_NUM_BUFS; b++) {
-        cmdpkt_init(&cmdmgr->rcvpkts[b]);
-    }
-    cmdmgr_register_funcs(cmdmgr);
+    cmdmgr_clear(cmdmgr);
+    ht_init(&cmdmgr->cmdimpls); 
 }
 
 void cmdmgr_clear(cmdmgr_s* cmdmgr) {
@@ -46,7 +42,7 @@ void cmdmgr_clear(cmdmgr_s* cmdmgr) {
     }
 }
 
-void cmdmgr_rcv_parser(cmdmgr_s* cmdmgr, circbuf_s* rcvbuf, cmdpkt_s* rcvpkt) {
+void cmdmgr_parse_stream(cmdmgr_s* cmdmgr, circbuf_s* rcvbuf, cmdpkt_s* rcvpkt) {
     uint16_t iter = 0;
     while (iter < 2 * CIRCBUF_MAX_SIZE) {
         uint8_t b = 0;
@@ -127,7 +123,7 @@ void cmdmgr_rcv_parser(cmdmgr_s* cmdmgr, circbuf_s* rcvbuf, cmdpkt_s* rcvpkt) {
                 cmdpkt_clear(rcvpkt);
                 break;
             case CMDPKT_FSM_ERROR:
-                sprintf(LOGBUF, "cmdmgr_rcv_fsm: malformed packet"); log_flush(LL_ERROR);
+                sprintf(LOGBUF, "cmdmgr_parse_stream: malformed packet"); log_flush(LL_ERROR);
                 cmdpkt_clear(rcvpkt);
                 break;
         }
@@ -136,27 +132,27 @@ void cmdmgr_rcv_parser(cmdmgr_s* cmdmgr, circbuf_s* rcvbuf, cmdpkt_s* rcvpkt) {
     }
 }
 
-void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* rcvpkt) {
+void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
     // Forward
-    if (rcvpkt->dest != NODE_ID) {
-        sprintf(LOGBUF, "cmdmgr_process_cmd: forwarding cmd '%s'", rcvpkt->id); log_flush(LL_INFO);
+    if (pkt->dest != NODE_ID) {
+        sprintf(LOGBUF, "cmdmgr_process_cmd: forwarding cmd '%s'", pkt->id); log_flush(LL_INFO);
         return;
     } 
     
     // CRC check
-    if (rcvpkt->crc != rcvpkt->running_crc) {
+    if (pkt->crc != pkt->running_crc) {
         sprintf(LOGBUF, "cmdmgr_process_cmd: crc check failed on cmd '%s' crc:%u calculated:%u",
-                rcvpkt->id, rcvpkt->crc, rcvpkt->running_crc); log_flush(LL_ERROR);
+                pkt->id, pkt->crc, pkt->running_crc); log_flush(LL_ERROR);
         return;
     } 
     
-    // Parse & execute cmd here
-    cmdfunc_f cmdfunc = ht_get(&cmdmgr->cmdfuncs, rcvpkt->id);
-    if (cmdfunc == NULL) {
-        sprintf(LOGBUF, "cmdmgr_process_cmd: cmd not recognized '%s'", rcvpkt->id); log_flush(LL_ERROR);
+    // Find and execute cmd implementation
+    cmdimpl_f cmdimpl = ht_get(&cmdmgr->cmdimpls, pkt->id);
+    if (cmdimpl == NULL) {
+        sprintf(LOGBUF, "cmdmgr_process_cmd: cmd not recognized '%s'", pkt->id); log_flush(LL_ERROR);
         return;
     }
-    cmdfunc(rcvpkt);
+    cmdimpl(pkt);
 }
 
 

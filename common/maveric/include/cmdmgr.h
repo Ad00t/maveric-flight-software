@@ -5,7 +5,7 @@
 #include "circbuf.h"
 #include "hashtable.h"
 
-#define CMD_MAX_LEN             256
+#define CMD_MAX_LEN             127
 #define CMD_MAX_ID_LEN          20
 #define CMD_MAX_ARGSSTR_LEN     CMD_MAX_LEN - CMD_MAX_ID_LEN - 7
 #define CMD_START_BYTE          0xCD
@@ -50,11 +50,11 @@ void cmdpkt_clear(cmdpkt_s* pkt);
 
 // Command manager
 
-typedef void (*cmdfunc_f)(cmdpkt_s* pkt);
+typedef void (*cmdimpl_f)(cmdpkt_s* pkt);
 
 typedef struct {
     cmdpkt_s rcvpkts[CMD_NUM_BUFS];
-    hashtable_s cmdfuncs;
+    hashtable_s cmdimpls;
 } cmdmgr_s;
 
 // Initialize cmdmgr
@@ -63,10 +63,10 @@ void cmdmgr_init(cmdmgr_s* cmdmgr);
 // Clear all rcv pkts 
 void cmdmgr_clear(cmdmgr_s* cmdmgr);
 
-// Check interrupt buffer to advance packet reader FSM 
-void cmdmgr_rcv_parser(cmdmgr_s* cmdmgr, circbuf_s* rcvbuf, cmdpkt_s* rcvpkt);
+// Parse command from bytestream/buffer 
+void cmdmgr_parse_stream(cmdmgr_s* cmdmgr, circbuf_s* rcvbuf, cmdpkt_s* rcvpkt);
 
 // Checks link layer headers, CRC, and forwards/runs command appropriately
-void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* rcvpkt);
+void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt);
 
 #endif

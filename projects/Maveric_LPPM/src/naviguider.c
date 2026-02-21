@@ -107,7 +107,7 @@ void nvg_send_command(nvg_s* nvg, char* cmd) {
     delay_ms(100);
 } 
 
-void nvg_rcv_parser(nvg_s* nvg, circbuf_s* irqbuf) {
+void nvg_parse_stream(nvg_s* nvg, circbuf_s* irqbuf) {
     nvg_pkt_s* rcvpkt = &nvg->rcvpkt;
 
     uint16_t iter;
@@ -135,14 +135,14 @@ void nvg_rcv_parser(nvg_s* nvg, circbuf_s* irqbuf) {
         }
 
         if (!is_data_line(rcvpkt->rcvline, rcvpkt->rl_len)) {
-            sprintf(LOGBUF, "nvg_rcv_parser: info: len=%u \"%s\"", rcvpkt->rl_len, rcvpkt->rcvline); log_flush(LL_TRACE);
+            sprintf(LOGBUF, "nvg_parse_stream: info: len=%u \"%s\"", rcvpkt->rl_len, rcvpkt->rcvline); log_flush(LL_TRACE);
             nvg_pkt_clear(rcvpkt);
             continue;
         }
 
         /* ---- CSV parsing starts here ---- */
 
-        // sprintf(LOGBUF, "nvg_rcv_parser: data: len=%u \"%s\"", rcvpkt->rl_len, rcvpkt->rcvline); log_flush(LL_TRACE);
+        // sprintf(LOGBUF, "nvg_parse_stream: data: len=%u \"%s\"", rcvpkt->rl_len, rcvpkt->rcvline); log_flush(LL_TRACE);
 
         /* Tokenize */
         char* argv[16];
@@ -187,7 +187,7 @@ void nvg_rcv_parser(nvg_s* nvg, circbuf_s* irqbuf) {
         continue;
 
     malformed:
-        sprintf(LOGBUF, "nvg_rcv_parser: malformed: len=%u \"%s\"", rcvpkt->rl_len, rcvpkt->rcvline); log_flush(LL_ERROR);
+        sprintf(LOGBUF, "nvg_parse_stream: malformed: len=%u \"%s\"", rcvpkt->rl_len, rcvpkt->rcvline); log_flush(LL_ERROR);
         nvg_pkt_clear(rcvpkt);
     }
 }

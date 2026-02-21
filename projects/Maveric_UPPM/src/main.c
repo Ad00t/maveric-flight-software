@@ -69,13 +69,13 @@
 #include "interrupts.c"
 #include "systime.c"
 #include "ax100.c"
-#include "schedfunc.c"
-#include "scheduler.c"
-#include "cmdfunc.c"
 #include "cmdmgr.c"
+#include "scheduler.c"
+#include "cmdimpl.c"
+#include "housekeeping.c"
 
 void system_init(void);
-void housekeeping(void);
+void system_superloop(void);
 void system_cleanup(void);
 
 int1 SUPERLOOP_RUNNING = TRUE;
@@ -89,7 +89,7 @@ ax100_s g_ax100;            // AX100 transceiver driver
 void main(void) {	
     system_init();
     while (SUPERLOOP_RUNNING) {
-        housekeeping(); 
+        system_superloop(); 
     }
     system_cleanup();
 }
@@ -101,8 +101,6 @@ void system_init(void) {
 	setup_timer1(TMR_INTERNAL | TMR_DIV_BY_64, 0x00FA); 
     memset(LOGBUF, 0, sizeof(LOGBUF));
     
-    fprintf(COM_D, "test\n");
-
     // SPI init
 	// output_high(FLASH_CHIP_SELECT);
 	// output_high(SECOND_FLASH_CS);
@@ -128,24 +126,26 @@ void system_init(void) {
     ax100_init(&g_ax100, AX100_PORT);
     cmdmgr_init(&g_cmdmgr);
     scheduler_init(&g_scheduler);
+    cmdimpl_init();
+    hk_init();
 
     sprintf(LOGBUF, "system initialized"); log_flush(LL_INFO);
     delay_ms(1000);
 }
 
-// Housekeeping routine
-void housekeeping(void) {
+// Main master routine run in superloop
+void system_superloop(void) {
     // Kick the dog
     restart_wdt();
 
     // Handle received byte interrupts
     isr_disable_all();
-    // cmdmgr_rcv_parser(&g_cmdmgr, &g_ax100.cmdbuf, &g_cmdmgr.rcvpkts[0]); // Handle AX100 commands
-    // cmdmgr_rcv_parser(&g_cmdmgr, &g_irqmgr.irqbufs[1], &g_cmdmgr.rcvpkts[1]); // Handle LPPM commands 
-    cmdmgr_rcv_parser(&g_cmdmgr, &g_irqmgr.irqbufs[3], &g_cmdmgr.rcvpkts[2]); // Handle FTDI commands 
+    // cmdmgr_parse_stream(&g_cmdmgr, &g_ax100.cmdbuf, &g_cmdmgr.rcvpkts[0]); // Handle AX100 commands
+    // cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[1], &g_cmdmgr.rcvpkts[1]); // Handle LPPM commands 
+    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[3], &g_cmdmgr.rcvpkts[2]); // Handle FTDI commands 
     isr_enable_all();
    
-    scheduler_run_tasks(&g_scheduler);
+    scheduler_run_tasks(&g_scheduler, &g_cmdmgr);
 }
 
 // Cleanup routine

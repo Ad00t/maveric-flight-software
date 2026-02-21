@@ -1,38 +1,41 @@
 #ifndef __SCHEDULER_H__
 #define __SCHEDULER_H__
 
-#include "schedfunc.h"
+#include "cmdmgr.h"
 #include <stdint.h>
 #include <time.h>
 
+#define SCHEDULER_MAX_TASKS         16 
 #define SCHEDULE_REPS_INFINITE      0xFF
-#define SCHEDULER_MAX_TASKS         32 
 
 // Schedule task (as generic as possible)
 
 typedef void (*schedfunc_f)(void);
 
 typedef struct {
-    schedfunc_f func;
+    char cmd[CMD_MAX_LEN];
     uint64_t next_release;
     uint32_t period_ms;
     uint16_t remaining_reps; 
-    uint8_t id;
+    schedfunc_f func;
+    int8_t id;
     int1 active;
+    int1 is_cmd;
 } schedtask_s;
 
 // Scheduling manager API
 
 typedef struct {
     schedtask_s tasks[SCHEDULER_MAX_TASKS];
-    uint8_t i_free;
+    uint8_t id_to_idx[SCHEDULER_MAX_TASKS];
+    uint8_t i_free; // The pointer that we advance to find a free frame upon scheduling
 } scheduler_s;
 
 // Initialize scheduler service
 void scheduler_init(scheduler_s* s);
 
 // Check scheduler for tasks that need to run and execute them
-void scheduler_run_tasks(scheduler_s* s);
+void scheduler_run_tasks(scheduler_s* s, cmdmgr_s* cmdmgr);
 
 // Find the scheduled task with this id and clear it
 void scheduler_deschedule(scheduler_s* s, uint8_t id);
@@ -44,7 +47,9 @@ void scheduler_deschedule(scheduler_s* s, uint8_t id);
  * Finitely recurring tasks have a limit of 65535 repetitions
  * MAKE SURE THE SCHEDULE PERIOD IS GREATER THAN THE FUNCTION'S RUNTIME
  */
-void scheduler_schedule_at(scheduler_s* s, uint8_t id, schedfunc_f* func, struct_tm start_time, uint16_t reps, uint32_t period_ms);
+void scheduler_schedule_at(scheduler_s* s, int8_t id, schedfunc_f func, struct_tm start_time, uint16_t reps, uint32_t period_ms);
+// The command version
+void scheduler_schedule_at(scheduler_s* s, int8_t id, char* cmd, struct_tm start_time, uint16_t reps, uint32_t period_ms);
 
 /*
  * Schedule <func> to execute starting in <start_delay_ms> milliseconds from now for <reps> repetitions every <period_ms> milliseconds 
@@ -53,6 +58,8 @@ void scheduler_schedule_at(scheduler_s* s, uint8_t id, schedfunc_f* func, struct
  * Finitely recurring tasks have a limit of 65535 repetitions
  * MAKE SURE THE SCHEDULE PERIOD IS GREATER THAN THE FUNCTION'S RUNTIME
  */
-void scheduler_schedule_in(scheduler_s* s, uint8_t id, schedfunc_f* func, uint32_t start_delay_ms, uint16_t reps, uint32_t period_ms);
+void scheduler_schedule_in(scheduler_s* s, int8_t id, schedfunc_f func, uint32_t start_delay_ms, uint16_t reps, uint32_t period_ms);
+// The command version
+void scheduler_schedule_in(scheduler_s* s, int8_t id, char* cmd, uint32_t start_delay_ms, uint16_t reps, uint32_t period_ms);
 
 #endif // !__SCHEDULER_H__

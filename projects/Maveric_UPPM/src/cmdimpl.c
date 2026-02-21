@@ -1,4 +1,4 @@
-#include "cmdfunc.h"
+#include "cmdimpl.h"
 #include "cmdmgr.h"
 #include "systime.h"
 #include "ax100.h"
@@ -15,12 +15,11 @@ extern scheduler_s g_scheduler;     // Schedules manager
 extern struct_tm g_rtc_time;        // Global RTC time tracking instance (from lower PPM)       
 extern ax100_s g_ax100;             // AX100 transceiver driver 
 
-void cmdmgr_register_funcs(cmdmgr_s* cmdmgr) {
-    ht_init(&cmdmgr->cmdfuncs); 
-    ht_set(&cmdmgr->cmdfuncs, "cmd_set_time", (cmdfunc_f) cmdfunc_set_time);
+void cmdimpl_init() {
+    ht_set(&g_cmdmgr.cmdimpls, "cmd_set_time", (cmdimpl_f) cmdimpl_cmd_set_time);
 }
 
-void cmdfunc_set_time(cmdpkt_s* pkt) {
+void cmdimpl_cmd_set_time(cmdpkt_s* pkt) {
     // I know we're updating the original args string here. We should have all our args parsed out after this so it's ok.
     char* p = pkt->args_str;  
     struct_tm time;
@@ -35,7 +34,7 @@ void cmdfunc_set_time(cmdpkt_s* pkt) {
     memcpy(&g_rtc_time, &time, sizeof(struct_tm));
     systime_sync(); // Since Lower PPM is source of truth for timing, this sync should be the only sync in Upper PPM
 
-    sprintf(LOGBUF, "cmdfunc_set_time [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", 
+    sprintf(LOGBUF, "cmdimpl_cmd_set_time [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", 
             g_rtc_time.tm_wday, g_rtc_time.tm_mon, g_rtc_time.tm_mday, g_rtc_time.tm_year, 
             g_rtc_time.tm_hour, g_rtc_time.tm_min, g_rtc_time.tm_sec); log_flush(LL_INFO);
 }

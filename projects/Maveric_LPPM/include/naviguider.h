@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define NVG_MAX_LINE_LEN        256 
+#define NVG_MAX_LINE_LEN        CIRCBUF_MAX_SIZE - 1 
 #define NVG_MAX_ARG_SIZE        20
 #define NVG_MAX_PAYLOAD_LEN     7
 #define NVG_SENSOR_TABLE_LEN    21
@@ -67,8 +67,8 @@ void nvg_clear(nvg_s* nvg);
 // Send command to naviguider
 void nvg_send_command(nvg_s* nvg, char* cmd); 
 
-// Advance naviguider fsm & packet parsinvg
-void nvg_rcv_parser(nvg_s* nvg, circbuf_s* irqbuf);
+// Parse naviguider data packets out of input buffer/stream 
+void nvg_parse_stream(nvg_s* nvg, circbuf_s* irqbuf);
 
 // Read back sensor data into naviguider object on successful full data packet reception
 void nvg_rcv_complete(nvg_s* nvg);

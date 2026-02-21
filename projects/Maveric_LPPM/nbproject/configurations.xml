@@ -10,17 +10,17 @@
       <itemPath>../../common/maveric/include/circbuf.h</itemPath>
       <itemPath>../../common/maveric/include/hashtable.h</itemPath>
       <itemPath>../../common/maveric/include/crcnew.h</itemPath>
-      <itemPath>include/cmdfunc.h</itemPath>
       <itemPath>include/interrupts.h</itemPath>
       <itemPath>../../common/maveric/include/cmdmgr.h</itemPath>
       <itemPath>include/naviguider.h</itemPath>
       <itemPath>include/adcsmtq.h</itemPath>
       <itemPath>include/adis16260.h</itemPath>
       <itemPath>include/m41t81s.h</itemPath>
-      <itemPath>include/schedfunc.h</itemPath>
       <itemPath>../../common/maveric/include/systime.h</itemPath>
       <itemPath>../../common/maveric/include/scheduler.h</itemPath>
       <itemPath>../../common/maveric/include/colors.h</itemPath>
+      <itemPath>include/cmdimpl.h</itemPath>
+      <itemPath>include/housekeeping.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -42,7 +42,6 @@
       <itemPath>../../common/maveric/src/circbuf.c</itemPath>
       <itemPath>../../common/maveric/src/hashtable.c</itemPath>
       <itemPath>../../common/maveric/src/crcnew.c</itemPath>
-      <itemPath>src/cmdfunc.c</itemPath>
       <itemPath>../../common/maveric/src/cmdmgr.c</itemPath>
       <itemPath>src/naviguider.c</itemPath>
       <itemPath>src/adcsmtq.c</itemPath>
@@ -51,7 +50,6 @@
       <itemPath>../../common/maveric/src/scheduler.c</itemPath>
       <itemPath>../../common/maveric/src/systime.c</itemPath>
       <itemPath>src/m41t81s.c</itemPath>
-      <itemPath>src/schedfunc.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>

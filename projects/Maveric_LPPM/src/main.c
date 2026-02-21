@@ -64,24 +64,24 @@
 #include "colors.h"
 #include "crcnew.c"
 #include "uart.c"
-#include "common.c"
 #include "hashtable.c"
 #include "circbuf.c"
 #include "i2c.c"
 #include "spi.c"
 #include "interrupts.c"
 #include "systime.c"
+#include "common.c"
 #include "adcsmtq.c"
 #include "adis16260.c"
 #include "naviguider.c"
 #include "m41t81s.c"
-#include "schedfunc.c"
-#include "scheduler.c"
-#include "cmdfunc.c"
 #include "cmdmgr.c"
+#include "scheduler.c"
+#include "cmdimpl.c"
+#include "housekeeping.c"
 
 void system_init(void);
-void housekeeping(void);
+void system_superloop(void);
 void system_cleanup(void);
 
 int1 SUPERLOOP_RUNNING = TRUE;
@@ -97,7 +97,7 @@ nvg_s g_nvg;                  // Naviguider
 void main(void) {	
     system_init();
     while (SUPERLOOP_RUNNING) {
-        housekeeping(); 
+        system_superloop(); 
     }
     system_cleanup();
 }
@@ -137,28 +137,30 @@ void system_init(void) {
     // mtq_set_conf(&g_mtq, 0, MTQ_MODE_DETUMBLING);
     // gyro_init(&g_gyro, GYRO_CS1, GYRO_CS2, GYRO_CS3, GYRO_ON);
     nvg_init(&g_nvg, NVG_PORT);
-    cmdmgr_init(&g_cmdmgr);
     scheduler_init(&g_scheduler);
+    cmdmgr_init(&g_cmdmgr);
+    hk_init();
+    cmdimpl_init();
 
     sprintf(LOGBUF, "system initialized"); log_flush(LL_INFO);
     delay_ms(1000);
 }
 
-// Housekeeping routine
-void housekeeping(void) {
+// Master code of what runs every superloop iteration
+void system_superloop(void) {
     // Kick the dog
     restart_wdt();
 
     // Handle received byte interrupts
     isr_disable_all();
     // Do driver handling before commands so data is up to date
-    // mtq_rcv_parser(&g_mtq, &g_irqmgr.irqbufs[0]); // Handle magnetorquer data
-    nvg_rcv_parser(&g_nvg, &g_irqmgr.irqbufs[1]); // Handle naviguider data
-    cmdmgr_rcv_parser(&g_cmdmgr, &g_irqmgr.irqbufs[2], &g_cmdmgr.rcvpkts[0]); // Handle UPPM commands 
-    cmdmgr_rcv_parser(&g_cmdmgr, &g_irqmgr.irqbufs[3], &g_cmdmgr.rcvpkts[1]); // Handle FTDI commands
+    // mtq_parse_stream(&g_mtq, &g_irqmgr.irqbufs[0]); // Handle magnetorquer data
+    nvg_parse_stream(&g_nvg, &g_irqmgr.irqbufs[1]); // Handle naviguider data
+    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[2], &g_cmdmgr.rcvpkts[0]); // Handle UPPM commands 
+    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[3], &g_cmdmgr.rcvpkts[1]); // Handle FTDI commands
     isr_enable_all();
    
-    scheduler_run_tasks(&g_scheduler);
+    scheduler_run_tasks(&g_scheduler, &g_cmdmgr);
 }
 
 // Cleanup routine

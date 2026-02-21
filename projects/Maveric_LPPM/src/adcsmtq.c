@@ -195,39 +195,39 @@ void mtq_read_complete(mtq_s* mtq) {
     switch (reg->type) {
         case T_UINT8: {
             for (i = 0; i < n_body_bytes; i++)
-                p += sprintf(LOGBUF, " %u", ((uint8_t*)reg->value)[i]);
+                p += sprintf(&LOGBUF[p], " %u", ((uint8_t*)reg->value)[i]);
             break;
         }
         case T_INT8: {
             for (i = 0; i < n_body_bytes/2; i++)
-                p += sprintf(LOGBUF, " %d", ((int8_t*)reg->value)[i]);
+                p += sprintf(&LOGBUF[p], " %d", ((int8_t*)reg->value)[i]);
             break;
         }
         case T_UINT16: {
             for (i = 0; i < n_body_bytes/2; i++)
-                p += sprintf(LOGBUF, " %u", ((uint16_t*)reg->value)[i]);
+                p += sprintf(&LOGBUF[p], " %u", ((uint16_t*)reg->value)[i]);
             break;
         }
         case T_INT16: {
             for (i = 0; i < n_body_bytes/2; i++)
-                p += sprintf(LOGBUF, " %d", ((int16_t*)reg->value)[i]);
+                p += sprintf(&LOGBUF[p], " %d", ((int16_t*)reg->value)[i]);
             break;
         }
         case T_FLOAT: {
 //            for (i = 0; i < n_body_bytes; i++)
-//                p += sprintf(LOGBUF, " 0x%02X", reg->value[i]);
+//                p += sprintf(&LOGBUF[p], " 0x%02X", reg->value[i]);
             for (i = 0; i < n_body_bytes/4; i++) 
-                p += sprintf(LOGBUF, " %.2f", ((float*)reg->value)[i]);
+                p += sprintf(&LOGBUF[p], " %.2f", ((float*)reg->value)[i]);
             break;
         }
         case T_CHAR: {
             ((char*)reg->value)[n_body_bytes] = '\0'; // Null terminate
-            p += sprintf(LOGBUF, " '%s'", (char*)reg->value);
+            p += sprintf(&LOGBUF[p], " '%s'", (char*)reg->value);
             break;
         }
     }    
 
-    p += sprintf(LOGBUF, " ]"); log_flush(LL_TRACE);
+    p += sprintf(&LOGBUF[p], " ]"); log_flush(LL_TRACE);
 }
 
 void mtq_write_start(mtq_s* mtq, mtq_reg_s* reg, void* data) {
@@ -262,8 +262,8 @@ void mtq_write_start(mtq_s* mtq, mtq_reg_s* reg, void* data) {
     uint16_t p = 0;
     p += sprintf(LOGBUF, "mtq_write_start: port=%u reg=(%u,%u) len=%u data=[", mtq->port, reg->midx, reg->idx, w_buf_len+1);
     for (i = 0; i < w_buf_len; i++)
-        p += sprintf(LOGBUF, " 0x%02X", w_buf[i]);
-    p += sprintf(LOGBUF, " 0x%02X ]", csum); log_flush(LL_TRACE);
+        p += sprintf(&LOGBUF[p], " 0x%02X", w_buf[i]);
+    p += sprintf(&LOGBUF[p], " 0x%02X ]", csum); log_flush(LL_TRACE);
     
     uart_write_buf(mtq->port, w_buf, w_buf_len);
     uart_write_buf(mtq->port, &csum, 1);
@@ -306,7 +306,7 @@ void mtq_write_complete(mtq_s* mtq) {
             mtq->port, reg->midx, reg->idx, reg->cnt, rcvpkt->err); log_flush(LL_TRACE);
 }
 
-void mtq_rcv_parser(mtq_s* mtq, circbuf_s* irqbuf) {
+void mtq_parse_stream(mtq_s* mtq, circbuf_s* irqbuf) {
     mtq_pkt_s* rcvpkt = &mtq->rcvpkt;
     uint16_t iter = 0;
     while (iter < 2*CIRCBUF_MAX_SIZE) {
@@ -368,7 +368,7 @@ void mtq_rcv_parser(mtq_s* mtq, circbuf_s* irqbuf) {
                 mtq_pkt_clear(rcvpkt);
                 break;
             case MTQ_FSM_ERROR:
-                sprintf(LOGBUF, "mtq_rcv_parser: malformed packet"); log_flush(LL_ERROR);
+                sprintf(LOGBUF, "mtq_parse_stream: malformed packet"); log_flush(LL_ERROR);
                 mtq_pkt_clear(rcvpkt);
                 break;
         }
@@ -400,14 +400,6 @@ int1 mtq_heartbeat(mtq_s* mtq) {
 void mtq_reset(mtq_s* mtq) {
     uint8_t req = 1;
     mtq_write_start(mtq, MTQ_NVM, &req);
-}
-
-// NOT WORKING. may need to use state machine to read 1 reg per superloop iteration.
-void mtq_read_all(mtq_s* mtq) {
-    uint8_t i;
-    for (i = 0; i < MTQ_REG_TABLE_LEN; i++) {
-        mtq_read_start(mtq, &mtq->reg_table[i]);
-    }
 }
 
 void mtq_read_fast(mtq_s* mtq) {

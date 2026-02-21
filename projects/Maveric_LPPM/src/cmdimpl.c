@@ -1,4 +1,4 @@
-#include "cmdfunc.h"
+#include "cmdimpl.h"
 #include "cmdmgr.h"
 #include "systime.h"
 #include "hashtable.h"
@@ -21,13 +21,14 @@ extern mtq_s g_mtq;                   // Magnetorquer
 extern gyro_s g_gyro;                 // Gyroscope (x3)
 extern nvg_s g_nvg;                   // Naviguider
 
-void cmdmgr_register_funcs(cmdmgr_s* cmdmgr) {
-    ht_init(&cmdmgr->cmdfuncs); 
-    ht_set(&cmdmgr->cmdfuncs, "cmd_set_time", (cmdfunc_f) cmdfunc_set_time);
-    ht_set(&cmdmgr->cmdfuncs, "cmd_ftdi_log", (cmdfunc_f) cmdfunc_ftdi_log);
+void cmdimpl_init(void) {
+    ht_set(&g_cmdmgr.cmdimpls, "cmd_set_time", (cmdimpl_f) cmdimpl_cmd_set_time);
+    ht_set(&g_cmdmgr.cmdimpls, "cmd_ftdi_log", (cmdimpl_f) cmdimpl_cmd_ftdi_log);
 }
 
-void cmdfunc_set_time(cmdpkt_s* pkt) {
+// COMMAND IMPLEMENTATIONS
+
+void cmdimpl_cmd_set_time(cmdpkt_s* pkt) {
     // I know we're updating the original args string here. We should have all our args parsed out after this so it's ok.
     char* p = pkt->args_str;  
     struct_tm time;
@@ -43,12 +44,12 @@ void cmdfunc_set_time(cmdpkt_s* pkt) {
     systime_sync();
     mtq_set_date_time(&g_mtq, &time); 
 
-    sprintf(LOGBUF, "cmdfunc_set_time [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", 
+    sprintf(LOGBUF, "cmdimpl_cmd_set_time [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", 
             g_ertc.time.tm_wday, g_ertc.time.tm_mon, g_ertc.time.tm_mday, g_ertc.time.tm_year, 
             g_ertc.time.tm_hour, g_ertc.time.tm_min, g_ertc.time.tm_sec); log_flush(LL_INFO);
 }
 
-void cmdfunc_ftdi_log(cmdpkt_s* pkt) {
+void cmdimpl_cmd_ftdi_log(cmdpkt_s* pkt) {
     char* p = pkt->args_str;
     fprintf(FTDI_PORT, "%s", p);
 }
