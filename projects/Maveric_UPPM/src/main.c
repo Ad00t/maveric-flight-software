@@ -63,7 +63,7 @@
 #include "crcnew.c"
 #include "common.c"
 #include "hashtable.c"
-#include "circbuf.c"
+#include "ringbuf.c"
 #include "i2c.c"
 #include "spi.c"
 #include "interrupts.c"

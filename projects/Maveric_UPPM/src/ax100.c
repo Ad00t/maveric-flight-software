@@ -1,14 +1,14 @@
 #include "ax100.h"
 #include "crcnew.h"
 #include "uart.h"
-#include "circbuf.h"
+#include "ringbuf.h"
 #include "common.h"
 
 // MAIN TRANSCEIVER INTERFACE
 
 void ax100_init(ax100_s* a, uint8_t port) {
     a->port = port;
-    cb_init(&a->cmdbuf);
+    rb_init(&a->cmdbuf);
     ax100_set_power(a, TRUE);
     sprintf(LOGBUF, "ax100_init"); log_flush(KWHT);
 }
@@ -25,8 +25,8 @@ int1 ax100_is_on(ax100_s* a) {
 	return (int1) input_state(AX100_PWR);
 }
 
-uint8_t ax100_get_avail_msg(ax100_s* a, circbuf_s* irqbuf) {
-	if (cb_len(irqbuf) <= CRC32_SIZE + getKissFooterSize() + getKissHeaderSize() + getCspHeaderSize()) {
+uint8_t ax100_get_avail_msg(ax100_s* a, ringbuf_s* irqbuf) {
+	if (rb_len(irqbuf) <= CRC32_SIZE + getKissFooterSize() + getKissHeaderSize() + getCspHeaderSize()) {
 		return 0;
 	}
 
@@ -42,8 +42,8 @@ uint8_t ax100_get_avail_msg(ax100_s* a, circbuf_s* irqbuf) {
 	uint8_t msgLength = 0;
     uint8_t frameLength = frameEndIdx - frameStartIdx + 1;
     uint8_t framebuf[AX100_MAX_FRAME_SIZE] = {0};
-    cb_pop(irqbuf, frameStartIdx, NULL);
-    cb_pop(irqbuf, frameLength, framebuf);
+    rb_pop(irqbuf, frameStartIdx, NULL);
+    rb_pop(irqbuf, frameLength, framebuf);
     extractMessageFromFrame(framebuf, frameLength, &a->cmdbuf, &msgLength);
 	return msgLength;
 }
@@ -81,17 +81,17 @@ void setupFrame(uint8_t* message, uint16_t messageLength, uint8_t* frame, uint16
 	addKissFooter(frame, frameLength);
 }
 
-int1 findFrame(circbuf_s* irqbuf, int* frameStartIdx, int* frameEndIdx, uint16_t minFrameSize) {
+int1 findFrame(ringbuf_s* irqbuf, int* frameStartIdx, int* frameEndIdx, uint16_t minFrameSize) {
 	*frameStartIdx = -1;
 	*frameEndIdx = -1;
 
-    uint8_t bufferLen = cb_len(irqbuf);
+    uint8_t bufferLen = rb_len(irqbuf);
 	int startLimit = bufferLen - 1;
 	uint8_t idx;
 	for (idx = 0; idx < startLimit; idx++) {
         uint8_t b1, b2;
-        cb_peek(irqbuf, idx, &b1);
-        cb_peek(irqbuf, idx+1, &b2);
+        rb_peek(irqbuf, idx, &b1);
+        rb_peek(irqbuf, idx+1, &b2);
 		if (b1 == FEND && b2 != FEND) {
             *frameStartIdx = idx;
 			break;
@@ -104,7 +104,7 @@ int1 findFrame(circbuf_s* irqbuf, int* frameStartIdx, int* frameEndIdx, uint16_t
 
 	for (idx = *frameStartIdx + 1 + minFrameSize; idx < bufferLen; idx++) {
         uint8_t b;
-        cb_peek(irqbuf, idx, &b);
+        rb_peek(irqbuf, idx, &b);
 		if (b == FEND) {
 			*frameEndIdx = idx;
 			return TRUE;
@@ -114,13 +114,13 @@ int1 findFrame(circbuf_s* irqbuf, int* frameStartIdx, int* frameEndIdx, uint16_t
     return FALSE;
 }
 
-void extractMessageFromFrame(uint8_t* framebuf, uint16_t frameLength, circbuf_s* cmdbuf, uint16_t* msgLength) {
+void extractMessageFromFrame(uint8_t* framebuf, uint16_t frameLength, ringbuf_s* cmdbuf, uint16_t* msgLength) {
     uint8_t msgbuf[AX100_MAX_FRAME_SIZE] = {0};
 	removeKissByteCheck(framebuf, frameLength, msgbuf, msgLength, 0);
 	*msgLength -= getKissHeaderSize() + getCspHeaderSize() + CRC32_SIZE + getKissFooterSize();
 	uint8_t i;
 	for (i = 0; i < *msgLength; ++i) {
-		cb_push(cmdbuf, msgbuf[i + getKissHeaderSize() + getCspHeaderSize()]);
+		rb_push(cmdbuf, msgbuf[i + getKissHeaderSize() + getCspHeaderSize()]);
 	}
 }
 

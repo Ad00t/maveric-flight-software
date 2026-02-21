@@ -306,12 +306,12 @@ void mtq_write_complete(mtq_s* mtq) {
             mtq->port, reg->midx, reg->idx, reg->cnt, rcvpkt->err); log_flush(LL_TRACE);
 }
 
-void mtq_parse_stream(mtq_s* mtq, circbuf_s* irqbuf) {
+void mtq_parse_stream(mtq_s* mtq, ringbuf_s* irqbuf) {
     mtq_pkt_s* rcvpkt = &mtq->rcvpkt;
     uint16_t iter = 0;
-    while (iter < 2*CIRCBUF_MAX_SIZE) {
+    while (iter < 2*RINGBUF_MAX_SIZE) {
         uint8_t b;
-        if (!cb_pop(irqbuf, 1, &b)) return;
+        if (!rb_pop(irqbuf, 1, &b)) return;
       
         switch (rcvpkt->fsm) {
             case MTQ_FSM_HEAD:

@@ -14,7 +14,7 @@ Purpose: Provides a base definition for interfacing with the AX100 transceiver
 ***************************************************************************/
 
 #include <stdint.h>
-#include "circbuf.h"
+#include "ringbuf.h"
 
 // kiss header size (2), csp header size (4), crc32 size (4), kiss footer size (1)
 #define AX100_MAX_FRAME_SIZE          256
@@ -40,13 +40,13 @@ Purpose: Provides a base definition for interfacing with the AX100 transceiver
 
 typedef struct {
     uint8_t port; 
-    circbuf_s cmdbuf;
+    ringbuf_s cmdbuf;
 } ax100_s;
 
 void ax100_init(ax100_s* a, uint8_t port);
 void ax100_set_power(ax100_s* a, int1 on);
 int1 ax100_is_on(ax100_s* a);
-uint8_t ax100_get_avail_msg(ax100_s* a, circbuf_s* irqbuf);
+uint8_t ax100_get_avail_msg(ax100_s* a, ringbuf_s* irqbuf);
 void ax100_transmit_msg(ax100_s* a, uint8_t* buf, uint8_t len);
 
 // FRAME
@@ -68,12 +68,12 @@ void setupFrame(uint8_t* message, uint16_t messageLength, uint8_t* frame, uint16
   Looks through a buffer to see if a full frame is available for processing. Used
   for data coming from GomSpace
 */
-int1 findFrame(circbuf_s* irqbuf, int* frameStartIdx, int* frameEndIdx, uint16_t minFrameSize);
+int1 findFrame(ringbuf_s* irqbuf, int* frameStartIdx, int* frameEndIdx, uint16_t minFrameSize);
 
 /*
   Takes a frame and extracts the message out of it. Used for data coming from GomSpace
 */
-void extractMessageFromFrame(uint8_t* framebuf, uint16_t frameLength, circbuf_s* cmdbuf, uint16_t* msgLength);
+void extractMessageFromFrame(uint8_t* framebuf, uint16_t frameLength, ringbuf_s* cmdbuf, uint16_t* msgLength);
 
 void setupWdtReset(uint8_t* msg, uint16_t* msgLength);
 

@@ -51,11 +51,11 @@ void scheduler_run_tasks(scheduler_s* s, cmdmgr_s* cmdmgr) {
                 s->tasks[i].next_release = newnext; 
             }
             if (s->tasks[i].is_cmd) {
-                circbuf_s rcvbuf;
-                cb_init(&rcvbuf);
+                ringbuf_s rcvbuf;
+                rb_init(&rcvbuf);
                 uint8_t j;
                 for (j = 0; j < CMD_MAX_LEN; j++) {
-                    cb_push(&rcvbuf, (uint8_t) s->tasks[i].cmd[j]); 
+                    rb_push(&rcvbuf, (uint8_t) s->tasks[i].cmd[j]); 
                 }
                 cmdpkt_s pkt;
                 cmdpkt_init(&pkt);

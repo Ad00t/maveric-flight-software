@@ -2,12 +2,12 @@
 #define __ADCSMTQ_H__
 
 #include "interrupts.h"
-#include "circbuf.h"
+#include "ringbuf.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <time.h>
 
-#define MTQ_MAX_DATA_LEN        CIRCBUF_MAX_SIZE - 1
+#define MTQ_MAX_DATA_LEN        RINGBUF_MAX_SIZE - 1
 #define MTQ_HEAD_READ           0xC9
 #define MTQ_HEAD_WRITE          0xC8
 #define MTQ_REG_TABLE_LEN       23      // 116
@@ -112,7 +112,7 @@ void mtq_write_start(mtq_s* mtq, uint16_t key, void* data);
 void mtq_write_complete(mtq_s* mtq);
 
 // Parse mtq data packets from input stream/buffer 
-void mtq_parse_stream(mtq_s* mtq, circbuf_s* irqbuf);
+void mtq_parse_stream(mtq_s* mtq, ringbuf_s* irqbuf);
 
 // HIGH LEVEL API
 

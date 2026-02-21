@@ -2,7 +2,7 @@
 #define __CMDMGR_H__
 
 #include <stdint.h>
-#include "circbuf.h"
+#include "ringbuf.h"
 #include "hashtable.h"
 
 #define CMD_MAX_LEN             127
@@ -64,7 +64,7 @@ void cmdmgr_init(cmdmgr_s* cmdmgr);
 void cmdmgr_clear(cmdmgr_s* cmdmgr);
 
 // Parse command from bytestream/buffer 
-void cmdmgr_parse_stream(cmdmgr_s* cmdmgr, circbuf_s* rcvbuf, cmdpkt_s* rcvpkt);
+void cmdmgr_parse_stream(cmdmgr_s* cmdmgr, ringbuf_s* rcvbuf, cmdpkt_s* rcvpkt);
 
 // Checks link layer headers, CRC, and forwards/runs command appropriately
 void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt);

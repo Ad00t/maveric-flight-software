@@ -1,6 +1,6 @@
 #include "naviguider.h"
 #include "interrupts.h"
-#include "circbuf.h"
+#include "ringbuf.h"
 #include "uart.h"
 #include "common.h"
 #include <stdio.h>
@@ -107,13 +107,13 @@ void nvg_send_command(nvg_s* nvg, char* cmd) {
     delay_ms(100);
 } 
 
-void nvg_parse_stream(nvg_s* nvg, circbuf_s* irqbuf) {
+void nvg_parse_stream(nvg_s* nvg, ringbuf_s* irqbuf) {
     nvg_pkt_s* rcvpkt = &nvg->rcvpkt;
 
     uint16_t iter;
-    for (iter = 0; iter < 2 * CIRCBUF_MAX_SIZE; iter++) {
+    for (iter = 0; iter < 2 * RINGBUF_MAX_SIZE; iter++) {
         uint8_t c;
-        if (!cb_pop(irqbuf, 1, &c))
+        if (!rb_pop(irqbuf, 1, &c))
             return;
 
         /* Accumulate characters until line end */

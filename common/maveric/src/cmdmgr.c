@@ -1,5 +1,5 @@
 #include "cmdmgr.h"
-#include "circbuf.h"
+#include "ringbuf.h"
 #include "hashtable.h"
 #include "crcnew.h"
 #include "common.h"
@@ -42,11 +42,11 @@ void cmdmgr_clear(cmdmgr_s* cmdmgr) {
     }
 }
 
-void cmdmgr_parse_stream(cmdmgr_s* cmdmgr, circbuf_s* rcvbuf, cmdpkt_s* rcvpkt) {
+void cmdmgr_parse_stream(cmdmgr_s* cmdmgr, ringbuf_s* rcvbuf, cmdpkt_s* rcvpkt) {
     uint16_t iter = 0;
-    while (iter < 2 * CIRCBUF_MAX_SIZE) {
+    while (iter < 2 * RINGBUF_MAX_SIZE) {
         uint8_t b = 0;
-        if (!cb_pop(rcvbuf, 1, &b)) return;
+        if (!rb_pop(rcvbuf, 1, &b)) return;
 
         switch (rcvpkt->fsm) {
             case CMDPKT_FSM_HEAD:

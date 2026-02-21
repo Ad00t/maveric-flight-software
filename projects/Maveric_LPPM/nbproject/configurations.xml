@@ -50,6 +50,8 @@
       <itemPath>../../common/maveric/src/scheduler.c</itemPath>
       <itemPath>../../common/maveric/src/systime.c</itemPath>
       <itemPath>src/m41t81s.c</itemPath>
+      <itemPath>src/cmdimpl.c</itemPath>
+      <itemPath>src/housekeeping.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>

@@ -11,7 +11,7 @@
 
 typedef struct {
     int1 started;
-    volatile circbuf_s irqbufs[NUM_PORTS];
+    volatile ringbuf_s irqbufs[NUM_PORTS];
     volatile uint64_t ms;
 } irqmgr_s;
 
