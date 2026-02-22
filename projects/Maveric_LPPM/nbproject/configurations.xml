@@ -7,7 +7,6 @@
       <itemPath>include/pinslower.h</itemPath>
       <itemPath>../../common/maveric/include/i2c.h</itemPath>
       <itemPath>../../common/maveric/include/uart.h</itemPath>
-      <itemPath>../../common/maveric/include/circbuf.h</itemPath>
       <itemPath>../../common/maveric/include/hashtable.h</itemPath>
       <itemPath>../../common/maveric/include/crcnew.h</itemPath>
       <itemPath>include/interrupts.h</itemPath>
@@ -21,6 +20,7 @@
       <itemPath>../../common/maveric/include/colors.h</itemPath>
       <itemPath>include/cmdimpl.h</itemPath>
       <itemPath>include/housekeeping.h</itemPath>
+      <itemPath>../../common/maveric/include/ringbuf.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -39,7 +39,6 @@
     <logicalFolder name="OtherFiles" displayName="Other Files" projectFiles="false">
       <itemPath>../../common/maveric/src/i2c.c</itemPath>
       <itemPath>../../common/maveric/src/uart.c</itemPath>
-      <itemPath>../../common/maveric/src/circbuf.c</itemPath>
       <itemPath>../../common/maveric/src/hashtable.c</itemPath>
       <itemPath>../../common/maveric/src/crcnew.c</itemPath>
       <itemPath>../../common/maveric/src/cmdmgr.c</itemPath>

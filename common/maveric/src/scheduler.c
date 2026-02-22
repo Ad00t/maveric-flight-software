@@ -7,33 +7,40 @@
 
 // HELPERS
 
-void schedule_task(scheduler_s* s, schedtask_s task) {
+int8_t schedule_task(scheduler_s* s, schedtask_s task, uint8_t i_start, uint8_t max_tasks) {
     if (task.id < 0) {
         sprintf(LOGBUF, "schedule_task: task id invalid"); log_flush(LL_ERROR);
-        return;
+        return -1;
     }
-    uint8_t start = s->i_free;
-    while (s->tasks[s->i_free].id >= 0) {
-        s->i_free = (s->i_free + 1) % SCHEDULER_MAX_TASKS;
-        if (s->i_free == start) {
+    uint8_t i_free = i_start;
+    while (s->tasks[i_free].id >= 0) {
+        if (++i_free == i_start + max_tasks) {
             sprintf(LOGBUF, "schedule_task: tasks buffer full"); log_flush(LL_ERROR);
-            return;
+            return -1;
         }
     }
-    s->tasks[s->i_free] = task; 
-    s->id_to_idx[task.id] = s->i_free;
+    s->tasks[i_free] = task; 
+    s->id_map[task.id] = &s->tasks[i_free];
+    return i_free;
+}
+
+void create_schedtask(schedtask_s* task, int8_t id, schedtask_type_e type, uint64_t next_release, uint32_t period_ms, uint16_t reps) {
+    task->id = id;
+    task->type = type;
+    task->active = TRUE;
+    task->next_release = next_release;
+    task->period_ms = period_ms;
+    task->remaining_reps = reps;
 }
 
 // SCHEDULER PUBLIC API
 
 void scheduler_init(scheduler_s* s) {
-    memset(s->tasks, 0, sizeof(s->tasks));
-    memset(s->id_to_idx, 0, sizeof(s->id_to_idx));
+    memset(s, 0, sizeof(scheduler_s));
     uint8_t i;
     for (i = 0; i < SCHEDULER_MAX_TASKS; i++) {
         s->tasks[i].id = -1;
     }
-    s->i_free = 0;
 }
 
 void scheduler_run_tasks(scheduler_s* s, cmdmgr_s* cmdmgr) {
@@ -50,77 +57,72 @@ void scheduler_run_tasks(scheduler_s* s, cmdmgr_s* cmdmgr) {
                 uint64_t newnext = now + s->tasks[i].period_ms;
                 s->tasks[i].next_release = newnext; 
             }
-            if (s->tasks[i].is_cmd) {
-                ringbuf_s rcvbuf;
-                rb_init(&rcvbuf);
-                uint8_t j;
-                for (j = 0; j < CMD_MAX_LEN; j++) {
-                    rb_push(&rcvbuf, (uint8_t) s->tasks[i].cmd[j]); 
-                }
-                cmdpkt_s pkt;
-                cmdpkt_init(&pkt);
-                cmdmgr_parse_stream(cmdmgr, &rcvbuf, &pkt);
-            } else {
-                schedfunc_f schedfunc = s->tasks[i].func;
-                schedfunc();
+            switch (s->tasks[i].type) {
+                case CMD:
+                    ringbuf_s rcvbuf;
+                    rb_init(&rcvbuf);
+                    uint8_t j;
+                    for (j = 0; j < CMD_MAX_LEN; j++) {
+                        rb_push(&rcvbuf, s->tasks[i].cmd_ptr[j]); 
+                    }
+                    cmdpkt_s pkt;
+                    cmdpkt_init(&pkt);
+                    cmdmgr_parse_stream(cmdmgr, &rcvbuf, &pkt);
+                    break;
+                case FUNC:
+                    schedfunc_f schedfunc = s->tasks[i].func;
+                    schedfunc();
+                    break;
             }
         }
     }
 }
 
-void scheduler_deschedule(scheduler_s* s, uint8_t id) {
-    memset(&s->tasks[s->id_to_idx[id]], 0, sizeof(schedtask_s));
-    s->id_to_idx[id] = 0;
+uint8_t scheduler_deschedule(scheduler_s* s, uint8_t id) {
+    schedtask_s* task_ptr = s->id_map[id];
+    if (task_ptr == NULL) return STATUS_ERR;
+    if (task_ptr->type == CMD) memset(task_ptr->cmd_ptr, 0, CMD_MAX_LEN);
+    memset(task_ptr, 0, sizeof(schedtask_s));
+    s->id_map[id] = NULL;
+    return STATUS_OK;
 }
 
-void scheduler_schedule_at(scheduler_s* s, int8_t id, schedfunc_f func, struct_tm start_time, uint16_t reps, uint32_t period_ms) {
+uint8_t scheduler_schedule_func_at(scheduler_s* s, int8_t id, schedfunc_f func, struct_tm start_time, uint32_t period_ms, uint16_t reps) {
     schedtask_s task = {0};
-    task.id = id;
+    create_schedtask(&task, id, FUNC, rtc_to_epoch_ms(start_time), period_ms, reps);
     task.func = func;
-    memset(task.cmd, 0, sizeof(task.cmd));
-    task.is_cmd = FALSE;
-    task.next_release = rtc_to_epoch_ms(start_time);
-    task.remaining_reps = reps;
-    task.period_ms = period_ms;
-    task.active = TRUE;
-    schedule_task(s, task);
+    int8_t i_task = schedule_task(s, task, 0, SCHEDULER_MAX_FUNC_TASKS); // Func tasks segment of tasks buffer
+    if (i_task == -1) return STATUS_ERR;
+    return STATUS_OK;
 }
 
-void scheduler_schedule_at(scheduler_s* s, int8_t id, char* cmd, struct_tm start_time, uint16_t reps, uint32_t period_ms) {
+uint8_t scheduler_schedule_cmd_at(scheduler_s* s, int8_t id, uint8_t* cmd, struct_tm start_time, uint32_t period_ms, uint16_t reps) {
     schedtask_s task = {0};
-    task.id = id;
-    task.func = NULL;
-    memcpy(task.cmd, cmd, sizeof(task.cmd));
-    task.is_cmd = TRUE;
-    task.next_release = rtc_to_epoch_ms(start_time);
-    task.remaining_reps = reps;
-    task.period_ms = period_ms;
-    task.active = TRUE;
-    schedule_task(s, task);
+    create_schedtask(&task, id, CMD, rtc_to_epoch_ms(start_time), period_ms, reps);
+    int8_t i_task = schedule_task(s, task, SCHEDULER_MAX_FUNC_TASKS, SCHEDULER_MAX_CMD_TASKS); // Cmd tasks segment of tasks buffer
+    if (i_task == -1) return STATUS_ERR;
+    uint8_t* cmd_ptr = s->cmds[i_task - SCHEDULER_MAX_FUNC_TASKS]; 
+    memcpy(cmd_ptr, cmd, CMD_MAX_LEN);
+    s->tasks[i_task].cmd_ptr = cmd_ptr;
+    return STATUS_OK;
 }
 
-void scheduler_schedule_in(scheduler_s* s, int8_t id, schedfunc_f func, uint32_t start_delay_ms, uint16_t reps, uint32_t period_ms) {
+uint8_t scheduler_schedule_func_in(scheduler_s* s, int8_t id, schedfunc_f func, uint32_t start_delay_ms, uint32_t period_ms, uint16_t reps) {
     schedtask_s task = {0};
-    task.id = id;
+    create_schedtask(&task, id, FUNC, systime_epoch_ms() + start_delay_ms, period_ms, reps);
     task.func = func;
-    memset(task.cmd, 0, sizeof(task.cmd));
-    task.is_cmd = FALSE;
-    task.next_release = systime_epoch_ms() + start_delay_ms;
-    task.remaining_reps = reps;
-    task.period_ms = period_ms;
-    task.active = TRUE;
-    schedule_task(s, task);
+    uint8_t i_task = schedule_task(s, task, 0, SCHEDULER_MAX_FUNC_TASKS);
+    if (i_task == -1) return STATUS_ERR;
+    return STATUS_OK;
 }
 
-void scheduler_schedule_in(scheduler_s* s, int8_t id, char* cmd, uint32_t start_delay_ms, uint16_t reps, uint32_t period_ms) {
+uint8_t scheduler_schedule_cmd_in(scheduler_s* s, int8_t id, uint8_t* cmd, uint32_t start_delay_ms, uint32_t period_ms, uint16_t reps) {
     schedtask_s task = {0};
-    task.id = id;
-    task.func = NULL;
-    memcpy(task.cmd, cmd, sizeof(task.cmd));
-    task.is_cmd = TRUE;
-    task.next_release = systime_epoch_ms() + start_delay_ms;
-    task.remaining_reps = reps;
-    task.period_ms = period_ms;
-    task.active = TRUE;
-    schedule_task(s, task);
+    create_schedtask(&task, id, CMD, systime_epoch_ms() + start_delay_ms, period_ms, reps);
+    int8_t i_task = schedule_task(s, task, SCHEDULER_MAX_FUNC_TASKS, SCHEDULER_MAX_CMD_TASKS);
+    if (i_task == -1) return STATUS_ERR;
+    uint8_t* cmd_ptr = s->cmds[i_task - SCHEDULER_MAX_FUNC_TASKS]; 
+    memcpy(cmd_ptr, cmd, CMD_MAX_LEN);
+    s->tasks[i_task].cmd_ptr = cmd_ptr;
+    return STATUS_OK;
 }

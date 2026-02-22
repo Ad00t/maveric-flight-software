@@ -3,7 +3,11 @@
 
 #include <stdint.h>
 
-#define LOGBUF_MAX_LEN          512
+#define STATUS_OK               1
+#define STATUS_ERR              0
+
+#define LOGBUF_MAX_LEN          256 
+char LOGBUF[LOGBUF_MAX_LEN];    // Global log buffer
 
 typedef enum {
     LL_TRACE = 0,
@@ -13,8 +17,6 @@ typedef enum {
     LL_NONE = 4
 } log_level_e;
 
-char LOGBUF[LOGBUF_MAX_LEN];    // Global log buffer
-
 // Creates a command string with the given parameters
 uint8_t create_cmd(uint8_t src, uint8_t dest, uint8_t echo, char* id, char* args, uint8_t* out);
 
@@ -22,4 +24,3 @@ uint8_t create_cmd(uint8_t src, uint8_t dest, uint8_t echo, char* id, char* args
 void log_flush(log_level_e lvl);
 
 #endif // !__COMMON_H__
-

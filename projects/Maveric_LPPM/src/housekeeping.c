@@ -22,12 +22,12 @@ extern gyro_s g_gyro;                 // Gyroscope (x3)
 extern nvg_s g_nvg;                   // Naviguider
 
 void hk_init(void) {
-    scheduler_schedule_in(&g_scheduler, 0, hk_get_ertc_time, 2000, SCHEDULE_REPS_INFINITE, 500);
-    scheduler_schedule_in(&g_scheduler, 1, hk_systime_sync, 2000, SCHEDULE_REPS_INFINITE, 5000);
-    scheduler_schedule_in(&g_scheduler, 2, hk_log, 2000, SCHEDULE_REPS_INFINITE, 500);
-    scheduler_schedule_in(&g_scheduler, 3, hk_heartbeats, 2000, SCHEDULE_REPS_INFINITE, 3000);
-    scheduler_schedule_in(&g_scheduler, 4, hk_read_sensors, 2000, SCHEDULE_REPS_INFINITE, 1000);
-    // scheduler_schedule_in(&g_scheduler, 6, hk_test_disable_ertc, 15000, 1, 0);
+    scheduler_schedule_func_in(&g_scheduler, 0, hk_get_ertc_time, 2000, 500, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 1, hk_systime_sync, 2000, 5000, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 2, hk_log, 2000, 500, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 3, hk_heartbeats, 2000, 3000, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 4, hk_read_sensors, 2000, 1000, SCHEDULE_REPS_INFINITE);
+    // scheduler_schedule_func_in(&g_scheduler, 6, hk_test_disable_ertc, 15000, 0, 1);
 }
 
 // HOUSEKEEPING FUNCTIONS
