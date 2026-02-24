@@ -50,6 +50,8 @@
       <itemPath>../../common/maveric/src/uart.c</itemPath>
       <itemPath>../../common/maveric/src/common.c</itemPath>
       <itemPath>../../common/maveric/src/ringbuf.c</itemPath>
+      <itemPath>src/cmdimpl.c</itemPath>
+      <itemPath>src/housekeeping.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>

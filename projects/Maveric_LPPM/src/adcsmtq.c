@@ -144,7 +144,7 @@ void mtq_read_start(mtq_s* mtq, mtq_reg_s* reg) {
     w_buf[3] = (reg->midx << 4) | 0;
     uint8_t csum = gen_csum(w_buf, 4);
     
-    sprintf(LOGBUF, "mtq_read_start: port=UART%u reg=(%u,%u) data=[ 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X ]", 
+    sprintf(LOGBUF, "mtq_read_start: port=UART%u reg=(%u,%u) data=[ %02X %02X %02X %02X %02X ]", 
             mtq->port, reg->midx, reg->idx, w_buf[0], w_buf[1], w_buf[2], w_buf[3], csum); log_flush(LL_TRACE);
     
     uart_write_buf(mtq->port, w_buf, 4); 
@@ -262,8 +262,8 @@ void mtq_write_start(mtq_s* mtq, mtq_reg_s* reg, void* data) {
     uint16_t p = 0;
     p += sprintf(LOGBUF, "mtq_write_start: port=%u reg=(%u,%u) len=%u data=[", mtq->port, reg->midx, reg->idx, w_buf_len+1);
     for (i = 0; i < w_buf_len; i++)
-        p += sprintf(&LOGBUF[p], " 0x%02X", w_buf[i]);
-    p += sprintf(&LOGBUF[p], " 0x%02X ]", csum); log_flush(LL_TRACE);
+        p += sprintf(&LOGBUF[p], " %02X", w_buf[i]);
+    p += sprintf(&LOGBUF[p], " %02X ]", csum); log_flush(LL_TRACE);
     
     uart_write_buf(mtq->port, w_buf, w_buf_len);
     uart_write_buf(mtq->port, &csum, 1);

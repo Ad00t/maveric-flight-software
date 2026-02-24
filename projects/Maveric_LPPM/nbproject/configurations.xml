@@ -51,6 +51,7 @@
       <itemPath>src/m41t81s.c</itemPath>
       <itemPath>src/cmdimpl.c</itemPath>
       <itemPath>src/housekeeping.c</itemPath>
+      <itemPath>../../common/maveric/src/ringbuf.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
