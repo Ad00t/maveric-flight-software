@@ -10,7 +10,7 @@ void ax100_init(ax100_s* a, uint8_t port) {
     a->port = port;
     rb_init(&a->cmdbuf);
     ax100_set_power(a, TRUE);
-    sprintf(LOGBUF, "ax100_init"); log_flush(KWHT);
+    sprintf(LOGBUF, "ax100_init"); log_flush(LL_INFO);
 }
 
 void ax100_set_power(ax100_s* a, int1 on) {
