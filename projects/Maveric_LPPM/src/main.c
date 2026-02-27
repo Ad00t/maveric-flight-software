@@ -62,8 +62,8 @@
 #include <time.h>
 #include <time.c>
 #include "colors.h"
-#include "crcnew.c"
 #include "uart.c"
+#include "crcnew.c"
 #include "hashtable.c"
 #include "ringbuf.c"
 #include "i2c.c"

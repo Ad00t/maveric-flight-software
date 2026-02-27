@@ -18,7 +18,7 @@
          char array of size 1 is passed in.
 -----------------------------------------------------------
 */
-uint16_t compute_crc16(uint8_t* buf, int len) {
+uint16_t compute_crc16(uint8_t* buf, uint8_t len) {
     uint16_t crc = 0x0000;  // XMODEM init
     int i, j;
 

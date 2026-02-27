@@ -2,24 +2,27 @@ from crc import Calculator, Crc16
 import time
 import serial
 
-FEND = 0xC0
-DATA_FRAME = 0x00
 REQUEST = 0 
 RESPONSE = 1
 
 crcalc = Calculator(Crc16.XMODEM)
 
 def create_cmd(orgn: int, dest: int, echo: int, ptype: int, id: str, args: str) -> bytearray:
-    data = [ FEND, DATA_FRAME, orgn, dest, echo, ptype, len(id), len(args), id, 0, args, 0 ]
-    ba = bytearray()
-    for d in data:
-        if isinstance(d, int): ba.append(d & 0xFF)
-        elif isinstance(d, str): ba.extend(d.encode('ascii'))
-        elif isinstance(d, (bytes, bytearray)): ba.extend(d)
-    crc16 = crcalc.checksum(ba)
-    ba.extend(crc16.to_bytes(2, byteorder='little', signed=False))
-    ba.append(FEND & 0xFF)
-    return ba
+    msg_data = [ orgn, dest, echo, ptype, len(id), len(args), id, 0, args, 0 ]
+
+    msg_ba = bytearray()
+    for d in msg_data:
+        if isinstance(d, int): msg_ba.append(d & 0xFF)
+        elif isinstance(d, str): msg_ba.extend(d.encode('ascii'))
+        elif isinstance(d, (bytes, bytearray)): msg_ba.extend(d)
+    crc16 = crcalc.checksum(msg_ba)
+    msg_ba.extend(crc16.to_bytes(2, byteorder='little', signed=False))
+
+    pkt_ba = bytearray()
+    pkt_ba.extend(b'\xC0\x00')
+    pkt_ba.extend(msg_ba)
+    pkt_ba.extend(b'\xC0')
+    return pkt_ba 
 
 def send_cmd(serial: serial.Serial, orgn: int, dest: int, echo: int, ptype: int, id: str, args: str) -> tuple:
     if not (serial and serial.is_open): return (bytearray(), 0)

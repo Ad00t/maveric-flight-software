@@ -108,7 +108,7 @@ void nvg_send_command(nvg_s* nvg, char* cmd) {
 } 
 
 void nvg_parse_stream(nvg_s* nvg, ringbuf_s* irqbuf) {
-    nvg_pkt_s* rcvpkt = &nvg->rcvpkt;
+    nvg_pkt_s* pkt = &nvg->rcvpkt;
 
     uint16_t iter;
     for (iter = 0; iter < 2 * RINGBUF_MAX_SIZE; iter++) {
@@ -116,83 +116,81 @@ void nvg_parse_stream(nvg_s* nvg, ringbuf_s* irqbuf) {
         if (!rb_pop(irqbuf, 1, &c))
             return;
 
-        /* Accumulate characters until line end */
+        // Accumulate characters until line end
         if (c != '\r' && c != '\n') {
-            if (rcvpkt->rl_len < NVG_MAX_LINE_LEN - 1) {
-                rcvpkt->rcvline[rcvpkt->rl_len++] = c;
-                rcvpkt->rcvline[rcvpkt->rl_len] = '\0';
-            } else {
-                nvg_pkt_clear(rcvpkt);
+            if (pkt->buf_len >= NVG_MAX_LINE_LEN - 1) {
+                goto malformed;
             }
+            pkt->buf[pkt->buf_len++] = c;
+            pkt->buf[pkt->buf_len] = '\0';
             continue;
         }
 
-        /* Line end detected */
+        // Line end detected
 
-        if (rcvpkt->rl_len <= 8) {
-            nvg_pkt_clear(rcvpkt);
+        if (!is_data_line(pkt->buf, pkt->buf_len)) {
+            sprintf(LOGBUF, "nvg_parse_stream: info: len=%u \"%s\"", pkt->buf_len, pkt->buf); log_flush(LL_TRACE);
+            nvg_pkt_clear(pkt);
             continue;
         }
 
-        if (!is_data_line(rcvpkt->rcvline, rcvpkt->rl_len)) {
-            sprintf(LOGBUF, "nvg_parse_stream: info: len=%u \"%s\"", rcvpkt->rl_len, rcvpkt->rcvline); log_flush(LL_TRACE);
-            nvg_pkt_clear(rcvpkt);
-            continue;
+        // CSV data line detected
+
+        if (pkt->buf_len <= 8) {
+            goto malformed;
         }
 
-        /* ---- CSV parsing starts here ---- */
+        // sprintf(LOGBUF, "nvg_parse_stream: data: len=%u \"%s\"", pkt->buf_len, pkt->buf); log_flush(LL_TRACE);
 
-        // sprintf(LOGBUF, "nvg_parse_stream: data: len=%u \"%s\"", rcvpkt->rl_len, rcvpkt->rcvline); log_flush(LL_TRACE);
-
-        /* Tokenize */
+        // Tokenize
         char* argv[16];
-        uint8_t rcvline_cp[NVG_MAX_LINE_LEN] = {0};
-        memcpy(rcvline_cp, rcvpkt->rcvline, sizeof(rcvline_cp));
-        uint8_t argc = split_csv(rcvline_cp, rcvpkt->rl_len, argv, 16);
+        uint8_t buf_cp[NVG_MAX_LINE_LEN] = {0};
+        memcpy(buf_cp, pkt->buf, sizeof(buf_cp));
+        uint8_t argc = split_csv(buf_cp, pkt->buf_len, argv, 16);
         if (argc < 3) goto malformed;
 
-        // fprintf(FTDI_PORT, "%sline='%s' tokens: cnt=%u [ ", KYEL, rcvpkt->rcvline, argc);
+        // fprintf(FTDI_PORT, "%sline='%s' tokens: cnt=%u [ ", KYEL, pkt->buf, argc);
         // uint8_t j;
         // for (j = 0; j < argc; j++)
         //     fprintf(FTDI_PORT, "%s ", argv[j]);
         // fprintf(FTDI_PORT, "]\n");
 
-        /* ---- Timestamp ---- */
+        // Timestamp
         char* endp;
         uint32_t ts_raw = strtoul(argv[0], &endp, 10);
         if (*endp != '\0' && *endp != ',' && *endp != ' ') goto malformed;
-        rcvpkt->ts = ts_raw / 32000.0f;
+        pkt->ts = ts_raw / 32000.0f;
 
-        /* ---- Sensor ID ---- */
+        // Sensor ID
         uint8_t id = atoi(argv[1]);
         if (id < 1 || id > 20 || nvg->sensors[id].id == 0) goto malformed;
-        rcvpkt->id = id;
+        pkt->id = id;
 
-        /* ---- Payload length check ---- */
+        // Payload length check 
         uint8_t expected = nvg->sensors[id].len;
         if (argc != 2 + expected) goto malformed;
 
-        /* ---- Payload parsing ---- */
+        // Payload parsing 
         uint8_t i;
         for (i = 0; i < expected; i++) {
             char *arg = argv[2 + i];
             if (!arg) goto malformed;
-            rcvpkt->payload[i] = strtof(arg, &endp);
+            pkt->payload[i] = strtof(arg, &endp);
             if (*endp != '\0' && *endp != ',' && *endp != ' ') goto malformed;
         }
 
-        /* ---- Success ---- */
-        nvg_rcv_complete(nvg);
-        nvg_pkt_clear(rcvpkt);
+        // Success 
+        nvg_process_sensor_data(nvg);
+        nvg_pkt_clear(pkt);
         continue;
 
     malformed:
-        sprintf(LOGBUF, "nvg_parse_stream: malformed: len=%u \"%s\"", rcvpkt->rl_len, rcvpkt->rcvline); log_flush(LL_ERROR);
-        nvg_pkt_clear(rcvpkt);
+        sprintf(LOGBUF, "nvg_parse_stream: malformed: len=%u \"%s\"", pkt->buf_len, pkt->buf); log_flush(LL_ERROR);
+        nvg_pkt_clear(pkt);
     }
 }
 
-void nvg_rcv_complete(nvg_s* nvg) { 
+void nvg_process_sensor_data(nvg_s* nvg) { 
     static char* id_to_text[] = { 
         "NULL", "ACCELEROMETER", "MAGNETOMETER_CAL", "ORIENTATION", "GYROSCOPE_CAL", 
         "NULL", "PRESSURE", "TEMPERATURE", "NULL", "ACCEL_GRAVITY", "ACCEL_LINEAR", 
@@ -208,9 +206,9 @@ void nvg_rcv_complete(nvg_s* nvg) {
     uint16_t p = 0;
     uint8_t i;
     p += sprintf(LOGBUF, "nvg_rcv_complete: ts=%.3f sens=%s [", sens->ts, id_to_text[sens->id]); 
-    for (i = 0; i < sens->len-1; i++)
+    for (i = 0; i < sens->len; i++)
         p += sprintf(&LOGBUF[p], " %.3f", sens->data[i]);
-    p += sprintf(&LOGBUF[p], " %.3f ]", sens->data[sens->len-1]); log_flush(LL_TRACE);
+    p += sprintf(&LOGBUF[p], " ]"); log_flush(LL_TRACE);
 }
 
 void nvg_get_sensor_data(nvg_s* nvg, uint8_t id, float* out) {

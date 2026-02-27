@@ -60,7 +60,7 @@ void cmdmgr_init(cmdmgr_s* cmdmgr);
 void cmdmgr_clear(cmdmgr_s* cmdmgr);
 
 // Parse command from bytestream/buffer 
-void cmdmgr_parse_stream(cmdmgr_s* cmdmgr, ringbuf_s* rcvbuf, cmdpkt_s* rcvpkt);
+void cmdmgr_parse_stream(cmdmgr_s* cmdmgr, ringbuf_s* rcvbuf, cmdpkt_s* pkt);
 
 // Checks link layer headers, CRC, and forwards/runs command appropriately
 void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt);

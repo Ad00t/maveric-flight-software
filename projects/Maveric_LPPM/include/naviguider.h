@@ -23,12 +23,12 @@ typedef enum {
 // Naviguider sensor data reception packet
 
 typedef struct {
-    uint8_t rcvline[NVG_MAX_LINE_LEN];
+    uint8_t buf[NVG_MAX_LINE_LEN];
     float payload[NVG_MAX_PAYLOAD_LEN];
     char curr_arg[NVG_MAX_ARG_SIZE];
     float ts;
     uint8_t id;
-    uint16_t rl_len;
+    uint16_t buf_len;
     nvg_fsm_e fsm;
 } nvg_pkt_s;
 
@@ -71,7 +71,7 @@ void nvg_send_command(nvg_s* nvg, char* cmd);
 void nvg_parse_stream(nvg_s* nvg, ringbuf_s* irqbuf);
 
 // Read back sensor data into naviguider object on successful full data packet reception
-void nvg_rcv_complete(nvg_s* nvg);
+void nvg_process_sensor_data(nvg_s* nvg);
 
 // Return a copy of the data for a sensor
 void nvg_get_sensor_data(nvg_s* nvg, uint8_t id, float* out);

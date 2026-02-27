@@ -21,8 +21,8 @@ typedef enum {
     LL_NONE = 4
 } log_level_e;
 
-// Creates a command string with the given parameters
-uint8_t create_cmdpkt(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args, uint8_t* out);
+// Creates a command framed by KISS with the given parameters
+uint8_t create_cmd_frame(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args, uint8_t* out);
 
 // Logs whatever's in LOGBUF with the given color and a standard prefix
 void log_flush(log_level_e lvl);
