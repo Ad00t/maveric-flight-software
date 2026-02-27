@@ -1,7 +1,7 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
-#include "cmdmgr.h"
+#include "cmdpkt.h"
 #include <stdint.h>
 
 #define STATUS_OK               1
@@ -21,8 +21,8 @@ typedef enum {
     LL_NONE = 4
 } log_level_e;
 
-// Creates a command framed by KISS with the given parameters
-uint8_t create_cmd_frame(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args, uint8_t* out);
+// Creates a packet KISS frame with the specified parameters and sends it to port
+void send_cmd(uint8_t port, uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args); 
 
 // Logs whatever's in LOGBUF with the given color and a standard prefix
 void log_flush(log_level_e lvl);

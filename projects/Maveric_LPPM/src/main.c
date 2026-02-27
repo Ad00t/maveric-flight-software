@@ -56,6 +56,7 @@
 #define NODE_ID             NODE_ID_LPPM
 #define NODE_LBL            "LPPM"
 #define LOG_LEVEL           LL_TRACE 
+#define CMD_NUM_BUFS        2
 
 // Module includes (.c necessary)
 
@@ -71,6 +72,7 @@
 #include "kiss.c"
 #include "interrupts.c"
 #include "systime.c"
+#include "cmdpkt.c"
 #include "common.c"
 #include "adcsmtq.c"
 #include "adis16260.c"

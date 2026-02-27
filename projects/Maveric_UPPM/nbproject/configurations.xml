@@ -22,6 +22,7 @@
       <itemPath>include/cmdimpl.h</itemPath>
       <itemPath>include/housekeeping.h</itemPath>
       <itemPath>../../common/maveric/include/kiss.h</itemPath>
+      <itemPath>../../common/maveric/include/cmdpkt.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

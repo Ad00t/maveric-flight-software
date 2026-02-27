@@ -2,14 +2,15 @@
 #include "crcnew.h"
 #include "uart.h"
 #include "ringbuf.h"
+#include "cmdpkt.h"
 #include "common.h"
+#include "cmdmgr.h"
 #include "kiss.h"
 
 // MAIN TRANSCEIVER INTERFACE
 
 void ax100_init(ax100_s* a, uint8_t port) {
     a->port = port;
-    rb_init(&a->cmdbuf);
     ax100_set_power(a, TRUE);
     sprintf(LOGBUF, "ax100_init"); log_flush(LL_INFO);
 }
@@ -26,17 +27,13 @@ int1 ax100_is_on(ax100_s* a) {
 	return (int1) input_state(AX100_PWR);
 }
 
-uint8_t ax100_get_avail_msg(ax100_s* a, ringbuf_s* irqbuf) {
-	if (rb_len(irqbuf) <= CRC32_SIZE + KISS_HEADER_SIZE + KISS_FOOTER_SIZE + CSP_HEADER_SIZE) {
-		return 0;
-	}
+void ax100_parse_stream(ax100_s* a, cmdmgr_s* cmdmgr, ringbuf_s* irqbuf, cmdpkt_s* pkt) {
+	if (rb_len(irqbuf) <= CRC32_SIZE + KISS_HEADER_SIZE + KISS_FOOTER_SIZE + CSP_HEADER_SIZE) return;
 
 	int frameStartIdx = 0;
 	int frameEndIdx = 0;
 	// Look through the incoming buffer on the desired port and see if there is an available frame
-	if (!findFrame(irqbuf, &frameStartIdx, &frameEndIdx, 1)) {
-        return 0;
-    }
+	if (!findFrame(irqbuf, &frameStartIdx, &frameEndIdx, 1)) return;
 
 	// If there is, grab the message contained in the frame
     // We are waiting for a full frame to enter the irqbuf before processing it. Could replace with FSM.
@@ -45,8 +42,10 @@ uint8_t ax100_get_avail_msg(ax100_s* a, ringbuf_s* irqbuf) {
     uint8_t framebuf[AX100_MAX_FRAME_SIZE] = {0};
     rb_pop(irqbuf, frameStartIdx, NULL);
     rb_pop(irqbuf, frameLength, framebuf);
-    extractMessageFromFrame(framebuf, frameLength, &a->cmdbuf, &msgLength);
-	return msgLength;
+    extractMessageFromFrame(framebuf, frameLength, pkt, &msgLength);
+    
+    // Parse the packet and execute it
+    cmdmgr_process_cmd(cmdmgr, pkt);    
 }
 
 void ax100_transmit_msg(ax100_s* a, uint8_t* buf, uint8_t len) {
@@ -114,14 +113,15 @@ int1 findFrame(ringbuf_s* irqbuf, int* frameStartIdx, int* frameEndIdx, uint16_t
     return FALSE;
 }
 
-void extractMessageFromFrame(uint8_t* framebuf, uint16_t frameLength, ringbuf_s* cmdbuf, uint16_t* msgLength) {
+void extractMessageFromFrame(uint8_t* framebuf, uint16_t frameLength, cmdpkt_s* pkt, uint16_t* msgLength) {
     uint8_t msgbuf[AX100_MAX_FRAME_SIZE] = {0};
 	kiss_remove_byte_check(framebuf, frameLength, msgbuf, msgLength, 0);
 	*msgLength -= KISS_HEADER_SIZE + CSP_HEADER_SIZE + CRC32_SIZE + KISS_FOOTER_SIZE;
 	uint8_t i;
-	for (i = 0; i < *msgLength; ++i) {
-		rb_push(cmdbuf, msgbuf[i + KISS_HEADER_SIZE + CSP_HEADER_SIZE]);
+	for (i = 0; i < *msgLength; i++) {
+		pkt->buf[i] = msgbuf[i + KISS_HEADER_SIZE + CSP_HEADER_SIZE];
 	}
+    pkt->buf_len = *msgLength;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
