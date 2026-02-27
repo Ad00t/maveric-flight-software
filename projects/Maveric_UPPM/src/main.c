@@ -50,7 +50,7 @@
 // Global defines
 
 #define UPPER_PPM
-#define NODE_ID             3
+#define NODE_ID             NODE_ID_UPPM
 #define NODE_LBL            "UPPM"
 #define LOG_LEVEL           LL_TRACE
 
@@ -61,13 +61,14 @@
 #include "colors.h"
 #include "uart.c"
 #include "crcnew.c"
-#include "common.c"
+#include "kiss.c"
 #include "hashtable.c"
 #include "ringbuf.c"
 #include "i2c.c"
 #include "spi.c"
 #include "interrupts.c"
 #include "systime.c"
+#include "common.c"
 #include "ax100.c"
 #include "cmdmgr.c"
 #include "scheduler.c"
@@ -142,7 +143,7 @@ void system_superloop(void) {
     isr_disable_all();
     // cmdmgr_parse_stream(&g_cmdmgr, &g_ax100.cmdbuf, &g_cmdmgr.rcvpkts[0]); // Handle AX100 commands
     // cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[1], &g_cmdmgr.rcvpkts[1]); // Handle LPPM commands 
-    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[3], &g_cmdmgr.rcvpkts[2]); // Handle FTDI commands 
+    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[2], &g_cmdmgr.rcvpkts[2]); // Handle FTDI commands 
     isr_enable_all();
    
     scheduler_run_tasks(&g_scheduler, &g_cmdmgr);

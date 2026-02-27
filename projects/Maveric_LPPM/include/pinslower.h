@@ -51,7 +51,7 @@
 #pin_select U2TX = PIN_F2 
 #pin_select U2RX = PIN_F4 
 
-#define COM_C       3 // Upper PPM 
+#define COM_C       3 // UPPM 
 #define COM_C_BAUD  115200
 #pin_select U3TX = PIN_D2 
 #pin_select U3RX = PIN_D3 

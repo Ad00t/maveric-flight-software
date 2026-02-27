@@ -53,7 +53,7 @@
 // Global defines
 
 #define LOWER_PPM
-#define NODE_ID             1
+#define NODE_ID             NODE_ID_LPPM
 #define NODE_LBL            "LPPM"
 #define LOG_LEVEL           LL_TRACE 
 
@@ -68,6 +68,7 @@
 #include "ringbuf.c"
 #include "i2c.c"
 #include "spi.c"
+#include "kiss.c"
 #include "interrupts.c"
 #include "systime.c"
 #include "common.c"
@@ -136,7 +137,7 @@ void system_init(void) {
     // mtq_init(&g_mtq, MTQ_PORT);
     // mtq_set_conf(&g_mtq, 0, MTQ_MODE_DETUMBLING);
     // gyro_init(&g_gyro, GYRO_CS1, GYRO_CS2, GYRO_CS3, GYRO_ON);
-    nvg_init(&g_nvg, NVG_PORT);
+    // nvg_init(&g_nvg, NVG_PORT);
     scheduler_init(&g_scheduler);
     cmdmgr_init(&g_cmdmgr);
     hk_init();
@@ -155,7 +156,7 @@ void system_superloop(void) {
     isr_disable_all();
     // Do driver handling before commands so data is up to date
     // mtq_parse_stream(&g_mtq, &g_irqmgr.irqbufs[0]); // Handle magnetorquer data
-    nvg_parse_stream(&g_nvg, &g_irqmgr.irqbufs[1]); // Handle naviguider data
+    // nvg_parse_stream(&g_nvg, &g_irqmgr.irqbufs[1]); // Handle naviguider data
     cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[2], &g_cmdmgr.rcvpkts[0]); // Handle UPPM commands 
     cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[3], &g_cmdmgr.rcvpkts[1]); // Handle FTDI commands
     isr_enable_all();
@@ -166,5 +167,5 @@ void system_superloop(void) {
 // Cleanup routine
 void system_cleanup(void) {
     mtq_destroy(&g_mtq);
-    nvg_destroy(&g_nvg);
+    // nvg_destroy(&g_nvg);
 }

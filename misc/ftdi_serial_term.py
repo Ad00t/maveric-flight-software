@@ -4,6 +4,7 @@ import traceback
 import threading
 import sys
 import os
+import commands
 from crc import Calculator, Crc16
 from prompt_toolkit.application import Application
 from prompt_toolkit.layout import Layout, HSplit, Window, ScrollablePane
@@ -130,7 +131,7 @@ def log(text):
 def read_serial():
     while True:
         try:
-            if ftdi.in_waiting > 0:
+            if ftdi and ftdi.is_open and ftdi.in_waiting > 0:
                 line = ftdi.readline().decode('ascii', errors='replace')
                 if len(line) > 0:
                     log(line) 
@@ -141,26 +142,12 @@ def read_serial():
             break
         except Exception as e:
             log(f'\033[31m[RPI] [ERROR] read_serial: {traceback.format_exc()}\r\n')
-    
-def send_command(orgn, dest, echo, cmd_id, args):
-    if not ftdi.is_open: return
-    data = [ 0xCD, orgn, dest, echo, len(args), f"{cmd_id} {args}" ]
-    ba = bytearray()
-    for d in data:
-        if isinstance(d, int): ba.append(d & 0xFF)
-        elif isinstance(d, str): ba.extend(d.encode('ascii'))
-        elif isinstance(d, (bytes, bytearray)): ba.extend(d)
-    crc16 = crcalc.checksum(ba)
-    ba.extend(crc16.to_bytes(2, byteorder='little', signed=False))
-    # ba.extend([ 0xAA, 0x00 ])
-    log(f"\033[0m[RPI] [INFO] sending cmd: {repr(ba.decode('ascii', errors='replace'))} [ {ba.hex(' ')} ] crc:{crc16}\r\n")
-    count = ftdi.write(ba)
-    # time.sleep(0.01)
             
 def send_command_str(cmdstr):
     cmdstr = cmdstr.strip()
     spl = cmdstr.split(' ')
-    send_command(int(cmdstr[0]), int(cmdstr[1]), int(cmdstr[2]), spl[1], ' '.join(spl[2:]))
+    ba, cnt = commands.send_cmd(ftdi, int(spl[0]), int(spl[1]), int(spl[2]), int(spl[3]), spl[4], ' '.join(spl[5:]))
+    log(f"\033[0m[RPI] [INFO] sending cmd: cnt={cnt} {repr(ba.decode('ascii', errors='replace'))} [ {ba.hex(' ')} ]\r\n")
 
 if __name__ == "__main__":      
     rx_thread = threading.Thread(target=read_serial, daemon=True)

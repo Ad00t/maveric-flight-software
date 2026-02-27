@@ -1,4 +1,5 @@
 #include "cmdmgr.h"
+#include "kiss.h"
 #include "ringbuf.h"
 #include "hashtable.h"
 #include "crcnew.h"
@@ -15,17 +16,7 @@ void cmdpkt_init(cmdpkt_s* pkt) {
 }
 
 void cmdpkt_clear(cmdpkt_s* pkt) {
-    pkt->fsm = CMDPKT_FSM_HEAD;
-    pkt->i_id = 0;
-    pkt->i_args = 0;
-    pkt->orgn = 0;
-    pkt->dest = 0;
-    pkt->echo = 0;
-    memset(pkt->id, 0, CMD_MAX_ID_LEN);
-    pkt->args_len = 0;
-    memset(pkt->args_str, 0, CMD_MAX_ARGSSTR_LEN);
-    pkt->crc = 0;
-    pkt->running_crc = 0;
+    memset(pkt, 0, sizeof(cmdpkt_s));
 }
 
 // Command Manager
@@ -48,91 +39,44 @@ void cmdmgr_parse_stream(cmdmgr_s* cmdmgr, ringbuf_s* rcvbuf, cmdpkt_s* rcvpkt) 
         uint8_t b = 0;
         if (!rb_pop(rcvbuf, 1, &b)) return;
 
-        switch (rcvpkt->fsm) {
-            case CMDPKT_FSM_HEAD:
-                if (b == 0xCD) {
-                    rcvpkt->running_crc = compute_crc16_cont(CRC_RESTART, &b, 1);
-                    rcvpkt->fsm = CMDPKT_FSM_ORGN;
-                }
-                break;
-                
-            case CMDPKT_FSM_ORGN:
-                rcvpkt->orgn = b;
-                rcvpkt->running_crc = compute_crc16_cont(CRC_CONTINUE_PREVIOUS, &b, 1);
-                rcvpkt->fsm = CMDPKT_FSM_DEST;
-                break;
-
-            case CMDPKT_FSM_DEST:
-                rcvpkt->dest = b;
-                rcvpkt->running_crc = compute_crc16_cont(CRC_CONTINUE_PREVIOUS, &b, 1);
-                rcvpkt->fsm = CMDPKT_FSM_ECHO;
-                break;
-
-            case CMDPKT_FSM_ECHO:
-                rcvpkt->echo = b;
-                rcvpkt->running_crc = compute_crc16_cont(CRC_CONTINUE_PREVIOUS, &b, 1);
-                rcvpkt->fsm = CMDPKT_FSM_ARGSLEN;
-                break;
-                
-            case CMDPKT_FSM_ARGSLEN:
-                rcvpkt->args_len = b;
-                rcvpkt->running_crc = compute_crc16_cont(CRC_CONTINUE_PREVIOUS, &b, 1);
-                rcvpkt->fsm = CMDPKT_FSM_ID;
-                break;
-
-            case CMDPKT_FSM_ID:
-                if (rcvpkt->i_id >= CMD_MAX_ID_LEN) {
-                    rcvpkt->fsm = CMDPKT_FSM_ERROR;
-                    break;
-                }
-                rcvpkt->id[rcvpkt->i_id++] = b;
-                rcvpkt->running_crc = compute_crc16_cont(CRC_CONTINUE_PREVIOUS, &b, 1);
-                if (b == ' ') {
-                    rcvpkt->id[rcvpkt->i_id-1] = '\0';
-                    rcvpkt->fsm = CMDPKT_FSM_ARGSSTR;
-                }
-                break;
-
-            case CMDPKT_FSM_ARGSSTR:
-                if (rcvpkt->i_args >= CMD_MAX_ARGSSTR_LEN) {
-                    rcvpkt->fsm = CMDPKT_FSM_ERROR;
-                    break;
-                }
-                rcvpkt->running_crc = compute_crc16_cont(CRC_CONTINUE_PREVIOUS, &b, 1);
-                rcvpkt->args_str[rcvpkt->i_args++] = b;
-                if (rcvpkt->i_args >= rcvpkt->args_len) {
-                    rcvpkt->args_str[rcvpkt->i_args] = '\0';
-                    rcvpkt->fsm = CMDPKT_FSM_CRC1;
-                }
-                break;
-
-            case CMDPKT_FSM_CRC1:
-                rcvpkt->crc = b;
-                rcvpkt->fsm = CMDPKT_FSM_CRC2;
-                break;
-            
-            case CMDPKT_FSM_CRC2:
-                rcvpkt->crc = ((uint16_t)b << 8) | rcvpkt->crc; // 2 byte CRC stored as little endian in cmd
-                rcvpkt->fsm = CMDPKT_FSM_DONE;
-                break;
+        if (b == FEND) {
+            if (rcvpkt->busy) { // Reached end of frame
+                cmdmgr_process_cmd(cmdmgr, rcvpkt);    
+                cmdpkt_clear(rcvpkt);
+            } else { // Detected beginning of frame
+                cmdpkt_clear(rcvpkt);
+                rcvpkt->busy = TRUE;
+                rcvpkt->n_skip = KISS_HEADER_SIZE; // Skip KISS header
+            }
         }
 
-        switch (rcvpkt->fsm) {
-            case CMDPKT_FSM_DONE:
-                cmdmgr_process_cmd(cmdmgr, rcvpkt);
-                cmdpkt_clear(rcvpkt);
-                break;
-            case CMDPKT_FSM_ERROR:
-                sprintf(LOGBUF, "cmdmgr_parse_stream: malformed packet"); log_flush(LL_ERROR);
-                cmdpkt_clear(rcvpkt);
-                break;
+        if (rcvpkt->n_skip > 0) { 
+            rcvpkt->n_skip--;
+            continue;
         }
 
+        rcvpkt->buf[rcvpkt->buf_len++] = b;
         iter++;
     }
 }
 
 void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
+    // Parse out cmdpkt fields
+    uint8_t len = 0;
+    pkt->orgn = pkt->buf[len++];
+    pkt->dest = pkt->buf[len++];
+    pkt->echo = pkt->buf[len++];
+    pkt->ptype = pkt->buf[len++];
+    pkt->id_len = pkt->buf[len++];
+    pkt->args_len = pkt->buf[len++];
+    pkt->id = &pkt->buf[len];
+    len += pkt->id_len + 1;
+    pkt->args = &pkt->buf[len];
+    len += pkt->args_len + 1;
+    uint8_t crc_low = pkt->buf[len++];
+    uint8_t crc_high = pkt->buf[len++];
+    pkt->crc = make16(crc_high, crc_low);
+
     // Forward
     if (pkt->dest != NODE_ID) {
         sprintf(LOGBUF, "cmdmgr_process_cmd: forwarding cmd '%s'", pkt->id); log_flush(LL_INFO);
@@ -140,19 +84,22 @@ void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
     } 
     
     // CRC check
-    if (pkt->crc != pkt->running_crc) {
+    uint16_t calc_crc = compute_crc16(pkt->buf, pkt->buf_len - 2);
+    if (pkt->crc != calc_crc) {
         sprintf(LOGBUF, "cmdmgr_process_cmd: crc check failed on cmd '%s' crc:%u calculated:%u",
-                pkt->id, pkt->crc, pkt->running_crc); log_flush(LL_ERROR);
+                pkt->id, pkt->crc, calc_crc); log_flush(LL_ERROR);
         return;
     } 
     
     // Find and execute cmd implementation
-    cmdimpl_f cmdimpl = ht_get(&cmdmgr->cmdimpls, pkt->id);
-    if (cmdimpl == NULL) {
-        sprintf(LOGBUF, "cmdmgr_process_cmd: cmd not recognized '%s'", pkt->id); log_flush(LL_ERROR);
-        return;
+    if (pkt->ptype == REQUEST) {
+        cmdimpl_f cmdimpl = ht_get(&cmdmgr->cmdimpls, pkt->id);
+        if (cmdimpl == NULL) {
+            sprintf(LOGBUF, "cmdmgr_process_cmd: cmd not recognized '%s'", pkt->id); log_flush(LL_ERROR);
+            return;
+        }
+        cmdimpl(pkt);
     }
-    cmdimpl(pkt);
 }
 
 

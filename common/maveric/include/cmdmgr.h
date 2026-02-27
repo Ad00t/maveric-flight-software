@@ -2,44 +2,40 @@
 #define __CMDMGR_H__
 
 #include <stdint.h>
+#include "kiss.h"
 #include "ringbuf.h"
 #include "hashtable.h"
 
-#define CMD_MAX_LEN             127
+#define CMD_MAX_LEN             255 - KISS_HEADER_SIZE - KISS_FOOTER_SIZE
+#define CMD_HEADER_SIZE         6
+#define CMD_FOOTER_SIZE         2
 #define CMD_MAX_ID_LEN          20
-#define CMD_MAX_ARGSSTR_LEN     CMD_MAX_LEN - CMD_MAX_ID_LEN - 7
-#define CMD_START_BYTE          0xCD
+#define CMD_MAX_ARGSSTR_LEN     CMD_MAX_LEN - CMD_MAX_ID_LEN - CMD_HEADER_SIZE - CMD_FOOTER_SIZE
 #define CMD_NUM_BUFS            3
 
 // Command packet & reader FSM
 
 typedef enum {
-    CMDPKT_FSM_HEAD = 0,
-    CMDPKT_FSM_ORGN,
-    CMDPKT_FSM_DEST,
-    CMDPKT_FSM_ECHO,
-    CMDPKT_FSM_ARGSLEN,
-    CMDPKT_FSM_ID,
-    CMDPKT_FSM_ARGSSTR,
-    CMDPKT_FSM_CRC1,
-    CMDPKT_FSM_CRC2,
-    CMDPKT_FSM_DONE,
-    CMDPKT_FSM_ERROR
-} cmdpkt_fsm_e;
+    REQUEST = 0,
+    RESPONSE = 1
+} cmdpkt_type_e;
 
 typedef struct {
     // Packet parsing metadata
-    cmdpkt_fsm_e fsm;
-    uint8_t i_id, i_args;
+    char buf[CMD_MAX_LEN];
+    uint8_t buf_len;
+    uint8_t n_skip;
+    int1 busy;
     // Packet data
     uint8_t orgn;
     uint8_t dest;
     uint8_t echo;
-    char id[CMD_MAX_ID_LEN];
+    cmdpkt_type_e ptype;
+    uint8_t id_len;
     uint8_t args_len;
-    char args_str[CMD_MAX_ARGSSTR_LEN];
+    char* id;
+    char* args;
     uint16_t crc;
-    uint16_t running_crc;
 } cmdpkt_s;
 
 // Initialize cmdpkt

@@ -109,7 +109,7 @@ static const uint32_t CRC_TABLE[256] = {
 	0xF36E6F75, 0x0105EC76, 0x12551F82, 0xE03E9C81, 0x34F4F86A, 0xC69F7B69, 0xD5CF889D, 0x27A40B9E,
 	0x79B737BA, 0x8BDCB4B9, 0x988C474D, 0x6AE7C44E, 0xBE2DA0A5, 0x4C4623A6, 0x5F16D052, 0xAD7D5351};
 
-uint32_t compute_crc32(uint8_t* data, int length) {
+uint32_t compute_crc32(uint8_t* data, uint8_t length) {
 	uint32_t crc = 0xffffffff;
 
 	int idx;

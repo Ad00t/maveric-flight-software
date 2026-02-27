@@ -21,13 +21,7 @@ Purpose: Provides a base definition for interfacing with the AX100 transceiver
 #define AX100_MIN_MESSAGE_SIZE        11
 #define AX100_MAX_MESSAGE_SIZE        AX100_MAX_FRAME_SIZE - AX100_MIN_MESSAGE_SIZE
 
-#define FEND                    0xC0
-#define FESC                    0xDB
-#define TFEND                   0xDC
-#define TFESC                   0xDD
-
-#define DATA_FRAME              0x00
-
+#define CSP_HEADER_SIZE         4
 #define CSP_NORMAL_PRIORITY     2L
 #define FSW_NODE                8L
 #define TX_NODE                 0L
@@ -109,22 +103,6 @@ typedef struct {
 
 void addCspHeader(uint8_t* msg, uint16_t* msgLength, uint16_t startLocation);
 
-uint16_t getCspHeaderSize(void);
-
 void addCspHeaderWdtReset(uint8_t* msg, uint16_t* msgLength, uint16_t startLocation);
-
-// KISS
-
-void applyKissByteCheck(uint8_t* message, uint16_t messageLength, uint8_t* frame,
-						uint16_t* frameLength, uint16_t msgStartIdx);
-
-void addKissHeader(uint8_t* msg, uint16_t* msgLength);
-void addKissFooter(uint8_t* msg, uint16_t* msgLength);
-
-uint16_t getKissHeaderSize(void);
-uint16_t getKissFooterSize(void);
-
-void removeKissByteCheck(uint8_t* frame, uint16_t frameLength, uint8_t* msg, uint16_t* msgLength,
-						 uint16_t frameStartIdx);
 
 #endif

@@ -30,7 +30,7 @@ void cmdimpl_init(void) {
 
 void cmdimpl_cmd_set_time(cmdpkt_s* pkt) {
     // I know we're updating the original args string here. We should have all our args parsed out after this so it's ok.
-    char* p = pkt->args_str;  
+    char* p = pkt->args;  
     struct_tm time;
     time.tm_wday = strtoul(p, &p, 10); // Other options: strtok(), strtod(), strotol()
     time.tm_mon = strtoul(p, &p, 10); 
@@ -50,6 +50,6 @@ void cmdimpl_cmd_set_time(cmdpkt_s* pkt) {
 }
 
 void cmdimpl_cmd_ftdi_log(cmdpkt_s* pkt) {
-    char* p = pkt->args_str;
+    char* p = pkt->args;
     fprintf(FTDI_PORT, "%s", p);
 }

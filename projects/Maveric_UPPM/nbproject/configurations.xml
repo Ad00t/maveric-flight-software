@@ -21,6 +21,7 @@
       <itemPath>../../common/maveric/include/ringbuf.h</itemPath>
       <itemPath>include/cmdimpl.h</itemPath>
       <itemPath>include/housekeeping.h</itemPath>
+      <itemPath>../../common/maveric/include/kiss.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -52,6 +53,7 @@
       <itemPath>../../common/maveric/src/ringbuf.c</itemPath>
       <itemPath>src/cmdimpl.c</itemPath>
       <itemPath>src/housekeeping.c</itemPath>
+      <itemPath>../../common/maveric/src/kiss.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
@@ -154,6 +156,7 @@
         <property key="event.recorder.debugger.behavior" value="Running"/>
         <property key="event.recorder.enabled" value="false"/>
         <property key="event.recorder.scvd.files" value=""/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="lastid" value=""/>
         <property key="memories.aux" value="false"/>

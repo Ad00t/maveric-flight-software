@@ -53,7 +53,7 @@ void hk_log(void) {
 void hk_heartbeats(void) {
     int1 hb_ertc = ertc_heartbeat(&g_ertc);
     // int1 hb_mtq = mtq_heartbeat(&g_mtq);
-    int1 hb_nvg = nvg_heartbeat(&g_nvg);
+    // int1 hb_nvg = nvg_heartbeat(&g_nvg);
     // int1 hb_gyro = gyro_heartbeat(&g_gyro);
 }
 

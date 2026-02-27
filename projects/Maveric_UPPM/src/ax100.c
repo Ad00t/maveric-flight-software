@@ -3,6 +3,7 @@
 #include "uart.h"
 #include "ringbuf.h"
 #include "common.h"
+#include "kiss.h"
 
 // MAIN TRANSCEIVER INTERFACE
 
@@ -26,7 +27,7 @@ int1 ax100_is_on(ax100_s* a) {
 }
 
 uint8_t ax100_get_avail_msg(ax100_s* a, ringbuf_s* irqbuf) {
-	if (rb_len(irqbuf) <= CRC32_SIZE + getKissFooterSize() + getKissHeaderSize() + getCspHeaderSize()) {
+	if (rb_len(irqbuf) <= CRC32_SIZE + KISS_HEADER_SIZE + KISS_FOOTER_SIZE + CSP_HEADER_SIZE) {
 		return 0;
 	}
 
@@ -58,27 +59,26 @@ void ax100_transmit_msg(ax100_s* a, uint8_t* buf, uint8_t len) {
     uint8_t i;
     p += sprintf(LOGBUF, "ax100_transmit_msg: len=%u [", frameLength); 
     for (i = 0; i < frameLength - 1; i++) 
-        p += sprintf(&LOGBUF[p], "%02X", buf[i]); 
-    p += sprintf(&LOGBUF[p], "%02X ]", buf[frameLength - 1]); 
+        p += sprintf(&LOGBUF[p], " %02X", buf[i]); 
+    p += sprintf(&LOGBUF[p], " %02X ]", buf[frameLength - 1]); 
     log_flush(LL_TRACE);
 }
 
 // FRAME
 
 void setupFrame(uint8_t* message, uint16_t messageLength, uint8_t* frame, uint16_t* frameLength) {
-	addKissHeader(frame, frameLength);
+	kiss_prepend_header(frame, frameLength);
 
-	addCspHeader(frame, frameLength, getKissHeaderSize());
+	addCspHeader(frame, frameLength, KISS_HEADER_SIZE);
 
-	applyKissByteCheck(message, messageLength, frame, frameLength,
-					   getKissHeaderSize() + getCspHeaderSize());
+	kiss_apply_byte_check(message, messageLength, frame, frameLength, KISS_HEADER_SIZE + CSP_HEADER_SIZE);
 
 	uint32_t crc32 = compute_crc32(message, messageLength);
 	crc32 = htonl(crc32);
 
-	applyKissByteCheck((uint8_t*)&crc32, sizeof(crc32), frame, frameLength, *frameLength);
+	kiss_apply_byte_check((uint8_t*)&crc32, sizeof(crc32), frame, frameLength, *frameLength);
 
-	addKissFooter(frame, frameLength);
+	kiss_append_footer(frame, frameLength);
 }
 
 int1 findFrame(ringbuf_s* irqbuf, int* frameStartIdx, int* frameEndIdx, uint16_t minFrameSize) {
@@ -116,20 +116,20 @@ int1 findFrame(ringbuf_s* irqbuf, int* frameStartIdx, int* frameEndIdx, uint16_t
 
 void extractMessageFromFrame(uint8_t* framebuf, uint16_t frameLength, ringbuf_s* cmdbuf, uint16_t* msgLength) {
     uint8_t msgbuf[AX100_MAX_FRAME_SIZE] = {0};
-	removeKissByteCheck(framebuf, frameLength, msgbuf, msgLength, 0);
-	*msgLength -= getKissHeaderSize() + getCspHeaderSize() + CRC32_SIZE + getKissFooterSize();
+	kiss_remove_byte_check(framebuf, frameLength, msgbuf, msgLength, 0);
+	*msgLength -= KISS_HEADER_SIZE + CSP_HEADER_SIZE + CRC32_SIZE + KISS_FOOTER_SIZE;
 	uint8_t i;
 	for (i = 0; i < *msgLength; ++i) {
-		rb_push(cmdbuf, msgbuf[i + getKissHeaderSize() + getCspHeaderSize()]);
+		rb_push(cmdbuf, msgbuf[i + KISS_HEADER_SIZE + CSP_HEADER_SIZE]);
 	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void setupWdtReset(uint8_t* msg, uint16_t* msgLength) {
-	addKissHeader(msg, msgLength);
+	kiss_prepend_header(msg, msgLength);
 
-	addCspHeaderWdtReset(msg, msgLength, getKissHeaderSize());
+	addCspHeaderWdtReset(msg, msgLength, KISS_HEADER_SIZE);
 
 	// empty message, so CRC32 == 0
 	int crcLoc = *msgLength;
@@ -140,7 +140,7 @@ void setupWdtReset(uint8_t* msg, uint16_t* msgLength) {
 	msg[crcLoc + 3] = 0;
 	*msgLength += 4;
 
-	addKissFooter(msg, msgLength);
+	kiss_append_footer(msg, msgLength);
 }
 
 // INET
@@ -193,10 +193,6 @@ void addCspHeader(uint8_t* msg, uint16_t* msgLength, uint16_t startLocation) {
 	*msgLength += sizeof(header.value);
 }
 
-uint16_t getCspHeaderSize(void) {
-	return (sizeof(CSPHeader));
-}
-
 void addCspHeaderWdtReset(uint8_t* msg, uint16_t* msgLength, uint16_t startLocation) {
 	CSPHeader header;
 	memset(&header, 0, sizeof(CSPHeader));
@@ -210,87 +206,4 @@ void addCspHeaderWdtReset(uint8_t* msg, uint16_t* msgLength, uint16_t startLocat
 
 	memcpy(&(msg[startLocation]), (uint8_t*)&header.value, sizeof(header.value));
 	*msgLength += sizeof(header.value);
-}
-
-// KISS
-
-
-////////////////////////////////////////////////////////////////////////////////
-
-void addKissHeader(uint8_t* msg, uint16_t* msgLength) {
-	msg[0] = FEND;
-	msg[1] = DATA_FRAME;
-
-	*msgLength += 2;
-}
-
-uint16_t getKissHeaderSize(void) {
-	return (2);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void addKissFooter(uint8_t* msg, uint16_t* msgLength) {
-	msg[*msgLength] = FEND;
-	(*msgLength)++;
-}
-
-uint16_t getKissFooterSize(void) {
-	return (1);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void applyKissByteCheck(uint8_t* message, uint16_t messageLength, uint8_t* frame,
-						uint16_t* frameLength, uint16_t msgStartIdx) {
-	uint16_t spot = msgStartIdx;
-
-	int idx;
-	for (idx = 0; idx < messageLength; idx++) {
-		if (*(message + idx) == FEND) {
-			frame[spot] = FESC;
-			spot++;
-			frame[spot] = TFEND;
-			spot++;
-		} else if (*(message + idx) == FESC) {
-			frame[spot] = FESC;
-			spot++;
-			frame[spot] = TFESC;
-			spot++;
-		} else {
-			frame[spot] = message[idx];
-			spot++;
-		}
-	}
-
-	*frameLength = spot;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void removeKissByteCheck(uint8_t* incomingBuffer, uint16_t frameLength, uint8_t* msg, uint16_t* msgLength, uint16_t frameStartIdx) {
-	int len = frameLength;
-	int spot = 0;
-
-	int idx;
-	for (idx = frameStartIdx; idx < frameLength; idx++) {
-		if (*(incomingBuffer + idx) == FESC) {
-			len--;
-			idx++;
-
-			if (*(incomingBuffer + idx) == TFESC) {
-				msg[spot] = FESC;
-			} else if (*(incomingBuffer + idx) == TFEND) {
-				msg[spot] = FEND;
-			} else {
-				msg[spot] = incomingBuffer[idx];
-			}
-		} else {
-			msg[spot] = incomingBuffer[idx];
-		}
-
-		spot++;
-	}
-
-	*msgLength = len;
 }
