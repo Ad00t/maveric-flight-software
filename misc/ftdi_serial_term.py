@@ -23,7 +23,7 @@ SCROLL_SPEED = 3
 MAX_LOGS = 10000
 
 crcalc = Calculator(Crc16.XMODEM)
-ftdi = serial.Serial('COM5', baudrate=115200, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, timeout=1)
+ftdi = serial.Serial(sys.argv[1], baudrate=115200, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, timeout=1)
 
 log_lines = []
 is_manual_scrolling = False
@@ -136,7 +136,7 @@ def read_serial():
                 if len(line) > 0:
                     log(line) 
         except KeyboardInterrupt:
-            log('\033[0m[RPI] [INFO] read+serial: quitting\r\n')
+            log('\033[0m[RPI] [INFO] read_serial: quitting\r\n')
             if ftdi.is_open: 
                 ftdi.close()
             break
@@ -147,13 +147,19 @@ def send_command_str(cmdstr):
     cmdstr = cmdstr.strip()
     spl = cmdstr.split(' ')
     ba, cnt = commands.send_cmd(ftdi, int(spl[0]), int(spl[1]), int(spl[2]), int(spl[3]), spl[4], ' '.join(spl[5:]))
-    log(f"\033[0m[RPI] [INFO] sending cmd: cnt={cnt} {repr(ba.decode('ascii', errors='replace'))} [ {ba.hex(' ')} ]\r\n")
+    log(f"\033[0m[RPI] [INFO] sending cmd: cnt={cnt} {repr(ba.decode('ascii', errors='replace'))}\r\n")
 
 if __name__ == "__main__":      
     rx_thread = threading.Thread(target=read_serial, daemon=True)
     rx_thread.start()
     try:
         app.run()
+    except KeyboardInterrupt:
+        log('\033[0m[RPI] [INFO] main: quitting\r\n')
+        if ftdi.is_open: 
+            ftdi.close()
+    except Exception as e:
+        log(f'\033[31m[RPI] [ERROR] main: {traceback.format_exc()}\r\n')
     finally:
         if ftdi.is_open:
             ftdi.close()

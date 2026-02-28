@@ -63,3 +63,56 @@ void kiss_remove_byte_check(uint8_t* incomingBuffer, uint16_t frameLength, uint8
 
 	*msgLength = len;
 }
+
+uint16_t kiss_extract_frame(ringbuf_s* rcvbuf, uint8_t* frame_buf, uint16_t frame_buf_size) {
+	int16_t frameStartIdx = 0;
+	int16_t frameEndIdx = 0;
+	// Look through the incoming buffer on the desired port and see if there is an available frame
+	if (!kiss_find_frame(rcvbuf, &frameStartIdx, &frameEndIdx, 1)) 
+        return 0;
+
+	// If there is, grab the message contained in the frame
+    // We are waiting for a full frame to enter the rcvbuf before processing it. Could replace with FSM.
+    uint16_t frameLength = frameEndIdx - frameStartIdx + 1;
+    if (frameLength <= frame_buf_size) {
+        rb_pop(rcvbuf, frameStartIdx, NULL);
+        rb_pop(rcvbuf, frameLength, frame_buf);
+        return frameLength;
+    } else {
+        rb_pop(rcvbuf, frameStartIdx + frameLength, NULL);
+        return 0; 
+    }
+}
+
+int1 kiss_find_frame(ringbuf_s* rcvbuf, int* frameStartIdx, int* frameEndIdx, uint16_t minFrameSize) {
+	*frameStartIdx = -1;
+	*frameEndIdx = -1;
+
+    uint8_t bufferLen = rb_len(rcvbuf);
+	int startLimit = bufferLen - 1;
+	uint8_t idx;
+	for (idx = 0; idx < startLimit; idx++) {
+        uint8_t b1, b2;
+        rb_peek(rcvbuf, idx, &b1);
+        rb_peek(rcvbuf, idx+1, &b2);
+		if (b1 == FEND && b2 != FEND) {
+            *frameStartIdx = idx;
+			break;
+        }
+	}
+
+	if (*frameStartIdx < 0) {
+		return FALSE;
+	}
+
+	for (idx = *frameStartIdx + 1 + minFrameSize; idx < bufferLen; idx++) {
+        uint8_t b;
+        rb_peek(rcvbuf, idx, &b);
+		if (b == FEND) {
+			*frameEndIdx = idx;
+			return TRUE;
+		}
+	}
+
+    return FALSE;
+}

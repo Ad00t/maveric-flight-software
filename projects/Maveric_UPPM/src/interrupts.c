@@ -17,7 +17,7 @@ void irqmgr_init(irqmgr_s* irqmgr) {
 
 void irqmgr_clear(irqmgr_s* irqmgr) {
     uint8_t p;
-    for (p = 0; p < NUM_PORTS; p++) {
+    for (p = 0; p < IRQ_NUM_PORTS; p++) {
         rb_clear(&irqmgr->irqbufs[p]);
     }
 }

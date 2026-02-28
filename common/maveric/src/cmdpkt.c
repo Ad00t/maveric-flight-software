@@ -13,7 +13,8 @@ void cmdpkt_create(cmdpkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, cmdp
     uint8_t* buf = pkt->buf;
     uint8_t id_len = strlen(id);
     uint8_t args_len = strlen(id);
-    
+   
+    // Add header
     buf[len++] = orgn;
     buf[len++] = dest;
     buf[len++] = echo;
@@ -21,10 +22,12 @@ void cmdpkt_create(cmdpkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, cmdp
     buf[len++] = id_len;
     buf[len++] = args_len;
 
+    // Add id field
     memcpy(&buf[len], id, id_len);
     len += id_len;
     buf[len++] = '\0';
-   
+  
+    // Add args str
     memcpy(&buf[len], args, args_len);
     len += args_len;
     buf[len++] = '\0';
@@ -42,8 +45,9 @@ void cmdpkt_clear(cmdpkt_s* pkt) {
 
 uint8_t cmdpkt_parse_buf(cmdpkt_s* pkt) {
     if (pkt->buf_len < 10) return STATUS_ERR;
+    uint16_t len = 0;
 
-    uint8_t len = 0;
+    // Parse header fields
     pkt->orgn = pkt->buf[len++];
     pkt->dest = pkt->buf[len++];
     pkt->echo = pkt->buf[len++];
@@ -51,16 +55,19 @@ uint8_t cmdpkt_parse_buf(cmdpkt_s* pkt) {
     pkt->id_len = pkt->buf[len++];
     pkt->args_len = pkt->buf[len++];
 
+    // Parse id field
     pkt->id = &pkt->buf[len];
     if (len + pkt->id_len >= pkt->buf_len
         || pkt->buf[len + pkt->id_len] != '\0') return STATUS_ERR;
     len += pkt->id_len + 1;
-    
+   
+    // Parse args field
     pkt->args = &pkt->buf[len];
     if (len + pkt->args_len >= pkt->buf_len
         || pkt->buf[len + pkt->args_len] != '\0') return STATUS_ERR;
     len += pkt->args_len + 1;
-    
+   
+    // Parse CRC as uint16
     uint8_t crc_low = pkt->buf[len++];
     uint8_t crc_high = pkt->buf[len++];
     pkt->crc = make16(crc_high, crc_low);

@@ -159,7 +159,7 @@ void system_superloop(void) {
     // Do driver handling before commands so data is up to date
     // mtq_parse_stream(&g_mtq, &g_irqmgr.irqbufs[0]); // Handle magnetorquer data
     // nvg_parse_stream(&g_nvg, &g_irqmgr.irqbufs[1]); // Handle naviguider data
-    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[2], &g_cmdmgr.rcvpkts[0]); // Handle UPPM commands 
+    // cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[2], &g_cmdmgr.rcvpkts[0]); // Handle UPPM commands 
     cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[3], &g_cmdmgr.rcvpkts[1]); // Handle FTDI commands
     isr_enable_all();
    
@@ -168,6 +168,6 @@ void system_superloop(void) {
 
 // Cleanup routine
 void system_cleanup(void) {
-    mtq_destroy(&g_mtq);
+    // mtq_destroy(&g_mtq);
     // nvg_destroy(&g_nvg);
 }

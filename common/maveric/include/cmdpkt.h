@@ -21,7 +21,7 @@ typedef enum {
 typedef struct {
     // Packet parsing metadata
     char buf[CMD_MAX_LEN];
-    uint8_t buf_len;
+    uint16_t buf_len;
     uint8_t n_skip;
     int1 busy;
     // Packet data

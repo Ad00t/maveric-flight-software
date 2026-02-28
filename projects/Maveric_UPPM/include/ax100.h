@@ -60,15 +60,9 @@ void ax100_transmit_msg(ax100_s* a, uint8_t* buf, uint8_t len);
 void setupFrame(uint8_t* message, uint16_t messageLength, uint8_t* frame, uint16_t* frameLength);
 
 /*
-  Looks through a buffer to see if a full frame is available for processing. Used
-  for data coming from GomSpace
-*/
-int1 findFrame(ringbuf_s* irqbuf, int* frameStartIdx, int* frameEndIdx, uint16_t minFrameSize);
-
-/*
   Takes a frame and extracts the message out of it. Used for data coming from GomSpace
 */
-void extractMessageFromFrame(uint8_t* framebuf, uint16_t frameLength, cmdpkt_s* pkt, uint16_t* msgLength);
+void extractMessageFromFrame(uint8_t* framebuf, uint16_t frameLength, cmdpkt_s* pkt);
 
 void setupWdtReset(uint8_t* msg, uint16_t* msgLength);
 

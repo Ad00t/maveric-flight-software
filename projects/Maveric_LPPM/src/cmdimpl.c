@@ -42,7 +42,7 @@ void cmdimpl_cmd_set_time(cmdpkt_s* pkt) {
 
     ertc_set_time(&g_ertc, &time);
     systime_sync();
-    mtq_set_date_time(&g_mtq, &time); 
+    // mtq_set_date_time(&g_mtq, &time); 
 
     sprintf(LOGBUF, "cmdimpl_cmd_set_time [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", 
             g_ertc.time.tm_wday, g_ertc.time.tm_mon, g_ertc.time.tm_mday, g_ertc.time.tm_year, 

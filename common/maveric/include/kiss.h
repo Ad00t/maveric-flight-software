@@ -1,10 +1,11 @@
 #ifndef __KISS_H__
 #define __KISS_H__
 
+#include "ringbuf.h"
 #include <stdint.h>
 
-#define KISS_HEADER_SIZE    2
-#define KISS_FOOTER_SIZE    1 
+#define KISS_HEADER_SIZE        2
+#define KISS_FOOTER_SIZE        1 
 
 #define FEND                    0xC0
 
@@ -20,6 +21,10 @@ void kiss_append_footer(uint8_t* msg, uint16_t* msgLength);
 void kiss_apply_byte_check(uint8_t* message, uint16_t messageLength, uint8_t* frame, uint16_t* frameLength, uint16_t msgStartIdx);
 
 void kiss_remove_byte_check(uint8_t* frame, uint16_t frameLength, uint8_t* msg, uint16_t* msgLength, uint16_t frameStartIdx);
+
+uint16_t kiss_extract_frame(ringbuf_s* rcvbuf, uint8_t* frame_buf, uint16_t frame_buf_size);
+
+int1 kiss_find_frame(ringbuf_s* irqbuf, int* frameStartIdx, int* frameEndIdx, uint16_t minFrameSize);
 
 #endif
 

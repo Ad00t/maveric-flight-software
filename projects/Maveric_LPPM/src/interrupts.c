@@ -17,7 +17,7 @@ void irqmgr_init(irqmgr_s* irqmgr) {
 
 void irqmgr_clear(irqmgr_s* irqmgr) {
     uint8_t p;
-    for (p = 0; p < NUM_PORTS; p++) {
+    for (p = 0; p < IRQ_NUM_PORTS; p++) {
         rb_clear(&irqmgr->irqbufs[p]);
     }
 }
@@ -65,6 +65,7 @@ void isr_uart3(void) {
 #INT_RDA4 // FTDI
 void isr_uart4(void) {
     if (!g_irqmgr.started || !uart_byte_avail(COM_D)) return;
+    // TEST[TEST_I++] = uart_read_byte(COM_D); 
     rb_push(&g_irqmgr.irqbufs[3], uart_read_byte(COM_D));
 }
 

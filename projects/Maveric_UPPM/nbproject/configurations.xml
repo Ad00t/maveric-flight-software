@@ -55,6 +55,7 @@
       <itemPath>src/cmdimpl.c</itemPath>
       <itemPath>src/housekeeping.c</itemPath>
       <itemPath>../../common/maveric/src/kiss.c</itemPath>
+      <itemPath>../../common/maveric/src/cmdpkt.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>

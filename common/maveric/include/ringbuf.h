@@ -6,8 +6,9 @@
 #define RINGBUF_MAX_SIZE    256 
 
 typedef struct {
-    uint16_t w, r;
-    uint8_t data[RINGBUF_MAX_SIZE];
+    volatile uint16_t r;
+    volatile uint16_t w;
+    volatile uint8_t data[RINGBUF_MAX_SIZE];
 } ringbuf_s;
 
 // Initialize a circular buffer
