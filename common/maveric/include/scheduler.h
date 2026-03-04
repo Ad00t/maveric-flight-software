@@ -1,6 +1,7 @@
 #ifndef __SCHEDULER_H__
 #define __SCHEDULER_H__
 
+#include "cmdpkt.h"
 #include "cmdmgr.h"
 #include <stdint.h>
 #include <time.h>
@@ -24,7 +25,7 @@ typedef struct {
     uint32_t period_ms;
     uint16_t remaining_reps; 
     schedfunc_f func;
-    uint8_t* cmd_ptr; // Only store a pointer to the cmd in the scheduler cmds buffer so we don't have 20 cmd buffers
+    cmdpkt_s* cmd_ptr; // Only store a pointer to the cmd in the scheduler cmds buffer so we don't have 20 cmd buffers
     schedtask_type_e type;
     int8_t id;
     int1 active;
@@ -35,7 +36,7 @@ typedef struct {
 typedef struct {
     schedtask_s tasks[SCHEDULER_MAX_TASKS]; // Internally segmented between schedtask types
     schedtask_s* id_map[SCHEDULER_MAX_FUNC_TASKS]; // Contains mapping of task ids to pointer to schedtask in tasks buffer
-    uint8_t cmds[SCHEDULER_MAX_CMD_TASKS][CMD_MAX_LEN]; // Buffer of cmds
+    cmdpkt_s cmds[SCHEDULER_MAX_CMD_TASKS]; // Buffer of cmds
 } scheduler_s;
 
 // Initialize scheduler service
@@ -56,7 +57,7 @@ uint8_t scheduler_deschedule(scheduler_s* s, uint8_t id);
  */
 uint8_t scheduler_schedule_func_at(scheduler_s* s, int8_t id, schedfunc_f func, struct_tm start_time, uint32_t period_ms, uint16_t reps);
 // The command version
-uint8_t scheduler_schedule_cmd_at(scheduler_s* s, int8_t id, uint8_t* cmd, struct_tm start_time, uint32_t period_ms, uint16_t reps);
+uint8_t scheduler_schedule_cmd_at(scheduler_s* s, int8_t id, cmdpkt_s cmd, struct_tm start_time, uint32_t period_ms, uint16_t reps);
 
 /*
  * Schedule <func> to execute starting in <start_delay_ms> milliseconds from now for <reps> repetitions every <period_ms> milliseconds 
@@ -67,6 +68,6 @@ uint8_t scheduler_schedule_cmd_at(scheduler_s* s, int8_t id, uint8_t* cmd, struc
  */
 uint8_t scheduler_schedule_func_in(scheduler_s* s, int8_t id, schedfunc_f func, uint32_t start_delay_ms, uint32_t period_ms, uint16_t reps);
 // The command version
-uint8_t scheduler_schedule_cmd_in(scheduler_s* s, int8_t id, uint8_t* cmd, uint32_t start_delay_ms, uint32_t period_ms, uint16_t reps);
+uint8_t scheduler_schedule_cmd_in(scheduler_s* s, int8_t id, cmdpkt_s cmd, uint32_t start_delay_ms, uint32_t period_ms, uint16_t reps);
 
 #endif // !__SCHEDULER_H__
