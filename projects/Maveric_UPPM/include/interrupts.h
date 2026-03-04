@@ -5,13 +5,13 @@
 
 // UPPER PPM INTERRUPTS CONFIG
 
-#define NUM_PORTS   4
+#define IRQ_NUM_PORTS   4
 
 // Interrupt request manager
 
 typedef struct {
     int1 started;
-    volatile ringbuf_s irqbufs[NUM_PORTS];
+    volatile ringbuf_s irqbufs[IRQ_NUM_PORTS];
     volatile uint64_t ms;
 } irqmgr_s;
 

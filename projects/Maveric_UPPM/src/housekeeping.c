@@ -1,3 +1,5 @@
+// UPPER PPM HOUSEKEEPING
+
 #include "housekeeping.h"
 #include "systime.h"
 #include "interrupts.h"
@@ -42,5 +44,5 @@ void hk_read_sensors(void) {
 
 void hk_test_ax100(void) {
     char test[] = "test";
-    ax100_transmit_msg(&g_ax100, (uint8_t*) test, strlen(test));
+    ax100_transmit_frame(&g_ax100, (uint8_t*) test, strlen(test));
 }

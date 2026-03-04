@@ -8,6 +8,7 @@
 #include "m41t81s.h"
 #include "adis16260.h"
 #include "naviguider.h"
+#include "housekeeping.h"
 #include "common.h"
 #include <stdint.h>
 #include <stdlib.h>
@@ -22,15 +23,15 @@ extern gyro_s g_gyro;                 // Gyroscope (x3)
 extern nvg_s g_nvg;                   // Naviguider
 
 void cmdimpl_init(void) {
-    ht_set(&g_cmdmgr.cmdimpls, "cmd_set_time", (cmdimpl_f) cmdimpl_cmd_set_time);
-    ht_set(&g_cmdmgr.cmdimpls, "cmd_ftdi_log", (cmdimpl_f) cmdimpl_cmd_ftdi_log);
+    ht_set(&g_cmdmgr.cmdimpls, "ppm_set_time", (cmdimpl_f) cmdimpl_ppm_set_time);
+    ht_set(&g_cmdmgr.cmdimpls, "ppm_ftdi_log", (cmdimpl_f) cmdimpl_ppm_ftdi_log);
 }
 
 // COMMAND IMPLEMENTATIONS
 
-void cmdimpl_cmd_set_time(cmdpkt_s* pkt) {
-    // I know we're updating the original args string here. We should have all our args parsed out after this so it's ok.
-    char* p = pkt->args;  
+void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
+    char p[32] = {0};
+    memcpy(p, pkt->args, pkt->args_len);  
     struct_tm time;
     time.tm_wday = strtoul(p, &p, 10); // Other options: strtok(), strtod(), strotol()
     time.tm_mon = strtoul(p, &p, 10); 
@@ -42,14 +43,15 @@ void cmdimpl_cmd_set_time(cmdpkt_s* pkt) {
 
     ertc_set_time(&g_ertc, &time);
     systime_sync();
-    // mtq_set_date_time(&g_mtq, &time); 
+    cmd_dispatch(NODE_ID, NODE_ID_UPPM, 0, REQUEST, "ppm_set_time", pkt->args);
+    mtq_set_date_time(&g_mtq, &time); 
 
-    sprintf(LOGBUF, "cmdimpl_cmd_set_time [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", 
+    sprintf(LOGBUF, "cmdimpl_ppm_set_time [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", 
             g_ertc.time.tm_wday, g_ertc.time.tm_mon, g_ertc.time.tm_mday, g_ertc.time.tm_year, 
             g_ertc.time.tm_hour, g_ertc.time.tm_min, g_ertc.time.tm_sec); log_flush(LL_INFO);
 }
 
-void cmdimpl_cmd_ftdi_log(cmdpkt_s* pkt) {
+void cmdimpl_ppm_ftdi_log(cmdpkt_s* pkt) {
     char* p = pkt->args;
     fprintf(FTDI_PORT, "%s", p);
 }

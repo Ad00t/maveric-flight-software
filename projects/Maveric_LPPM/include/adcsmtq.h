@@ -81,6 +81,7 @@ typedef struct {
     mtq_reg_s* reg_idx_map[MTQ_MAP_COUNT][MTQ_MAX_IDX_COUNT];
     mtq_pkt_s rcvpkt;
     uint8_t port;  
+    int1 is_init;
 } mtq_s;
 
 // Initialize mtq object

@@ -56,24 +56,22 @@
 #define NODE_ID             NODE_ID_LPPM
 #define NODE_LBL            "LPPM"
 #define LOG_LEVEL           LL_TRACE 
-#define CMD_NUM_BUFS        2
 
 // Module includes (.c necessary)
 
 #include <time.h>
 #include <time.c>
-#include "colors.h"
+#include "common.h"
 #include "uart.c"
 #include "crcnew.c"
 #include "hashtable.c"
 #include "ringbuf.c"
 #include "i2c.c"
 #include "spi.c"
-#include "kiss.c"
 #include "interrupts.c"
 #include "systime.c"
 #include "cmdpkt.c"
-#include "common.c"
+#include "logger.c"
 #include "adcsmtq.c"
 #include "adis16260.c"
 #include "naviguider.c"
@@ -157,10 +155,10 @@ void system_superloop(void) {
     // Handle received byte interrupts
     isr_disable_all();
     // Do driver handling before commands so data is up to date
-    // mtq_parse_stream(&g_mtq, &g_irqmgr.irqbufs[0]); // Handle magnetorquer data
-    // nvg_parse_stream(&g_nvg, &g_irqmgr.irqbufs[1]); // Handle naviguider data
-    // cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[2], &g_cmdmgr.rcvpkts[0]); // Handle UPPM commands 
-    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[3], &g_cmdmgr.rcvpkts[1]); // Handle FTDI commands
+    // mtq_parse_stream(&g_mtq, &g_irqmgr.irqbufs[MTQ_PORT-1]); // Handle magnetorquer data
+    // nvg_parse_stream(&g_nvg, &g_irqmgr.irqbufs[NVG_PORT-1]); // Handle naviguider data
+    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[UPPM_PORT-1], &g_cmdmgr.rcvpkts[0], FALSE); // Handle UPPM commands 
+    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[FTDI_PORT-1], &g_cmdmgr.rcvpkts[1], FALSE); // Handle FTDI commands
     isr_enable_all();
    
     scheduler_run_tasks(&g_scheduler, &g_cmdmgr);

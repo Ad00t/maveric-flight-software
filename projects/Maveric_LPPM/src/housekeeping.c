@@ -1,3 +1,5 @@
+// LOWER PPM HOUSEKEEPING
+
 #include "housekeeping.h"
 #include "scheduler.h"
 #include "systime.h"
@@ -8,7 +10,7 @@
 #include "m41t81s.h"
 #include "adis16260.h"
 #include "naviguider.h"
-#include "common.h"
+#include "logger.h"
 #include <stdint.h>
 
 #module
@@ -23,7 +25,7 @@ extern nvg_s g_nvg;                   // Naviguider
 
 void hk_init(void) {
     scheduler_schedule_func_in(&g_scheduler, 0, hk_get_ertc_time, 2000, 500, SCHEDULE_REPS_INFINITE);
-    scheduler_schedule_func_in(&g_scheduler, 1, hk_systime_sync, 2000, 5000, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 1, hk_systime_sync, 2000, 10000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 2, hk_log, 2000, 500, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 3, hk_heartbeats, 2000, 3000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 4, hk_read_sensors, 2000, 1000, SCHEDULE_REPS_INFINITE);
@@ -37,11 +39,12 @@ void hk_get_ertc_time(void) {
 }
 
 void hk_systime_sync(void) {
-    // char cmd[CMD_MAX_LEN] = {0};
-    // char args[CMD_MAX_ARGSSTR_LEN] = {0};
-    // sprintf(args, "%u %u %u %u %u %u %u", )
-    // create_cmd(NODE_ID, 2, 0, "cmd_set_time", , cmd);
     systime_sync();
+    char timestr[32] = {0};
+    sprintf(timestr, "%u %u %u %u %u %u %u", 
+            g_ertc.time.tm_wday, g_ertc.time.tm_mon, g_ertc.time.tm_mday, g_ertc.time.tm_year, 
+            g_ertc.time.tm_hour, g_ertc.time.tm_min, g_ertc.time.tm_sec);
+    cmd_dispatch(NODE_ID, NODE_ID_LPPM, 0, REQUEST, "ppm_set_time", timestr);
 }
 
 void hk_log(void) {
@@ -52,13 +55,13 @@ void hk_log(void) {
 
 void hk_heartbeats(void) {
     int1 hb_ertc = ertc_heartbeat(&g_ertc);
-    // int1 hb_mtq = mtq_heartbeat(&g_mtq);
-    // int1 hb_nvg = nvg_heartbeat(&g_nvg);
+    int1 hb_mtq = mtq_heartbeat(&g_mtq);
+    int1 hb_nvg = nvg_heartbeat(&g_nvg);
     // int1 hb_gyro = gyro_heartbeat(&g_gyro);
 }
 
 void hk_read_sensors(void) {
-    // mtq_read_ctrl(&g_mtq);
+    mtq_read_ctrl(&g_mtq);
     // mtq_read_fast(&g_mtq);
     // gyro_read_all(&g_gyro);
 }

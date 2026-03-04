@@ -53,24 +53,22 @@
 #define NODE_ID             NODE_ID_UPPM
 #define NODE_LBL            "UPPM"
 #define LOG_LEVEL           LL_TRACE
-#define CMD_NUM_BUFS        2
 
 // Module includes (.c necessary)
 
 #include <time.h>
 #include <time.c>
-#include "colors.h"
+#include "common.h"
 #include "uart.c"
 #include "crcnew.c"
 #include "hashtable.c"
 #include "ringbuf.c"
 #include "i2c.c"
 #include "spi.c"
-#include "kiss.c"
 #include "interrupts.c"
 #include "systime.c"
 #include "cmdpkt.c"
-#include "common.c"
+#include "logger.c"
 #include "ax100.c"
 #include "cmdmgr.c"
 #include "scheduler.c"
@@ -143,9 +141,10 @@ void system_superloop(void) {
 
     // Handle received byte interrupts
     isr_disable_all();
-    // Handle AX100 commands. this is not done by cmdmgr due to AX100 non-standard packets including CSP header. cmdmgr only handles KISS framed cmdpkts.
-    ax100_parse_stream(&g_ax100, &g_cmdmgr, &g_irqmgr.irqbufs[1], &g_cmdmgr.rcvpkts[0]); 
-    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[2], &g_cmdmgr.rcvpkts[1]); // Handle LPPM commands, includes FTDI commands 
+    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[ASTROBOARD_PORT-1], &g_cmdmgr.rcvpkts[0], FALSE); // Handle Astroboard commands 
+    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[AX100_PORT-1], &g_cmdmgr.rcvpkts[1], TRUE); // Handle AX100 commands 
+    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[LPPM_PORT-1], &g_cmdmgr.rcvpkts[2], FALSE); // Handle LPPM commands
+    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[HOLONAV_PORT-1], &g_cmdmgr.rcvpkts[3], FALSE); // Handle Holonav commands
     isr_enable_all();
    
     scheduler_run_tasks(&g_scheduler, &g_cmdmgr);

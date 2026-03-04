@@ -63,6 +63,7 @@
 
 #define MTQ_PORT    COM_A
 #define NVG_PORT    COM_B
+#define UPPM_PORT   COM_C
 #define FTDI_PORT   COM_D
 
 //========================================

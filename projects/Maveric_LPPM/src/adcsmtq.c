@@ -53,6 +53,7 @@ int1 mtq_pkt_verify_csum(mtq_pkt_s* pkt) {
 
 void mtq_init(mtq_s* mtq, uint8_t port) {
     mtq->port = port;
+    mtq->is_init = TRUE;
     memcpy(mtq->reg_table, MTQ_INIT_REG_TABLE, sizeof(MTQ_INIT_REG_TABLE));
     memset(mtq->reg_idx_map, 0, MTQ_MAP_COUNT * MTQ_MAX_IDX_COUNT * sizeof(mtq_reg_s*));
     mtq_pkt_init(&mtq->rcvpkt);
@@ -100,30 +101,32 @@ void mtq_init(mtq_s* mtq, uint8_t port) {
 }
 
 void mtq_destroy(mtq_s* mtq) {
+    if (!mtq->is_init) return;
+    mtq_clear(mtq);
     uint8_t i;
     for (i = 0; i < MTQ_REG_TABLE_LEN; i++) {
         if (mtq->reg_table[i].value != NULL)
             free(mtq->reg_table[i].value);
     }
-    
+    mtq->is_init = FALSE; 
     sprintf(LOGBUF, "mtq_destroy"); log_flush(LL_INFO);
 }
 
 void mtq_clear(mtq_s* mtq) {
+    if (!mtq->is_init) return;
     uint8_t i;
     for (i = 0; i < MTQ_REG_TABLE_LEN; i++) {
         if (mtq->reg_table[i].value != NULL)
             memset(mtq->reg_table[i].value, 0, 4 * mtq->reg_table[i].cnt);
     }
-
     mtq_pkt_clear(&mtq->rcvpkt);
     memset(mtq->reg_idx_map, 0, MTQ_MAP_COUNT * MTQ_MAX_IDX_COUNT * sizeof(mtq_reg_s*));
     memset(mtq->reg_table, 0, sizeof(MTQ_INIT_REG_TABLE));
-    
     sprintf(LOGBUF, "mtq_clear"); log_flush(LL_INFO);
 }
 
 mtq_reg_s* mtq_get_reg(mtq_s* mtq, uint8_t midx, uint8_t idx) {
+    if (!mtq->is_init) return NULL;
     if (midx >= MTQ_MAP_COUNT || idx >= MTQ_MAX_IDX_COUNT)
         return NULL;
     mtq_reg_s* reg = mtq->reg_idx_map[midx][idx];
@@ -137,6 +140,7 @@ mtq_reg_s* mtq_get_reg(mtq_s* mtq, uint16_t key) {
 }
 
 void mtq_read_start(mtq_s* mtq, mtq_reg_s* reg) {   
+    if (!mtq->is_init) return;
     uint8_t w_buf[4];
     w_buf[0] = MTQ_HEAD_READ;
     w_buf[1] = reg->idx;
@@ -153,6 +157,7 @@ void mtq_read_start(mtq_s* mtq, mtq_reg_s* reg) {
 }
 
 void mtq_read_start(mtq_s* mtq, uint16_t key) {
+    if (!mtq->is_init) return;
     mtq_reg_s* reg = mtq_get_reg(mtq, key);
     if (reg == NULL) {
         sprintf(LOGBUF, "mtq_read_start: register invalid (%u,%u)", key >> 8, key & 0x00FF); log_flush(LL_ERROR);
@@ -162,6 +167,7 @@ void mtq_read_start(mtq_s* mtq, uint16_t key) {
 }
 
 void mtq_read_complete(mtq_s* mtq) {
+    if (!mtq->is_init) return;
     mtq_pkt_s* rcvpkt = &mtq->rcvpkt;
     if (!mtq_pkt_verify_csum(rcvpkt)) {
         sprintf(LOGBUF, "mtq_read_complete: ppm checksum error (%u,%u)", rcvpkt->midx, rcvpkt->idx); log_flush(LL_ERROR);
@@ -231,6 +237,7 @@ void mtq_read_complete(mtq_s* mtq) {
 }
 
 void mtq_write_start(mtq_s* mtq, mtq_reg_s* reg, void* data) {
+    if (!mtq->is_init) return;
     uint8_t w_buf[MTQ_MAX_DATA_LEN];
     uint8_t n_body_bytes = 4*reg->cnt;
     uint8_t w_buf_len = 4 + n_body_bytes;
@@ -271,6 +278,7 @@ void mtq_write_start(mtq_s* mtq, mtq_reg_s* reg, void* data) {
 }
 
 void mtq_write_start(mtq_s* mtq, uint16_t key, void* data) {
+    if (!mtq->is_init) return;
     mtq_reg_s* reg = mtq_get_reg(mtq, key);
     if (reg == NULL) {
         sprintf(LOGBUF, "mtq_write_start: register invalid (%u,%u)", key >> 8, key & 0x00FF); log_flush(LL_ERROR);
@@ -280,6 +288,7 @@ void mtq_write_start(mtq_s* mtq, uint16_t key, void* data) {
 }
 
 void mtq_write_complete(mtq_s* mtq) {
+    if (!mtq->is_init) return;
     mtq_pkt_s* rcvpkt = &mtq->rcvpkt;
     if (!mtq_pkt_verify_csum(rcvpkt)) {
         sprintf(LOGBUF, "mtq_write_complete: ppm checksum error (%u,%u)", rcvpkt->midx, rcvpkt->idx); log_flush(LL_ERROR);
@@ -307,6 +316,7 @@ void mtq_write_complete(mtq_s* mtq) {
 }
 
 void mtq_parse_stream(mtq_s* mtq, ringbuf_s* irqbuf) {
+    if (!mtq->is_init) return;
     mtq_pkt_s* rcvpkt = &mtq->rcvpkt;
     uint16_t iter = 0;
     while (iter < 2*RINGBUF_MAX_SIZE) {
@@ -380,6 +390,7 @@ void mtq_parse_stream(mtq_s* mtq, ringbuf_s* irqbuf) {
 // HIGH LEVEL API
 
 int1 mtq_heartbeat(mtq_s* mtq) {
+    if (!mtq->is_init) return FALSE;
     mtq_reg_s* reg = mtq_get_reg(mtq, MTQ_SNID);
     if (reg == NULL) return FALSE;
     char* snid = (char*) reg->value;
@@ -398,11 +409,13 @@ int1 mtq_heartbeat(mtq_s* mtq) {
 }
 
 void mtq_reset(mtq_s* mtq) {
+    if (!mtq->is_init) return;
     uint8_t req = 1;
     mtq_write_start(mtq, MTQ_NVM, &req);
 }
 
 void mtq_read_fast(mtq_s* mtq) {
+    if (!mtq->is_init) return;
     uint8_t i;
     for (i = 0; i < MTQ_NUM_FAST_REGS; i++) {
         mtq_read_start(mtq, MTQ_FAST_FRAME_REGS[i]);
@@ -410,6 +423,7 @@ void mtq_read_fast(mtq_s* mtq) {
 }
 
 void mtq_read_ctrl(mtq_s* mtq) {
+    if (!mtq->is_init) return;
     uint8_t i;
     for (i = 0; i < MTQ_NUM_CTRL_REGS; i++) {
         mtq_read_start(mtq, MTQ_CTRL_FRAME_REGS[i]);
@@ -417,6 +431,7 @@ void mtq_read_ctrl(mtq_s* mtq) {
 }
 
 void mtq_set_date_time(mtq_s* mtq, struct_tm* rtc) {
+    if (!mtq->is_init) return;
     uint8_t date[4]; 
     date[3] = to_bcd(rtc->tm_year);
     date[2] = to_bcd(rtc->tm_mon);
@@ -433,6 +448,7 @@ void mtq_set_date_time(mtq_s* mtq, struct_tm* rtc) {
 }
 
 void mtq_set_conf(mtq_s* mtq, uint8_t elevation, uint8_t mode) {
+    if (!mtq->is_init) return;
     uint8_t conf[4];
     conf[3] = elevation;
     conf[2] = 0; // Unused

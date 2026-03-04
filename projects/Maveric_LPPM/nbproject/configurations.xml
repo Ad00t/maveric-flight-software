@@ -17,12 +17,12 @@
       <itemPath>include/m41t81s.h</itemPath>
       <itemPath>../../common/maveric/include/systime.h</itemPath>
       <itemPath>../../common/maveric/include/scheduler.h</itemPath>
-      <itemPath>../../common/maveric/include/colors.h</itemPath>
       <itemPath>include/cmdimpl.h</itemPath>
       <itemPath>include/housekeeping.h</itemPath>
       <itemPath>../../common/maveric/include/ringbuf.h</itemPath>
-      <itemPath>../../common/maveric/include/kiss.h</itemPath>
       <itemPath>../../common/maveric/include/cmdpkt.h</itemPath>
+      <itemPath>../../common/maveric/include/common.h</itemPath>
+      <itemPath>../../common/maveric/include/logger.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -54,7 +54,6 @@
       <itemPath>src/cmdimpl.c</itemPath>
       <itemPath>src/housekeeping.c</itemPath>
       <itemPath>../../common/maveric/src/ringbuf.c</itemPath>
-      <itemPath>../../common/maveric/src/kiss.c</itemPath>
       <itemPath>../../common/maveric/src/cmdpkt.c</itemPath>
     </logicalFolder>
   </logicalFolder>

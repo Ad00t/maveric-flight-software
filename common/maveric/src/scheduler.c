@@ -59,15 +59,15 @@ void scheduler_run_tasks(scheduler_s* s, cmdmgr_s* cmdmgr) {
             }
             switch (s->tasks[i].type) {
                 case CMD:
-                    ringbuf_s rcvbuf;
-                    rb_init(&rcvbuf);
-                    uint8_t j;
-                    for (j = 0; j < CMD_MAX_LEN; j++) {
-                        rb_push(&rcvbuf, s->tasks[i].cmd_ptr[j]); 
-                    }
-                    cmdpkt_s pkt;
-                    cmdpkt_init(&pkt);
-                    cmdmgr_parse_stream(cmdmgr, &rcvbuf, &pkt);
+                    // ringbuf_s rcvbuf;
+                    // rb_init(&rcvbuf);
+                    // uint8_t j;
+                    // for (j = 0; j < CMD_MAX_LEN; j++) {
+                    //     rb_push(&rcvbuf, s->tasks[i].cmd_ptr[j]); 
+                    // }
+                    // cmdpkt_s pkt;
+                    // cmdpkt_init(&pkt);
+                    // cmdmgr_parse_stream(cmdmgr, &rcvbuf, &pkt, FALSE);
                     break;
                 case FUNC:
                     schedfunc_f schedfunc = s->tasks[i].func;

@@ -8,7 +8,7 @@ void cmdimpl_init(void);
 
 // COMMAND IMPLEMENTATIONS 
 
-void cmdimpl_cmd_set_time(cmdpkt_s* pkt);
-void cmdimpl_cmd_ftdi_log(cmdpkt_s* pkt);
+void cmdimpl_ppm_set_time(cmdpkt_s* pkt);
+void cmdimpl_ppm_ftdi_log(cmdpkt_s* pkt);
 
 #endif 

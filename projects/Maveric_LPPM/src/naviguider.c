@@ -58,6 +58,7 @@ void nvg_pkt_clear(nvg_pkt_s* pkt) {
 
 void nvg_init(nvg_s* nvg, uint8_t port) {
     nvg->port = port;
+    nvg->is_init = TRUE;
     memcpy(nvg->sensors, NVG_INIT_SENSOR_TABLE, sizeof(NVG_INIT_SENSOR_TABLE));
     nvg_pkt_init(&nvg->rcvpkt);
 
@@ -74,20 +75,21 @@ void nvg_init(nvg_s* nvg, uint8_t port) {
 }
 
 void nvg_destroy(nvg_s* nvg) {
+    if (!nvg->is_init) return;
     nvg_stop_all_sensors(nvg);
     nvg_power_down(nvg);
     nvg_clear(nvg);
-
     uint8_t i;
     for (i = 0; i < NVG_NUM_SENSORS; i++) {
         if (nvg->sensors[NVG_SENSOR_IDS[i]].data != NULL)
             free(nvg->sensors[NVG_SENSOR_IDS[i]].data);
     }
-    
+    nvg->is_init = FALSE; 
     sprintf(LOGBUF, "nvg_destroy"); log_flush(LL_INFO);
 }
 
 void nvg_clear(nvg_s* nvg) {
+    if (!nvg->is_init) return;
     uint8_t i;
     for (i = 0; i < NVG_SENSOR_TABLE_LEN; i++) {
         nvg_sensor_s* sens = &nvg->sensors[i];
@@ -96,11 +98,11 @@ void nvg_clear(nvg_s* nvg) {
         sens->ts = 0;
     }
     nvg_pkt_clear(&nvg->rcvpkt);
-    
     sprintf(LOGBUF, "nvg_clear"); log_flush(LL_INFO);
 }
 
 void nvg_send_command(nvg_s* nvg, char* cmd) {
+    if (!nvg->is_init) return;
     uint8_t len = strlen(cmd);
     uart_write_buf(nvg->port, cmd, len);
     sprintf(LOGBUF, "nvg_send_command: len=%u \"%s\"", len, cmd); log_flush(LL_INFO);
@@ -108,6 +110,7 @@ void nvg_send_command(nvg_s* nvg, char* cmd) {
 } 
 
 void nvg_parse_stream(nvg_s* nvg, ringbuf_s* irqbuf) {
+    if (!nvg->is_init) return;
     nvg_pkt_s* pkt = &nvg->rcvpkt;
 
     uint16_t iter;
@@ -191,6 +194,7 @@ void nvg_parse_stream(nvg_s* nvg, ringbuf_s* irqbuf) {
 }
 
 void nvg_process_sensor_data(nvg_s* nvg) { 
+    if (!nvg->is_init) return;
     static char* id_to_text[] = { 
         "NULL", "ACCELEROMETER", "MAGNETOMETER_CAL", "ORIENTATION", "GYROSCOPE_CAL", 
         "NULL", "PRESSURE", "TEMPERATURE", "NULL", "ACCEL_GRAVITY", "ACCEL_LINEAR", 
@@ -212,6 +216,7 @@ void nvg_process_sensor_data(nvg_s* nvg) {
 }
 
 void nvg_get_sensor_data(nvg_s* nvg, uint8_t id, float* out) {
+    if (!nvg->is_init) return;
     nvg_sensor_s* sens = &nvg->sensors[id];
     if (sens->len == 0 || sens->data == NULL) {
         out = NULL;
@@ -223,6 +228,7 @@ void nvg_get_sensor_data(nvg_s* nvg, uint8_t id, float* out) {
 // HIGH LEVEL API
 
 void nvg_start_sensor(nvg_s* nvg, uint8_t id, uint16_t rate) {
+    if (!nvg->is_init) return;
     uint8_t buf[10];
     sprintf(buf, "s %u,%u\r", id, rate);
     nvg_send_command(nvg, buf); 
@@ -230,6 +236,7 @@ void nvg_start_sensor(nvg_s* nvg, uint8_t id, uint16_t rate) {
 }
 
 void nvg_start_all_sensors(nvg_s* nvg) {
+    if (!nvg->is_init) return;
     uint8_t i;
     for (i = 0; i < NVG_NUM_SENSORS; i++) {
         nvg_start_sensor(nvg, NVG_SENSOR_IDS[i], 1);
@@ -237,6 +244,7 @@ void nvg_start_all_sensors(nvg_s* nvg) {
 }
         
 void nvg_stop_all_sensors(nvg_s* nvg) {
+    if (!nvg->is_init) return;
     uint8_t i;
     for (i = 0; i < NVG_NUM_SENSORS; i++) {
         nvg_start_sensor(nvg, NVG_SENSOR_IDS[i], 0);
@@ -246,6 +254,7 @@ void nvg_stop_all_sensors(nvg_s* nvg) {
 // COMMAND FUNCTIONS
 
 int1 nvg_heartbeat(nvg_s* nvg) {
+    if (!nvg->is_init) return;
     int1 hb = (nvg->sensors[NVG_TEMPERATURE].ts > 0);
     if (!hb) {
         sprintf(LOGBUF, "nvg_heartbeat: flatlined. resetting..."); log_flush(LL_ERROR);
@@ -259,10 +268,12 @@ int1 nvg_heartbeat(nvg_s* nvg) {
 }
 
 void nvg_power_down(nvg_s* nvg) {
+    if (!nvg->is_init) return;
     nvg_send_command(nvg, "P");
 }
 
 void nvg_reset(nvg_s* nvg) {
+    if (!nvg->is_init) return;
     nvg_send_command(nvg, "X");
     nvg_send_command(nvg, "V0");
     nvg_send_command(nvg, "M1\r");
@@ -271,6 +282,7 @@ void nvg_reset(nvg_s* nvg) {
 }
 
 void nvg_magnetometer_mode(nvg_s* nvg) {
+    if (!nvg->is_init) return;
     nvg_stop_all_sensors(nvg);
     nvg_start_sensor(nvg, NVG_MAGNETOMETER_UNCAL, 1);
     nvg_start_sensor(nvg, NVG_MAGNETOMETER_CAL, 1);
