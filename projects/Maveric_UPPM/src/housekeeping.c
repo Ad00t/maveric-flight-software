@@ -21,6 +21,7 @@ extern struct_tm g_rtc_time;        // Global RTC time tracking instance (from l
 extern ax100_s g_ax100;             // AX100 transceiver driver 
 
 void hk_init() {
+    // IMPORTANT: AT LEAST ONE SCHEDULE FUNCTION MUST BE ACTIVE OR YOU WILL GET A SCHEDULER ERROR
     scheduler_schedule_func_in(&g_scheduler, 0, hk_log, 2000, 500, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 1, hk_heartbeats, 2000, 3000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 2, hk_read_sensors, 2000, 1000, SCHEDULE_REPS_INFINITE);

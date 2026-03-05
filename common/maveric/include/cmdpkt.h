@@ -33,15 +33,22 @@
 
 typedef enum {
     REQUEST = 0,
-    RESPONSE = 1
+    RESPONSE = 1,
+    ACK = 2
 } cmdpkt_type_e;
+
+typedef enum {
+    KISS_WAIT_FEND = 0,
+    KISS_IN_FRAME,
+    KISS_IN_ESCAPE
+} kiss_fsm_e;
 
 typedef struct {
     // Packet parsing metadata
-    char buf[CMD_MAX_LEN];
+    uint8_t buf[CMD_MAX_LEN];
+    uint16_t i_start;
     uint16_t buf_len;
-    uint8_t n_skip;
-    int1 busy;
+    kiss_fsm_e fsm;
     // Packet data
     uint8_t orgn;
     uint8_t dest;
@@ -101,6 +108,7 @@ uint16_t ntohs(uint16_t netShort);
 
 // KISS 
 
+int1 kiss_process_byte(cmdpkt_s* p, uint8_t byte);
 void kiss_prepend_header(uint8_t* msg, uint16_t* msgLength);
 void kiss_append_footer(uint8_t* msg, uint16_t* msgLength);
 void kiss_apply_byte_check(uint8_t* message, uint16_t messageLength, uint8_t* frame, uint16_t* frameLength, uint16_t msgStartIdx);

@@ -53,6 +53,7 @@
       <itemPath>src/cmdimpl.c</itemPath>
       <itemPath>src/housekeeping.c</itemPath>
       <itemPath>../../common/maveric/src/cmdpkt.c</itemPath>
+      <itemPath>../../common/maveric/src/logger.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>

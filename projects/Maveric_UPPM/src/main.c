@@ -81,11 +81,11 @@ void system_cleanup(void);
 
 int1 SUPERLOOP_RUNNING = TRUE;
 
-irqmgr_s g_irqmgr;          // Interrupts manager
-cmdmgr_s g_cmdmgr;          // Commands manager
-scheduler_s g_scheduler;    // Schedules manager
-struct_tm g_rtc_time;       // Global RTC time tracking instance (from lower PPM)       
-ax100_s g_ax100;            // AX100 transceiver driver
+irqmgr_s g_irqmgr = {0};          // Interrupts manager
+cmdmgr_s g_cmdmgr = {0};          // Commands manager
+scheduler_s g_scheduler = {0};    // Schedules manager
+struct_tm g_rtc_time = {0};       // Global RTC time tracking instance (from lower PPM)       
+ax100_s g_ax100 = {0};            // AX100 transceiver driver
 
 void main(void) {	
     system_init();

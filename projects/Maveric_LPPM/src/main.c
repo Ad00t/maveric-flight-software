@@ -87,13 +87,13 @@ void system_cleanup(void);
 
 int1 SUPERLOOP_RUNNING = TRUE;
 
-irqmgr_s g_irqmgr;            // Interrupts manager
-cmdmgr_s g_cmdmgr;            // Commands manager
-scheduler_s g_scheduler;      // Schedules manager
-ertc_s g_ertc;                // External RTC (on motherboard)
-mtq_s g_mtq;                  // Magnetorquer
-gyro_s g_gyro;                // Gyroscope (x3)
-nvg_s g_nvg;                  // Naviguider
+irqmgr_s g_irqmgr = {0};            // Interrupts manager
+cmdmgr_s g_cmdmgr = {0};            // Commands manager
+scheduler_s g_scheduler = {0};      // Schedules manager
+ertc_s g_ertc = {0};                // External RTC (on motherboard)
+mtq_s g_mtq = {0};                  // Magnetorquer
+gyro_s g_gyro = {0};                // Gyroscope (x3)
+nvg_s g_nvg = {0};                  // Naviguider
 
 void main(void) {	
     system_init();

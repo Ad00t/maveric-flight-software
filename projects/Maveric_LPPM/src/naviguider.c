@@ -254,7 +254,7 @@ void nvg_stop_all_sensors(nvg_s* nvg) {
 // COMMAND FUNCTIONS
 
 int1 nvg_heartbeat(nvg_s* nvg) {
-    if (!nvg->is_init) return;
+    if (!nvg->is_init) return 0;
     int1 hb = (nvg->sensors[NVG_TEMPERATURE].ts > 0);
     if (!hb) {
         sprintf(LOGBUF, "nvg_heartbeat: flatlined. resetting..."); log_flush(LL_ERROR);

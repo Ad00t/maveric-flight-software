@@ -14,6 +14,7 @@ typedef struct {
     struct_tm init_time;
     struct_tm halted_time;
     int1 is_using_ertc; // Are we using the external I2C RTC or the internal one?
+    int1 is_init;
 } ertc_s;
 
 // Initialze ertc module with initial time in buf

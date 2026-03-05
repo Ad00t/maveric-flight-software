@@ -51,6 +51,7 @@ void cp_rtc_to_stm(struct_tm* stm, rtc_time_t* rtc) {
 // ERTC FUNCTIONS
 
 void ertc_init(ertc_s* ertc, struct_tm* init_time) {
+    ertc->is_init = TRUE;
     ertc_clear(ertc);
     memcpy(&ertc->init_time, init_time, sizeof(struct_tm));
     ertc->is_using_ertc = TRUE;
@@ -64,11 +65,13 @@ void ertc_init(ertc_s* ertc, struct_tm* init_time) {
 }
 
 void ertc_clear(ertc_s* ertc) {
+    if (!ertc->is_init) return;
     memset(&ertc->time, 0, sizeof(struct_tm));
     memset(&ertc->halted_time, 0, sizeof(struct_tm));
 }
 
 void ertc_get_time(ertc_s* ertc) {
+    if (!ertc->is_init) return;
     if (ertc->is_using_ertc) {
         i2c_start();					// RTC READ SEQ
         i2c_write(0xD0);  				// Device address/write mode
@@ -84,7 +87,8 @@ void ertc_get_time(ertc_s* ertc) {
         ertc->time.tm_year = bcdtohex(i2c_read(0)& 0xff); 	// year, w/NOACK
         i2c_stop();
         
-        int1 valid = (ertc->time.tm_hour <= 23 && ertc->time.tm_min <= 59 && ertc->time.tm_sec <= 59 && ertc->time.tm_mon > 0 && ertc->time.tm_mday > 0); 
+        int1 valid = (ertc->time.tm_hour <= 23 && ertc->time.tm_min <= 59 && ertc->time.tm_sec <= 59
+                        && ertc->time.tm_mon > 0 && ertc->time.tm_mday > 0); 
         if (valid) {
             rtc_time_t rtc;
             cp_stm_to_rtc(&rtc, &ertc->time);
@@ -102,6 +106,7 @@ void ertc_get_time(ertc_s* ertc) {
 }
 
 void ertc_set_time(ertc_s* ertc, struct_tm* time) {
+    if (!ertc->is_init) return;
     if (ertc->is_using_ertc) {
         i2c_start();
         i2c_write(0xD0);
@@ -123,6 +128,7 @@ void ertc_set_time(ertc_s* ertc, struct_tm* time) {
 }
 
 int1 ertc_heartbeat(ertc_s* ertc) {
+    if (!ertc->is_init) return 0;
     if (!ertc->is_using_ertc) {
         sprintf(LOGBUF, "ertc_heartbeat: flatlined. resetting..."); log_flush(LL_ERROR);
         struct_tm init_time;
@@ -133,6 +139,7 @@ int1 ertc_heartbeat(ertc_s* ertc) {
 }
 
 void ertc_enable_fpm(ertc_s* ertc) {
+    if (!ertc->is_init) return;
     int i;
     uint8_t test_buf[16];
 

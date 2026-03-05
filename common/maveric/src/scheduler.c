@@ -61,12 +61,12 @@ void scheduler_run_tasks(scheduler_s* s, cmdmgr_s* cmdmgr) {
                 s->tasks[i].next_release = newnext; 
             }
             switch (s->tasks[i].type) {
-                case CMD:
-                    cmdmgr_process_cmd(cmdmgr, s->tasks[i].cmd_ptr);
-                    break;
                 case FUNC:
                     schedfunc_f schedfunc = s->tasks[i].func;
-                    schedfunc();
+                    if (schedfunc != NULL) schedfunc();
+                    break;
+                case CMD:
+                    cmdmgr_process_cmd(cmdmgr, s->tasks[i].cmd_ptr);
                     break;
             }
         }
@@ -91,13 +91,13 @@ uint8_t scheduler_schedule_func_at(scheduler_s* s, int8_t id, schedfunc_f func, 
     return STATUS_OK;
 }
 
-uint8_t scheduler_schedule_cmd_at(scheduler_s* s, int8_t id, cmdpkt_s cmd, struct_tm start_time, uint32_t period_ms, uint16_t reps) {
+uint8_t scheduler_schedule_cmd_at(scheduler_s* s, int8_t id, cmdpkt_s* p, struct_tm start_time, uint32_t period_ms, uint16_t reps) {
     schedtask_s task = {0};
     create_schedtask(&task, id, CMD, rtc_to_epoch_ms(start_time), period_ms, reps);
     int8_t i_task = schedule_task(s, task, SCHEDULER_MAX_FUNC_TASKS, SCHEDULER_MAX_CMD_TASKS); // Cmd tasks segment of tasks buffer
     if (i_task == -1) return STATUS_ERR;
     cmdpkt_s* cmd_ptr = &s->cmds[i_task - SCHEDULER_MAX_FUNC_TASKS]; 
-    *cmd_ptr = cmd;
+    memcpy(cmd_ptr, p, sizeof(cmdpkt_s));
     s->tasks[i_task].cmd_ptr = cmd_ptr;
     return STATUS_OK;
 }
@@ -111,13 +111,13 @@ uint8_t scheduler_schedule_func_in(scheduler_s* s, int8_t id, schedfunc_f func, 
     return STATUS_OK;
 }
 
-uint8_t scheduler_schedule_cmd_in(scheduler_s* s, int8_t id, cmdpkt_s cmd, uint32_t start_delay_ms, uint32_t period_ms, uint16_t reps) {
+uint8_t scheduler_schedule_cmd_in(scheduler_s* s, int8_t id, cmdpkt_s* p, uint32_t start_delay_ms, uint32_t period_ms, uint16_t reps) {
     schedtask_s task = {0};
     create_schedtask(&task, id, CMD, systime_epoch_ms() + start_delay_ms, period_ms, reps);
     int8_t i_task = schedule_task(s, task, SCHEDULER_MAX_FUNC_TASKS, SCHEDULER_MAX_CMD_TASKS);
     if (i_task == -1) return STATUS_ERR;
     cmdpkt_s* cmd_ptr = &s->cmds[i_task - SCHEDULER_MAX_FUNC_TASKS]; 
-    *cmd_ptr = cmd;
+    memcpy(cmd_ptr, p, sizeof(cmdpkt_s));
     s->tasks[i_task].cmd_ptr = cmd_ptr;
     return STATUS_OK;
 }

@@ -26,75 +26,82 @@ void cmdmgr_clear(cmdmgr_s* cmdmgr) {
 void cmdmgr_parse_stream(cmdmgr_s* cmdmgr, ringbuf_s* rcvbuf, cmdpkt_s* pkt, int1 csp) {
     if (rb_len(rcvbuf) < KISS_HEADER_SIZE + CMD_HEADER_SIZE + CMD_FOOTER_SIZE + KISS_FOOTER_SIZE
         + (csp ? CSP_HEADER_SIZE + CRC32_SIZE : 0)) return;
-    
-    // uint8_t i;
-    // for (i = 0; i < rb_len(rcvbuf); i++) {
-    //     uint8_t b = 0;
-    //     rb_peek(rcvbuf, i, &b);
-    //     fprintf(COM_D, "%u:%02X ", i, b);
-    // }
-    // fprintf(COM_D, "\n");
 
-    // Extract KISS frame
-    uint8_t frame_buf[CMD_MAX_FRAME_SIZE] = {0};
-    uint16_t frame_len = kiss_extract_frame(rcvbuf, frame_buf, sizeof(frame_buf));
-
-    // Extract cmd and process it if we have a frame
-    if (frame_len > 0) {
-        uint8_t cmd_buf[CMD_MAX_FRAME_SIZE] = {0};
-        uint16_t cmd_len = 0;
-        cmd_len = frame_len;
-        kiss_remove_byte_check(frame_buf, frame_len, cmd_buf, &cmd_len, 0);
-        cmd_len -= KISS_HEADER_SIZE + KISS_FOOTER_SIZE + (csp ? CSP_HEADER_SIZE + CRC32_SIZE : 0);
-        uint8_t i;
-        for (i = 0; i < cmd_len; i++)
-            pkt->buf[i] = cmd_buf[i + KISS_HEADER_SIZE + (csp ? CSP_HEADER_SIZE : 0)];
-        pkt->buf_len = cmd_len;
-        cmdmgr_process_cmd(cmdmgr, pkt);    
+    uint16_t iter;
+    for (iter = 0; iter < 2 * RINGBUF_MAX_SIZE; iter++) {
+        uint8_t b;
+        if (!rb_pop(rcvbuf, 1, &b))
+            return;
+        
+        if (kiss_process_byte(pkt, b)) {
+            pkt->i_start = 1;
+            pkt->buf_len--;
+            if (csp) { // Remove CSP header
+                pkt->i_start += CSP_HEADER_SIZE;
+                pkt->buf_len -= CRC32_SIZE;
+            }
+            cmdmgr_process_cmd(cmdmgr, pkt);    
+        } 
     }
+
+    // // Extract KISS frame
+    // uint8_t frame_buf[CMD_MAX_FRAME_SIZE] = {0};
+    // uint16_t frame_len = kiss_extract_frame(rcvbuf, frame_buf, sizeof(frame_buf));
+    //
+    // // Extract cmd and process it if we have a frame
+    // if (frame_len > 0) {
+    //     uint8_t cmd_buf[CMD_MAX_FRAME_SIZE] = {0};
+    //     uint16_t cmd_len = 0;
+    //     cmd_len = frame_len;
+    //     kiss_remove_byte_check(frame_buf, frame_len, cmd_buf, &cmd_len, 0);
+    //     cmd_len -= KISS_HEADER_SIZE + KISS_FOOTER_SIZE + (csp ? CSP_HEADER_SIZE + CRC32_SIZE : 0);
+    //     uint8_t i;
+    //     for (i = 0; i < cmd_len; i++)
+    //         pkt->buf[i] = cmd_buf[i + KISS_HEADER_SIZE + (csp ? CSP_HEADER_SIZE : 0)];
+    //     pkt->buf_len = cmd_len;
+    //     cmdmgr_process_cmd(cmdmgr, pkt);    
+    // }
 }
 
 void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
-    uint8_t i;
-    fprintf(COM_D, "buf: len=%u [", pkt->buf_len);
-    for (i = 0; i < pkt->buf_len; i++) {
-        fprintf(COM_D, " %u:0x%02X'%c'", i, pkt->buf[i], 
-                (pkt->buf[i] >= 32 && pkt->buf[i] <= 126) ? pkt->buf[i] : '%');
+    uint16_t i;
+    uint16_t p = 0;
+    p += sprintf(&LOGBUF[p], "cmdmgr_process_cmd: pkt rcvd: len=%u [", pkt->buf_len);
+    for (i = pkt->i_start; i < pkt->buf_len; i++) {
+        p += sprintf(&LOGBUF[p], " %02X'%c'", pkt->buf[i], ((pkt->buf[i] >= 32 && pkt->buf[i] <= 126) ? pkt->buf[i] : '%')); 
     }
-    fprintf(COM_D, " ]\n");
+    p += sprintf(&LOGBUF[p], " ]"); log_flush(LL_TRACE);
 
     // Parse cmdpkt buf into fields
     if (cmdpkt_parse_buf(pkt) != STATUS_OK) {
-        sprintf(LOGBUF, "cmdmgr_process_cmd: packet buffer parsing failed len=%u", pkt->buf_len); log_flush(LL_ERROR);
-        cmdpkt_clear(pkt);
-        return;
+        sprintf(LOGBUF, "cmdmgr_process_cmd: pkt buf parsing failed: len=%u", pkt->buf_len); log_flush(LL_ERROR);
+        goto cleanup;
     }
 
     // Forward
     if (pkt->dest != NODE_ID) {
-        sprintf(LOGBUF, "cmdmgr_process_cmd: forwarding cmd '%s'", pkt->id); log_flush(LL_INFO);
+        sprintf(LOGBUF, "cmdmgr_process_cmd: forwarding cmd: '%s'", pkt->id); log_flush(LL_INFO);
         cmd_dispatch(pkt);
-        cmdpkt_clear(pkt);
-        return;
+        goto cleanup;
     } 
     
     // CRC check
-    uint16_t calc_crc = compute_crc16(pkt->buf, pkt->buf_len - 2);
+    uint16_t calc_crc = compute_crc16(&pkt->buf[pkt->i_start], pkt->buf_len - 2);
     if (pkt->crc != calc_crc) {
-        sprintf(LOGBUF, "cmdmgr_process_cmd: crc check failed on cmd '%s' crc:%u calculated:%u",
+        sprintf(LOGBUF, "cmdmgr_process_cmd: crc check failed on cmd: '%s' crc=%u calculated=%u",
                 pkt->id, pkt->crc, calc_crc); log_flush(LL_ERROR);
-        cmdpkt_clear(pkt);
-        return;
+        goto cleanup;
     } 
     
     // Find and execute cmd implementation
     cmdimpl_f cmdimpl = ht_get(&cmdmgr->cmdimpls, pkt->id);
     if (cmdimpl == NULL) {
-        sprintf(LOGBUF, "cmdmgr_process_cmd: cmd not recognized '%s'", pkt->id); log_flush(LL_ERROR);
-        return;
+        sprintf(LOGBUF, "cmdmgr_process_cmd: cmd not recognized: '%s'", pkt->id); log_flush(LL_ERROR);
+        goto cleanup;
     }
     cmdimpl(pkt);
 
+cleanup:
     cmdpkt_clear(pkt);
 }
 
@@ -129,6 +136,12 @@ void cmd_dispatch(cmdpkt_s* pkt) {
             uart_write_buf(HOLONAV_PORT, frame, frame_len);
             break;
         case NODE_ID_LPPM:
+            // uint16_t i;
+            // fprintf(COM_C, "%suppm->lppm len=%u [", KMAG, frame_len);
+            // for (i = 0; i < frame_len; i++) {
+            //     fprintf(COM_C, " %02X", frame[i]);
+            // }
+            // fprintf(COM_C, " ]\n");
             uart_write_buf(LPPM_PORT, frame, frame_len);
             break;
     }

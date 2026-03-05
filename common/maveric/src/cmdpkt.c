@@ -44,8 +44,7 @@ void cmdpkt_create(cmdpkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, cmdp
     len += args_len;
     buf[len++] = '\0';
     
-    // CRC should only be computed on message, not framing or anything else
-    uint16_t crc = compute_crc16(&buf[KISS_HEADER_SIZE], len - KISS_HEADER_SIZE); 
+    uint16_t crc = compute_crc16(buf, len); 
     pkt->crc = crc;
     buf[len++] = crc & 0xFF; 
     buf[len++] = (crc >> 8) & 0xFF; 
@@ -59,30 +58,31 @@ void cmdpkt_clear(cmdpkt_s* pkt) {
 uint8_t cmdpkt_parse_buf(cmdpkt_s* pkt) {
     if (pkt->buf_len < 10) return STATUS_ERR;
     uint16_t len = 0;
+    uint8_t* buf = &pkt->buf[pkt->i_start];
 
     // Parse header fields
-    pkt->orgn = pkt->buf[len++];
-    pkt->dest = pkt->buf[len++];
-    pkt->echo = pkt->buf[len++];
-    pkt->ptype = pkt->buf[len++];
-    pkt->id_len = pkt->buf[len++];
-    pkt->args_len = pkt->buf[len++];
+    pkt->orgn = buf[len++];
+    pkt->dest = buf[len++];
+    pkt->echo = buf[len++];
+    pkt->ptype = buf[len++];
+    pkt->id_len = buf[len++];
+    pkt->args_len = buf[len++];
 
     // Parse id field
-    pkt->id = &pkt->buf[len];
+    pkt->id = &buf[len];
     if (len + pkt->id_len >= pkt->buf_len
-        || pkt->buf[len + pkt->id_len] != '\0') return STATUS_ERR;
+        || buf[len + pkt->id_len] != '\0') return STATUS_ERR;
     len += pkt->id_len + 1;
    
     // Parse args field
-    pkt->args = &pkt->buf[len];
+    pkt->args = &buf[len];
     if (len + pkt->args_len >= pkt->buf_len
-        || pkt->buf[len + pkt->args_len] != '\0') return STATUS_ERR;
+        || buf[len + pkt->args_len] != '\0') return STATUS_ERR;
     len += pkt->args_len + 1;
    
     // Parse CRC as uint16
-    uint8_t crc_low = pkt->buf[len++];
-    uint8_t crc_high = pkt->buf[len++];
+    uint8_t crc_low = buf[len++];
+    uint8_t crc_high = buf[len++];
     pkt->crc = make16(crc_high, crc_low);
 
     return len == pkt->buf_len ? STATUS_OK : STATUS_ERR;
@@ -94,11 +94,11 @@ uint16_t cmdpkt_setup_frame(cmdpkt_s* pkt, uint8_t* frame, uint8_t frame_size, i
     uint16_t len = 0;
     kiss_prepend_header(frame, &len);
     if (csp) {
-        addCspHeader(frame, &len, KISS_HEADER_SIZE);
+        addCspHeader(frame, &len, len);
     } 
-    kiss_apply_byte_check(pkt.buf, pkt.buf_len, frame, &len, len);
+    kiss_apply_byte_check(pkt->buf, pkt->buf_len, frame, &len, len);
     if (csp) {
-        uint32_t crc32 = compute_crc32(pkt.buf pkt.buf_len);
+        uint32_t crc32 = compute_crc32(pkt->buf, pkt->buf_len);
         crc32 = htonl(crc32);
         kiss_apply_byte_check((uint8_t*)&crc32, sizeof(crc32), frame, &len, len);
     }
@@ -189,6 +189,59 @@ void setupWdtReset(uint8_t* msg, uint16_t* msgLength) {
 }
 
 // KISS
+
+int1 kiss_process_byte(cmdpkt_s* p, uint8_t byte) {
+    // fprintf(COM_D, "b: 0x%02X'%c'\n", byte, byte);
+    switch (p->fsm) {
+        case KISS_WAIT_FEND:
+            if (byte == FEND) {
+                p->buf_len = 0;
+                p->fsm = KISS_IN_FRAME;
+            }
+            break;
+        
+        case KISS_IN_FRAME:
+            if (byte == FEND) {
+                // End of frame
+                if (p->buf_len > 0) {
+                    return TRUE;
+                }
+            } else if (byte == FESC) {
+                p->fsm = KISS_IN_ESCAPE;
+            } else {
+                if (p->buf_len < CMD_MAX_FRAME_SIZE) {
+                    p->buf[p->buf_len++] = byte;
+                } else {
+                    // overflow -> drop frame
+                    p->fsm = KISS_WAIT_FEND;
+                    p->buf_len = 0;
+                }
+            }
+            break;
+
+        case KISS_IN_ESCAPE:
+            if (byte == TFEND) {
+                byte = FEND;
+            } else if (byte == TFESC) {
+                byte = FESC;
+            } else {
+                // invalid escape → drop frame
+                p->fsm = KISS_WAIT_FEND;
+                p->buf_len = 0;
+                break;
+            }
+
+            if (p->buf_len < CMD_MAX_FRAME_SIZE) {
+                p->buf[p->buf_len++] = byte;
+                p->fsm = KISS_IN_FRAME;
+            } else {
+                p->fsm = KISS_WAIT_FEND;
+                p->buf_len = 0;
+            }
+            break;
+    }
+    return FALSE;
+}
 
 void kiss_prepend_header(uint8_t* msg, uint16_t* msgLength) {
 	msg[0] = FEND;

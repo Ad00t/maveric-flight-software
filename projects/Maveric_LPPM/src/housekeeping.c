@@ -24,7 +24,8 @@ extern gyro_s g_gyro;                 // Gyroscope (x3)
 extern nvg_s g_nvg;                   // Naviguider
 
 void hk_init(void) {
-    scheduler_schedule_func_in(&g_scheduler, 0, hk_get_ertc_time, 2000, 500, SCHEDULE_REPS_INFINITE);
+    // IMPORTANT: AT LEAST ONE SCHEDULE FUNCTION MUST BE ACTIVE OR YOU WILL GET A SCHEDULER ERROR
+    scheduler_schedule_func_in(&g_scheduler, 1, hk_get_ertc_time, 2000, 500, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 1, hk_systime_sync, 2000, 10000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 2, hk_log, 2000, 500, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 3, hk_heartbeats, 2000, 3000, SCHEDULE_REPS_INFINITE);
@@ -54,7 +55,7 @@ void hk_log(void) {
 }
 
 void hk_heartbeats(void) {
-    int1 hb_ertc = ertc_heartbeat(&g_ertc);
+    // int1 hb_ertc = ertc_heartbeat(&g_ertc);
     int1 hb_mtq = mtq_heartbeat(&g_mtq);
     int1 hb_nvg = nvg_heartbeat(&g_nvg);
     // int1 hb_gyro = gyro_heartbeat(&g_gyro);
