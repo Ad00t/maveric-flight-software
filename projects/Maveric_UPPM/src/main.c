@@ -121,8 +121,8 @@ void system_init(void) {
     g_rtc_time.tm_hour = 0;
     g_rtc_time.tm_min = 0;
     g_rtc_time.tm_sec = 0;
-    setup_rtc(RTC_ENABLE | RTC_OUTPUT_SECONDS, 0);
-    rtc_write(&g_rtc_time);
+    // setup_rtc(RTC_ENABLE | RTC_OUTPUT_SECONDS, 0);
+    // rtc_write(&g_rtc_time);
     systime_init(&g_irqmgr.ms, &g_rtc_time);
     
     // Submodules & services init
