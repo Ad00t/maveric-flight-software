@@ -1,3 +1,4 @@
+#include "logger.h"
 #include "cmdpkt.h"
 #include "crcnew.h"
 #include "common.h"
@@ -57,6 +58,15 @@ void cmdpkt_clear(cmdpkt_s* pkt) {
 }
 
 uint8_t cmdpkt_parse_buf(cmdpkt_s* pkt) {
+    // uint16_t p = 0;
+    // uint16_t i;
+    // p += sprintf(&LOGBUF[p], "buf: [");
+    // for (i = pkt->i_start; i < pkt->buf_len; i++) {
+    //     p += sprintf(&LOGBUF[p], " %02X", pkt->buf[i]);
+    // }
+    // p += sprintf(&LOGBUF[p], " ]");
+    // log_flush(LL_TRACE);
+    
     if (pkt->buf_len < 10) return STATUS_ERR;
     uint16_t len = 0;
     uint8_t* buf = &pkt->buf[pkt->i_start];
@@ -68,23 +78,27 @@ uint8_t cmdpkt_parse_buf(cmdpkt_s* pkt) {
     pkt->ptype = buf[len++];
     pkt->id_len = buf[len++];
     pkt->args_len = buf[len++];
+    // sprintf(LOGBUF, "header parsed is=%u o=%u d=%u e=%u t=%u idl=%u al=%u", pkt->i_start, pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id_len, pkt->args_len); log_flush(LL_TRACE);
 
     // Parse id field
     pkt->id = &buf[len];
     if (len + pkt->id_len >= pkt->buf_len
         || buf[len + pkt->id_len] != '\0') return STATUS_ERR;
     len += pkt->id_len + 1;
-
+    // sprintf(LOGBUF, "id parsed '%s'", pkt->id);log_flush(LL_TRACE);
+   
     // Parse args field
     pkt->args = &buf[len];
     if (len + pkt->args_len >= pkt->buf_len
         || buf[len + pkt->args_len] != '\0') return STATUS_ERR;
     len += pkt->args_len + 1;
-
+    // sprintf(LOGBUF, "args parsed '%s'", pkt->args);log_flush(LL_TRACE);
+   
     // Parse CRC as uint16
     uint8_t crc_low = buf[len++];
     uint8_t crc_high = buf[len++];
     pkt->crc = make16(crc_high, crc_low);
+    // sprintf(LOGBUF, "crc parsed %u %u %u", pkt->crc, len, pkt->buf_len);log_flush(LL_TRACE);
     return len == pkt->buf_len ? STATUS_OK : STATUS_ERR;
 }
 
@@ -96,9 +110,9 @@ uint16_t cmdpkt_setup_frame(cmdpkt_s* pkt, uint8_t* frame, uint8_t frame_size, i
     if (csp) {
         addCspHeader(frame, &len, len);
     } 
-    kiss_apply_byte_check(pkt->buf, pkt->buf_len, frame, &len, len);
+    kiss_apply_byte_check(&pkt->buf[pkt->i_start], pkt->buf_len, frame, &len, len);
     if (csp) {
-        uint32_t crc32 = compute_crc32(pkt->buf, pkt->buf_len);
+        uint32_t crc32 = compute_crc32(&pkt->buf[pkt->i_start], pkt->buf_len);
         crc32 = htonl(crc32);
         kiss_apply_byte_check((uint8_t*)&crc32, sizeof(crc32), frame, &len, len);
     }
@@ -135,6 +149,12 @@ void cmdpkt_dispatch(cmdpkt_s* pkt) {
             uart_write_buf(HOLONAV_PORT, frame, frame_len);
             break;
         case NODE_ID_LPPM:
+            // uint16_t i;
+            // fprintf(COM_C, "%suppm->lppm len=%u [", KMAG, frame_len);
+            // for (i = 0; i < frame_len; i++) {
+            //     fprintf(COM_C, " %02X", frame[i]);
+            // }
+            // fprintf(COM_C, " ]\n");
             uart_write_buf(LPPM_PORT, frame, frame_len);
             break;
     }
