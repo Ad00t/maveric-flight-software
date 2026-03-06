@@ -34,7 +34,18 @@ void cmdmgr_parse_stream(cmdmgr_s* cmdmgr, ringbuf_s* rcvbuf, cmdpkt_s* pkt, int
         uint8_t b = 0;
         if (!rb_pop(rcvbuf, 1, &b)) return;
 
+        // if (b == FEND) {
+        //     fprintf(COM_D, "%s%02X ", KRED, b);
+        // } else {
+        //     fprintf(COM_D, "%s%02X ", KYEL, b);
+        // }
+
         if (kiss_process_byte(pkt, b)) {
+            // fprintf(COM_D, "%sFRAME\n", KGRN);
+            // cmdpkt_clear(pkt);
+            // pkt->fsm = KISS_IN_FRAME;
+            // continue;
+            
             // Full frame received
             pkt->i_start = 1;
             pkt->buf_len--;
@@ -50,6 +61,16 @@ void cmdmgr_parse_stream(cmdmgr_s* cmdmgr, ringbuf_s* rcvbuf, cmdpkt_s* pkt, int
 
 void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
     if (!cmdmgr->is_init) return;
+    // uint16_t p = 0;
+    // uint16_t i;
+    // p += sprintf(&LOGBUF[p], "buf: [");
+    // for (i = pkt->i_start; i < (pkt->buf_len > 40 ? 40 : pkt->buf_len); i++) {
+    //     p += sprintf(&LOGBUF[p], " %02X", pkt->buf[i]);
+    // }
+    // p += sprintf(&LOGBUF[p], " ]");
+    // log_flush(LL_TRACE);
+    // goto cleanup;
+    //
 
     // Parse cmdpkt buf into fields
     if (cmdpkt_parse_buf(pkt) != STATUS_OK) {
@@ -58,8 +79,9 @@ void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
     }
 
     // Forward
-    if (pkt->dest != NODE_ID) {
-        sprintf(LOGBUF, "cmdmgr_process_cmd: forwarding cmd: '%s'", pkt->id); log_flush(LL_INFO);
+    if (pkt->dest != NODE) {
+        sprintf(LOGBUF, "cmdmgr_process_cmd: forwarding cmd: o=%u d=%u e=%u p=%u id='%s'", 
+                pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id); log_flush(LL_INFO);
         cmdpkt_dispatch(pkt);
         goto cleanup;
     } 

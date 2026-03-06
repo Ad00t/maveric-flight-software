@@ -15,11 +15,11 @@ void log_flush(log_level_e lvl) {
     if (lvl >= LOG_LEVEL) {
         char logfmt[LOGBUF_MAX_LEN] = {0};
         sprintf(logfmt, "%s%Lu [%s] [%s] %s\n", ll_to_color[lvl], systime_epoch_ms(), ll_to_text[lvl], NODE_LBL, LOGBUF);
-#if NODE_ID == NODE_ID_LPPM
+#if NODE == NODE_LPPM
         uart_write_buf(FTDI_PORT, logfmt, strlen(logfmt));
-#elif NODE_ID == NODE_ID_UPPM
+#elif NODE == NODE_UPPM
         // uart_write_buf(COM_C, logfmt, strlen(logfmt));
-        cmd_dispatch(NODE_ID, NODE_ID_LPPM, 0, REQUEST, "ppm_ftdi_log", logfmt);
+        cmd_dispatch(NODE, NODE_LPPM, 0, REQ, "ppm_ftdi_log", logfmt);
 #endif
     }
    

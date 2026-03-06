@@ -13,13 +13,13 @@
 #define KCYN  "\033[36m"
 #define KWHT  "\033[37m"
 
-#define NODE_ID_LPPM        1
-#define NODE_ID_EPS         2
-#define NODE_ID_UPPM        3
-#define NODE_ID_HOLONAV     4
-#define NODE_ID_ASTROBOARD  5
-#define NODE_ID_GS          6          
-#define NODE_ID_FTDI        7
+#define NODE_LPPM        1
+#define NODE_EPS         2
+#define NODE_UPPM        3
+#define NODE_HOLONAV     4
+#define NODE_ASTROBOARD  5
+#define NODE_GS          6          
+#define NODE_FTDI        7
 
 #endif // !__COMMON_H__
 

@@ -33,9 +33,9 @@
 // Command packet & reader FSM
 
 typedef enum {
-    REQUEST = 0,
-    RESPONSE = 1,
-    ACK = 2
+    ACK = 0,
+    REQ = 1,
+    RES = 2,
 } cmdpkt_type_e;
 
 typedef enum {

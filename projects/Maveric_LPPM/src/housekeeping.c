@@ -46,7 +46,7 @@ void hk_systime_sync(void) {
     sprintf(timestr, "%u %u %u %u %u %u %u", 
             g_ertc.time.tm_wday, g_ertc.time.tm_mon, g_ertc.time.tm_mday, g_ertc.time.tm_year, 
             g_ertc.time.tm_hour, g_ertc.time.tm_min, g_ertc.time.tm_sec);
-    // cmd_dispatch(NODE_ID, NODE_ID_UPPM, 0, REQUEST, "ppm_set_time", timestr);
+    // cmd_dispatch(NODE, NODE_UPPM, 0, REQ, "ppm_set_time", timestr);
 }
 
 void hk_log(void) {

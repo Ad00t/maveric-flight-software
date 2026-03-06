@@ -25,6 +25,7 @@ extern nvg_s g_nvg;                   // Naviguider
 void cmdimpl_init(void) {
     ht_set(&g_cmdmgr.cmdimpls, "ppm_set_time", (cmdimpl_f) cmdimpl_ppm_set_time);
     ht_set(&g_cmdmgr.cmdimpls, "ppm_ftdi_log", (cmdimpl_f) cmdimpl_ppm_ftdi_log);
+    ht_set(&g_cmdmgr.cmdimpls, "ppm_ping", (cmdimpl_f) cmdimpl_ppm_ping);
 }
 
 // COMMAND IMPLEMENTATIONS
@@ -42,7 +43,7 @@ void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
 
     ertc_set_time(&g_ertc, &time);
     systime_sync();
-    // cmd_dispatch(NODE_ID, NODE_ID_UPPM, 0, REQUEST, "ppm_set_time", pkt->args);
+    // cmd_dispatch(NODE, NODE_UPPM, 0, REQUEST, "ppm_set_time", pkt->args);
     mtq_set_date_time(&g_mtq, &time); 
 
     sprintf(LOGBUF, "cmdimpl_ppm_set_time '%s' [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", pkt->args
@@ -53,4 +54,10 @@ void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
 void cmdimpl_ppm_ftdi_log(cmdpkt_s* pkt) {
     char* p = pkt->args;
     fprintf(FTDI_PORT, "%s", p);
+}
+
+void cmdimpl_ppm_ping(cmdpkt_s* pkt) {
+    if (pkt->ptype == REQ) {
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, "ppm_ping", "pong");
+    }
 }

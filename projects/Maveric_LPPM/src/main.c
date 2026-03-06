@@ -53,7 +53,7 @@
 // Global defines
 
 #define LOWER_PPM
-#define NODE_ID             NODE_ID_LPPM
+#define NODE                NODE_LPPM 
 #define NODE_LBL            "LPPM"
 #define LOG_LEVEL           LL_TRACE 
 

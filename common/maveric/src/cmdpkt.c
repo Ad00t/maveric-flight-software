@@ -58,15 +58,6 @@ void cmdpkt_clear(cmdpkt_s* pkt) {
 }
 
 uint8_t cmdpkt_parse_buf(cmdpkt_s* pkt) {
-    // uint16_t p = 0;
-    // uint16_t i;
-    // p += sprintf(&LOGBUF[p], "buf: [");
-    // for (i = pkt->i_start; i < pkt->buf_len; i++) {
-    //     p += sprintf(&LOGBUF[p], " %02X", pkt->buf[i]);
-    // }
-    // p += sprintf(&LOGBUF[p], " ]");
-    // log_flush(LL_TRACE);
-    
     if (pkt->buf_len < 10) return STATUS_ERR;
     uint16_t len = 0;
     uint8_t* buf = &pkt->buf[pkt->i_start];
@@ -120,47 +111,47 @@ uint16_t cmdpkt_setup_frame(cmdpkt_s* pkt, uint8_t* frame, uint8_t frame_size, i
     return len;
 }
 
+// Handles all packet routing
 void cmdpkt_dispatch(cmdpkt_s* pkt) {
     uint8_t frame[CMD_MAX_FRAME_SIZE] = {0};
-    int1 csp = NODE_ID == NODE_ID_UPPM && pkt->dest == NODE_ID_GS;
+    int1 csp = (NODE == NODE_UPPM && pkt->dest == NODE_GS);
     uint16_t frame_len = cmdpkt_setup_frame(pkt, frame, CMD_MAX_FRAME_SIZE, csp);
-#if NODE_ID == NODE_ID_LPPM
+#if NODE == NODE_LPPM
     switch (pkt->dest) {
-        case NODE_ID_EPS:
+        case NODE_EPS:
             break;
-        case NODE_ID_UPPM:
-        case NODE_ID_GS:
-        case NODE_ID_ASTROBOARD:
-        case NODE_ID_HOLONAV:
+        case NODE_FTDI:
+            uart_write_buf(FTDI_PORT, frame, frame_len);
+            break;
+        case NODE_UPPM:
+        case NODE_GS:
+        case NODE_ASTROBOARD:
+        case NODE_HOLONAV:
             uart_write_buf(UPPM_PORT, frame, frame_len);
             break;
     }
-#elif NODE_ID == NODE_ID_UPPM
+#elif NODE == NODE_UPPM
     switch (pkt->dest) {
-        case NODE_ID_EPS:
+        case NODE_EPS:
             break;
-        case NODE_ID_GS:
+        case NODE_FTDI:
+        case NODE_LPPM:
+            uart_write_buf(LPPM_PORT, frame, frame_len);
+            break;
+        case NODE_GS:
             uart_write_buf(AX100_PORT, frame, frame_len);
             break;
-        case NODE_ID_ASTROBOARD:
+        case NODE_ASTROBOARD:
             uart_write_buf(ASTROBOARD_PORT, frame, frame_len);
             break;
-        case NODE_ID_HOLONAV:
+        case NODE_HOLONAV:
             uart_write_buf(HOLONAV_PORT, frame, frame_len);
-            break;
-        case NODE_ID_LPPM:
-            // uint16_t i;
-            // fprintf(COM_C, "%suppm->lppm len=%u [", KMAG, frame_len);
-            // for (i = 0; i < frame_len; i++) {
-            //     fprintf(COM_C, " %02X", frame[i]);
-            // }
-            // fprintf(COM_C, " ]\n");
-            uart_write_buf(LPPM_PORT, frame, frame_len);
             break;
     }
 #endif
 }
 
+// Nice little wrapper function for sending commands from anywhere
 void cmd_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args) {
     cmdpkt_s pkt;
     cmdpkt_create(&pkt, orgn, dest, echo, ptype, id, args);

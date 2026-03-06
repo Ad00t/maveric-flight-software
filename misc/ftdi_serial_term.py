@@ -22,7 +22,6 @@ from prompt_toolkit.mouse_events import MouseEventType
 SCROLL_SPEED = 3
 MAX_LOGS = 10000
 
-crcalc = Calculator(Crc16.XMODEM)
 ftdi = serial.Serial(sys.argv[1], baudrate=115200, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, timeout=1)
 
 log_lines = []
@@ -146,7 +145,7 @@ def read_serial():
 def send_command_str(cmdstr):
     cmdstr = cmdstr.strip()
     spl = cmdstr.split(' ')
-    ba, cnt = commands.send_cmd_serial(ftdi, int(spl[0]), int(spl[1]), int(spl[2]), int(spl[3]), spl[4], ' '.join(spl[5:]))
+    ba, cnt = commands.send_cmd_serial(ftdi, int(spl[0]), int(spl[1]), int(spl[2]), spl[3], spl[4], ' '.join(spl[5:]))
     log(f"\033[0m[RPI] [INFO] sending cmd: cnt={cnt} {repr(ba.decode('ascii', errors='replace'))}\r\n")
 
 if __name__ == "__main__":      

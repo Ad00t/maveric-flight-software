@@ -10,5 +10,6 @@ void cmdimpl_init(void);
 
 void cmdimpl_ppm_set_time(cmdpkt_s* pkt);
 void cmdimpl_ppm_ftdi_log(cmdpkt_s* pkt);
+void cmdimpl_ppm_ping(cmdpkt_s* pkt);
 
 #endif 

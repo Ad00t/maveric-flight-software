@@ -2,13 +2,11 @@ from crc import Calculator, Crc16
 import time
 import serial
 
-REQUEST = 0 
-RESPONSE = 1
-
 crcalc = Calculator(Crc16.XMODEM)
+ptype_map = { 'ACK': 0, 'REQ': 1, 'RES': 2 }
 
-def create_cmd(orgn: int, dest: int, echo: int, ptype: int, id: str, args: str) -> bytearray:
-    msg_data = [ orgn, dest, echo, ptype, len(id), len(args), id, 0, args, 0 ]
+def create_cmd(orgn: int, dest: int, echo: int, ptype: str, id: str, args: str) -> bytearray:
+    msg_data = [ orgn, dest, echo, ptype_map[ptype], len(id), len(args), id, 0, args, 0 ]
 
     msg_ba = bytearray()
     for d in msg_data:
@@ -24,7 +22,7 @@ def create_cmd(orgn: int, dest: int, echo: int, ptype: int, id: str, args: str) 
     pkt_ba.extend(b'\xC0')
     return pkt_ba 
 
-def send_cmd_serial(serial: serial.Serial, orgn: int, dest: int, echo: int, ptype: int, id: str, args: str) -> tuple:
+def send_cmd_serial(serial: serial.Serial, orgn: int, dest: int, echo: int, ptype: str, id: str, args: str) -> tuple:
     if not (serial and serial.is_open): return (bytearray(), 0)
     ba = create_cmd(orgn, dest, echo, ptype, id, args)
     cnt = serial.write(ba)

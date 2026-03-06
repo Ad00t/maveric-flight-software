@@ -50,7 +50,7 @@
 // Global defines
 
 #define UPPER_PPM
-#define NODE_ID             NODE_ID_UPPM
+#define NODE                NODE_UPPM
 #define NODE_LBL            "UPPM"
 #define LOG_LEVEL           LL_TRACE
 

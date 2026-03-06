@@ -49,5 +49,5 @@ void hk_read_sensors(void) {
 }
 
 void hk_test_ax100(void) {
-    cmd_dispatch(NODE_ID, NODE_ID_GS, 0, REQUEST, "hello", "world");
+    cmd_dispatch(NODE, NODE_GS, 0, REQ, "hello", "world");
 }
