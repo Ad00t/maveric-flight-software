@@ -24,15 +24,14 @@ def create_cmd(orgn: int, dest: int, echo: int, ptype: int, id: str, args: str) 
     pkt_ba.extend(b'\xC0')
     return pkt_ba 
 
-def send_cmd(serial: serial.Serial, orgn: int, dest: int, echo: int, ptype: int, id: str, args: str) -> tuple:
+def send_cmd_serial(serial: serial.Serial, orgn: int, dest: int, echo: int, ptype: int, id: str, args: str) -> tuple:
     if not (serial and serial.is_open): return (bytearray(), 0)
     ba = create_cmd(orgn, dest, echo, ptype, id, args)
-    # ba = bytearray(b'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
     cnt = serial.write(ba)
     time.sleep(0.01)
     return (ba, cnt)
 
-def read_cmd(serial: serial.Serial) -> tuple | None:
+def read_cmd_serial(serial: serial.Serial) -> tuple | None:
     pass
     # error_cmd = (False, 0, 0, 0, '', '')
     # if not (serial and serial.is_open and serial.in_waiting == 0): 

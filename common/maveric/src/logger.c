@@ -3,7 +3,6 @@
 #include "uart.h"
 #include "systime.h"
 #include "cmdpkt.h"
-#include "cmdmgr.h"
 #include <stdint.h>
 #include <string.h>
 

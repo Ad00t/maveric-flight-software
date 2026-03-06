@@ -2,13 +2,14 @@
 #define __CMDPKT_H__
 
 #include <stdint.h>
+#include "ringbuf.h"
 
-#define CMD_MAX_FRAME_SIZE      255
+#define CMD_MAX_FRAME_SIZE      RINGBUF_MAX_SIZE - 1  
 #define CMD_MAX_LEN             CMD_MAX_FRAME_SIZE - KISS_HEADER_SIZE - KISS_FOOTER_SIZE
 #define CMD_HEADER_SIZE         6
 #define CMD_FOOTER_SIZE         2
 #define CMD_MAX_ID_LEN          20
-#define CMD_MAX_ARGSSTR_LEN     CMD_MAX_LEN - CMD_MAX_ID_LEN - CMD_HEADER_SIZE - CMD_FOOTER_SIZE
+#define CMD_MAX_ARGS_LEN        CMD_MAX_LEN - CMD_MAX_ID_LEN - CMD_HEADER_SIZE - CMD_FOOTER_SIZE - 2
 
 #define CSP_HEADER_SIZE         4
 #define CSP_NORMAL_PRIORITY     2L
@@ -76,6 +77,12 @@ uint8_t cmdpkt_parse_buf(cmdpkt_s* pkt);
 // Create a frame buffer for transmission of a cmdpkt, with optional csp headers. Returns length of frame
 uint16_t cmdpkt_setup_frame(cmdpkt_s* pkt, uint8_t frame, uint8_t frame_size, int1 csp);
 
+// Send a command packet along its appropriate route. Assumes pkt buf field is populated correctly.
+void cmdpkt_dispatch(cmdpkt_s* pkt);
+
+// Create then send command packet
+void cmd_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args);
+
 // CSPHEADER
 
 typedef struct {
@@ -113,7 +120,5 @@ void kiss_prepend_header(uint8_t* msg, uint16_t* msgLength);
 void kiss_append_footer(uint8_t* msg, uint16_t* msgLength);
 void kiss_apply_byte_check(uint8_t* message, uint16_t messageLength, uint8_t* frame, uint16_t* frameLength, uint16_t msgStartIdx);
 void kiss_remove_byte_check(uint8_t* buf, uint16_t frameLength, uint8_t* msg, uint16_t* msgLength, uint16_t frameStartIdx);
-uint16_t kiss_extract_frame(ringbuf_s* rcvbuf, uint8_t* frame_buf, uint16_t frame_buf_size);
-int1 kiss_find_frame(ringbuf_s* rcvbuf, int16_t* frameStartIdx, int16_t* frameEndIdx, uint16_t minFrameSize);
 
 #endif

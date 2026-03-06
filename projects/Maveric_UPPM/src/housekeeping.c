@@ -22,13 +22,18 @@ extern ax100_s g_ax100;             // AX100 transceiver driver
 
 void hk_init() {
     // IMPORTANT: AT LEAST ONE SCHEDULE FUNCTION MUST BE ACTIVE OR YOU WILL GET A SCHEDULER ERROR
-    scheduler_schedule_func_in(&g_scheduler, 0, hk_log, 2000, 500, SCHEDULE_REPS_INFINITE);
-    scheduler_schedule_func_in(&g_scheduler, 1, hk_heartbeats, 2000, 3000, SCHEDULE_REPS_INFINITE);
-    scheduler_schedule_func_in(&g_scheduler, 2, hk_read_sensors, 2000, 1000, SCHEDULE_REPS_INFINITE);
-    // scheduler_schedule_func_in(&g_scheduler, 3, hk_test_ax100, 2000, 3000, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 0, hk_get_rtc_time, 2000, 500, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 1, hk_log, 2000, 500, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 2, hk_heartbeats, 2000, 3000, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 3, hk_read_sensors, 2000, 1000, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 4, hk_test_ax100, 2000, 3000, SCHEDULE_REPS_INFINITE);
 }
 
 // SCHEDULE FUNCTIONS
+void hk_get_rtc_time(void) {
+    rtc_read(&g_rtc_time); 
+}
+
 void hk_log(void) {
     sprintf(LOGBUF, "housekeeping %02u, %02u/%02u/20%02u %02u:%02u:%02u", 
             g_rtc_time.tm_wday, g_rtc_time.tm_mon, g_rtc_time.tm_mday, g_rtc_time.tm_year, 
@@ -44,6 +49,5 @@ void hk_read_sensors(void) {
 }
 
 void hk_test_ax100(void) {
-    char test[] = "test";
-    ax100_transmit_frame(&g_ax100, (uint8_t*) test, strlen(test));
+    cmd_dispatch(NODE_ID, NODE_ID_GS, 0, REQUEST, "hello", "world");
 }

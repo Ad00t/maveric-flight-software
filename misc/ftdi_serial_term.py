@@ -146,7 +146,7 @@ def read_serial():
 def send_command_str(cmdstr):
     cmdstr = cmdstr.strip()
     spl = cmdstr.split(' ')
-    ba, cnt = commands.send_cmd(ftdi, int(spl[0]), int(spl[1]), int(spl[2]), int(spl[3]), spl[4], ' '.join(spl[5:]))
+    ba, cnt = commands.send_cmd_serial(ftdi, int(spl[0]), int(spl[1]), int(spl[2]), int(spl[3]), spl[4], ' '.join(spl[5:]))
     log(f"\033[0m[RPI] [INFO] sending cmd: cnt={cnt} {repr(ba.decode('ascii', errors='replace'))}\r\n")
 
 if __name__ == "__main__":      

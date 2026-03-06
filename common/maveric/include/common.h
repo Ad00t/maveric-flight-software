@@ -19,6 +19,7 @@
 #define NODE_ID_HOLONAV     4
 #define NODE_ID_ASTROBOARD  5
 #define NODE_ID_GS          6          
+#define NODE_ID_FTDI        7
 
 #endif // !__COMMON_H__
 

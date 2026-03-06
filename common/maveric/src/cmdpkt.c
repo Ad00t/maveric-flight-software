@@ -16,7 +16,7 @@ void cmdpkt_create(cmdpkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, cmdp
     uint16_t len = 0;
     uint8_t* buf = pkt->buf;
     uint8_t id_len = strlen(id);
-    uint8_t args_len = strlen(id);
+    uint8_t args_len = strlen(args);
    
     // Add header
     pkt->orgn = orgn;
@@ -49,6 +49,7 @@ void cmdpkt_create(cmdpkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, cmdp
     buf[len++] = crc & 0xFF; 
     buf[len++] = (crc >> 8) & 0xFF; 
     pkt->buf_len = len;
+    pkt->i_start = 0;
 }
 
 void cmdpkt_clear(cmdpkt_s* pkt) {
@@ -73,18 +74,17 @@ uint8_t cmdpkt_parse_buf(cmdpkt_s* pkt) {
     if (len + pkt->id_len >= pkt->buf_len
         || buf[len + pkt->id_len] != '\0') return STATUS_ERR;
     len += pkt->id_len + 1;
-   
+
     // Parse args field
     pkt->args = &buf[len];
     if (len + pkt->args_len >= pkt->buf_len
         || buf[len + pkt->args_len] != '\0') return STATUS_ERR;
     len += pkt->args_len + 1;
-   
+
     // Parse CRC as uint16
     uint8_t crc_low = buf[len++];
     uint8_t crc_high = buf[len++];
     pkt->crc = make16(crc_high, crc_low);
-
     return len == pkt->buf_len ? STATUS_OK : STATUS_ERR;
 }
 
@@ -104,6 +104,47 @@ uint16_t cmdpkt_setup_frame(cmdpkt_s* pkt, uint8_t* frame, uint8_t frame_size, i
     }
     kiss_append_footer(frame, &len);
     return len;
+}
+
+void cmdpkt_dispatch(cmdpkt_s* pkt) {
+    uint8_t frame[CMD_MAX_FRAME_SIZE] = {0};
+    int1 csp = NODE_ID == NODE_ID_UPPM && pkt->dest == NODE_ID_GS;
+    uint16_t frame_len = cmdpkt_setup_frame(pkt, frame, CMD_MAX_FRAME_SIZE, csp);
+#if NODE_ID == NODE_ID_LPPM
+    switch (pkt->dest) {
+        case NODE_ID_EPS:
+            break;
+        case NODE_ID_UPPM:
+        case NODE_ID_GS:
+        case NODE_ID_ASTROBOARD:
+        case NODE_ID_HOLONAV:
+            uart_write_buf(UPPM_PORT, frame, frame_len);
+            break;
+    }
+#elif NODE_ID == NODE_ID_UPPM
+    switch (pkt->dest) {
+        case NODE_ID_EPS:
+            break;
+        case NODE_ID_GS:
+            uart_write_buf(AX100_PORT, frame, frame_len);
+            break;
+        case NODE_ID_ASTROBOARD:
+            uart_write_buf(ASTROBOARD_PORT, frame, frame_len);
+            break;
+        case NODE_ID_HOLONAV:
+            uart_write_buf(HOLONAV_PORT, frame, frame_len);
+            break;
+        case NODE_ID_LPPM:
+            uart_write_buf(LPPM_PORT, frame, frame_len);
+            break;
+    }
+#endif
+}
+
+void cmd_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args) {
+    cmdpkt_s pkt;
+    cmdpkt_create(&pkt, orgn, dest, echo, ptype, id, args);
+    cmdpkt_dispatch(&pkt);
 }
 
 // INET
@@ -191,7 +232,6 @@ void setupWdtReset(uint8_t* msg, uint16_t* msgLength) {
 // KISS
 
 int1 kiss_process_byte(cmdpkt_s* p, uint8_t byte) {
-    // fprintf(COM_D, "b: 0x%02X'%c'\n", byte, byte);
     switch (p->fsm) {
         case KISS_WAIT_FEND:
             if (byte == FEND) {
@@ -225,7 +265,7 @@ int1 kiss_process_byte(cmdpkt_s* p, uint8_t byte) {
             } else if (byte == TFESC) {
                 byte = FESC;
             } else {
-                // invalid escape → drop frame
+                // invalid escape -> drop frame
                 p->fsm = KISS_WAIT_FEND;
                 p->buf_len = 0;
                 break;
@@ -303,57 +343,4 @@ void kiss_remove_byte_check(uint8_t* buf, uint16_t frameLength, uint8_t* msg, ui
 	}
 
 	*msgLength = len;
-}
-
-uint16_t kiss_extract_frame(ringbuf_s* rcvbuf, uint8_t* frame_buf, uint16_t frame_buf_size) {
-	int16_t frameStartIdx = 0;
-	int16_t frameEndIdx = 0;
-	// Look through the incoming buffer on the desired port and see if there is an available frame
-	if (!kiss_find_frame(rcvbuf, &frameStartIdx, &frameEndIdx, 1)) 
-        return 0;
-
-	// If there is, grab the message contained in the frame
-    // We are waiting for a full frame to enter the rcvbuf before processing it. Could replace with FSM.
-    uint16_t frameLength = frameEndIdx - frameStartIdx + 1;
-    if (frameLength <= frame_buf_size) {
-        rb_pop(rcvbuf, frameStartIdx, NULL);
-        rb_pop(rcvbuf, frameLength, frame_buf);
-        return frameLength;
-    } else {
-        rb_pop(rcvbuf, frameStartIdx + frameLength, NULL);
-        return 0; 
-    }
-}
-
-int1 kiss_find_frame(ringbuf_s* rcvbuf, int16_t* frameStartIdx, int16_t* frameEndIdx, uint16_t minFrameSize) {
-	*frameStartIdx = -1;
-	*frameEndIdx = -1;
-
-    uint8_t bufferLen = rb_len(rcvbuf);
-	uint16_t startLimit = bufferLen - 1;
-	uint16_t idx;
-	for (idx = 0; idx < startLimit; idx++) {
-        uint8_t b1, b2;
-        rb_peek(rcvbuf, idx, &b1);
-        rb_peek(rcvbuf, idx+1, &b2);
-		if (b1 == FEND && b2 != FEND) {
-            *frameStartIdx = idx;
-			break;
-        }
-	}
-
-	if (*frameStartIdx < 0) {
-		return FALSE;
-	}
-
-	for (idx = *frameStartIdx + 1 + minFrameSize; idx < bufferLen; idx++) {
-        uint8_t b;
-        rb_peek(rcvbuf, idx, &b);
-		if (b == FEND) {
-			*frameEndIdx = idx;
-			return TRUE;
-		}
-	}
-
-    return FALSE;
 }

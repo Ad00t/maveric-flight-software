@@ -30,8 +30,7 @@ void cmdimpl_init(void) {
 // COMMAND IMPLEMENTATIONS
 
 void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
-    char p[32] = {0};
-    memcpy(p, pkt->args, pkt->args_len);  
+    char* p = pkt->args;
     struct_tm time;
     time.tm_wday = strtoul(p, &p, 10); // Other options: strtok(), strtod(), strotol()
     time.tm_mon = strtoul(p, &p, 10); 
@@ -43,10 +42,10 @@ void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
 
     ertc_set_time(&g_ertc, &time);
     systime_sync();
-    cmd_dispatch(NODE_ID, NODE_ID_UPPM, 0, REQUEST, "ppm_set_time", pkt->args);
+    // cmd_dispatch(NODE_ID, NODE_ID_UPPM, 0, REQUEST, "ppm_set_time", pkt->args);
     mtq_set_date_time(&g_mtq, &time); 
 
-    sprintf(LOGBUF, "cmdimpl_ppm_set_time [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", 
+    sprintf(LOGBUF, "cmdimpl_ppm_set_time '%s' [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", pkt->args
             g_ertc.time.tm_wday, g_ertc.time.tm_mon, g_ertc.time.tm_mday, g_ertc.time.tm_year, 
             g_ertc.time.tm_hour, g_ertc.time.tm_min, g_ertc.time.tm_sec); log_flush(LL_INFO);
 }

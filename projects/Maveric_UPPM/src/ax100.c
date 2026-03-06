@@ -28,6 +28,7 @@ int1 ax100_is_on(ax100_s* a) {
 	return (int1) input_state(AX100_PWR);
 }
 
+// You should not ever need to use this function. Just use cmd_dispatch() with dest as GS
 void ax100_transmit_frame(ax100_s* a, uint8_t* frame, uint16_t len) {
     if (!a->is_init) return;
     uart_write_buf(a->port, frame, len);

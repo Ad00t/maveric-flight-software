@@ -121,6 +121,8 @@ void system_init(void) {
     g_rtc_time.tm_hour = 0;
     g_rtc_time.tm_min = 0;
     g_rtc_time.tm_sec = 0;
+    setup_rtc(RTC_ENABLE | RTC_OUTPUT_SECONDS, 0);
+    rtc_write(&g_rtc_time);
     systime_init(&g_irqmgr.ms, &g_rtc_time);
     
     // Submodules & services init
@@ -140,12 +142,10 @@ void system_superloop(void) {
     restart_wdt();
 
     // Handle received byte interrupts
-    isr_disable_all();
     cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[ASTROBOARD_PORT-1], &g_cmdmgr.rcvpkts[0], FALSE); // Handle Astroboard commands 
     cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[AX100_PORT-1], &g_cmdmgr.rcvpkts[1], TRUE); // Handle AX100 commands 
     cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[LPPM_PORT-1], &g_cmdmgr.rcvpkts[2], FALSE); // Handle LPPM commands
     cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[HOLONAV_PORT-1], &g_cmdmgr.rcvpkts[3], FALSE); // Handle Holonav commands
-    isr_enable_all();
    
     scheduler_run_tasks(&g_scheduler, &g_cmdmgr);
 }

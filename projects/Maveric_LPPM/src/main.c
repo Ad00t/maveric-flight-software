@@ -42,7 +42,7 @@
 
 #use rs232(baud=COM_A_BAUD, UART1, BITS=8, STREAM=COM_A, ERRORS, PARITY=N, STOP=1, TIMEOUT=1000)
 #use rs232(baud=COM_B_BAUD, UART2, BITS=8, STREAM=COM_B, ERRORS, PARITY=N, STOP=1, TIMEOUT=1000)
-#use rs232(baud=COM_C_BAUD, UART3, BITS=8, STREAM=COM_C, ERRORS, PARITY=N, STOP=1, TIMEOUT=1000)
+#use rs232(baud=COM_C_BAUD, UART3, BITS=8, STREAM=COM_C, ERRORS, PARITY=N, STOP=1, TIMEOUT=2000)
 #use rs232(baud=COM_D_BAUD, UART4, BITS=8, STREAM=COM_D, ERRORS, PARITY=N, STOP=1, TIMEOUT=1000)
 #use spi(MASTER, FORCE_HW, SPI1, BAUD=2000000, MSB_FIRST, BITS=16, MODE=3, STREAM=SPI_1)
 #use i2c(MASTER, I2C1, STREAM=I2C_1)
@@ -118,8 +118,8 @@ void system_init(void) {
 
     // Init interrupts 
     irqmgr_init(&g_irqmgr);
-    g_irqmgr.started = TRUE;
     isr_enable_all();
+    g_irqmgr.started = TRUE;
 
     // Init ertc, irtc, system time 
     struct_tm dfl_time;
@@ -153,13 +153,11 @@ void system_superloop(void) {
     restart_wdt();
 
     // Handle received byte interrupts
-    isr_disable_all();
     // Do driver handling before commands so data is up to date
     // mtq_parse_stream(&g_mtq, &g_irqmgr.irqbufs[MTQ_PORT-1]); // Handle magnetorquer data
     // nvg_parse_stream(&g_nvg, &g_irqmgr.irqbufs[NVG_PORT-1]); // Handle naviguider data
     cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[UPPM_PORT-1], &g_cmdmgr.rcvpkts[0], FALSE); // Handle UPPM commands 
     cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[FTDI_PORT-1], &g_cmdmgr.rcvpkts[1], FALSE); // Handle FTDI commands
-    isr_enable_all();
    
     scheduler_run_tasks(&g_scheduler, &g_cmdmgr);
 }

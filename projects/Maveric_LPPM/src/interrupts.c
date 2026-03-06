@@ -65,7 +65,6 @@ void isr_uart3(void) {
 #INT_RDA4 // FTDI
 void isr_uart4(void) {
     if (!g_irqmgr.started || !uart_byte_avail(COM_D)) return;
-    // TEST[TEST_I++] = uart_read_byte(COM_D); 
     rb_push(&g_irqmgr.irqbufs[3], uart_read_byte(COM_D));
 }
 

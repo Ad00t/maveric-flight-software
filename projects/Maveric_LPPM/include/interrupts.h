@@ -7,8 +7,6 @@
 
 #define IRQ_NUM_PORTS   4
 
-// uint8_t TEST[512] = {0};
-// uint8_t TEST_I = 0;
 // Interrupt request manager
 
 typedef struct {

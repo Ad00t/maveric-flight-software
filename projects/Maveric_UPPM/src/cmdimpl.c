@@ -20,9 +20,8 @@ void cmdimpl_init() {
 }
 
 void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
-    char p[32] = {0};
-    memcpy(p, pkt->args, pkt->args_len);  
-    struct_tm time;
+    char* p = pkt->args;
+    rtc_time_t time;
     time.tm_wday = strtoul(p, &p, 10); // Other options: strtok(), strtod(), strotol()
     time.tm_mon = strtoul(p, &p, 10); 
     time.tm_mday = strtoul(p, &p, 10);
@@ -30,11 +29,12 @@ void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
     time.tm_hour = strtoul(p, &p, 10);
     time.tm_min = strtoul(p, &p, 10);
     time.tm_sec = strtoul(p, &p, 10);
+    rtc_write(&time);
+    rtc_read(&g_rtc_time);
 
-    memcpy(&g_rtc_time, &time, sizeof(struct_tm));
     systime_sync(); // Since Lower PPM is source of truth for timing, this sync should be the only sync in Upper PPM
 
-    sprintf(LOGBUF, "cmdimpl_ppm_set_time [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", 
+    sprintf(LOGBUF, "cmdimpl_ppm_set_time '%s' [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", pkt->args
             g_rtc_time.tm_wday, g_rtc_time.tm_mon, g_rtc_time.tm_mday, g_rtc_time.tm_year, 
             g_rtc_time.tm_hour, g_rtc_time.tm_min, g_rtc_time.tm_sec); log_flush(LL_INFO);
 }

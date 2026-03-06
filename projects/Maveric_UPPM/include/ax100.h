@@ -33,6 +33,7 @@ typedef struct {
 void ax100_init(ax100_s* a, uint8_t port);
 void ax100_set_power(ax100_s* a, int1 on);
 int1 ax100_is_on(ax100_s* a);
+// Transmits an arbitrary frame. You should not ever need to use this function. Just use cmd_dispatch() with dest as GS
 void ax100_transmit_frame(ax100_s* a, uint8_t* frame, uint16_t len);
 
 #endif

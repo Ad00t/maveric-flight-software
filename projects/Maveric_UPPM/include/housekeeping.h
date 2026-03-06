@@ -6,6 +6,7 @@ void hk_init();
 
 // SCHEDULE FUNCTIONS
 
+void hk_get_rtc_time(void);
 void hk_log(void);
 void hk_heartbeats(void);
 void hk_read_sensors(void);
