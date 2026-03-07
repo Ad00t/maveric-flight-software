@@ -81,7 +81,7 @@ void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
     // Forward
     if (pkt->dest != NODE) {
         sprintf(LOGBUF, "cmdmgr_process_cmd: forwarding cmd: o=%u d=%u e=%u p=%u id='%s'", 
-                pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id); log_flush(LL_INFO);
+                pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id); log_flush(LL_TRACE);
         cmdpkt_dispatch(pkt);
         goto cleanup;
     } 

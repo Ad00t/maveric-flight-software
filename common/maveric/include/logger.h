@@ -8,13 +8,20 @@ char LOGBUF[LOGBUF_MAX_LEN];    // Global log buffer
 
 typedef enum {
     LL_TRACE = 0,
-    LL_INFO = 1,
-    LL_WARN = 2,
-    LL_ERROR = 3,
-    LL_NONE = 4
+    LL_DEBUG = 1,
+    LL_INFO = 2,
+    LL_WARN = 3,
+    LL_ERROR = 4,
+    LL_NONE = 5
 } log_level_e;
 
 // Logs whatever's in LOGBUF with the given color and a standard prefix
 void log_flush(log_level_e lvl);
+// Log flush helper methods
+void log_trace();
+void log_debug();
+void log_info();
+void log_warn();
+void log_error();
 
 #endif // !__LOGGER_H__

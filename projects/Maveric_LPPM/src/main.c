@@ -55,7 +55,7 @@
 #define LOWER_PPM
 #define NODE                NODE_LPPM 
 #define NODE_LBL            "LPPM"
-#define LOG_LEVEL           LL_TRACE 
+#define LOG_LEVEL           LL_DEBUG
 
 // Module includes (.c necessary)
 

@@ -2,41 +2,155 @@ from crc import Calculator, Crc16
 import time
 import serial
 
-crcalc = Calculator(Crc16.XMODEM)
-ptype_map = { 'ACK': 0, 'REQ': 1, 'RES': 2 }
+CMD_MAX_FRAME_SIZE = 255
+    
+FEND  = 0xC0
+FESC  = 0xDB
+TFEND = 0xDC
+TFESC = 0xDD
 
-def create_cmd(orgn: int, dest: int, echo: int, ptype: str, id: str, args: str) -> bytearray:
-    msg_data = [ orgn, dest, echo, ptype_map[ptype], len(id), len(args), id, 0, args, 0 ]
+WAIT_FEND = 0
+IN_FRAME = 1
+IN_ESCAPE = 2
 
-    msg_ba = bytearray()
-    for d in msg_data:
-        if isinstance(d, int): msg_ba.append(d & 0xFF)
-        elif isinstance(d, str): msg_ba.extend(d.encode('ascii'))
-        elif isinstance(d, (bytes, bytearray)): msg_ba.extend(d)
-    crc16 = crcalc.checksum(msg_ba)
-    msg_ba.extend(crc16.to_bytes(2, byteorder='little', signed=False))
+class CommandManager():
+    
+    crcalc = Calculator(Crc16.XMODEM)
+    node_lbl_to_id = { 'NONE': 0, 'LPPM': 1, 'EPS': 2, 'UPPM': 3, 'HOLONAV': 4, 'ASTROBOARD': 5, 'GS': 6, 'FTDI': 7 }
+    node_id_to_lbl = { v: k for k, v in node_lbl_to_id.items() }
+    ptype_lbl_to_id = { 'ACK': 0, 'REQ': 1, 'RES': 2 }
+    ptype_id_to_lbl = { v: k for k, v in ptype_lbl_to_id.items() }
 
-    pkt_ba = bytearray()
-    pkt_ba.extend(b'\xC0\x00')
-    pkt_ba.extend(msg_ba)
-    pkt_ba.extend(b'\xC0')
-    return pkt_ba 
+    def __init__(self, serial: serial.Serial, node: str):
+        self.serial = serial
+        self.frame = bytearray()
+        self.state = WAIT_FEND
+        self.node = node
 
-def send_cmd_serial(serial: serial.Serial, orgn: int, dest: int, echo: int, ptype: str, id: str, args: str) -> tuple:
-    if not (serial and serial.is_open): return (bytearray(), 0)
-    ba = create_cmd(orgn, dest, echo, ptype, id, args)
-    cnt = serial.write(ba)
-    time.sleep(0.01)
-    return (ba, cnt)
+    def create_cmd(self, orgn: str, dest: str, echo: str, ptype: str, id: str, args: str) -> bytearray:
+        msg_data = [ self.node_lbl_to_id[orgn], self.node_lbl_to_id[dest], self.node_lbl_to_id[echo], \
+                     self.ptype_lbl_to_id[ptype], len(id), len(args), id, 0, args, 0 ]
 
-def read_cmd_serial(serial: serial.Serial) -> tuple | None:
-    pass
-    # error_cmd = (False, 0, 0, 0, '', '')
-    # if not (serial and serial.is_open and serial.in_waiting == 0): 
-    #     return error_cmd
-    # raw_cmd = serial.read_until(FEND)
-    # if raw_cmd[0] != 0xCD:
-    #     return error_cmd
+        msg_ba = bytearray()
+        for d in msg_data:
+            if isinstance(d, int): msg_ba.append(d & 0xFF)
+            elif isinstance(d, str): msg_ba.extend(d.encode('ascii'))
+            elif isinstance(d, (bytes, bytearray)): msg_ba.extend(d)
+        crc16 = self.crcalc.checksum(msg_ba)
+        msg_ba.extend(crc16.to_bytes(2, byteorder='little', signed=False))
+
+        pkt_ba = bytearray()
+        pkt_ba.extend(b'\xC0\x00')
+        pkt_ba.extend(msg_ba)
+        pkt_ba.extend(b'\xC0')
+        return pkt_ba 
+
+    def send_cmd_serial(self, orgn: str, dest: str, echo: str, ptype: str, id: str, args: str) -> tuple:
+        if not (self.serial and self.serial.is_open): return (bytearray(), 0)
+        ba = self.create_cmd(orgn, dest, echo, ptype, id, args)
+        cnt = self.serial.write(ba)
+        time.sleep(0.01)
+        return (ba, cnt)
+
+    def kiss_process_byte(self, byte: int) -> bool:
+        if self.state == WAIT_FEND:
+            if byte == FEND:
+                self.frame.clear()
+                self.state = IN_FRAME
+        elif self.state == IN_FRAME:
+            if byte == FEND:
+                if len(self.frame) > 0:
+                    return True 
+            elif byte == FESC:
+                self.state = IN_ESCAPE
+            else:
+                if len(self.frame) < CMD_MAX_FRAME_SIZE:
+                    self.frame.append(byte)
+                else:
+                    # overflow -> drop frame
+                    self.frame.clear()
+                    self.state = WAIT_FEND
+        elif self.state == IN_ESCAPE:
+            if byte == TFEND:
+                self.frame.append(FEND)
+                self.state = IN_FRAME
+            elif byte == TFESC:
+                self.frame.append(FESC)
+                self.state = IN_FRAME
+            else:
+                # invalid escape -> drop frame
+                self.frame.clear()
+                self.state = WAIT_FEND
+        return False 
+
+    def parse_frame(self) -> dict | None: 
+        exp_msg_len = len(self.frame) - 1
+        if exp_msg_len < 10: return None
+        p = {}
+        buf = self.frame[1:]
+        size = 0
+
+        p['orgn'] = self.node_id_to_lbl[buf[size]] 
+        size += 1
+        p['dest'] = self.node_id_to_lbl[buf[size]]
+        size += 1
+        p['echo'] = self.node_id_to_lbl[buf[size]]
+        size += 1
+        p['ptype'] = self.ptype_id_to_lbl[buf[size]]
+        size += 1
+        p['id_len'] = buf[size]
+        size += 1
+        p['args_len'] = buf[size]
+        size += 1
+
+        if size + p['id_len'] > exp_msg_len: return None
+        p['id'] = buf[size:size+p['id_len']].decode('ascii')
+        size += p['id_len'] + 1
+        
+        if size + p['args_len'] > exp_msg_len: return None
+        p['args'] = buf[size:size+p['args_len']].decode('ascii')
+        size += p['args_len'] + 1
+
+        if size + 2 > exp_msg_len: return None
+        p['crc'] = buf[size] | (buf[size+1] << 8)
+        size += 2
+
+        p['size'] = size
+        return p if size == len(self.frame) - 1 else None
+
+    def cleanup_frame(self) -> None:
+        self.frame.clear()
+        self.state = IN_FRAME
+
+    # Reads a single command frame out of the input buffer if available
+    def parse_stream(self) -> dict | None:
+        if not (self.serial and self.serial.is_open): return None
+        n_bytes = self.serial.in_waiting
+
+        for _ in range(n_bytes):
+            b = int.from_bytes(self.serial.read(1))
+            if self.kiss_process_byte(b):
+                p = self.parse_frame()
+
+                if p is None:
+                    self.cleanup_frame()
+                    return None
+               
+                if p['dest'] != self.node:
+                    self.cleanup_frame()
+                    return None
+
+                crc_calc = self.crcalc.checksum(self.frame[1:1+p['size']-2])
+                if p['crc'] != crc_calc:
+                    self.cleanup_frame()
+                    return None
+                
+                self.cleanup_frame()
+                return p 
+                
+        return None
+            
+
 
 
     

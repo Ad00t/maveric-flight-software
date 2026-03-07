@@ -4,7 +4,7 @@ import traceback
 import threading
 import sys
 import os
-import commands
+from commands import CommandManager
 from crc import Calculator, Crc16
 from prompt_toolkit.application import Application
 from prompt_toolkit.layout import Layout, HSplit, Window, ScrollablePane
@@ -22,7 +22,17 @@ from prompt_toolkit.mouse_events import MouseEventType
 SCROLL_SPEED = 3
 MAX_LOGS = 10000
 
+KNRM = "\033[0m"
+KRED = "\033[31m"
+KGRN = "\033[32m"
+KYEL = "\033[33m"
+KBLU = "\033[34m"
+KMAG = "\033[35m"
+KCYN = "\033[36m"
+KWHT = "\033[37m"
+
 ftdi = serial.Serial(sys.argv[1], baudrate=115200, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, timeout=1)
+cmdmgr = CommandManager(ftdi, 'FTDI')
 
 log_lines = []
 is_manual_scrolling = False
@@ -50,7 +60,7 @@ def _(event):
     try:
         send_command_str(cmd)
     except Exception as e:
-        log(f'\033[31m[RPI] [ERROR] invalid command "{cmd}": {traceback.format_exc()}\r\n')
+        log_error(f'invalid command "{cmd}": {traceback.format_exc()}')
     finally:
         input_box.text = ""
         app.invalidate()
@@ -84,9 +94,9 @@ def _(event):
     global is_paused
     if is_paused:
         is_paused = False
-        log(f"\033[0m[RPI] logging resumed\r\n")
+        log_info(f"logging resumed")
     else:
-        log(f"\033[0m[RPI] logging paused\r\n")
+        log_info(f"logging paused")
         is_paused = True
         
 @kb.add("up") # Backward in command history
@@ -127,26 +137,53 @@ def log(text):
         scroll_top = max(0, scroll_top-MAX_LOGS//5 + 1)
     app.invalidate()
 
+def epoch_time_ms():
+    return round(time.time() * 1000)
+
+def log_trace(msg):
+    log(f"{KNRM}{epoch_time_ms()} [INFO] [FTDI] {msg}\n")
+
+def log_debug(msg):
+    log(f"{KWHT}{epoch_time_ms()} [INFO] [FTDI] {msg}\n")
+
+def log_info(msg):
+    log(f"{KCYN}{epoch_time_ms()} [INFO] [FTDI] {msg}\n")
+
+def log_warn(msg):
+    log(f"{KYEL}{epoch_time_ms()} [INFO] [FTDI] {msg}\n")
+
+def log_error(msg):
+    log(f"{KRED}{epoch_time_ms()} [ERROR] [FTDI] {msg}\n")
+
 def read_serial():
     while True:
         try:
-            if ftdi and ftdi.is_open and ftdi.in_waiting > 0:
-                line = ftdi.readline().decode('ascii', errors='replace')
-                if len(line) > 0:
-                    log(line) 
+            p = cmdmgr.parse_stream()
+            if p is not None:
+                match p['id']:
+                    case 'ftdi_log':
+                        log(p['args'])
+                    case _:
+                        log_error(f"cmd not recognized: '{p['id']}'")
+            # while ftdi.in_waiting > 0:
+            #     log(str(ftdi.read(100)) + "\n")
+            # if ftdi and ftdi.is_open and ftdi.in_waiting > 0:
+            #     line = ftdi.readline().decode('ascii', errors='replace')
+            #     if len(line) > 0:
+            #         log(line) 
         except KeyboardInterrupt:
-            log('\033[0m[RPI] [INFO] read_serial: quitting\r\n')
+            log_info('read_serial: quitting')
             if ftdi.is_open: 
                 ftdi.close()
             break
         except Exception as e:
-            log(f'\033[31m[RPI] [ERROR] read_serial: {traceback.format_exc()}\r\n')
+            log_error(f'read_serial: {traceback.format_exc()}')
             
 def send_command_str(cmdstr):
     cmdstr = cmdstr.strip()
     spl = cmdstr.split(' ')
-    ba, cnt = commands.send_cmd_serial(ftdi, int(spl[0]), int(spl[1]), int(spl[2]), spl[3], spl[4], ' '.join(spl[5:]))
-    log(f"\033[0m[RPI] [INFO] sending cmd: cnt={cnt} {repr(ba.decode('ascii', errors='replace'))}\r\n")
+    ba, cnt = cmdmgr.send_cmd_serial(spl[0], spl[1], spl[2], spl[3], spl[4], ' '.join(spl[5:]))
+    log_info(f"sending cmd: cnt={cnt} {repr(ba.decode('ascii', errors='replace'))}")
 
 if __name__ == "__main__":      
     rx_thread = threading.Thread(target=read_serial, daemon=True)
@@ -154,11 +191,11 @@ if __name__ == "__main__":
     try:
         app.run()
     except KeyboardInterrupt:
-        log('\033[0m[RPI] [INFO] main: quitting\r\n')
+        log_info('main: quitting')
         if ftdi.is_open: 
             ftdi.close()
     except Exception as e:
-        log(f'\033[31m[RPI] [ERROR] main: {traceback.format_exc()}\r\n')
+        log_error(f'main: {traceback.format_exc()}')
     finally:
         if ftdi.is_open:
             ftdi.close()

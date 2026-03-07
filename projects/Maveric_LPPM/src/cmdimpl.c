@@ -24,7 +24,6 @@ extern nvg_s g_nvg;                   // Naviguider
 
 void cmdimpl_init(void) {
     ht_set(&g_cmdmgr.cmdimpls, "ppm_set_time", (cmdimpl_f) cmdimpl_ppm_set_time);
-    ht_set(&g_cmdmgr.cmdimpls, "ppm_ftdi_log", (cmdimpl_f) cmdimpl_ppm_ftdi_log);
     ht_set(&g_cmdmgr.cmdimpls, "ppm_ping", (cmdimpl_f) cmdimpl_ppm_ping);
 }
 
@@ -49,11 +48,6 @@ void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
     sprintf(LOGBUF, "cmdimpl_ppm_set_time '%s' [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", pkt->args
             g_ertc.time.tm_wday, g_ertc.time.tm_mon, g_ertc.time.tm_mday, g_ertc.time.tm_year, 
             g_ertc.time.tm_hour, g_ertc.time.tm_min, g_ertc.time.tm_sec); log_flush(LL_INFO);
-}
-
-void cmdimpl_ppm_ftdi_log(cmdpkt_s* pkt) {
-    char* p = pkt->args;
-    fprintf(FTDI_PORT, "%s", p);
 }
 
 void cmdimpl_ppm_ping(cmdpkt_s* pkt) {
