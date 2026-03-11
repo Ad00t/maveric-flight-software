@@ -32,7 +32,7 @@ KCYN = "\033[36m"
 KWHT = "\033[37m"
 
 ftdi = serial.Serial(sys.argv[1], baudrate=115200, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, timeout=1)
-cmdmgr = CommandManager(ftdi, 'FTDI')
+cmdmgr = CommandManager(7, ftdi)
 
 log_lines = []
 is_manual_scrolling = False
@@ -164,7 +164,7 @@ def read_serial():
                     case 'ftdi_log':
                         log(p['args'])
                     case _:
-                        log_error(f"cmd not recognized: '{p['id']}'")
+                        log_error(f"cmd not recognized: {p}")
             # while ftdi.in_waiting > 0:
             #     log(str(ftdi.read(100)) + "\n")
             # if ftdi and ftdi.is_open and ftdi.in_waiting > 0:
@@ -182,7 +182,7 @@ def read_serial():
 def send_command_str(cmdstr):
     cmdstr = cmdstr.strip()
     spl = cmdstr.split(' ')
-    ba, cnt = cmdmgr.send_cmd_serial(spl[0], spl[1], spl[2], spl[3], spl[4], ' '.join(spl[5:]))
+    ba, cnt = cmdmgr.send_cmd_serial(int(spl[0]), int(spl[1]), int(spl[2]), int(spl[3]), spl[4], ' '.join(spl[5:]))
     log_info(f"sending cmd: cnt={cnt} {repr(ba.decode('ascii', errors='replace'))}")
 
 if __name__ == "__main__":      

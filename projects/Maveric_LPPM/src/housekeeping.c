@@ -52,7 +52,7 @@ void hk_systime_sync(void) {
 void hk_log(void) {
     sprintf(LOGBUF, "housekeeping %02u, %02u/%02u/20%02u %02u:%02u:%02u ertc=%u", 
             g_ertc.time.tm_wday, g_ertc.time.tm_mon, g_ertc.time.tm_mday, g_ertc.time.tm_year, 
-            g_ertc.time.tm_hour, g_ertc.time.tm_min, g_ertc.time.tm_sec, g_ertc.is_using_ertc); log_flush(LL_INFO);
+            g_ertc.time.tm_hour, g_ertc.time.tm_min, g_ertc.time.tm_sec, g_ertc.is_using_ertc); log_info();
 }
 
 void hk_heartbeats(void) {

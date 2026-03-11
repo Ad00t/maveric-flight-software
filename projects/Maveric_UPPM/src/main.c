@@ -67,6 +67,7 @@
 #include "spi.c"
 #include "interrupts.c"
 #include "systime.c"
+#include "framer.c"
 #include "cmdpkt.c"
 #include "logger.c"
 #include "ax100.c"

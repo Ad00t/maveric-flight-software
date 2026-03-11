@@ -3,6 +3,7 @@
 #include "hashtable.h"
 #include "crcnew.h"
 #include "uart.h"
+#include "framer.h"
 #include "cmdpkt.h"
 #include "common.h"
 #include "logger.h"
@@ -27,6 +28,7 @@ void cmdmgr_clear(cmdmgr_s* cmdmgr) {
 
 void cmdmgr_parse_stream(cmdmgr_s* cmdmgr, ringbuf_s* rcvbuf, cmdpkt_s* pkt, int1 csp) {
     if (!cmdmgr->is_init) return;
+    kiss_parser_s* p = &pkt->parser;
     uint16_t n_bytes = rb_len(rcvbuf);
 
     uint16_t iter;
@@ -40,64 +42,55 @@ void cmdmgr_parse_stream(cmdmgr_s* cmdmgr, ringbuf_s* rcvbuf, cmdpkt_s* pkt, int
         //     fprintf(COM_D, "%s%02X ", KYEL, b);
         // }
 
-        if (kiss_process_byte(pkt, b)) {
+        if (kiss_process_byte(p, b)) {
             // fprintf(COM_D, "%sFRAME\n", KGRN);
             // cmdpkt_clear(pkt);
-            // pkt->fsm = KISS_IN_FRAME;
+            // p->fsm = KISS_IN_FRAME;
             // continue;
             
             // Full frame received
-            pkt->i_start = 1;
-            pkt->buf_len--;
+            p->i_start = 1;
+            p->buf_len--;
             if (csp) { // Remove CSP header
-                pkt->i_start += CSP_HEADER_SIZE;
-                pkt->buf_len -= CSP_HEADER_SIZE + CRC32_SIZE;
+                p->i_start += CSP_HEADER_SIZE;
+                p->buf_len -= CSP_HEADER_SIZE + CRC32_SIZE;
             }
             cmdmgr_process_cmd(cmdmgr, pkt);    
-            pkt->fsm = KISS_IN_FRAME;
+            p->fsm = KISS_IN_FRAME;
         } 
     }
 }
 
 void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
     if (!cmdmgr->is_init) return;
-    // uint16_t p = 0;
-    // uint16_t i;
-    // p += sprintf(&LOGBUF[p], "buf: [");
-    // for (i = pkt->i_start; i < (pkt->buf_len > 40 ? 40 : pkt->buf_len); i++) {
-    //     p += sprintf(&LOGBUF[p], " %02X", pkt->buf[i]);
-    // }
-    // p += sprintf(&LOGBUF[p], " ]");
-    // log_flush(LL_TRACE);
-    // goto cleanup;
-    //
+    kiss_parser_s* p = &pkt->parser;
 
     // Parse cmdpkt buf into fields
     if (cmdpkt_parse_buf(pkt) != STATUS_OK) {
-        sprintf(LOGBUF, "cmdmgr_process_cmd: pkt buf parsing failed: len=%u", pkt->buf_len); log_flush(LL_ERROR);
+        sprintf(LOGBUF, "cmdmgr_process_cmd: pkt buf parsing failed: len=%u", p->buf_len); log_error();
         goto cleanup;
     }
 
     // Forward
     if (pkt->dest != NODE) {
         sprintf(LOGBUF, "cmdmgr_process_cmd: forwarding cmd: o=%u d=%u e=%u p=%u id='%s'", 
-                pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id); log_flush(LL_TRACE);
+                pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id); log_trace();
         cmdpkt_dispatch(pkt);
         goto cleanup;
     } 
     
     // CRC check
-    uint16_t calc_crc = compute_crc16(&pkt->buf[pkt->i_start], pkt->buf_len - 2);
+    uint16_t calc_crc = compute_crc16(&p->buf[p->i_start], p->buf_len - 2);
     if (pkt->crc != calc_crc) {
         sprintf(LOGBUF, "cmdmgr_process_cmd: crc check failed on cmd: '%s' crc=%u calculated=%u",
-                pkt->id, pkt->crc, calc_crc); log_flush(LL_ERROR);
+                pkt->id, pkt->crc, calc_crc); log_error();
         goto cleanup;
     } 
     
     // Find and execute cmd implementation
     cmdimpl_f cmdimpl = ht_get(&cmdmgr->cmdimpls, pkt->id);
     if (cmdimpl == NULL) {
-        sprintf(LOGBUF, "cmdmgr_process_cmd: cmd not recognized: '%s'", pkt->id); log_flush(LL_ERROR);
+        sprintf(LOGBUF, "cmdmgr_process_cmd: cmd not recognized: '%s'", pkt->id); log_error();
         goto cleanup;
     }
     cmdimpl(pkt);
