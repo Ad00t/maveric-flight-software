@@ -61,7 +61,7 @@
 
 #include <time.h>
 #include <time.c>
-#include "common.h"
+#include "common.c"
 #include "uart.c"
 #include "crcnew.c"
 #include "hashtable.c"
@@ -123,7 +123,7 @@ void system_init(void) {
     g_irqmgr.started = TRUE;
 
     // Init ertc, irtc, system time 
-    struct_tm dfl_time;
+    rtc_time_t dfl_time;
     dfl_time.tm_wday = 3;
     dfl_time.tm_mon = 1;
     dfl_time.tm_mday = 1;
@@ -144,7 +144,12 @@ void system_init(void) {
     hk_init();
     cmdimpl_init();
 
-    sprintf(LOGBUF, "system initialized"); log_flush(LL_INFO);
+    // Sync time with UPPM
+    char tm_str[32] = {0};
+    rtc_to_str(tm_str, g_ertc.time);
+    cmd_dispatch(NODE, NODE_UPPM, 0, REQ, "ppm_set_time", tm_str);
+
+    sprintf(LOGBUF, "system initialized"); log_info();
     delay_ms(1000);
 }
 

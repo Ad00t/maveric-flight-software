@@ -1,73 +1,26 @@
 #include "m41t81s.h"
+#include "common.h"
 #include "systime.h"
 #include "i2c.h"
-#include "common.h"
 #include <stdint.h>
 #include <time.h>
 
 #module
 
-// HELPERS
-
-uint8_t bcdtohex(uint8_t bcd) {
-    uint8_t zerosb, onesb, twosb, threesb;
-    int retval;
-
-    zerosb = bcd & 0x000f;
-    onesb = (bcd & 0x00f0)>>4;
-    twosb = (bcd & 0x0f00)>>8;
-    threesb = (bcd & 0xf000)>>12;
-    retval = threesb*1000 + twosb*100 + onesb*10 + zerosb;
-    return retval;
-}
-
-uint8_t hextobcd(uint8_t hex) {
-    uint8_t y;
-    y = (hex / 10) <<4;
-    y = y | (hex %10);
-    return (y);
-}
-
-void cp_stm_to_rtc(rtc_time_t* rtc, struct_tm* stm) {
-    rtc->tm_wday = stm->tm_wday;
-    rtc->tm_mon = stm->tm_mon;
-    rtc->tm_mday = stm->tm_mday;
-    rtc->tm_year = stm->tm_year;
-    rtc->tm_hour = stm->tm_hour;
-    rtc->tm_min = stm->tm_min;
-    rtc->tm_sec = stm->tm_sec;
-}
-
-void cp_rtc_to_stm(struct_tm* stm, rtc_time_t* rtc) {
-    stm->tm_wday = rtc->tm_wday;
-    stm->tm_mon = rtc->tm_mon;
-    stm->tm_mday = rtc->tm_mday;
-    stm->tm_year = rtc->tm_year;
-    stm->tm_hour = rtc->tm_hour;
-    stm->tm_min = rtc->tm_min;
-    stm->tm_sec = rtc->tm_sec;
-}
-
 // ERTC FUNCTIONS
 
-void ertc_init(ertc_s* ertc, struct_tm* init_time) {
+void ertc_init(ertc_s* ertc, rtc_time_t* init_time) {
     ertc->is_init = TRUE;
     ertc_clear(ertc);
-    memcpy(&ertc->init_time, init_time, sizeof(struct_tm));
+    memcpy(&ertc->init_time, init_time, sizeof(rtc_time_t));
     ertc->is_using_ertc = TRUE;
-    
-    setup_rtc(RTC_ENABLE | RTC_OUTPUT_SECONDS, 0);
-    rtc_time_t rtc;
-    cp_stm_to_rtc(&rtc, init_time);
-    rtc_write(&rtc);
-   
     ertc_enable_fpm(ertc);
 }
 
 void ertc_clear(ertc_s* ertc) {
     if (!ertc->is_init) return;
-    memset(&ertc->time, 0, sizeof(struct_tm));
-    memset(&ertc->halted_time, 0, sizeof(struct_tm));
+    memset(&ertc->time, 0, sizeof(rtc_time_t));
+    memset(&ertc->halted_time, 0, sizeof(rtc_time_t));
 }
 
 void ertc_get_time(ertc_s* ertc) {
@@ -90,22 +43,18 @@ void ertc_get_time(ertc_s* ertc) {
         int1 valid = (ertc->time.tm_hour <= 23 && ertc->time.tm_min <= 59 && ertc->time.tm_sec <= 59
                         && ertc->time.tm_mon > 0 && ertc->time.tm_mday > 0); 
         if (valid) {
-            rtc_time_t rtc;
-            cp_stm_to_rtc(&rtc, &ertc->time);
-            rtc_write(&rtc);
+            rtc_write(&ertc->time);
         } else {
             ertc->is_using_ertc = FALSE;
         }
     }
 
     if (!ertc->is_using_ertc) {
-        rtc_time_t rtc;
-        rtc_read(&rtc);
-        cp_rtc_to_stm(&ertc->time, &rtc);
+        rtc_read(&ertc->time);
     }
 }
 
-void ertc_set_time(ertc_s* ertc, struct_tm* time) {
+void ertc_set_time(ertc_s* ertc, rtc_time_t* time) {
     if (!ertc->is_init) return;
     if (ertc->is_using_ertc) {
         i2c_start();
@@ -121,9 +70,7 @@ void ertc_set_time(ertc_s* ertc, struct_tm* time) {
         i2c_stop();
     }
    
-    rtc_time_t rtc;
-    cp_stm_to_rtc(&rtc, time);
-    rtc_write(&rtc);
+    rtc_write(time);
     ertc_get_time(ertc);
 }
 
@@ -131,8 +78,8 @@ int1 ertc_heartbeat(ertc_s* ertc) {
     if (!ertc->is_init) return 0;
     if (!ertc->is_using_ertc) {
         sprintf(LOGBUF, "ertc_heartbeat: flatlined. resetting..."); log_flush(LL_ERROR);
-        struct_tm init_time;
-        memcpy(&init_time, &ertc->time, sizeof(struct_tm));
+        rtc_time_t init_time;
+        memcpy(&init_time, &ertc->time, sizeof(rtc_time_t));
         ertc_init(ertc, &init_time); 
     }
     return ertc->is_using_ertc;

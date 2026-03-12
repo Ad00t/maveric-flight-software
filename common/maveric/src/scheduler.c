@@ -82,7 +82,7 @@ uint8_t scheduler_deschedule(scheduler_s* s, uint8_t id) {
     return STATUS_OK;
 }
 
-uint8_t scheduler_schedule_func_at(scheduler_s* s, int8_t id, schedfunc_f func, struct_tm start_time, uint32_t period_ms, uint16_t reps) {
+uint8_t scheduler_schedule_func_at(scheduler_s* s, int8_t id, schedfunc_f func, rtc_time_t start_time, uint32_t period_ms, uint16_t reps) {
     schedtask_s task = {0};
     create_schedtask(&task, id, FUNC, rtc_to_epoch_ms(start_time), period_ms, reps);
     task.func = func;
@@ -91,7 +91,7 @@ uint8_t scheduler_schedule_func_at(scheduler_s* s, int8_t id, schedfunc_f func, 
     return STATUS_OK;
 }
 
-uint8_t scheduler_schedule_cmd_at(scheduler_s* s, int8_t id, cmdpkt_s* p, struct_tm start_time, uint32_t period_ms, uint16_t reps) {
+uint8_t scheduler_schedule_cmd_at(scheduler_s* s, int8_t id, cmdpkt_s* p, rtc_time_t start_time, uint32_t period_ms, uint16_t reps) {
     schedtask_s task = {0};
     create_schedtask(&task, id, CMD, rtc_to_epoch_ms(start_time), period_ms, reps);
     int8_t i_task = schedule_task(s, task, SCHEDULER_MAX_FUNC_TASKS, SCHEDULER_MAX_CMD_TASKS); // Cmd tasks segment of tasks buffer

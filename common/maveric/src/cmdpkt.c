@@ -100,7 +100,8 @@ uint8_t cmdpkt_parse_buf(cmdpkt_s* pkt) {
 void cmdpkt_dispatch(cmdpkt_s* pkt) {
     uint8_t frame[FRAME_MAX_SIZE] = {0};
     int1 csp = (NODE == NODE_UPPM && pkt->dest == NODE_GS);
-    uint16_t frame_len = framer_create(pkt->parser.buf, pkt->parser.buf_len, frame, csp);
+    kiss_parser_s* p = &pkt->parser;
+    uint16_t frame_len = framer_create(&p->buf[p->i_start], p->buf_len, frame, csp);
 #if NODE == NODE_LPPM
     switch (pkt->dest) {
         case NODE_EPS:

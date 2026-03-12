@@ -165,12 +165,6 @@ def read_serial():
                         log(p['args'])
                     case _:
                         log_error(f"cmd not recognized: {p}")
-            # while ftdi.in_waiting > 0:
-            #     log(str(ftdi.read(100)) + "\n")
-            # if ftdi and ftdi.is_open and ftdi.in_waiting > 0:
-            #     line = ftdi.readline().decode('ascii', errors='replace')
-            #     if len(line) > 0:
-            #         log(line) 
         except KeyboardInterrupt:
             log_info('read_serial: quitting')
             if ftdi.is_open: 

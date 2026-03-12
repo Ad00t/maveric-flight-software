@@ -17,7 +17,7 @@
 extern irqmgr_s g_irqmgr;           // Interrupts manager
 extern cmdmgr_s g_cmdmgr;           // Commands manager
 extern scheduler_s g_scheduler;     // Schedules manager
-extern struct_tm g_rtc_time;        // Global RTC time tracking instance (from lower PPM)       
+extern rtc_time_t g_rtc_time;       // Global RTC time tracking instance (from lower PPM) 
 extern ax100_s g_ax100;             // AX100 transceiver driver 
 
 void hk_init() {
@@ -26,18 +26,19 @@ void hk_init() {
     scheduler_schedule_func_in(&g_scheduler, 1, hk_log, 2000, 500, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 2, hk_heartbeats, 2000, 3000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 3, hk_read_sensors, 2000, 1000, SCHEDULE_REPS_INFINITE);
-    scheduler_schedule_func_in(&g_scheduler, 4, hk_test_ax100, 2000, 3000, SCHEDULE_REPS_INFINITE);
+    // scheduler_schedule_func_in(&g_scheduler, 4, hk_test_ax100, 2000, 3000, SCHEDULE_REPS_INFINITE);
 }
 
 // SCHEDULE FUNCTIONS
 void hk_get_rtc_time(void) {
-    rtc_read(&g_rtc_time); 
+    // rtc_read(&g_rtc_time); // This doesn't work on UPPM
+    epoch_ms_to_rtc(systime_epoch_ms(), &g_rtc_time);  
 }
 
 void hk_log(void) {
     sprintf(LOGBUF, "housekeeping %02u, %02u/%02u/20%02u %02u:%02u:%02u", 
             g_rtc_time.tm_wday, g_rtc_time.tm_mon, g_rtc_time.tm_mday, g_rtc_time.tm_year, 
-            g_rtc_time.tm_hour, g_rtc_time.tm_min, g_rtc_time.tm_sec); log_flush(LL_INFO);
+            g_rtc_time.tm_hour, g_rtc_time.tm_min, g_rtc_time.tm_sec); log_info();
 }
 
 void hk_heartbeats(void) {

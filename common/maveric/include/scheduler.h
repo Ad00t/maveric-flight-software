@@ -55,9 +55,9 @@ uint8_t scheduler_deschedule(scheduler_s* s, uint8_t id);
  * Finitely recurring tasks have a limit of 65535 repetitions
  * MAKE SURE THE SCHEDULE PERIOD IS GREATER THAN THE FUNCTION'S RUNTIME
  */
-uint8_t scheduler_schedule_func_at(scheduler_s* s, int8_t id, schedfunc_f func, struct_tm start_time, uint32_t period_ms, uint16_t reps);
+uint8_t scheduler_schedule_func_at(scheduler_s* s, int8_t id, schedfunc_f func, rtc_time_t start_time, uint32_t period_ms, uint16_t reps);
 // The command version
-uint8_t scheduler_schedule_cmd_at(scheduler_s* s, int8_t id, cmdpkt_s* p, struct_tm start_time, uint32_t period_ms, uint16_t reps);
+uint8_t scheduler_schedule_cmd_at(scheduler_s* s, int8_t id, cmdpkt_s* p, rtc_time_t start_time, uint32_t period_ms, uint16_t reps);
 
 /*
  * Schedule <func> to execute starting in <start_delay_ms> milliseconds from now for <reps> repetitions every <period_ms> milliseconds 

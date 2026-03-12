@@ -58,7 +58,7 @@
 
 #include <time.h>
 #include <time.c>
-#include "common.h"
+#include "common.c"
 #include "uart.c"
 #include "crcnew.c"
 #include "hashtable.c"
@@ -85,7 +85,7 @@ int1 SUPERLOOP_RUNNING = TRUE;
 irqmgr_s g_irqmgr = {0};          // Interrupts manager
 cmdmgr_s g_cmdmgr = {0};          // Commands manager
 scheduler_s g_scheduler = {0};    // Schedules manager
-struct_tm g_rtc_time = {0};       // Global RTC time tracking instance (from lower PPM)       
+rtc_time_t g_rtc_time = {0};       // Global RTC time tracking instance (from lower PPM)      
 ax100_s g_ax100 = {0};            // AX100 transceiver driver
 
 void main(void) {	
@@ -122,9 +122,7 @@ void system_init(void) {
     g_rtc_time.tm_hour = 0;
     g_rtc_time.tm_min = 0;
     g_rtc_time.tm_sec = 0;
-    // setup_rtc(RTC_ENABLE | RTC_OUTPUT_SECONDS, 0);
-    // rtc_write(&g_rtc_time);
-    systime_init(&g_irqmgr.ms, &g_rtc_time);
+    systime_init(&g_irqmgr.ms, &g_rtc_time); // It doesn't look like the UPPM built in RTC works.
     
     // Submodules & services init
     ax100_init(&g_ax100, AX100_PORT);
@@ -133,7 +131,7 @@ void system_init(void) {
     cmdimpl_init();
     hk_init();
 
-    sprintf(LOGBUF, "system initialized"); log_flush(LL_INFO);
+    sprintf(LOGBUF, "system initialized"); log_info();
     delay_ms(1000);
 }
 

@@ -10,15 +10,15 @@
 #include <time.h>
 
 typedef struct {
-    struct_tm time; 
-    struct_tm init_time;
-    struct_tm halted_time;
+    rtc_time_t time; 
+    rtc_time_t init_time;
+    rtc_time_t halted_time;
     int1 is_using_ertc; // Are we using the external I2C RTC or the internal one?
     int1 is_init;
 } ertc_s;
 
 // Initialze ertc module with initial time in buf
-void ertc_init(ertc_s* ertc, struct_tm* init_time);
+void ertc_init(ertc_s* ertc, rtc_time_t* init_time);
 
 // Clear ertc data
 void ertc_clear(ertc_s* ertc);
@@ -26,7 +26,7 @@ void ertc_clear(ertc_s* ertc);
 void ertc_get_time(ertc_s* ertc);
 
 // Set ertc time to buf
-void ertc_set_time(ertc_s* ertc, struct_tm* time);
+void ertc_set_time(ertc_s* ertc, rtc_time_t* time);
 
 // Periodicially reset if not using ertc
 int1 ertc_heartbeat(ertc_s* ertc);

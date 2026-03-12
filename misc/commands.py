@@ -140,7 +140,7 @@ class CommandManager():
                 if p is None:
                     self.cleanup_frame()
                     return None
-               
+                
                 if p['dest'] != self.node:
                     self.cleanup_frame()
                     return None
