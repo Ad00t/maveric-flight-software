@@ -20,7 +20,9 @@ extern ax100_s g_ax100;             // AX100 transceiver driver
 
 void cmdimpl_init() {
     ht_set(&g_cmdmgr.cmdimpls, "ppm_set_time", (cmdimpl_f) cmdimpl_ppm_set_time);
+    ht_set(&g_cmdmgr.cmdimpls, "ppm_get_time", (cmdimpl_f) cmdimpl_ppm_get_time);
     ht_set(&g_cmdmgr.cmdimpls, "ppm_ping", (cmdimpl_f) cmdimpl_ppm_ping);
+    ht_set(&g_cmdmgr.cmdimpls, "tlm_update", (cmdimpl_f) cmdimpl_tlm_update);
 }
 
 void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
@@ -44,8 +46,33 @@ void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
             g_rtc_time.tm_hour, g_rtc_time.tm_min, g_rtc_time.tm_sec); log_info();
 }
 
+void cmdimpl_ppm_get_time(cmdpkt_s* pkt) {
+    switch (pkt->ptype) {
+        case REQ:
+            char tm_str[32] = {0};  
+            rtc_to_str(tm_str, &g_rtc_time);
+            cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, "ppm_get_time", tm_str);
+            sprintf(LOGBUF, "cmdimpl_ppm_get_time REQ '%s'", tm_str); log_info();
+            break;
+        case RES:
+            sprintf(LOGBUF, "cmdimpl_ppm_get_time RES '%s'", pkt->args); log_info();
+            cmdimpl_ppm_set_time(pkt);
+            break;
+    }
+}
+
 void cmdimpl_ppm_ping(cmdpkt_s* pkt) {
     if (pkt->ptype == REQ) {
         cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, "ppm_ping", "pong");
     }
+}
+
+void cmdimpl_tlm_update(cmdpkt_s* pkt) {
+    switch (pkt->orgn) {
+        case NODE_LPPM: break;
+        case NODE_EPS: break;
+        case NODE_UPPM: break;
+        case NODE_HOLONAV: break;
+        case NODE_ASTROBOARD: break;
+    }  
 }

@@ -144,11 +144,6 @@ void system_init(void) {
     hk_init();
     cmdimpl_init();
 
-    // Sync time with UPPM
-    char tm_str[32] = {0};
-    rtc_to_str(tm_str, g_ertc.time);
-    cmd_dispatch(NODE, NODE_UPPM, 0, REQ, "ppm_set_time", tm_str);
-
     sprintf(LOGBUF, "system initialized"); log_info();
     delay_ms(1000);
 }

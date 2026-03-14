@@ -3,8 +3,9 @@
 
 #include <stdint.h>
 #include "framer.h"
+#include "crcnew.h"
 
-#define CMD_MAX_LEN             FRAME_MAX_SIZE - KISS_HEADER_SIZE - KISS_FOOTER_SIZE
+#define CMD_MAX_LEN             FRAME_MAX_SIZE - KISS_HEADER_SIZE - KISS_FOOTER_SIZE - CSP_HEADER_SIZE - CRC32_SIZE
 #define CMD_HEADER_SIZE         6
 #define CMD_FOOTER_SIZE         2
 #define CMD_MAX_ID_LEN          20

@@ -71,6 +71,7 @@
 #include "cmdpkt.c"
 #include "logger.c"
 #include "ax100.c"
+#include "telemetry.c"
 #include "cmdmgr.c"
 #include "scheduler.c"
 #include "cmdimpl.c"
@@ -82,11 +83,12 @@ void system_cleanup(void);
 
 int1 SUPERLOOP_RUNNING = TRUE;
 
-irqmgr_s g_irqmgr = {0};          // Interrupts manager
-cmdmgr_s g_cmdmgr = {0};          // Commands manager
-scheduler_s g_scheduler = {0};    // Schedules manager
-rtc_time_t g_rtc_time = {0};       // Global RTC time tracking instance (from lower PPM)      
-ax100_s g_ax100 = {0};            // AX100 transceiver driver
+irqmgr_s g_irqmgr = {0};            // Interrupts manager
+cmdmgr_s g_cmdmgr = {0};            // Commands manager
+scheduler_s g_scheduler = {0};      // Schedules manager
+rtc_time_t g_rtc_time = {0};        // Global RTC time tracking instance (from lower PPM)      
+ax100_s g_ax100 = {0};              // AX100 transceiver driver
+tlm_s g_tlm = {0};                  // Global telemetry state / data store
 
 void main(void) {	
     system_init();
@@ -130,6 +132,9 @@ void system_init(void) {
     scheduler_init(&g_scheduler);
     cmdimpl_init();
     hk_init();
+
+    delay_ms(2000); // Wait for LPPM to initialize
+    cmd_dispatch(NODE, NODE_LPPM, 0, REQ, "ppm_get_time", "");
 
     sprintf(LOGBUF, "system initialized"); log_info();
     delay_ms(1000);

@@ -1,4 +1,5 @@
 #include "framer.h"
+#include "crcnew.h"
 #include <stdint.h>
 
 // FRAMER
