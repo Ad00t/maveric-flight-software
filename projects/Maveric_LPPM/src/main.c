@@ -44,7 +44,7 @@
 #use rs232(baud=COM_B_BAUD, UART2, BITS=8, STREAM=COM_B, ERRORS, PARITY=N, STOP=1, TIMEOUT=1000)
 #use rs232(baud=COM_C_BAUD, UART3, BITS=8, STREAM=COM_C, ERRORS, PARITY=N, STOP=1, TIMEOUT=2000)
 #use rs232(baud=COM_D_BAUD, UART4, BITS=8, STREAM=COM_D, ERRORS, PARITY=N, STOP=1, TIMEOUT=1000)
-#use spi(MASTER, FORCE_HW, SPI1, BAUD=2000000, MSB_FIRST, BITS=16, MODE=3, STREAM=SPI_1)
+// #use spi(MASTER, FORCE_HW, SPI1, BAUD=2000000, MSB_FIRST, BITS=16, MODE=3, STREAM=SPI_1)
 #use i2c(MASTER, I2C1, STREAM=I2C_1)
 // #use timer(TIMER=1, TICK=1ns, BITS=16, ISR)
 // #use i2c(master, sda=PIN_A3, scl=PIN_A2, STREAM=I2C_1)
@@ -68,15 +68,18 @@
 #include "ringbuf.c"
 #include "i2c.c"
 #include "spi.c"
+#include "flash_at25df641.c"
+#include "config.c"
+#include "flashmgr.c"
 #include "interrupts.c"
 #include "systime.c"
 #include "framer.c"
 #include "cmdpkt.c"
 #include "logger.c"
-#include "adcsmtq.c"
-#include "adis16260.c"
+#include "mtq.c"
+#include "gyro.c"
 #include "naviguider.c"
-#include "m41t81s.c"
+#include "ertc.c"
 #include "cmdmgr.c"
 #include "scheduler.c"
 #include "cmdimpl.c"
@@ -86,10 +89,12 @@ void system_init(void);
 void system_superloop(void);
 void system_cleanup(void);
 
-int1 SUPERLOOP_RUNNING = TRUE;
+int1 g_superloop_running = TRUE;
+uint8_t g_rbt_cause = 0;
 
 irqmgr_s g_irqmgr = {0};            // Interrupts manager
 cmdmgr_s g_cmdmgr = {0};            // Commands manager
+flashmgr_s g_flashmgr = {0};        // Flash manager. Includes config, rbtcnt.
 scheduler_s g_scheduler = {0};      // Schedules manager
 ertc_s g_ertc = {0};                // External RTC (on motherboard)
 mtq_s g_mtq = {0};                  // Magnetorquer
@@ -98,7 +103,7 @@ nvg_s g_nvg = {0};                  // Naviguider
 
 void main(void) {	
     system_init();
-    while (SUPERLOOP_RUNNING) {
+    while (g_superloop_running) {
         system_superloop(); 
     }
     system_cleanup();
@@ -106,23 +111,28 @@ void main(void) {
 
 // System initialization routine
 void system_init(void) {
-    // Watchdog, millisecond timer init
+    // Watchdog, millisecond timer, logger, rbt_cause init
     setup_wdt(WDT_ON);
 	setup_timer1(TMR_INTERNAL | TMR_DIV_BY_64, 0x00FA); 
-    memset(LOGBUF, 0, sizeof(LOGBUF));
+    logger_init();
+    g_rbt_cause = restart_cause();
 
     // SPI init
-	// output_high(FLASH_CHIP_SELECT);
-	// output_high(SECOND_FLASH_CS);
-	// spi_set_mode(GYRO_SPI_MODE);
+	output_high(FLASH_CHIP_SELECT);
+	output_high(SECOND_FLASH_CS);
+	spi_set_mode(FLASH_SPI_MODE);
 	// setup_spi(SPI_MASTER | SPI_XMIT_L_TO_H | SPI_CLK_DIV_16 | SPI_SCK_IDLE_HIGH);
+   
+    // Flash init
+    flashmgr_init(&g_flashmgr);
+    status_e s = flashmgr_increment_rbt_cnt(&g_flashmgr);
 
-    // Init interrupts 
+    // Interrupts init 
     irqmgr_init(&g_irqmgr);
     isr_enable_all();
     g_irqmgr.started = TRUE;
 
-    // Init ertc, irtc, system time 
+    // eRTC, iRTC, system time init 
     rtc_time_t dfl_time;
     dfl_time.tm_wday = 3;
     dfl_time.tm_mon = 1;
@@ -144,7 +154,12 @@ void system_init(void) {
     hk_init();
     cmdimpl_init();
 
-    sprintf(LOGBUF, "system initialized"); log_info();
+    // Push a time update to UPPM 
+    char tm_str[32] = {0};
+    rtc_to_str(&g_ertc.time, tm_str);
+    cmd_dispatch(NODE, NODE_UPPM, 0, REQ, "ppm_set_time", tm_str);
+
+    sprintf(LOGBUF, "system initialized %u", s); log_info();
     delay_ms(1000);
 }
 

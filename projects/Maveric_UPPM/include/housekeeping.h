@@ -8,8 +8,9 @@ void hk_init();
 
 void hk_get_rtc_time(void);
 void hk_log(void);
+void hk_update_tlm(void);
+void hk_tlm_beacon(void);
 void hk_heartbeats(void);
-void hk_read_sensors(void);
 void hk_test_ax100(void);
 
 #endif // !__HOUSEKEEPING_H__

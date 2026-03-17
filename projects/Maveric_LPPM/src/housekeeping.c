@@ -7,9 +7,9 @@
 #include "cmdmgr.h"
 #include "interrupts.h"
 #include "hashtable.h"
-#include "adcsmtq.h"
-#include "m41t81s.h"
-#include "adis16260.h"
+#include "mtq.h"
+#include "ertc.h"
+#include "gyro.h"
 #include "naviguider.h"
 #include "logger.h"
 #include <stdint.h>
@@ -27,10 +27,10 @@ extern nvg_s g_nvg;                   // Naviguider
 void hk_init(void) {
     // IMPORTANT: AT LEAST ONE SCHEDULE FUNCTION MUST BE ACTIVE OR YOU WILL GET A SCHEDULER ERROR
     scheduler_schedule_func_in(&g_scheduler, 0, hk_get_ertc_time, 2000, 500, SCHEDULE_REPS_INFINITE);
-    scheduler_schedule_func_in(&g_scheduler, 1, hk_log, 2000, 500, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 1, hk_log, 2500, 500, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 2, hk_systime_sync, 5000, 30000, SCHEDULE_REPS_INFINITE);
-    scheduler_schedule_func_in(&g_scheduler, 3, hk_heartbeats, 2000, 3000, SCHEDULE_REPS_INFINITE);
-    scheduler_schedule_func_in(&g_scheduler, 4, hk_read_sensors, 2000, 1000, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 3, hk_heartbeats, 4000, 3000, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 4, hk_read_sensors, 3000, 1000, SCHEDULE_REPS_INFINITE);
     // scheduler_schedule_func_in(&g_scheduler, 6, hk_test_disable_ertc, 15000, 0, 1);
 }
 

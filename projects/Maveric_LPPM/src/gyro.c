@@ -1,4 +1,4 @@
-#include "adis16260.h"
+#include "gyro.h"
 #include "spi.h"
 #include "common.h"
 #include <stdint.h>
@@ -80,7 +80,7 @@ void gyro_read_reg(gyro_s* gyro, uint8_t reg, uint16_t* res) {
     // spi_write(req & 0x00FF); 		     
     // uint16_t d0 = spi_xfer(SPI_1, req, 16);
     // res[1] = spi_xfer(SPI_1, 0, 16);
-    spi_xfer(SPI_1, req);
+    // spi_xfer(SPI_1, req);
     output_high(gyro->cs_x); 
    
     delay_us(15);
@@ -88,7 +88,7 @@ void gyro_read_reg(gyro_s* gyro, uint8_t reg, uint16_t* res) {
     output_low(gyro->cs_x); 
     // res[0] = make16(spi_read(req >> 8), spi_read(req & 0x00FF));	            
     // res[0] = make16(spi_read(0), spi_read(0));
-    res[0] = spi_xfer(SPI_1, 0xFFFF);
+    // res[0] = spi_xfer(SPI_1, 0xFFFF);
     output_high(gyro->cs_x);
 
     delay_us(15);

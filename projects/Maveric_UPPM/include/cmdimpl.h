@@ -9,6 +9,6 @@ void cmdimpl_init();
 void cmdimpl_ppm_set_time(cmdpkt_s* pkt);
 void cmdimpl_ppm_get_time(cmdpkt_s* pkt);
 void cmdimpl_ppm_ping(cmdpkt_s* pkt);
-void cmdimpl_tlm_update(cmdpkt_s* pkt);
+void cmdimpl_tlm_get_data(cmdpkt_s* pkt);
 
 #endif 

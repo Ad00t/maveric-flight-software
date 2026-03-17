@@ -2,6 +2,7 @@
 #define __CMDPKT_H__
 
 #include <stdint.h>
+#include "common.h"
 #include "framer.h"
 #include "crcnew.h"
 
@@ -52,7 +53,7 @@ void cmdpkt_create(cmdpkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, cmdp
 void cmdpkt_clear(cmdpkt_s* pkt);
 
 // Parse packet fields out of its buffer. Requires pkt->buf and pkt->buf_len to be populated.
-uint8_t cmdpkt_parse_buf(cmdpkt_s* pkt);
+status_e cmdpkt_parse_buf(cmdpkt_s* pkt);
 
 // Send a command packet along its appropriate route. Assumes pkt buf field is populated correctly.
 void cmdpkt_dispatch(cmdpkt_s* pkt);

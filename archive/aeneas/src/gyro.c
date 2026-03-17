@@ -17,7 +17,7 @@ Date 	 |  Au.  |	Notes
 */
 
 
-#include <gyro.h>		// Public header
+#include "gyro.h"		// Public header
 
 #module					// !!! Important: This command makes everything below scoped only to this file.
 

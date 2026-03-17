@@ -8,6 +8,14 @@
 
 #module
 
+void logger_init() {
+    logger_clear();
+}
+
+void logger_clear() {
+    memset(LOGBUF, 0, sizeof(LOGBUF));
+}
+
 void log_flush(log_level_e lvl) {
     static char* ll_to_text[] = { "TRACE", "DEBUG", "INFO", "WARN", "ERROR" };
     static char* ll_to_color[] = { KNRM, KWHT, KCYN, KYEL, KRED };
@@ -23,8 +31,8 @@ void log_flush(log_level_e lvl) {
 //         cmd_dispatch(NODE, NODE_LPPM, 0, REQ, "ppm_ftdi_log", logfmt);
 // #endif
     }
-   
-    memset(LOGBUF, 0, sizeof(LOGBUF));
+
+    logger_clear();
 }
 
 void log_trace() {

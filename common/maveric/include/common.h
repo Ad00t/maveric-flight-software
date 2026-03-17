@@ -1,11 +1,25 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
-#include <time.h>
 #include <stdint.h>
 
-#define STATUS_OK               1
-#define STATUS_ERR              0
+typedef enum  {
+	SUCCESS 			= 			0,		// No error
+	BUSY,									// Function is not finished.
+	FAILURE 			= 			2,		// Generic error
+	UNREACHABLE,							// "Unreachable" code was reached.
+	OUT_OF_BOUNDS,							// Array overflow or pointer overflow detected.
+	TIMEOUT,								// A time overflow has occured
+
+	INVALID_ARG 		= 			10,	    // Invalid Arguments passed to the function
+	SUBFUNCTION_ERR,					    // An error occured in a function called below the current function
+	
+	FLASH_NOT_EMPTY     = 			20,	
+	FLASH_BUSY,
+	FLASH_PROTECTED,
+
+	UNKNOWN				=			90      // The error state is unknown
+} status_e;
 
 #define KNRM  "\033[0m"
 #define KRED  "\033[31m"

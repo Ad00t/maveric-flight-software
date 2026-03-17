@@ -82,6 +82,7 @@ void system_superloop(void);
 void system_cleanup(void);
 
 int1 SUPERLOOP_RUNNING = TRUE;
+uint8_t g_rbt_cause = 0;
 
 irqmgr_s g_irqmgr = {0};            // Interrupts manager
 cmdmgr_s g_cmdmgr = {0};            // Commands manager
@@ -100,10 +101,11 @@ void main(void) {
 
 // System initialization routine
 void system_init(void) {
-    // Watchdog, millisecond timer, logbuf init
+    // Watchdog, millisecond timer, logger, rbt_cause init
     setup_wdt(WDT_ON);
 	setup_timer1(TMR_INTERNAL | TMR_DIV_BY_64, 0x00FA); 
-    memset(LOGBUF, 0, sizeof(LOGBUF));
+    logger_init();
+    g_rbt_cause = restart_cause();
     
     // SPI init
 	// output_high(FLASH_CHIP_SELECT);

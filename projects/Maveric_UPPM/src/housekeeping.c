@@ -19,13 +19,15 @@ extern cmdmgr_s g_cmdmgr;           // Commands manager
 extern scheduler_s g_scheduler;     // Schedules manager
 extern rtc_time_t g_rtc_time;       // Global RTC time tracking instance (from lower PPM) 
 extern ax100_s g_ax100;             // AX100 transceiver driver 
+extern tlm_s g_tlm;                 // Global telemetry state / data store
 
 void hk_init() {
-    // IMPORTANT: AT LEAST ONE SCHEDULE FUNCTION MUST BE ACTIVE OR YOU WILL GET A SCHEDULER ERROR
+   // IMPORTANT: AT LEAST ONE SCHEDULE FUNCTION MUST BE ACTIVE OR YOU WILL GET A SCHEDULER ERROR
     scheduler_schedule_func_in(&g_scheduler, 0, hk_get_rtc_time, 2000, 500, SCHEDULE_REPS_INFINITE);
-    scheduler_schedule_func_in(&g_scheduler, 1, hk_log, 2000, 500, SCHEDULE_REPS_INFINITE);
-    scheduler_schedule_func_in(&g_scheduler, 2, hk_heartbeats, 2000, 3000, SCHEDULE_REPS_INFINITE);
-    scheduler_schedule_func_in(&g_scheduler, 3, hk_read_sensors, 2000, 1000, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 1, hk_log, 2500, 500, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 2, hk_update_tlm, 5000, 5000, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 3, hk_tlm_beacon, 7000, 7000, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 4, hk_heartbeats, 4000, 3000, SCHEDULE_REPS_INFINITE);
     // scheduler_schedule_func_in(&g_scheduler, 4, hk_test_ax100, 2000, 3000, SCHEDULE_REPS_INFINITE);
 }
 
@@ -41,11 +43,18 @@ void hk_log(void) {
             g_rtc_time.tm_hour, g_rtc_time.tm_min, g_rtc_time.tm_sec); log_info();
 }
 
-void hk_heartbeats(void) {
-
+void hk_update_tlm(void) {
+    cmd_dispatch(NODE, NODE_LPPM, 0, REQ, "tlm_get_data", "");
+    cmd_dispatch(NODE, NODE_EPS, 0, REQ, "tlm_get_data", "");
+    cmd_dispatch(NODE, NODE_HOLONAV, 0, REQ, "tlm_get_data", "");
+    cmd_dispatch(NODE, NODE_ASTROBOARD, 0, REQ, "tlm_get_data", "");
 }
 
-void hk_read_sensors(void) {
+void hk_tlm_beacon(void) {
+    tlm_beacon(&g_tlm, 1);
+}
+
+void hk_heartbeats(void) {
 
 }
 

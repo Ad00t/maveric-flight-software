@@ -66,7 +66,7 @@ void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
     kiss_parser_s* p = &pkt->parser;
 
     // Parse cmdpkt buf into fields
-    if (cmdpkt_parse_buf(pkt) != STATUS_OK) {
+    if (cmdpkt_parse_buf(pkt) != SUCCESS) {
         sprintf(LOGBUF, "cmdmgr_process_cmd: pkt buf parsing failed: len=%u", p->buf_len); log_error();
         goto cleanup;
     }

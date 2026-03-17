@@ -7,9 +7,9 @@ typedef struct {
     // Generic
     uint64_t time;
     uint16_t lppm_rbt_cnt;
-    uint8_t lppm_last_rbt_cause;
+    uint8_t lppm_rbt_cause;
     uint16_t uppm_rbt_cnt;
-    uint8_t uppm_last_rbt_cause;
+    uint8_t uppm_rbt_cause;
     uint32_t mode;
     float quat_attitude[4];
     // Beacon 1
@@ -52,19 +52,12 @@ typedef struct {
     uint16_t ab_seq; 
     // Beacon 7
     uint16_t hn_seq;
-    
 } tlm_s;
 
 void tlm_init(tlm_s* tlm);
 void tlm_clear(tlm_s* tlm);
 
 // Format a telemetry message packet for a specified beacon for transmission. Only creates the message buffer, not command or frame.
-void tlm_beacon_1(tlm_s* tlm, uint8_t* out);
-void tlm_beacon_2(tlm_s* tlm, uint8_t* out);
-void tlm_beacon_3(tlm_s* tlm, uint8_t* out);
-void tlm_beacon_4(tlm_s* tlm, uint8_t* out);
-void tlm_beacon_5(tlm_s* tlm, uint8_t* out);
-void tlm_beacon_6(tlm_s* tlm, uint8_t* out);
-void tlm_beacon_7(tlm_s* tlm, uint8_t* out);
+void tlm_beacon(tlm_s* tlm, uint8_t bcn_num);
 
 #endif
