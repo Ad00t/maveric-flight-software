@@ -43,7 +43,7 @@ void hk_get_ertc_time(void) {
 void hk_systime_sync(void) {
     systime_sync();
     char tm_str[32] = {0};
-    rtc_to_str(tm_str, g_ertc.time);
+    rtc_to_str(g_ertc.time, tm_str);
     cmd_dispatch(NODE, NODE_UPPM, 0, REQ, "ppm_set_time", tm_str);
 }
 
@@ -55,14 +55,14 @@ void hk_log(void) {
 
 void hk_heartbeats(void) {
     // int1 hb_ertc = ertc_heartbeat(&g_ertc);
-    int1 hb_mtq = mtq_heartbeat(&g_mtq);
+    // int1 hb_mtq = mtq_heartbeat(&g_mtq);
     int1 hb_nvg = nvg_heartbeat(&g_nvg);
     // int1 hb_gyro = gyro_heartbeat(&g_gyro);
 }
 
 void hk_read_sensors(void) {
-    mtq_read_ctrl(&g_mtq);
-    // mtq_read_fast(&g_mtq);
+    // mtq_read_ctrl(&g_mtq);
+    mtq_read_fast(&g_mtq);
     // gyro_read_all(&g_gyro);
 }
 

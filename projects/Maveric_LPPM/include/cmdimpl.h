@@ -1,7 +1,7 @@
 #ifndef __CMDIMPL_H__
 #define __CMDIMPL_H__
 
-#include "cmdmgr.h"
+#include "cmdpkt.h"
 
 // Register command implementations in cmdmgr hash table
 void cmdimpl_init(void);

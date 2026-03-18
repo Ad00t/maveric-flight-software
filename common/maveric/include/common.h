@@ -4,19 +4,19 @@
 #include <stdint.h>
 
 typedef enum  {
-	SUCCESS 			= 			0,		// No error
-	BUSY,									// Function is not finished.
-	FAILURE 			= 			2,		// Generic error
-	UNREACHABLE,							// "Unreachable" code was reached.
-	OUT_OF_BOUNDS,							// Array overflow or pointer overflow detected.
-	TIMEOUT,								// A time overflow has occured
+	FAILURE 			= 			0,		// Generic error
+	SUCCESS 			= 			1,		// No error
+	BUSY                =           2,		// Function is not finished.
+	UNREACHABLE         =           3,		// "Unreachable" code was reached.
+	OUT_OF_BOUNDS       =           4,		// Array overflow or pointer overflow detected.
+	TIMEOUT             =           5,		// A time overflow has occured
 
 	INVALID_ARG 		= 			10,	    // Invalid Arguments passed to the function
-	SUBFUNCTION_ERR,					    // An error occured in a function called below the current function
+	SUBFUNCTION_ERR     =           11,	    // An error occured in a function called below the current function
 	
 	FLASH_NOT_EMPTY     = 			20,	
-	FLASH_BUSY,
-	FLASH_PROTECTED,
+	FLASH_BUSY          =           21,
+	FLASH_PROTECTED     =           22,
 
 	UNKNOWN				=			90      // The error state is unknown
 } status_e;

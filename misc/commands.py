@@ -18,7 +18,7 @@ class CommandManager():
     crcalc = Calculator(Crc16.XMODEM)
     node_lbl_to_id = { 'NONE': 0, 'LPPM': 1, 'EPS': 2, 'UPPM': 3, 'HOLONAV': 4, 'ASTROBOARD': 5, 'GS': 6, 'FTDI': 7 }
     node_id_to_lbl = { v: k for k, v in node_lbl_to_id.items() }
-    ptype_lbl_to_id = { 'ACK': 0, 'NACK': 1, 'REQ': 2, 'RES': 3 }
+    ptype_lbl_to_id = { 'NONE': 0, 'REQ': 1, 'RES': 2, 'ACK': 3, 'RES': 4 }
     ptype_id_to_lbl = { v: k for k, v in ptype_lbl_to_id.items() }
 
     def __init__(self, node: int, serial: serial.Serial | None = None):

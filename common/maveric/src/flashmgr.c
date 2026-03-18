@@ -63,7 +63,6 @@ status_e flashmgr_increment_rbt_cnt(flashmgr_s* self) {
 	// Next check if we are at the end of the block, because we'll need to erase the block and start
 	// over in that case
 	if (i >= FLASH_BLOCK_SIZE - 1) {
-        sprintf(LOGBUF, "erasing"); log_error();
 		flashEraseBlockByAddr(RESERVED_ADDR);
 		i = 0;
 	}

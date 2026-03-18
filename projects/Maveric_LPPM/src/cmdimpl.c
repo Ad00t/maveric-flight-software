@@ -41,8 +41,8 @@ void cmdimpl_init(void) {
 
     ht_set(ht, "mtq_get_conf", (cmdimpl_f) cmdimpl_mtq_get_conf);
     ht_set(ht, "mtq_set_conf", (cmdimpl_f) cmdimpl_mtq_set_conf);
-    ht_set(ht, "mtq_get_datetime", (cmdimpl_f) cmdimpl_mtq_get_conf);
-    ht_set(ht, "mtq_set_datetime", (cmdimpl_f) cmdimpl_mtq_set_conf);
+    ht_set(ht, "mtq_get_datetime", (cmdimpl_f) cmdimpl_mtq_get_datetime);
+    ht_set(ht, "mtq_set_datetime", (cmdimpl_f) cmdimpl_mtq_set_datetime);
     ht_set(ht, "mtq_get_tle", (cmdimpl_f) cmdimpl_mtq_get_tle);
     ht_set(ht, "mtq_set_tle", (cmdimpl_f) cmdimpl_mtq_set_tle);
     ht_set(ht, "mtq_get_paxs", (cmdimpl_f) cmdimpl_mtq_get_paxs);
@@ -67,11 +67,11 @@ void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
     time.tm_sec = strtoul(p, &p, 10);
     
     uint64_t oldtime = systime_epoch_ms();
-    ertc_set_time(&g_ertc, &time);
+    ertc_set_time(&g_ertc, time);
     systime_sync();
     scheduler_refresh_all(&g_scheduler, oldtime);
 
-    mtq_set_datetime(&g_mtq, &time);
+    mtq_set_datetime(&g_mtq, time);
     cmd_dispatch(NODE, NODE_UPPM, 0, REQ, "ppm_set_time", pkt->args);
 
     sprintf(LOGBUF, "cmdimpl_ppm_set_time '%s' [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", pkt->args
@@ -83,7 +83,7 @@ void cmdimpl_ppm_get_time(cmdpkt_s* pkt) {
     if (pkt->ptype != REQ) return;
     // Only implement REQ here because LPPM should never be replacing its time from another subsystem
     char tm_str[32] = {0};  
-    rtc_to_str(tm_str, g_ertc.time);
+    rtc_to_str(g_ertc.time, tm_str);
     cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, "ppm_get_time", tm_str);
     sprintf(LOGBUF, "cmdimpl_ppm_get_time REQ '%s'", tm_str); log_info();
     break;
@@ -144,6 +144,18 @@ void cmdimpl_mtq_get_conf(cmdpkt_s* pkt) {
 
 void cmdimpl_mtq_set_conf(cmdpkt_s* pkt) {
     if (pkt->ptype != REQ) return;
+    char* p = pkt->args;
+    uint8_t data[4] = {0};
+    data[3] = strtoul(p, &p, 10);
+    data[2] = 0;
+    data[1] = 0;
+    data[0] = strtoul(p, &p, 10);
+    
+    if (mtq_write_start(&g_mtq, MTQ_CONF, data) == SUCCESS) { 
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, ACK, "mtq_set_conf", "");
+    } else {
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, NACK, "mtq_set_conf", "");
+    }
 }
 
 void cmdimpl_mtq_get_datetime(cmdpkt_s* pkt) {

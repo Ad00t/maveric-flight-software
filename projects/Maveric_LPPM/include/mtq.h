@@ -133,7 +133,7 @@ status_e mtq_read_fast(mtq_s* mtq);
 status_e mtq_read_ctrl(mtq_s* mtq);
 
 // Set date and time registers (absolute time)
-status_e mtq_set_datetime(mtq_s* mtq, rtc_time_t* rtc);
+status_e mtq_set_datetime(mtq_s* mtq, rtc_time_t rtc);
 
 #define MTQ_MODE_MANUAL             7 
 #define MTQ_MODE_SUN_SPIN           6
@@ -316,7 +316,7 @@ static const mtq_reg_s MTQ_INIT_REG_TABLE[] = {
     /* Q */                { 132, 4, 0, T_FLOAT, NULL, 0 },
     /* RATE */             { 136, 3, 0, T_FLOAT, NULL, 0 },
     /* LLA */              { 139, 3, 0, T_FLOAT, NULL, 0 },
-    // /* ATT_ERROR */        { 142, 3, 0, T_FLOAT, NULL, 0 },
+    /* ATT_ERROR */        { 142, 3, 0, T_FLOAT, NULL, 0 },
     /* ATT_ERROR_RATE */   { 145, 3, 0, T_FLOAT, NULL, 0 },
     // /* ADCS_TMP */         { 148, 1, 0, T_INT16, NULL, 0 },
     // /* CMG0_TMP */         { 149, 1, 0, T_INT16, NULL, 0 },
