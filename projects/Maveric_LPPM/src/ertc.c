@@ -78,7 +78,7 @@ void ertc_set_time(ertc_s* ertc, rtc_time_t* time) {
 int1 ertc_heartbeat(ertc_s* ertc) {
     if (!ertc->is_init) return 0;
     if (!ertc->is_using_ertc) {
-        sprintf(LOGBUF, "ertc_heartbeat: flatlined. resetting..."); log_flush(LL_ERROR);
+        sprintf(LOGBUF, "ertc_heartbeat: flatlined. resetting..."); log_error();
         rtc_time_t init_time;
         memcpy(&init_time, &ertc->time, sizeof(rtc_time_t));
         ertc_init(ertc, &init_time); 

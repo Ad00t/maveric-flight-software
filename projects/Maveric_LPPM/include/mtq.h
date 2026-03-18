@@ -99,15 +99,15 @@ mtq_reg_s* mtq_get_reg(mtq_s* mtq, uint8_t midx, uint8_t idx);
 mtq_reg_s* mtq_get_reg(mtq_s* mtq, uint16_t key);
 
 // Send register read command to mtq
-void mtq_read_start(mtq_s* mtq, mtq_reg_s* reg);
-void mtq_read_start(mtq_s* mtq, uint16_t key);
+status_e mtq_read_start(mtq_s* mtq, mtq_reg_s* reg);
+status_e mtq_read_start(mtq_s* mtq, uint16_t key);
 
 // Handle read data received from mtq
 void mtq_read_complete(mtq_s* mtq);
 
 // Send register write command to mtq
-void mtq_write_start(mtq_s* mtq, mtq_reg_s* reg, void* data);
-void mtq_write_start(mtq_s* mtq, uint16_t key, void* data);
+status_e mtq_write_start(mtq_s* mtq, mtq_reg_s* reg, void* data);
+status_e mtq_write_start(mtq_s* mtq, uint16_t key, void* data);
 
 // Handle write response receieved from mtq
 void mtq_write_complete(mtq_s* mtq);
@@ -117,20 +117,23 @@ void mtq_parse_stream(mtq_s* mtq, ringbuf_s* irqbuf);
 
 // HIGH LEVEL API
 
+// Get a copy of the data for a given register, if it exists
+status_e mtq_get_data(mtq_s* mtq, uint16_t key, void* out);
+
 // Check if we're still receiving from the mtq
-int1 mtq_heartbeat(mtq_s* mtq);
+status_e mtq_heartbeat(mtq_s* mtq);
 
 // Write 1 to nvm register to reset
-void mtq_reset(mtq_s* mtq);
+status_e mtq_reset(mtq_s* mtq);
 
 // Read fast frame registers
-void mtq_read_fast(mtq_s* mtq);
+status_e mtq_read_fast(mtq_s* mtq);
 
 // Read control frame registers
-void mtq_read_ctrl(mtq_s* mtq);
+status_e mtq_read_ctrl(mtq_s* mtq);
 
 // Set date and time registers (absolute time)
-void mtq_set_date_time(mtq_s* mtq, struct_tm* rtc);
+status_e mtq_set_datetime(mtq_s* mtq, rtc_time_t* rtc);
 
 #define MTQ_MODE_MANUAL             7 
 #define MTQ_MODE_SUN_SPIN           6
@@ -142,7 +145,7 @@ void mtq_set_date_time(mtq_s* mtq, struct_tm* rtc);
 #define MTQ_MODE_SAFE               0
 
 // Set config (target elevation, mode)
-void mtq_set_conf(mtq_s* mtq, uint8_t elevation, uint8_t mode);
+status_e mtq_set_conf(mtq_s* mtq, uint8_t elevation, uint8_t mode);
 
 // Map Idx | Idx register keys
 
@@ -402,7 +405,7 @@ static const mtq_reg_s MTQ_INIT_REG_TABLE[] = {
     // /* STR_INFO */         { 84, 1, 2, T_UINT8, NULL, 0 },
     // /* STR0_ORIEN_BS */    { 85, 4, 2, T_FLOAT, NULL, 0 },
     // /* STR1_ORIEN_BS */    { 89, 4, 2, T_FLOAT, NULL, 0 },
-    /* NVM */              { 255,1, 2, T_UINT8, NULL, 0 }
+    /* NVM */              { 255, 1, 2, T_UINT8, NULL, 0 }
 };
 
 #endif

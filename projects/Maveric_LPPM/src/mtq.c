@@ -27,11 +27,6 @@ uint8_t gen_csum(uint8_t* buf, uint8_t len) {
     return 0xFF - sum + 1;
 }
 
-// Convert a decimal number to binary-coded decimal
-uint8_t to_bcd(uint8_t val) {
-    return ((val / 10) << 4) | (val % 10);
-}
-
 // MTQ Packet
 
 void mtq_pkt_init(mtq_pkt_s* pkt) {
@@ -97,7 +92,7 @@ void mtq_init(mtq_s* mtq, uint8_t port) {
     }
     
     mtq_set_conf(&mtq, 0, MTQ_MODE_SAFE);
-    sprintf(LOGBUF, "mtq_init: port=%u", mtq->port); log_flush(LL_INFO);
+    sprintf(LOGBUF, "mtq_init: port=%u", mtq->port); log_info();
 }
 
 void mtq_destroy(mtq_s* mtq) {
@@ -109,7 +104,7 @@ void mtq_destroy(mtq_s* mtq) {
             free(mtq->reg_table[i].value);
     }
     mtq->is_init = FALSE; 
-    sprintf(LOGBUF, "mtq_destroy"); log_flush(LL_INFO);
+    sprintf(LOGBUF, "mtq_destroy"); log_info();
 }
 
 void mtq_clear(mtq_s* mtq) {
@@ -122,7 +117,7 @@ void mtq_clear(mtq_s* mtq) {
     mtq_pkt_clear(&mtq->rcvpkt);
     memset(mtq->reg_idx_map, 0, MTQ_MAP_COUNT * MTQ_MAX_IDX_COUNT * sizeof(mtq_reg_s*));
     memset(mtq->reg_table, 0, sizeof(MTQ_INIT_REG_TABLE));
-    sprintf(LOGBUF, "mtq_clear"); log_flush(LL_INFO);
+    sprintf(LOGBUF, "mtq_clear"); log_info();
 }
 
 mtq_reg_s* mtq_get_reg(mtq_s* mtq, uint8_t midx, uint8_t idx) {
@@ -139,8 +134,8 @@ mtq_reg_s* mtq_get_reg(mtq_s* mtq, uint16_t key) {
     return mtq_get_reg(mtq, key >> 8, key & 0x00FF);
 }
 
-void mtq_read_start(mtq_s* mtq, mtq_reg_s* reg) {   
-    if (!mtq->is_init) return;
+status_e mtq_read_start(mtq_s* mtq, mtq_reg_s* reg) {   
+    if (!mtq->is_init) return FAILURE;
     uint8_t w_buf[4];
     w_buf[0] = MTQ_HEAD_READ;
     w_buf[1] = reg->idx;
@@ -149,44 +144,45 @@ void mtq_read_start(mtq_s* mtq, mtq_reg_s* reg) {
     uint8_t csum = gen_csum(w_buf, 4);
     
     sprintf(LOGBUF, "mtq_read_start: port=UART%u reg=(%u,%u) data=[ %02X %02X %02X %02X %02X ]", 
-            mtq->port, reg->midx, reg->idx, w_buf[0], w_buf[1], w_buf[2], w_buf[3], csum); log_flush(LL_TRACE);
+            mtq->port, reg->midx, reg->idx, w_buf[0], w_buf[1], w_buf[2], w_buf[3], csum); log_trace();
     
     uart_write_buf(mtq->port, w_buf, 4); 
     uart_write_byte(mtq->port, csum);
     delay_ms(10);
+    return SUCCESS;
 }
 
-void mtq_read_start(mtq_s* mtq, uint16_t key) {
-    if (!mtq->is_init) return;
+status_e mtq_read_start(mtq_s* mtq, uint16_t key) {
+    if (!mtq->is_init) return FAILURE;
     mtq_reg_s* reg = mtq_get_reg(mtq, key);
     if (reg == NULL) {
-        sprintf(LOGBUF, "mtq_read_start: register invalid (%u,%u)", key >> 8, key & 0x00FF); log_flush(LL_ERROR);
-        return;
+        sprintf(LOGBUF, "mtq_read_start: register invalid (%u,%u)", key >> 8, key & 0x00FF); log_error();
+        return FAILURE;
     }
-    mtq_read_start(mtq, reg);
+    return mtq_read_start(mtq, reg);
 }
 
 void mtq_read_complete(mtq_s* mtq) {
     if (!mtq->is_init) return;
     mtq_pkt_s* rcvpkt = &mtq->rcvpkt;
     if (!mtq_pkt_verify_csum(rcvpkt)) {
-        sprintf(LOGBUF, "mtq_read_complete: ppm checksum error (%u,%u)", rcvpkt->midx, rcvpkt->idx); log_flush(LL_ERROR);
+        sprintf(LOGBUF, "mtq_read_complete: ppm checksum error (%u,%u)", rcvpkt->midx, rcvpkt->idx); log_error();
         return;
     }
 
     switch (rcvpkt->err) {
         case 0: break; // No error
         case 1: // Checksum error
-            sprintf(LOGBUF, "mtq_read_complete: rcv checksum error (%u,%u)", rcvpkt->midx, rcvpkt->idx); log_flush(LL_ERROR);
+            sprintf(LOGBUF, "mtq_read_complete: rcv checksum error (%u,%u)", rcvpkt->midx, rcvpkt->idx); log_error();
             return;
         case 2: // Invalid register
-            sprintf(LOGBUF, "mtq_read_complete: rcv invalid register (%u,%u)", rcvpkt->midx, rcvpkt->idx); log_flush(LL_ERROR);
+            sprintf(LOGBUF, "mtq_read_complete: rcv invalid register (%u,%u)", rcvpkt->midx, rcvpkt->idx); log_error();
             return;
     }
 
     mtq_reg_s* reg = mtq_get_reg(mtq, rcvpkt->midx, rcvpkt->idx);
     if (reg == NULL) {
-        sprintf(LOGBUF, "mtq_read_complete: ppm invalid register (%u,%u)", rcvpkt->midx, rcvpkt->idx); log_flush(LL_ERROR);
+        sprintf(LOGBUF, "mtq_read_complete: ppm invalid register (%u,%u)", rcvpkt->midx, rcvpkt->idx); log_error();
         return;
     }
         
@@ -233,11 +229,11 @@ void mtq_read_complete(mtq_s* mtq) {
         }
     }    
 
-    p += sprintf(&LOGBUF[p], " ]"); log_flush(LL_TRACE);
+    p += sprintf(&LOGBUF[p], " ]"); log_trace();
 }
 
-void mtq_write_start(mtq_s* mtq, mtq_reg_s* reg, void* data) {
-    if (!mtq->is_init) return;
+status_e mtq_write_start(mtq_s* mtq, mtq_reg_s* reg, void* data) {
+    if (!mtq->is_init) return FAILURE;
     uint8_t w_buf[MTQ_MAX_DATA_LEN];
     uint8_t n_body_bytes = 4*reg->cnt;
     uint8_t w_buf_len = 4 + n_body_bytes;
@@ -270,49 +266,53 @@ void mtq_write_start(mtq_s* mtq, mtq_reg_s* reg, void* data) {
     p += sprintf(LOGBUF, "mtq_write_start: port=%u reg=(%u,%u) len=%u data=[", mtq->port, reg->midx, reg->idx, w_buf_len+1);
     for (i = 0; i < w_buf_len; i++)
         p += sprintf(&LOGBUF[p], " %02X", w_buf[i]);
-    p += sprintf(&LOGBUF[p], " %02X ]", csum); log_flush(LL_TRACE);
+    p += sprintf(&LOGBUF[p], " %02X ]", csum); log_trace();
     
     uart_write_buf(mtq->port, w_buf, w_buf_len);
     uart_write_buf(mtq->port, &csum, 1);
     delay_ms(10);
+    return SUCCESS;
 }
 
-void mtq_write_start(mtq_s* mtq, uint16_t key, void* data) {
-    if (!mtq->is_init) return;
+status_e mtq_write_start(mtq_s* mtq, uint16_t key, void* data) {
+    if (!mtq->is_init) return FAILURE;
     mtq_reg_s* reg = mtq_get_reg(mtq, key);
     if (reg == NULL) {
-        sprintf(LOGBUF, "mtq_write_start: register invalid (%u,%u)", key >> 8, key & 0x00FF); log_flush(LL_ERROR);
-        return;
+        sprintf(LOGBUF, "mtq_write_start: register invalid (%u,%u)", key >> 8, key & 0x00FF); log_error();
+        return FAILURE;
     }
-    mtq_write_start(mtq, reg, data);
+    return mtq_write_start(mtq, reg, data);
 }
 
 void mtq_write_complete(mtq_s* mtq) {
     if (!mtq->is_init) return;
     mtq_pkt_s* rcvpkt = &mtq->rcvpkt;
     if (!mtq_pkt_verify_csum(rcvpkt)) {
-        sprintf(LOGBUF, "mtq_write_complete: ppm checksum error (%u,%u)", rcvpkt->midx, rcvpkt->idx); log_flush(LL_ERROR);
+        sprintf(LOGBUF, "mtq_write_complete: ppm checksum error (%u,%u)", rcvpkt->midx, rcvpkt->idx); log_error();
         return;
     }
 
     switch (rcvpkt->err) {
         case 0: break; // No error
         case 1: // Checksum error
-            sprintf(LOGBUF, "mtq_write_complete: rcv checksum error (%u,%u)", rcvpkt->midx, rcvpkt->idx); log_flush(LL_ERROR);
+            sprintf(LOGBUF, "mtq_write_complete: rcv checksum error (%u,%u)", rcvpkt->midx, rcvpkt->idx); log_error();
             return;
         case 2: // Invalid register
-            sprintf(LOGBUF, "mtq_write_complete: rcv invalid register (%u,%u)", rcvpkt->midx, rcvpkt->idx); log_flush(LL_ERROR);
+            sprintf(LOGBUF, "mtq_write_complete: rcv invalid register (%u,%u)", rcvpkt->midx, rcvpkt->idx); log_error();
             return;
     }
 
     mtq_reg_s* reg = mtq_get_reg(mtq, rcvpkt->midx, rcvpkt->idx);
     if (reg == NULL) {
-        sprintf(LOGBUF, "mtq_write_complete: ppm invalid register (%u,%u)", rcvpkt->midx, rcvpkt->idx); log_flush(LL_ERROR);
+        sprintf(LOGBUF, "mtq_write_complete: ppm invalid register (%u,%u)", rcvpkt->midx, rcvpkt->idx); log_error();
         return;
     }
     
     sprintf(LOGBUF, "mtq_write_complete: port=%u reg=(%u,%u) count=%u err=%u", 
-            mtq->port, reg->midx, reg->idx, reg->cnt, rcvpkt->err); log_flush(LL_TRACE);
+            mtq->port, reg->midx, reg->idx, reg->cnt, rcvpkt->err); log_trace();
+
+    // Readback
+    mtq_read_start(mtq, reg);
 }
 
 void mtq_parse_stream(mtq_s* mtq, ringbuf_s* irqbuf) {
@@ -378,7 +378,7 @@ void mtq_parse_stream(mtq_s* mtq, ringbuf_s* irqbuf) {
                 mtq_pkt_clear(rcvpkt);
                 break;
             case MTQ_FSM_ERROR:
-                sprintf(LOGBUF, "mtq_parse_stream: malformed packet"); log_flush(LL_ERROR);
+                sprintf(LOGBUF, "mtq_parse_stream: malformed packet"); log_error();
                 mtq_pkt_clear(rcvpkt);
                 break;
         }
@@ -389,15 +389,23 @@ void mtq_parse_stream(mtq_s* mtq, ringbuf_s* irqbuf) {
 
 // HIGH LEVEL API
 
-int1 mtq_heartbeat(mtq_s* mtq) {
-    if (!mtq->is_init) return FALSE;
+status_e mtq_get_data(mtq_s* mtq, uint16_t key, void* out) {
+    if (!mtq->is_init) return FAILURE;
+    mtq_reg_s* reg = mtq_get_reg(mtq, key);
+    if (reg == NULL) return FAILURE;
+    memcpy(out, reg->value, reg->value_len);
+    return SUCCESS;
+}
+
+status_e mtq_heartbeat(mtq_s* mtq) {
+    if (!mtq->is_init) return FAILURE;
     mtq_reg_s* reg = mtq_get_reg(mtq, MTQ_SNID);
-    if (reg == NULL) return FALSE;
+    if (reg == NULL) return FAILURE;
     char* snid = (char*) reg->value;
-    int1 hb = strncmp(snid, "TAD102063", reg->value_len) == 0; 
+    status_e hb = strncmp(snid, "TAD102063", reg->value_len) == 0 ? SUCCESS : FAILURE; 
     
-    if (!hb) {
-        sprintf(LOGBUF, "mtq_heartbeat: flatlined. resetting..."); log_flush(LL_ERROR);
+    if (hb == FAILURE) {
+        sprintf(LOGBUF, "mtq_heartbeat: flatlined. resetting..."); log_error();
         uint8_t port = mtq->port;
         mtq_destroy(mtq);
         mtq_init(mtq, port);
@@ -408,51 +416,58 @@ int1 mtq_heartbeat(mtq_s* mtq) {
     return hb;
 }
 
-void mtq_reset(mtq_s* mtq) {
-    if (!mtq->is_init) return;
+status_e mtq_reset(mtq_s* mtq) {
+    if (!mtq->is_init) return FAILURE;
     uint8_t req = 1;
-    mtq_write_start(mtq, MTQ_NVM, &req);
+    return mtq_write_start(mtq, MTQ_NVM, &req);
 }
 
-void mtq_read_fast(mtq_s* mtq) {
-    if (!mtq->is_init) return;
+status_e mtq_read_fast(mtq_s* mtq) {
+    if (!mtq->is_init) return FAILURE;
     uint8_t i;
+    status_e s = SUCCESS;
     for (i = 0; i < MTQ_NUM_FAST_REGS; i++) {
-        mtq_read_start(mtq, MTQ_FAST_FRAME_REGS[i]);
+        if (mtq_read_start(mtq, MTQ_FAST_FRAME_REGS[i]) == FAILURE)
+            s = FAILURE;
     }
+    return s;
 }
 
-void mtq_read_ctrl(mtq_s* mtq) {
-    if (!mtq->is_init) return;
+status_e mtq_read_ctrl(mtq_s* mtq) {
+    if (!mtq->is_init) return FAILURE;
     uint8_t i;
+    status_e s = SUCCESS;
     for (i = 0; i < MTQ_NUM_CTRL_REGS; i++) {
-        mtq_read_start(mtq, MTQ_CTRL_FRAME_REGS[i]);
+        if (mtq_read_start(mtq, MTQ_CTRL_FRAME_REGS[i]) == FAILURE)
+            s = FAILURE;
     }
+    return s;
 }
 
-void mtq_set_date_time(mtq_s* mtq, struct_tm* rtc) {
-    if (!mtq->is_init) return;
+status_e mtq_set_datetime(mtq_s* mtq, rtc_time_t* rtc) {
+    if (!mtq->is_init) return FAILURE;
     uint8_t date[4]; 
-    date[3] = to_bcd(rtc->tm_year);
-    date[2] = to_bcd(rtc->tm_mon);
-    date[1] = to_bcd(rtc->tm_mday);
-    date[0] = to_bcd(rtc->tm_wday); 
-    mtq_write_start(mtq, MTQ_DATE, date);
+    date[3] = hextobcd(rtc->tm_year);
+    date[2] = hextobcd(rtc->tm_mon);
+    date[1] = hextobcd(rtc->tm_mday);
+    date[0] = hextobcd(rtc->tm_wday); 
+    status_e s1 = mtq_write_start(mtq, MTQ_DATE, date);
     
     uint8_t time[4];
-    time[3] = to_bcd(rtc->tm_hour);
-    time[2] = to_bcd(rtc->tm_min);
-    time[1] = to_bcd(rtc->tm_sec);
-    time[0] = to_bcd(0); // Unused
-    mtq_write_start(mtq, MTQ_TIME, time);
+    time[3] = hextobcd(rtc->tm_hour);
+    time[2] = hextobcd(rtc->tm_min);
+    time[1] = hextobcd(rtc->tm_sec);
+    time[0] = hextobcd(0); // Unused
+    status_e s2 = mtq_write_start(mtq, MTQ_TIME, time);
+    return (s1 == SUCCESS && s2 == SUCCESS);
 }
 
-void mtq_set_conf(mtq_s* mtq, uint8_t elevation, uint8_t mode) {
-    if (!mtq->is_init) return;
+status_e mtq_set_conf(mtq_s* mtq, uint8_t elevation, uint8_t mode) {
+    if (!mtq->is_init) return FAILURE;
     uint8_t conf[4];
     conf[3] = elevation;
     conf[2] = 0; // Unused
     conf[1] = 0; // Unused
     conf[0] = mode | (1 << 7);
-    mtq_write_start(mtq, MTQ_CONF, conf);
+    return mtq_write_start(mtq, MTQ_CONF, conf);
 }

@@ -39,5 +39,5 @@ void tlm_beacon(tlm_s* tlm, uint8_t bcn_num) {
     }
 
     sprintf(LOGBUF, "tlm_beacon: %s", bcn_buf); log_info();
-    // cmd_dispatch(NODE, NODE_GS, 0, "tlm_beacon", bcn_buf);
+    cmd_dispatch(NODE, NODE_GS, 0, REQ, "tlm_beacon", bcn_buf);
 }

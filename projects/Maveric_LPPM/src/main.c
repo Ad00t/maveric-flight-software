@@ -84,6 +84,13 @@
 #include "scheduler.c"
 #include "cmdimpl.c"
 #include "housekeeping.c"
+// GNC
+// #include "rt_logging.c"
+// #include "rtGetNaN.c"
+// #include "rtGetInf.c"
+// #include "rt_nonfinite.c"
+// #include "GNC_Planner_Core.c"
+// #include "rt_main.c"
 
 void system_init(void);
 void system_superloop(void);

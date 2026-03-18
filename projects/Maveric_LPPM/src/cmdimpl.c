@@ -29,12 +29,28 @@ extern gyro_s g_gyro;                   // Gyroscope (x3)
 extern nvg_s g_nvg;                     // Naviguider
 
 void cmdimpl_init(void) {
-    ht_set(&g_cmdmgr.cmdimpls, "ppm_set_time", (cmdimpl_f) cmdimpl_ppm_set_time);
-    ht_set(&g_cmdmgr.cmdimpls, "ppm_get_time", (cmdimpl_f) cmdimpl_ppm_get_time);
-    ht_set(&g_cmdmgr.cmdimpls, "ppm_ping", (cmdimpl_f) cmdimpl_ppm_ping);
-    ht_set(&g_cmdmgr.cmdimpls, "ppm_delay", (cmdimpl_f) cmdimpl_ppm_delay);
-    ht_set(&g_cmdmgr.cmdimpls, "ppm_clear_bufs", (cmdimpl_f) cmdimpl_ppm_clear_bufs);
-    ht_set(&g_cmdmgr.cmdimpls, "tlm_get_data", (cmdimpl_f) cmdimpl_tlm_get_data);
+    hashtable_s* ht = &g_cmdmgr.cmdimpls;
+
+    ht_set(ht, "ppm_set_time", (cmdimpl_f) cmdimpl_ppm_set_time);
+    ht_set(ht, "ppm_get_time", (cmdimpl_f) cmdimpl_ppm_get_time);
+    ht_set(ht, "ppm_ping", (cmdimpl_f) cmdimpl_ppm_ping);
+    ht_set(ht, "ppm_delay", (cmdimpl_f) cmdimpl_ppm_delay);
+    ht_set(ht, "ppm_clear_bufs", (cmdimpl_f) cmdimpl_ppm_clear_bufs);
+
+    ht_set(ht, "tlm_get_data", (cmdimpl_f) cmdimpl_tlm_get_data);
+
+    ht_set(ht, "mtq_get_conf", (cmdimpl_f) cmdimpl_mtq_get_conf);
+    ht_set(ht, "mtq_set_conf", (cmdimpl_f) cmdimpl_mtq_set_conf);
+    ht_set(ht, "mtq_get_datetime", (cmdimpl_f) cmdimpl_mtq_get_conf);
+    ht_set(ht, "mtq_set_datetime", (cmdimpl_f) cmdimpl_mtq_set_conf);
+    ht_set(ht, "mtq_get_tle", (cmdimpl_f) cmdimpl_mtq_get_tle);
+    ht_set(ht, "mtq_set_tle", (cmdimpl_f) cmdimpl_mtq_set_tle);
+    ht_set(ht, "mtq_get_paxs", (cmdimpl_f) cmdimpl_mtq_get_paxs);
+    ht_set(ht, "mtq_set_paxs", (cmdimpl_f) cmdimpl_mtq_set_paxs);
+    ht_set(ht, "mtq_get_mtquser", (cmdimpl_f) cmdimpl_mtq_get_mtquser);
+    ht_set(ht, "mtq_set_mtquser", (cmdimpl_f) cmdimpl_mtq_set_mtquser);
+    ht_set(ht, "mtq_reset", (cmdimpl_f) cmdimpl_mtq_reset);
+    ht_set(ht, "mtq_get_stat", (cmdimpl_f) cmdimpl_mtq_get_stat);
 }
 
 // COMMAND IMPLEMENTATIONS
@@ -55,7 +71,7 @@ void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
     systime_sync();
     scheduler_refresh_all(&g_scheduler, oldtime);
 
-    mtq_set_date_time(&g_mtq, &time); 
+    mtq_set_datetime(&g_mtq, &time);
     cmd_dispatch(NODE, NODE_UPPM, 0, REQ, "ppm_set_time", pkt->args);
 
     sprintf(LOGBUF, "cmdimpl_ppm_set_time '%s' [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", pkt->args
@@ -85,7 +101,10 @@ void cmdimpl_ppm_delay(cmdpkt_s* pkt) {
     uint32_t delay = strtoul(p, &p, 10);
     sprintf(LOGBUF, "cmdimpl_ppm_delay d=%u", delay); log_info();
     if (delay < 60000) {
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, ACK, "ppm_delay", "");
         delay_ms(delay);
+    } else {
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, NACK, "ppm_delay", "");
     }
 }
 
@@ -109,4 +128,148 @@ void cmdimpl_tlm_get_data(cmdpkt_s* pkt) {
     char args[CMD_MAX_ARGS_LEN] = {0};
     sprintf(args, "%u %u", g_flashmgr.rbt_cnt, g_rbt_cause);
     cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, "tlm_get_data", args);
+}
+
+void cmdimpl_mtq_get_conf(cmdpkt_s* pkt) {
+    if (pkt->ptype != REQ) return;
+    uint8_t conf[4] = {0};
+    if (mtq_get_data(&g_mtq, MTQ_CONF, conf) == SUCCESS) {
+        char args[32] = {0};
+        sprintf(args, "%u", conf[0]);
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, "mtq_get_conf", args);
+    } else {
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, NACK, "mtq_get_conf", "");
+    }
+}
+
+void cmdimpl_mtq_set_conf(cmdpkt_s* pkt) {
+    if (pkt->ptype != REQ) return;
+}
+
+void cmdimpl_mtq_get_datetime(cmdpkt_s* pkt) {
+    if (pkt->ptype != REQ) return;
+    uint8_t date[4] = {0};
+    uint8_t time[4] = {0};
+    if (mtq_get_data(&g_mtq, MTQ_DATE, date) == SUCCESS && mtq_get_data(&g_mtq, MTQ_TIME, time) == SUCCESS) {
+        char args[32] = {0}; 
+        sprintf(args, "%u %u %u %u %u %u %u", 
+                bcdtohex(date[0]), bcdtohex(date[2]), bcdtohex(date[1]), bcdtohex(date[3]),
+                bcdtohex(time[3]), bcdtohex(time[2]), bcdtohex(time[1]));
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, "mtq_get_datetime", args);
+    } else {
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, NACK, "mtq_get_datetime", "");
+    }
+}
+
+void cmdimpl_mtq_set_datetime(cmdpkt_s* pkt) {
+    if (pkt->ptype != REQ) return;
+    char* p = pkt->args;
+    rtc_time_t time;
+    time.tm_wday = strtoul(p, &p, 10); // Other options: strtok(), strtod(), strotol()
+    time.tm_mon = strtoul(p, &p, 10); 
+    time.tm_mday = strtoul(p, &p, 10);
+    time.tm_year = strtoul(p, &p, 10);
+    time.tm_hour = strtoul(p, &p, 10);
+    time.tm_min = strtoul(p, &p, 10);
+    time.tm_sec = strtoul(p, &p, 10);
+    
+    if (mtq_set_datetime(&g_mtq, &time) == SUCCESS) { 
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, ACK, "mtq_set_datetime", "");
+    } else {
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, NACK, "mtq_set_datetime", "");
+    }
+}
+
+void cmdimpl_mtq_get_tle(cmdpkt_s* pkt) {
+    if (pkt->ptype != REQ) return;
+    char tle[140] = {0};
+    if (mtq_get_data(&g_mtq, MTQ_TLE, tle) == SUCCESS) {
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, "mtq_get_tle", tle);
+    } else {
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, NACK, "mtq_get_tle", "");
+    }
+}
+
+void cmdimpl_mtq_set_tle(cmdpkt_s* pkt) {
+    if (pkt->ptype != REQ) return;
+    if ((mtq_write_start(&g_mtq, MTQ_TLE, pkt->args)) == SUCCESS) { 
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, ACK, "mtq_set_tle", "");
+    } else {
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, NACK, "mtq_set_tle", "");
+    }
+}
+
+void cmdimpl_mtq_get_paxs(cmdpkt_s* pkt) {
+    if (pkt->ptype != REQ) return;
+    float paxs[3] = {0};
+    if (mtq_get_data(&g_mtq, MTQ_POINTING_AXIS, paxs) == SUCCESS) {
+        char args[32] = {0};
+        sprintf(args, "%.3f %.3f %.3f", paxs[0], paxs[1], paxs[2]);
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, "mtq_get_paxs", args);
+    } else {
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, NACK, "mtq_get_paxs", "");
+    }
+}
+
+void cmdimpl_mtq_set_paxs(cmdpkt_s* pkt) {
+    if (pkt->ptype != REQ) return;
+    char* p = pkt->args;
+    float data[3] = {0};
+    data[0] = strtof(p, &p);
+    data[1] = strtof(p, &p);
+    data[2] = strtof(p, &p);
+    
+    if (mtq_write_start(&g_mtq, MTQ_POINTING_AXIS, data) == SUCCESS) { 
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, ACK, "mtq_set_paxs", "");
+    } else {
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, NACK, "mtq_set_paxs", "");
+    }
+}
+
+void cmdimpl_mtq_get_mtquser(cmdpkt_s* pkt) {
+    if (pkt->ptype != REQ) return;
+    float mtquser[3] = {0};
+    if (mtq_get_data(&g_mtq, MTQ_MTQ_USER, mtquser) == SUCCESS) {
+        char args[32] = {0};
+        sprintf(args, "%.3f %.3f %.3f", mtquser[0], mtquser[1], mtquser[2]);
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, "mtq_get_mtquser", args);
+    } else {
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, NACK, "mtq_get_mtquser", "");
+    }
+}
+
+void cmdimpl_mtq_set_mtquser(cmdpkt_s* pkt) {
+    if (pkt->ptype != REQ) return;
+    char* p = pkt->args;
+    float data[3] = {0};
+    data[0] = strtof(p, &p);
+    data[1] = strtof(p, &p);
+    data[2] = strtof(p, &p);
+    
+    if (mtq_write_start(&g_mtq, MTQ_MTQ_USER, data) == SUCCESS) { 
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, ACK, "mtq_set_mtquser", "");
+    } else {
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, NACK, "mtq_set_mtquser", "");
+    }
+}
+
+void cmdimpl_mtq_reset(cmdpkt_s* pkt) {
+    if (pkt->ptype != REQ) return;
+    if (mtq_reset(&g_mtq) == SUCCESS) {
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, ACK, "mtq_reset", "");
+    } else {
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, NACK, "mtq_reset", "");
+    }
+}
+
+void cmdimpl_mtq_get_stat(cmdpkt_s* pkt) {
+    if (pkt->ptype != REQ) return;
+    uint8_t stat[4] = {0};
+    if (mtq_get_data(&g_mtq, MTQ_STAT, stat) == SUCCESS) {
+        char args[32] = {0};
+        sprintf(args, "%u %u %u %u", stat[0], stat[1], stat[2], stat[3]);
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, "mtq_get_stat", args);
+    } else {
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, NACK, "mtq_get_stat", "");
+    }
 }

@@ -79,6 +79,7 @@ status_e flashmgr_reset_rbt_cnt(flashmgr_s* self) {
 	flashEraseBlockByAddr(RESERVED_ADDR);
 	flashWriteSafe(RESERVED_ADDR, sizeof(self->rbt_cnt), &self->rbt_cnt, RESERVED_ADDR,
 				   RESERVED_ADDR + FLASH_BLOCK_SIZE - 1);
+    return SUCCESS;
 }
 
 uint8_t saveDataToFlash(flashmgr_s* self, char* data, uint16_t dataSize, MemorySection section) {

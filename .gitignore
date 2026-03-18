@@ -1,5 +1,5 @@
 ## MPLAB Ignores
-**/nbproject/**
+# **/nbproject/**
 
 # Project files
 *.mcs
