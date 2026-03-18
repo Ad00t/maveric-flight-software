@@ -164,7 +164,7 @@ def read_serial():
                     case 'ftdi_log':
                         log(p['args'])
                     case _:
-                        log_error(f"cmd not recognized: {p}")
+                        log_error(f"unimplemented cmd: {p}")
         except KeyboardInterrupt:
             log_info('read_serial: quitting')
             if ftdi.is_open: 

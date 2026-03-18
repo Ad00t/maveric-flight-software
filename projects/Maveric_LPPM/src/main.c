@@ -55,7 +55,7 @@
 #define LOWER_PPM
 #define NODE                NODE_LPPM 
 #define NODE_LBL            "LPPM"
-#define LOG_LEVEL           LL_DEBUG
+#define LOG_LEVEL           LL_DEBUG 
 
 // Module includes (.c necessary)
 
@@ -132,7 +132,7 @@ void system_init(void) {
    
     // Flash init
     flashmgr_init(&g_flashmgr);
-    status_e s = flashmgr_increment_rbt_cnt(&g_flashmgr);
+    flashmgr_increment_rbt_cnt(&g_flashmgr);
 
     // Interrupts init 
     irqmgr_init(&g_irqmgr);
@@ -152,8 +152,9 @@ void system_init(void) {
     systime_init(&g_irqmgr.ms, &g_ertc.time);
     
     // Submodules & services init
-    // mtq_init(&g_mtq, MTQ_PORT);
-    // mtq_set_conf(&g_mtq, 0, MTQ_MODE_DETUMBLING);
+    mtq_init(&g_mtq, MTQ_PORT);
+    mtq_set_datetime(&g_mtq, g_ertc.time);
+    mtq_set_conf(&g_mtq, 0, MTQ_MODE_SAFE);
     // gyro_init(&g_gyro, GYRO_CS1, GYRO_CS2, GYRO_CS3, GYRO_ON);
     // nvg_init(&g_nvg, NVG_PORT);
     scheduler_init(&g_scheduler);
@@ -163,10 +164,10 @@ void system_init(void) {
 
     // Push a time update to UPPM 
     char tm_str[32] = {0};
-    rtc_to_str(&g_ertc.time, tm_str);
+    rtc_to_str(g_ertc.time, tm_str);
     cmd_dispatch(NODE, NODE_UPPM, 0, REQ, "ppm_set_time", tm_str);
 
-    sprintf(LOGBUF, "system initialized %u", s); log_info();
+    sprintf(LOGBUF, "system initialized"); log_info();
     delay_ms(1000);
 }
 
@@ -177,7 +178,7 @@ void system_superloop(void) {
 
     // Handle received byte interrupts
     // Do driver handling before commands so data is up to date
-    // mtq_parse_stream(&g_mtq, &g_irqmgr.irqbufs[MTQ_PORT-1]); // Handle magnetorquer data
+    mtq_parse_stream(&g_mtq, &g_irqmgr.irqbufs[MTQ_PORT-1]); // Handle magnetorquer data
     // nvg_parse_stream(&g_nvg, &g_irqmgr.irqbufs[NVG_PORT-1]); // Handle naviguider data
     cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[UPPM_PORT-1], &g_cmdmgr.rcvpkts[0], FALSE); // Handle UPPM commands 
     cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[FTDI_PORT-1], &g_cmdmgr.rcvpkts[1], FALSE); // Handle FTDI commands
@@ -187,6 +188,6 @@ void system_superloop(void) {
 
 // Cleanup routine
 void system_cleanup(void) {
-    // mtq_destroy(&g_mtq);
+    mtq_destroy(&g_mtq);
     // nvg_destroy(&g_nvg);
 }

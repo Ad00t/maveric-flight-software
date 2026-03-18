@@ -91,7 +91,6 @@ void mtq_init(mtq_s* mtq, uint8_t port) {
         }
     }
     
-    mtq_set_conf(&mtq, 0, MTQ_MODE_SAFE);
     sprintf(LOGBUF, "mtq_init: port=%u", mtq->port); log_info();
 }
 
@@ -409,6 +408,9 @@ status_e mtq_heartbeat(mtq_s* mtq) {
         uint8_t port = mtq->port;
         mtq_destroy(mtq);
         mtq_init(mtq, port);
+        rtc_time_t dt;
+        epoch_ms_to_rtc(systime_epoch_ms(), &dt); 
+        mtq_set_datetime(mtq, dt);
     }
     
     memset(snid, 0, reg->value_len);
@@ -444,22 +446,22 @@ status_e mtq_read_ctrl(mtq_s* mtq) {
     return s;
 }
 
-status_e mtq_set_datetime(mtq_s* mtq, rtc_time_t* rtc) {
+status_e mtq_set_datetime(mtq_s* mtq, rtc_time_t rtc) {
     if (!mtq->is_init) return FAILURE;
     uint8_t date[4]; 
-    date[3] = hextobcd(rtc->tm_year);
-    date[2] = hextobcd(rtc->tm_mon);
-    date[1] = hextobcd(rtc->tm_mday);
-    date[0] = hextobcd(rtc->tm_wday); 
+    date[3] = hextobcd(rtc.tm_year);
+    date[2] = hextobcd(rtc.tm_mon);
+    date[1] = hextobcd(rtc.tm_mday);
+    date[0] = hextobcd(rtc.tm_wday); 
     status_e s1 = mtq_write_start(mtq, MTQ_DATE, date);
     
     uint8_t time[4];
-    time[3] = hextobcd(rtc->tm_hour);
-    time[2] = hextobcd(rtc->tm_min);
-    time[1] = hextobcd(rtc->tm_sec);
+    time[3] = hextobcd(rtc.tm_hour);
+    time[2] = hextobcd(rtc.tm_min);
+    time[1] = hextobcd(rtc.tm_sec);
     time[0] = hextobcd(0); // Unused
     status_e s2 = mtq_write_start(mtq, MTQ_TIME, time);
-    return (s1 == SUCCESS && s2 == SUCCESS);
+    return (s1 == SUCCESS && s2 == SUCCESS) ? SUCCESS : FAILURE;
 }
 
 status_e mtq_set_conf(mtq_s* mtq, uint8_t elevation, uint8_t mode) {

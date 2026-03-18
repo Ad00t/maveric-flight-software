@@ -51,7 +51,7 @@ void epoch_ms_to_rtc(uint64_t epoch_ms, rtc_time_t* rtc) {
     cp_stm_to_rtc(rtc, &stm);
 }
 
-void rtc_to_str(char* out, rtc_time_t rtc) {
+void rtc_to_str(rtc_time_t rtc, char* out) {
     sprintf(out, "%u %u %u %u %u %u %u", rtc.tm_wday, rtc.tm_mon, rtc.tm_mday, rtc.tm_year, rtc.tm_hour, rtc.tm_min, rtc.tm_sec);
 }
 

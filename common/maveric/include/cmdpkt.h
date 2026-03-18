@@ -24,10 +24,10 @@
 // Command packet & reader FSM
 
 typedef enum {
-    ACK = 0,
-    NACK = 1,
-    REQ = 2,
-    RES = 3
+    REQ = 1,
+    RES = 2,
+    ACK = 3,
+    NACK = 4,
 } cmdpkt_type_e;
 
 typedef struct {

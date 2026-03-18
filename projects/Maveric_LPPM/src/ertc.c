@@ -55,23 +55,23 @@ void ertc_get_time(ertc_s* ertc) {
     }
 }
 
-void ertc_set_time(ertc_s* ertc, rtc_time_t* time) {
+void ertc_set_time(ertc_s* ertc, rtc_time_t time) {
     if (!ertc->is_init) return;
     if (ertc->is_using_ertc) {
         i2c_start();
         i2c_write(0xD0);
         i2c_write(0x01);
-        i2c_write(hextobcd(time->tm_sec));	//seconds
-        i2c_write(hextobcd(time->tm_min));  //minutes
-        i2c_write(hextobcd(time->tm_hour));	//hour
-        i2c_write(hextobcd(time->tm_wday)+1);  //weekday (rtc is 1-7 code is 0-6)
-        i2c_write(hextobcd(time->tm_mday));  //Month day
-        i2c_write(hextobcd(time->tm_mon));  //month
-        i2c_write(hextobcd(time->tm_year));  //year
+        i2c_write(hextobcd(time.tm_sec));	//seconds
+        i2c_write(hextobcd(time.tm_min));  //minutes
+        i2c_write(hextobcd(time.tm_hour));	//hour
+        i2c_write(hextobcd(time.tm_wday)+1);  //weekday (rtc is 1-7 code is 0-6)
+        i2c_write(hextobcd(time.tm_mday));  //Month day
+        i2c_write(hextobcd(time.tm_mon));  //month
+        i2c_write(hextobcd(time.tm_year));  //year
         i2c_stop();
     }
    
-    rtc_write(time);
+    rtc_write(&time);
     ertc_get_time(ertc);
 }
 

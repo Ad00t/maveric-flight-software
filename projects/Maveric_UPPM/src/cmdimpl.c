@@ -53,7 +53,7 @@ void cmdimpl_ppm_get_time(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
         case REQ:
             char tm_str[32] = {0};  
-            rtc_to_str(tm_str, &g_rtc_time);
+            rtc_to_str(g_rtc_time, tm_str);
             cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, "ppm_get_time", tm_str);
             sprintf(LOGBUF, "cmdimpl_ppm_get_time REQ '%s'", tm_str); log_info();
             break;
