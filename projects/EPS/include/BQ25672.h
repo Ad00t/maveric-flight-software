@@ -64,9 +64,12 @@
 #define REG48_Part_Infotmation       0x48
           
 extern bq25672_init(unsigned int8 add = BQ_ADDR);
-extern void bq25672_state(unsigned int8 add = BQ_ADDR, unsigned int16 reg = 0x00, unsigned int1 text = 0);
+//extern void bq25672_state(unsigned int8 add = BQ_ADDR, unsigned int16 reg = 0x00, unsigned int1 text = 0);
+extern void bq25672_state(unsigned int8 add = BQ_ADDR,unsigned char *output, unsigned int16 reg = 0x00, unsigned int1 text = 0);
 extern void bq25672_update(unsigned int8 add = BQ_ADDR);
 #endif
+
+#include "BQ25672.c"
 /*
 def main():
     bbq = BQ25672(0x6B)

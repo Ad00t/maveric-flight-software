@@ -30,12 +30,12 @@ ifeq ($(TYPE_IMAGE), DEBUG_RUN)
 IMAGE_TYPE=debug
 OUTPUT_SUFFIX=cof
 DEBUGGABLE_SUFFIX=cof
-FINAL_IMAGE=${DISTDIR}/Maveric_LPPM.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+FINAL_IMAGE=${DISTDIR}/EPS.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
 else
 IMAGE_TYPE=production
 OUTPUT_SUFFIX=hex
 DEBUGGABLE_SUFFIX=cof
-FINAL_IMAGE=${DISTDIR}/Maveric_LPPM.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+FINAL_IMAGE=${DISTDIR}/EPS.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
 endif
 
 ifeq ($(COMPARE_BUILD), true)
@@ -51,17 +51,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=src/main.c
+SOURCEFILES_QUOTED_IF_SPACED=scr/main.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/src/main.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/src/main.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/scr/main.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/scr/main.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/src/main.o
+OBJECTFILES=${OBJECTDIR}/scr/main.o
 
 # Source Files
-SOURCEFILES=src/main.c
+SOURCEFILES=scr/main.c
 
 
 
@@ -82,7 +82,7 @@ FIXDEPS=fixDeps
 ifneq ($(INFORMATION_MESSAGE), )
 	@echo $(INFORMATION_MESSAGE)
 endif
-	${MAKE}  -f nbproject/Makefile-default.mk ${DISTDIR}/Maveric_LPPM.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+	${MAKE}  -f nbproject/Makefile-default.mk ${DISTDIR}/EPS.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
 
 MP_CC="C:\Program Files (x86)\PICC\CCSCON.exe"
 MP_LD="C:\Program Files (x86)\PICC\CCSCON.exe"
@@ -92,28 +92,28 @@ sourceline.gcccompat=sourceline="\#device ANSI" sourceline="\#device PASS_STRING
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: compile
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
-${OBJECTDIR}/src/main.o: src/main.c  nbproject/Makefile-${CND_CONF}.mk 
-	${MKDIR} ${OBJECTDIR}/src 
+${OBJECTDIR}/scr/main.o: scr/main.c  nbproject/Makefile-${CND_CONF}.mk 
+	${MKDIR} ${OBJECTDIR}/scr 
 ifeq (1,1) 
 	${MKDIR} ${DISTDIR} 
-	${MP_CC}  out="${OBJECTDIR}\src"  src/main.c +FD +DF +CC +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="..\..\common\maveric\include" I+="include" I+="include\gnc" I+="..\..\common\maveric\src" I+="src\gnc" I+="src" +DF +LN +T +A +M +J +Z +ICD -P #__PIC24FJ256GA110__=1 
-	@mv ${OBJECTDIR}/src/main.cof "${DISTDIR}/Maveric_LPPM.${IMAGE_TYPE}.cof" 
-	@mv ${OBJECTDIR}/src/main.hex "${DISTDIR}/Maveric_LPPM.${IMAGE_TYPE}.hex"
+	${MP_CC}  out="${OBJECTDIR}\scr"  scr/main.c +FD +DF +CC +Y=9 +EA +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 
+	@mv ${OBJECTDIR}/scr/main.cof "${DISTDIR}/EPS.${IMAGE_TYPE}.cof" 
+	@mv ${OBJECTDIR}/scr/main.hex "${DISTDIR}/EPS.${IMAGE_TYPE}.hex"
 else 
-	${MP_CC}  out=""${OBJECTDIR}\src"" src/main.c +EXPORT +FD +DF +CC +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="..\..\common\maveric\include" I+="include" I+="include\gnc" I+="..\..\common\maveric\src" I+="src\gnc" I+="src" +DF +LN +T +A +M +J +Z +ICD -P #__PIC24FJ256GA110__=1 +EXPORTD="${OBJECTDIR}/src"  
+	${MP_CC}  out=""${OBJECTDIR}\scr"" scr/main.c +EXPORT +FD +DF +CC +Y=9 +EA +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 +EXPORTD="${OBJECTDIR}/scr"  
 	
 endif 
 	
 else
-${OBJECTDIR}/src/main.o: src/main.c  nbproject/Makefile-${CND_CONF}.mk 
-	${MKDIR} ${OBJECTDIR}/src 
+${OBJECTDIR}/scr/main.o: scr/main.c  nbproject/Makefile-${CND_CONF}.mk 
+	${MKDIR} ${OBJECTDIR}/scr 
 ifeq (1,1) 
 	${MKDIR} ${DISTDIR} 
-	${MP_CC}  out="${OBJECTDIR}\src"  src/main.c +FD +DF +CC +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="..\..\common\maveric\include" I+="include" I+="include\gnc" I+="..\..\common\maveric\src" I+="src\gnc" I+="src" +DF +LN +T +A +M +J +Z +ICD -P #__PIC24FJ256GA110__=1 
-	@mv ${OBJECTDIR}/src/main.cof "${DISTDIR}/Maveric_LPPM.${IMAGE_TYPE}.cof" 
-	@mv ${OBJECTDIR}/src/main.hex "${DISTDIR}/Maveric_LPPM.${IMAGE_TYPE}.hex"
+	${MP_CC}  out="${OBJECTDIR}\scr"  scr/main.c +FD +DF +CC +Y=9 +EA +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 
+	@mv ${OBJECTDIR}/scr/main.cof "${DISTDIR}/EPS.${IMAGE_TYPE}.cof" 
+	@mv ${OBJECTDIR}/scr/main.hex "${DISTDIR}/EPS.${IMAGE_TYPE}.hex"
 else 
-	${MP_CC}  out=""${OBJECTDIR}\src"" src/main.c +EXPORT +FD +DF +CC +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="..\..\common\maveric\include" I+="include" I+="include\gnc" I+="..\..\common\maveric\src" I+="src\gnc" I+="src" +DF +LN +T +A +M +J +Z +ICD -P #__PIC24FJ256GA110__=1 +EXPORTD="${OBJECTDIR}/src"  
+	${MP_CC}  out=""${OBJECTDIR}\scr"" scr/main.c +EXPORT +FD +DF +CC +Y=9 +EA +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 +EXPORTD="${OBJECTDIR}/scr"  
 	
 endif 
 	
@@ -122,22 +122,22 @@ endif
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: link
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
-${DISTDIR}/Maveric_LPPM.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk    
+${DISTDIR}/EPS.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk    
 	${MKDIR} ${DISTDIR} 
 ifeq (1,1) 
 	
 else 
-	${MP_LD}   out="${DISTDIR}"  +FD +DF +CC LINK=Maveric_LPPM.${IMAGE_TYPE}.hex=${OBJECTDIR}/src/main.o +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="..\..\common\maveric\include" I+="include" I+="include\gnc" I+="..\..\common\maveric\src" I+="src\gnc" I+="src" +DF +LN +T +A +M +J +Z +ICD -P
+	${MP_LD}   out="${DISTDIR}"  +FD +DF +CC LINK=EPS.${IMAGE_TYPE}.hex=${OBJECTDIR}/scr/main.o +Y=9 +EA +DF +LN +T +A +M +J +Z -P
 	
 endif 
 	
 else
-${DISTDIR}/Maveric_LPPM.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk   
+${DISTDIR}/EPS.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk   
 	${MKDIR} ${DISTDIR} 
 ifeq (1,1) 
 	
 else 
-	${MP_LD}   out="${DISTDIR}"  +FD +DF +CC LINK=Maveric_LPPM.${IMAGE_TYPE}.hex=${OBJECTDIR}/src/main.o +Y=9 +EA I+="C:\Program Files (x86)\PICC\Devices" I+="C:\Program Files (x86)\PICC\Drivers" I+="..\..\common\maveric\include" I+="include" I+="include\gnc" I+="..\..\common\maveric\src" I+="src\gnc" I+="src" +DF +LN +T +A +M +J +Z +ICD -P
+	${MP_LD}   out="${DISTDIR}"  +FD +DF +CC LINK=EPS.${IMAGE_TYPE}.hex=${OBJECTDIR}/scr/main.o +Y=9 +EA +DF +LN +T +A +M +J +Z -P
 	
 endif 
 	

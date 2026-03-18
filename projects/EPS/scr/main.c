@@ -1,71 +1,93 @@
 //#define DEVELOP
-#include <24FJ256GA110.h>
+#include <24FJ256GA110.h>			// Device Header File.  Switched to brackets to use version in PICC Library
+
 #include <string.h>
+#include "include/pineps.h"
 
 #fuses NOPROTECT
 #use delay(clock=4000000)
-#use rs232(baud=9600, xmit=PIN_F2, rcv=PIN_F3, STREAM=SERIAL)
-#use i2c(master, sda=PIN_G3, scl=PIN_G2, STREAM=I2C_1)
+//#use rs232(baud=9600, xmit=PIN_F2, rcv=PIN_F3, STREAM=SERIAL)
+//#use rs232(baud=9600, xmit=PIN_F2, rcv=PIN_F3, STREAM=COM_A, ERRORS, PARITY = N, TIMEOUT=1000)
+#use i2c(master, sda=Device_SDA, scl=Device_SCL, STREAM=I2C_1)
 // Slave addresses are shifted by one bit: ex b11111111->b01111111
-#use i2c(slave, sda=PIN_A3, scl=PIN_A2, address=0x77, FORCE_HW, STREAM=I2C_2)
-#use i2c(slave, sda=PIN_E7, scl=PIN_E6, address=0xee, FORCE_HW, STREAM=I2C_3)
+//#use i2c(slave, sda=PIN_A3, scl=PIN_A2, address=0x15, FORCE_HW, STREAM=I2C_2)
+#use i2c(slave, sda=PIN_E7, scl=PIN_E6, address=0x12, FORCE_HW, STREAM=I2C_3)
 
-//#include "ina226.h"
-#include "i2c.c"
-#include "BQ25672.c"
-#include "ina226.c"
-#include "eps.c"
+// Port 0
+#pin_select U1TX = U1TX_PIN
+#pin_select U1RX = U1RX_PIN
+
+// Port 1
+//#pin_select U2TX = U2TX_PIN
+//#pin_select U2RX = U2RX_PIN
+
+// Port 2
+//#pin_select U3TX = U3TX_PIN
+//#pin_select U3RX = U3RX_PIN
+
+// Port 3
+//#pin_select U4TX = U4TX_PIN
+//#pin_select U4RX = U4RX_PIN
+
+
+#define COM_A_BAUD  9600  // UART Testing Port
+//#define COM_B_BAUD  115200  // Transceiver (Test purposes)
+//#define COM_C_BAUD  115200 // Other PPM
+//#define COM_D_BAUD  115200 // Payload
+
+#define COM_A		1 // Stream Port 1
+//#define COM_B       2 // Stream Port 2
+//#define COM_C       3 // Stream Port 3
+//#define COM_D       4 // Stream Port 4
+
+//#define I2C_1       1 // Stream I2C
+
+//==================================================================
+//  		Serial Port Initialization
+//===================================================================
+#use rs232(baud = COM_A_BAUD, UART1, bits = 8, STREAM = COM_A, ERRORS, PARITY = N, TIMEOUT=1000)
+//#use rs232(baud = COM_B_BAUD, UART2, bits = 8, STREAM = COM_B, ERRORS, PARITY = N, TIMEOUT=1000)
+//#use rs232(baud = COM_C_BAUD, UART3, bits = 8, STREAM = COM_C, ERRORS, PARITY = N, TIMEOUT=1000) // To/From other PIC
+//#use rs232(baud = COM_D_BAUD, UART4, bits = 8, STREAM = COM_D, ERRORS, PARITY = N, TIMEOUT=1000)
+
+#include "i2c.h"
+#include "BQ25672.h"
+#include "ina226.h"
+#include "eps.h"
+#include "cmd.h"
+#include "interrupt.h"
 
 void power_set_test(int pin, unsigned int8 add);
 void power_io(unsigned int8 eps_output, unsigned int8 eps_state);
 void cut_wire(unsigned int8 cut_output, unsigned int8 cut_state, unsigned int8 cut_time);
-void eps_housekeeping(void);
+void eps_housekeeping(unsigned char *hk_bbq,unsigned char *hk_ina);
 int8 pass_command(char* cmd);
 
-BYTE address, buffer[0x10];
-
-#INT_SI2C3
-void i2c3_isr()
-	{
-	BYTE incoming, state;
-	//printf("I2C interrupt activated \n\r");
-	state = i2c_isr_state(I2C_3);
-	
-	if (state <= 0x80)
-		{
-		
-		//while(!i2c_poll(I2C_3));
-		incoming = i2c_read(I2C_3);
-		incoming = i2c_read(I2C_3);
-		incoming = i2c_read(I2C_3);
-		i2c_write(I2C_3, 0xca);
-		if(state == 1)
-			address = incoming;
-		if(state == 2)
-			buffer[address] = incoming;
-		}
-	if (state == 0x80)
-		{
-		printf("no incoming byte \n\r");
-		i2c_write(I2C_3, buffer[address]);
-		}
-	printf("state %u \n\r", state);
-	printf("byte to read:%x \n\r", incoming);
-	}
 
 void main()
 {	
-	enable_interrupts(INT_SI2C3);
+	//enable_interrupts(INT_SI2C3);
 	//enable_interrupts(GLOBAL);
-
+	
 	unsigned char eps_hk[10]="hk";
 	// ex: hk
+	//hk buffers
+	unsigned char hk_bbq[128];
+	unsigned char hk_ina[128];
+
 	unsigned char eps_io[10]="io";
 	// ex: io 1 1 / io 1 0
 	unsigned char eps_ct[10]="ct";
 	// ex: ct 1 1 5 / ct 1 0 3
 	unsigned int1 bq_bit;
 	
+	start_flag = FALSE;
+	cmd_flag = FALSE;
+	delay_ms(1000);
+	enable_all_interrupts();
+	start_flag = TRUE;
+	delay_ms(1000);
+
 #ifdef DEVELOP
 	unsigned int i;
 #endif
@@ -74,7 +96,7 @@ void main()
 	bq25672_update();
 
 #ifdef DEVELOP
-	printf("BQ25672 check %d \n\r",bq_bit);
+	fprintf(COM_A,"BQ25672 check %d \n\r",bq_bit);
 
 	for (i=0;i<=0x48;i++)
 	{
@@ -136,12 +158,11 @@ void main()
 	output_low(PIN_E9);
 
 #endif
+	fprintf(COM_A,"EPS_USC_SERC\n\r");	
+	delay_ms(250);
 
 	do
 	{	
-		unsigned char str1[256];
-		unsigned char *ptr1=str1;
-
 		unsigned char command[256];
 		unsigned char params[256];
 	
@@ -151,61 +172,86 @@ void main()
 		unsigned int8 eps_output, eps_state;
 		unsigned int8 cut_output, cut_state, cut_time;
 
-		printf("Hello\n\r");	
+		buffer_cmd="";
+		buffer2_cmd="";
+
 	#ifdef DEVELOP
-		printf("Enter a string\n\r");
+		fprintf(COM_A,"Enter a string\n\r");
 	//#else
 	//	printf("cmd\n");
 	#endif
-		eps_read_command(ptr1);
+		if (cmd_flag)
+		{	
+			fprintf(COM_A,"Interrupt_activated\n\r");
+			fprintf(COM_A,"Received: %s\n\r", rcv_cmd);
+			disable_all_interrupts();
 
-		delay_ms(1000);
-		
-		eps_get_command(str1, cmd, prms);
-	#ifdef DEVELOP
-		printf("%s\n\r",str1);
-		printf("String:%s, Command:%s, Parameters:%s\n\r", str1, command, params);
-	#endif
+			fprintf(COM_A,"\033[31m[SYS] Solving cmd: %s; len: %u; start: %u; check: %s\n\r",rcv_cmd, len, rcv_cmd[0], &rcv_cmd[len-1]);
+			//Get the cmd components
+			cmd_get_command(rcv_cmd,&orgn,&dest,&ech, cmd, prms);			
+			fprintf(COM_A,"[SYS] origin: %u; destination: %u; echo: %u\n\r",orgn,dest,ech);
+			fprintf(COM_A,"[SYS] command: %s; params: %s\n\r",cmd,prms);
 
-		if (strcmp(command, eps_io)==0)
-		{
-			//Switch On/Off Function
-			eps_get_prmts(params, &eps_output, &eps_state);
-		#ifdef DEVELOP
-			printf("output command\n");
-			printf("eps output:%u eps state:%u \n\r", eps_output, eps_state);
-		#endif
-			power_io(eps_output, eps_state);
-			
-		}
-		else if (strcmp(command, eps_ct)==0)
-		{
-			//Switch On/Off Function
-			
-			eps_get_prmts3(params, &cut_output, &cut_state, &cut_time);
-		#ifdef DEVELOP
-			printf("Wire Cut command\n\r");
-			printf("cut output:%u cut state:%u cut state:%u\n\r", cut_output, cut_state, cut_time);
-		#endif
-			cut_wire(cut_output, cut_state, cut_time);
-		}
-		else if (strcmp(command,eps_hk)==0)
-		{
-		#ifdef DEVELOP
-			printf("hk command\n\r");
-		#endif
-			eps_housekeeping();
-		}
+			delay_ms(10);
+			//eps_get_command(rcv_cmd, cmd, prms);
 		
-		else
-		{
-		#ifdef DEVELOP
-			printf("No command\n\r");
-		#endif
-		}
-		//printf(command);
-		//printf("Output = %d , State = %d", eps_output, eps_state);
+			#ifdef DEVELOP
+				fprintf(COM_A,"%s\n\r",rcv_cmd);
+				fprintf(COM_A,"String:%s, Command:%s, Parameters:%s\n\r", str1, command, params);
+			#endif
 		
+				if (strcmp(command, eps_io)==0)
+				{
+					//Switch On/Off Function
+					eps_get_prmts(params, &eps_output, &eps_state);
+				#ifdef DEVELOP
+					fprintf(COM_A,"output command\n");
+					fprintf(COM_A,"eps output:%u eps state:%u \n\r", eps_output, eps_state);
+				#endif
+					power_io(eps_output, eps_state);
+					
+				}
+				else if (strcmp(command, eps_ct)==0)
+				{
+					//Switch On/Off Function
+					
+					eps_get_prmts3(params, &cut_output, &cut_state, &cut_time);
+				#ifdef DEVELOP
+					fprintf(COM_A,"Wire Cut command\n\r");
+					fprintf(COM_A,"cut output:%u cut state:%u cut state:%u\n\r", cut_output, cut_state, cut_time);
+				#endif
+					cut_wire(cut_output, cut_state, cut_time);
+				}
+				else if (strcmp(command,eps_hk)==0)
+				{
+				#ifdef DEVELOP
+					fprintf(COM_A,"hk command\n\r");
+				#endif
+					//eps_housekeeping(hk_bbq,hk_ina);
+					
+					strcpy(buffer_cmd,hk_bbq);
+					strcpy(buffer2_cmd,hk_ina);
+					//counter = 0;
+					//counter2 = 0;
+					fprintf(COM_A,buffer_cmd);
+					fprintf(COM_A,"\n");
+					fprintf(COM_A,"Counter 1: %u , Counter 2: %u\n", counter, counter2);
+					fprintf(COM_A,buffer2_cmd);
+					fprintf(COM_A,"\n");
+					eps_housekeeping(hk_bbq,hk_ina);
+				}
+				
+				else
+				{
+				#ifdef DEVELOP
+					fprintf(COM_A,"No command\n\r");
+				#endif
+				}
+				//printf(command);
+				//printf("Output = %d , State = %d", eps_output, eps_state);
+				cmd_flag = FALSE;
+				enable_all_interrupts();
+		}
 	} while(TRUE);
 }
 
@@ -367,7 +413,7 @@ void cut_wire(unsigned int8 cut_output, unsigned int8 cut_state, unsigned int8 c
 			break;
 		default:
 
-			printf("CUT Output Error\n\r");
+			fprintf(COM_A,"CUT Output Error\n\r");
 			pin = 0;
 			break;
 	}
@@ -387,9 +433,9 @@ void cut_wire(unsigned int8 cut_output, unsigned int8 cut_state, unsigned int8 c
 			default:
 				dp_flag = 0;
 #ifdef DEVELOP
-				printf("CUT State Error\n\r");
+				fprintf(COM_A,"CUT State Error\n\r");
 #else
-				printf("0\n");
+				fprintf(COM_A,"0\n");
 #endif				
 				break;
 		}
@@ -401,7 +447,7 @@ void cut_wire(unsigned int8 cut_output, unsigned int8 cut_state, unsigned int8 c
 			delay_ms(100);
 			sw_state = input(sw_pin);
 #ifdef DEVELOP
-			printf("Deployer Selected: %2X %2X, Switch State: %d\n\r",pin, dp_pin, sw_state);		
+			fprintf(COM_A,"Deployer Selected: %2X %2X, Switch State: %d\n\r",pin, dp_pin, sw_state);		
 //#else
 			//printf("Shunt voltage: %Ld, Bus voltage: %Ld, Power: %Ld, Current: %Ld\n\r", shunt_voltage, bus_voltage, power, current);
 			//printf("ct,%Ld,%Ld,%d",bus_voltage, current, sw_state);		
@@ -416,30 +462,40 @@ void cut_wire(unsigned int8 cut_output, unsigned int8 cut_state, unsigned int8 c
 		
 			delay_ms(100);
 #ifdef DEVELOP
-			printf("Shunt voltage: %Ld, Bus voltage: %Ld, Power: %Ld, Current: %Ld\n\r", shunt_voltage, bus_voltage, power, current);
-			printf("Deployer Selected: %2X %2X, Switch State: %d\n\r",pin, dp_pin, sw_state);		
+			fprintf(COM_A,"Shunt voltage: %Ld, Bus voltage: %Ld, Power: %Ld, Current: %Ld\n\r", shunt_voltage, bus_voltage, power, current);
+			fprintf(COM_A,"Deployer Selected: %2X %2X, Switch State: %d\n\r",pin, dp_pin, sw_state);		
 #else
 			//printf(",%2X,%2X,%d\n\r",pin, dp_pin, sw_state);	
-			printf("ct,%2X,%2X,%Ld,%Ld,%d\n", pin, dp_pin, bus_voltage, current, sw_state);			
+			fprintf(COM_A,"ct,%2X,%2X,%Ld,%Ld,%d\n", pin, dp_pin, bus_voltage, current, sw_state);			
 #endif
 		}
 		
 	}
 }
 
-void eps_housekeeping(void)
+void eps_housekeeping(unsigned char *hk_bbq,unsigned char *hk_ina)
 {
+	unsigned char hk_bbq_in[128];
+	unsigned char hk_ina_in[128];
+	unsigned char buffer_bbq[32];
+	unsigned char buffer_ina[32];
+	unsigned char comma[4];
 	int16 shunt_voltage, bus_voltage, power, current;
 	unsigned int8 add;
 
 	int j;
 
 	bq25672_update();
-	printf("hk,");
+	//fprintf(COM_A,"hk,");
+	hk_bbq_in = "hk,";
+	hk_ina_in = "";
+	comma = ",";
+
 	for (j=0x31;j<=0x45;j+=2)
 	{
-		bq25672_state(BQ_ADDR, j,1);
-		printf(",");
+		bq25672_state(BQ_ADDR,buffer_bbq, j,1);
+		strcat(hk_bbq_in,buffer_bbq);
+		strcat(hk_bbq_in,comma);
 	}
 	for (j=1;j<=10;j++)
 	{
@@ -491,9 +547,11 @@ void eps_housekeeping(void)
 		}
 	
 		ina226_read_data(add, &shunt_voltage, &bus_voltage, &power, &current);
-		printf("%Ld,%Ld,%Ld,", bus_voltage, power, current);
+		sprintf(buffer_ina,"%Ld,%Ld,%Ld,", bus_voltage, power, current);
+		strcat(hk_ina_in,buffer_ina);
 	}
-	printf("\n");
+	strcpy(hk_bbq,hk_bbq_in);
+	strcpy(hk_ina,hk_ina_in);
 	
 }
 

@@ -47,3 +47,5 @@ extern void ina226_calibrate(unsigned int8 add, unsigned int16 calibration = 0x1
 extern void ina226_read_data(unsigned int8 add, int16 *shunt_voltage, int16 *bus_voltage, int16 *power, int16 *current);
 
 #endif
+
+#include "ina226.c"

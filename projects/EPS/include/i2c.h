@@ -19,3 +19,5 @@ extern void i2c1_read_word(unsigned int8 add, unsigned int8 reg, unsigned int8 *
 //extern void i2c3_write_16(unsigned int8 add, unsigned int8 reg, unsigned int16 write_data);
 
 #endif
+
+#include "i2c.c"

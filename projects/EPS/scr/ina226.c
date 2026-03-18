@@ -1,5 +1,3 @@
-#include "ina226.h"
-
 #module					// !!! Important: This command makes everything below scoped only to this file.
 
 int1 ina226_init(unsigned int8 add)
