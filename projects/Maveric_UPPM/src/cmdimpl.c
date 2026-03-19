@@ -50,7 +50,7 @@ void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
             systime_sync(); // Since Lower PPM is source of truth for timing, this sync should be the only sync in Upper PPM
             scheduler_refresh_all(&g_scheduler, oldtime);
             
-            sprintf(LOGBUF, "cmdimpl_ppm_set_time '%s' [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", pkt->args
+            sprintf(LOGBUF, "cmdimpl_ppm_set_time '%s' [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", pkt->args,
                     g_rtc_time.tm_wday, g_rtc_time.tm_mon, g_rtc_time.tm_mday, g_rtc_time.tm_year, 
                     g_rtc_time.tm_hour, g_rtc_time.tm_min, g_rtc_time.tm_sec); log_info();
             break;

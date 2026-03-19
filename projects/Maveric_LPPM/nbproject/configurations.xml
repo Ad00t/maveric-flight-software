@@ -59,6 +59,10 @@
       <itemPath>../../common/maveric/src/framer.c</itemPath>
       <itemPath>../../common/maveric/src/interrupts.c</itemPath>
       <itemPath>src/config.c</itemPath>
+      <itemPath>src/adcsmtq.c</itemPath>
+      <itemPath>src/adis16260.c</itemPath>
+      <itemPath>src/m41t81s.c</itemPath>
+      <itemPath>../../common/maveric/src/at25df641.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
