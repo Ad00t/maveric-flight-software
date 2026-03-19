@@ -23,11 +23,11 @@ extern tlm_s g_tlm;                 // Global telemetry state / data store
 
 void hk_init(void) {
     // IMPORTANT: AT LEAST ONE SCHEDULE FUNCTION MUST BE ACTIVE OR YOU WILL GET A SCHEDULER ERROR
-    status_e s0 = scheduler_schedule_func_in(&g_scheduler, 0, hk_get_rtc_time, 2000, 500, SCHEDULE_REPS_INFINITE);
-    status_e s1 = scheduler_schedule_func_in(&g_scheduler, 1, hk_log, 2500, 500, SCHEDULE_REPS_INFINITE);
-    status_e s2 = scheduler_schedule_func_in(&g_scheduler, 2, hk_update_tlm, 5000, 5000, SCHEDULE_REPS_INFINITE);
-    status_e s3 = scheduler_schedule_func_in(&g_scheduler, 3, hk_tlm_beacon, 7000, 7000, SCHEDULE_REPS_INFINITE);
-    status_e s4 = scheduler_schedule_func_in(&g_scheduler, 4, hk_heartbeats, 4000, 3000, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 0, hk_get_rtc_time, 2000, 500, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 1, hk_log, 2500, 500, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 2, hk_update_tlm, 5000, 5000, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 3, hk_tlm_beacon, 7000, 7000, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 4, hk_heartbeats, 4000, 3000, SCHEDULE_REPS_INFINITE);
     // scheduler_schedule_func_in(&g_scheduler, 4, hk_test_ax100, 2000, 3000, SCHEDULE_REPS_INFINITE);
 }
 

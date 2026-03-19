@@ -667,7 +667,7 @@ status_e flashFindEmptyPage(uint16_t startpage, uint16_t endpage,
 	// initialize locals
 	currentpage = startpage;
 	empty = 0;
-	uint8_t c;
+	// uint8_t c;
 
 	for (currentpage = startpage; currentpage <= endpage; currentpage++) {
 		// getByte(USER_PORT, &c);

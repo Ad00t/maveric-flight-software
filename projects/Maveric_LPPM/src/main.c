@@ -161,9 +161,9 @@ void system_init(void) {
     cmdimpl_init();
 
     // Push a time update to UPPM 
-    char tm_str[32] = {0};
-    rtc_to_str(g_ertc.time, tm_str);
-    cmd_dispatch(NODE, NODE_UPPM, 0, REQ, "ppm_set_time", tm_str);
+    char req[CMD_MAX_ARGS_LEN] = {0};
+    rtc_to_str(g_ertc.time, req);
+    cmd_dispatch(NODE, NODE_UPPM, 0, REQ, "ppm_set_time", req);
 
     sprintf(LOGBUF, "system initialized"); log_info();
     delay_ms(1000);
@@ -180,7 +180,7 @@ void system_superloop(void) {
     // nvg_parse_stream(&g_nvg, &g_irqmgr.irqbufs[NVG_PORT-1]); // Handle naviguider data
     cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[UPPM_PORT-1], &g_cmdmgr.rcvpkts[0], FALSE); // Handle UPPM commands 
     cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[FTDI_PORT-1], &g_cmdmgr.rcvpkts[1], FALSE); // Handle FTDI commands
-   
+
     scheduler_run_tasks(&g_scheduler, &g_cmdmgr);
 }
 

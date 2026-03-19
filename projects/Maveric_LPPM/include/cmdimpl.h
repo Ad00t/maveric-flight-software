@@ -18,10 +18,10 @@ void cmdimpl_ppm_sched_cmd_in(cmdpkt_s* pkt);
 
 void cmdimpl_tlm_get_data(cmdpkt_s* pkt);
 
-void cmdimpl_mtq_read(cmdpkt_s* pkt);
-void cmdimpl_mtq_get(cmdpkt_s* pkt);
-void cmdimpl_mtq_set(cmdpkt_s* pkt);
-void cmdimpl_mtq_restart(cmdpkt_s* pkt);
+void cmdimpl_mtq_read_1(cmdpkt_s* pkt);
+void cmdimpl_mtq_get_1(cmdpkt_s* pkt);
+void cmdimpl_mtq_set_1(cmdpkt_s* pkt);
+void cmdimpl_mtq_reset(cmdpkt_s* pkt);
 
 void cmdimpl_mtq_read_fast(cmdpkt_s* pkt);
 void cmdimpl_mtq_get_fast(cmdpkt_s* pkt);
