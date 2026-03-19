@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define NVG_MAX_LINE_LEN        RINGBUF_MAX_SIZE - 1 
+#define NVG_MAX_LINE_LEN        RINGBUF_MAX_CAPACITY 
 #define NVG_MAX_ARG_SIZE        20
 #define NVG_MAX_PAYLOAD_LEN     7
 #define NVG_SENSOR_TABLE_LEN    21

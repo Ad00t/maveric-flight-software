@@ -63,32 +63,9 @@ void mtq_init(mtq_s* mtq, uint8_t port) {
             mtq->reg_idx_map[reg->midx][reg->idx] = reg;
 
         // Allocate register data space
-        switch (reg->type) {
-            case T_UINT8:
-                reg->value_len = 4*reg->cnt / sizeof(uint8_t);
-                reg->value = calloc(reg->value_len, sizeof(uint8_t));
-                break;
-            case T_INT8:
-                reg->value_len = 4*reg->cnt / sizeof(int8_t);
-                reg->value = calloc(reg->value_len, sizeof(int8_t));
-                break;
-            case T_UINT16:
-                reg->value_len = 4*reg->cnt / sizeof(uint16_t);
-                reg->value = calloc(reg->value_len, sizeof(uint16_t));
-                break;
-            case T_INT16:
-                reg->value_len = 4*reg->cnt / sizeof(int16_t);
-                reg->value = calloc(reg->value_len, sizeof(int16_t));
-                break;
-            case T_FLOAT:
-                reg->value_len = 4*reg->cnt / sizeof(float);
-                reg->value = calloc(reg->value_len, sizeof(float));
-                break;
-            case T_CHAR:
-                reg->value_len = 4*reg->cnt / sizeof(char);
-                reg->value = calloc(reg->value_len, sizeof(char));
-                break;
-        }
+        uint8_t l = MTQ_REG_TYPE_SIZES[reg->type];
+        reg->value_len = 4*reg->cnt / l;
+        reg->value = calloc(reg->value_len, l);
     }
     
     rtc_time_t dt;
@@ -240,7 +217,7 @@ void mtq_read_complete(mtq_s* mtq) {
 
 status_e mtq_write_start(mtq_s* mtq, mtq_reg_s* reg, void* data) {
     if (!mtq->is_init) return FAILURE;
-    uint8_t w_buf[MTQ_MAX_DATA_LEN] = {0};
+    uint8_t w_buf[MTQ_MAX_PKT_LEN] = {0};
     uint8_t n_body_bytes = 4*reg->cnt;
     uint8_t w_buf_len = 4 + n_body_bytes;
     w_buf[0] = MTQ_HEAD_WRITE;
@@ -308,7 +285,7 @@ void mtq_parse_stream(mtq_s* mtq, ringbuf_s* irqbuf) {
     if (!mtq->is_init) return;
     mtq_pkt_s* rcvpkt = &mtq->rcvpkt;
     uint16_t iter = 0;
-    while (iter < 2*RINGBUF_MAX_SIZE) {
+    while (iter < 2*RINGBUF_MAX_CAPACITY) {
         uint8_t b;
         if (!rb_pop(irqbuf, 1, &b)) return;
       
@@ -335,18 +312,18 @@ void mtq_parse_stream(mtq_s* mtq, ringbuf_s* irqbuf) {
                 rcvpkt->err = b & 0b1111; 
                 switch (rcvpkt->head) {
                     case MTQ_HEAD_WRITE: rcvpkt->fsm = MTQ_FSM_CSUM; break;
-                    case MTQ_HEAD_READ: rcvpkt->fsm = MTQ_FSM_DATA; break;
+                    case MTQ_HEAD_READ: rcvpkt->fsm = MTQ_FSM_PAYLOAD; break;
                     default: rcvpkt->fsm = MTQ_FSM_ERROR; break;
                 }
                 break;
 
-            case MTQ_FSM_DATA:
-                if (rcvpkt->i_args >= MTQ_MAX_DATA_LEN) {
+            case MTQ_FSM_PAYLOAD:
+                if (rcvpkt->i_payload >= MTQ_MAX_PAYLOAD_LEN) {
                     rcvpkt->fsm = MTQ_FSM_ERROR;
                     break;
                 }
-                rcvpkt->data[rcvpkt->i_args++] = b;
-                if (rcvpkt->i_args >= 4*rcvpkt->cnt) {
+                rcvpkt->data[rcvpkt->i_payload++] = b;
+                if (rcvpkt->i_payload >= 4*rcvpkt->cnt) {
                     rcvpkt->fsm = MTQ_FSM_CSUM;
                 }
                 break;

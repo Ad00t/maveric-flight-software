@@ -114,7 +114,7 @@ void nvg_parse_stream(nvg_s* nvg, ringbuf_s* irqbuf) {
     nvg_pkt_s* pkt = &nvg->rcvpkt;
 
     uint16_t iter;
-    for (iter = 0; iter < 2 * RINGBUF_MAX_SIZE; iter++) {
+    for (iter = 0; iter < 2*RINGBUF_MAX_CAPACITY; iter++) {
         uint8_t c;
         if (!rb_pop(irqbuf, 1, &c))
             return;

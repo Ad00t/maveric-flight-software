@@ -3,12 +3,13 @@
 
 #include <stdint.h>
 
-#define RINGBUF_MAX_SIZE    256 
+#define RINGBUF_SIZE            256 
+#define RINGBUF_MAX_CAPACITY    RINGBUF_SIZE - 1
 
 typedef struct {
     volatile uint16_t r;
     volatile uint16_t w;
-    volatile uint8_t data[RINGBUF_MAX_SIZE];
+    volatile uint8_t data[RINGBUF_SIZE];
 } ringbuf_s;
 
 // Initialize a circular buffer

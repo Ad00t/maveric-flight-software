@@ -7,7 +7,10 @@
 #include <stdint.h>
 #include <time.h>
 
-#define MTQ_MAX_DATA_LEN        RINGBUF_MAX_SIZE - 1
+#define MTQ_MAX_PKT_LEN         RINGBUF_MAX_CAPACITY
+#define MTQ_HEADER_LEN          4
+#define MTQ_CSUM_LEN            1
+#define MTQ_MAX_PAYLOAD_LEN     MTQ_MAX_PKT_LEN - MTQ_HEADER_LEN - MTQ_CSUM_LEN
 #define MTQ_HEAD_READ           0xC9
 #define MTQ_HEAD_WRITE          0xC8
 #define MTQ_REG_TABLE_LEN       23      // 116
@@ -26,6 +29,8 @@ typedef enum {
     T_CHAR
 } mtq_reg_type_e;
 
+static uint8_t MTQ_REG_TYPE_SIZES[] = { 1, 1, 2, 2, 4, 1 };
+
 // Packet parsing FSM states
 
 typedef enum {
@@ -33,7 +38,7 @@ typedef enum {
     MTQ_FSM_IDX,
     MTQ_FSM_CNT,
     MTQ_FSM_MIDXERR,
-    MTQ_FSM_DATA,
+    MTQ_FSM_PAYLOAD,
     MTQ_FSM_CSUM,
     MTQ_FSM_DONE,
     MTQ_FSM_ERROR,
@@ -42,10 +47,10 @@ typedef enum {
 // MTQ packet parsing struct
 
 typedef struct {
-    uint8_t data[MTQ_MAX_DATA_LEN];
+    uint8_t data[MTQ_MAX_PKT_LEN];
     // Packet parsing metadata
     mtq_fsm_e fsm;
-    uint8_t i_args;
+    uint8_t i_payload;
     // Packet data
     uint8_t head;
     uint8_t idx;

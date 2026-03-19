@@ -193,7 +193,7 @@ void cmdimpl_mtq_read_1(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
         case REQ:
             char* p = pkt->args;
-            uint8_t key = strtoul(p, &p, 10);
+            uint16_t key = strtoul(p, &p, 10);
             sprintf(LOGBUF, "cmdimpl_mtq_read_1 key=%u", key); log_info();
             status_e s = mtq_read_start(&g_mtq, key);
             char res[CMD_MAX_ARGS_LEN] = {0};
@@ -207,7 +207,7 @@ void cmdimpl_mtq_get_1(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
         case REQ:
             char* p = pkt->args;
-            uint8_t key = strtoul(p, &p, 10);
+            uint16_t key = strtoul(p, &p, 10);
             sprintf(LOGBUF, "cmdimpl_mtq_get_1 key=%u", key); log_info();
             char res[CMD_MAX_ARGS_LEN] = {0};
             uint8_t j = 0;
@@ -222,12 +222,54 @@ void cmdimpl_mtq_set_1(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
         case REQ:
             char* p = pkt->args;
-            uint8_t key = strtoul(p, &p, 10);
+            uint16_t key = strtoul(p, &p, 10);
             sprintf(LOGBUF, "cmdimpl_mtq_set_1 key=%u", key); log_info();
             char res[CMD_MAX_ARGS_LEN] = {0};
-            uint8_t j = 0;
-            j += sprintf(&res[j], "%u", key);
-            status_e s = mtq_print_reg_data(&g_mtq, key, res, &j);
+            sprintf(res, "%u", key);
+            mtq_reg_s* reg = mtq_get_reg(&g_mtq, key);
+            if (reg == NULL) {
+                cmd_dispatch(NODE, pkt->orgn, pkt->echo, NACK, "mtq_set_1", res); 
+                break;
+            }
+            uint8_t i;
+            uint8_t data[MTQ_MAX_PAYLOAD_LEN] = {0};
+            uint8_t l = MTQ_REG_TYPE_SIZES[reg->type];
+            switch (reg->type) {
+                case T_UINT8:
+                    for (i = 0; i < reg->value_len; i++) {
+                        uint8_t val = strtoul(p, &p, 10);
+                        memcpy(&data[i*l], &val, l);
+                    }
+                    break;
+                case T_INT8:
+                    for (i = 0; i < reg->value_len; i++) {
+                        int8_t val = strtol(p, &p, 10);
+                        memcpy(&data[i*l], &val, l);
+                    }
+                    break;
+                case T_UINT16:
+                    for (i = 0; i < reg->value_len; i++) {
+                        uint16_t val = strtoul(p, &p, 10);
+                        memcpy(&data[i*l], &val, l);
+                    }
+                    break;
+                case T_INT16:
+                    for (i = 0; i < reg->value_len; i++) {
+                        int16_t val = strtol(p, &p, 10);
+                        memcpy(&data[i*l], &val, l);
+                    }
+                    break;
+                case T_FLOAT:
+                    for (i = 0; i < reg->value_len; i++) {
+                        float val = strtol(p, &p, 10);
+                        memcpy(&data[i*l], &val, l);
+                    }
+                    break;
+                case T_CHAR:
+                    memcpy(data, p+1, strlen(p+1)); // Skip 1 space
+                    break;
+            }
+            status_e s = mtq_write_start(&g_mtq, reg, data);
             cmd_dispatch(NODE, pkt->orgn, pkt->echo, stat2ack(s), "mtq_set_1", res); 
             break;
     }
