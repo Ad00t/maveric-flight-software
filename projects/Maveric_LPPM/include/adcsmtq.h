@@ -18,6 +18,17 @@
 #define MTQ_MAX_IDX_COUNT       256     // 256
 #define MTQ_PAGE_SIZE           5
 
+// Modes for set mode
+#define MTQ_MODE_MANUAL             7 
+#define MTQ_MODE_SUN_SPIN           6
+#define MTQ_MODE_TARGET_TRACKING    5
+#define MTQ_MODE_LVLH               4
+#define MTQ_MODE_FINE_POINTING      3
+#define MTQ_MODE_SUN_POINTING       2
+#define MTQ_MODE_DETUMBLING         1
+#define MTQ_MODE_SAFE               0
+
+
 // Register type
 
 typedef enum {
@@ -149,15 +160,6 @@ status_e mtq_read_all(mtq_s* mtq);
 
 // Set date and time registers (absolute time)
 status_e mtq_set_datetime(mtq_s* mtq, rtc_time_t rtc);
-
-#define MTQ_MODE_MANUAL             7 
-#define MTQ_MODE_SUN_SPIN           6
-#define MTQ_MODE_TARGET_TRACKING    5
-#define MTQ_MODE_LVLH               4
-#define MTQ_MODE_FINE_POINTING      3
-#define MTQ_MODE_SUN_POINTING       2
-#define MTQ_MODE_DETUMBLING         1
-#define MTQ_MODE_SAFE               0
 
 // Set mode via conf register. Ignore target elevation.
 status_e mtq_set_mode(mtq_s* mtq, uint8_t mode);
