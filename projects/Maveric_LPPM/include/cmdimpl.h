@@ -13,7 +13,7 @@ void cmdimpl_ppm_get_time(cmdpkt_s* pkt);
 void cmdimpl_ppm_ping(cmdpkt_s* pkt);
 void cmdimpl_ppm_delay(cmdpkt_s* pkt);
 void cmdimpl_ppm_clear_bufs(cmdpkt_s* pkt);
-void cmdimpl_ppm_get_schedules(cmdpkt_s* pkt);
+void cmdimpl_ppm_get_scheds(cmdpkt_s* pkt);
 void cmdimpl_ppm_sched_cmd_in(cmdpkt_s* pkt);
 
 void cmdimpl_tlm_get_data(cmdpkt_s* pkt);

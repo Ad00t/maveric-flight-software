@@ -39,6 +39,7 @@ void cmdimpl_init(void) {
     ht_set(ht, "ppm_ping", (cmdimpl_f) cmdimpl_ppm_ping);
     ht_set(ht, "ppm_delay", (cmdimpl_f) cmdimpl_ppm_delay);
     ht_set(ht, "ppm_clear_bufs", (cmdimpl_f) cmdimpl_ppm_clear_bufs);
+    ht_set(ht, "ppm_get_scheds", (cmdimpl_f) cmdimpl_ppm_get_scheds);
     ht_set(ht, "ppm_sched_cmd_in", (cmdimpl_f) cmdimpl_ppm_sched_cmd_in);
 
     ht_set(ht, "tlm_get_data", (cmdimpl_f) cmdimpl_tlm_get_data);
@@ -66,7 +67,7 @@ cmdpkt_type_e stat2ack(status_e s) {
 
 void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case REQ:
+        case REQ: {
             char* p = pkt->args;
             rtc_time_t time;
             time.tm_wday = strtoul(p, &p, 10); // Other options: strtok(), strtod(), strotol()
@@ -89,32 +90,35 @@ void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
                     g_ertc.time.tm_wday, g_ertc.time.tm_mon, g_ertc.time.tm_mday, g_ertc.time.tm_year, 
                     g_ertc.time.tm_hour, g_ertc.time.tm_min, g_ertc.time.tm_sec); log_info();
             break;
+        }
     }
 }
 
 void cmdimpl_ppm_get_time(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case REQ:
+        case REQ: {
             sprintf(LOGBUF, "cmdimpl_ppm_get_time REQ"); log_info();
             char res[CMD_MAX_ARGS_LEN] = {0};  
             rtc_to_str(g_ertc.time, res);
             cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, "ppm_get_time", res);
             break;
+        }
     }
 }
 
 void cmdimpl_ppm_ping(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case REQ:
+        case REQ: {
             sprintf(LOGBUF, "cmdimpl_ppm_ping '%s'", pkt->args); log_info();
             cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, "ppm_ping", "pong");
             break;
+        }
     }
 }
 
 void cmdimpl_ppm_delay(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case REQ:
+        case REQ: {
             char* p = pkt->args;
             uint32_t delay = strtoul(p, &p, 10);
             sprintf(LOGBUF, "cmdimpl_ppm_delay d=%u", delay); log_info();
@@ -125,17 +129,18 @@ void cmdimpl_ppm_delay(cmdpkt_s* pkt) {
                 cmd_dispatch(NODE, pkt->orgn, pkt->echo, NACK, "ppm_delay", "");
             }
             break;
+        }
     }
 }
 
 void cmdimpl_ppm_clear_bufs(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case REQ:
+        case REQ: {
             char* p = pkt->args;
             uint8_t mode = strtoul(p, &p, 10);
             sprintf(LOGBUF, "cmdimpl_ppm_clear_bufs m=%u", mode); log_info();
             switch (mode) {
-                case 0:
+                case 0: 
                     irqmgr_clear(&g_irqmgr);
                     break;
                 case 1:
@@ -143,19 +148,29 @@ void cmdimpl_ppm_clear_bufs(cmdpkt_s* pkt) {
                     break;
             }
             break;
+        }
     }
 }
 
-void cmdimpl_ppm_get_schedules(cmdpkt_s* pkt) {
+void cmdimpl_ppm_get_scheds(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case REQ:
+        case REQ: {
+            sprintf(LOGBUF, "cmdimpl_ppm_get_scheds") log_info();
+            char res[CMD_MAX_ARGS_LEN] = {0}; 
+            uint8_t i;
+            for (i = 0; i < SCHEDULER_MAX_TASKS; i++) {
+                schedtask_s st = g_scheduler.tasks[i];
+                sprintf(res, "%u:%u,%u,%u ", i, st.id, st.active, st.type);
+            }
+            cmd_dispatch(NONE, pkt->orgn, pkt->echo, RES, "ppm_get_scheds", res);
             break;
+        }
     }
 }
 
 void cmdimpl_ppm_sched_cmd_in(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case REQ:
+        case REQ: {
             char* p = pkt->args;
             uint8_t schedule_id = strtoul(p, &p, 10);
             uint32_t start_delay_ms = strtoul(p, &p, 10);
@@ -168,6 +183,8 @@ void cmdimpl_ppm_sched_cmd_in(cmdpkt_s* pkt) {
             char sep[] = " ";
             char* cmd_id = strtok(++p, sep);
             char* args = strtok(0, sep);
+            sprintf(LOGBUF, "cmdimpl_ppm_sched_cmd_in sid=%u del=%u per=%u rep=%u o=%u d=%u e=%u p=%u id='%s' args='%s'",
+                    schedule_id, start_delay_ms, period_ms, reps, orgn, dest, echo, ptype, cmd_id, args); log_info();
             cmdpkt_s schedcmd;
             cmdpkt_create(&schedcmd, orgn, dest, echo, ptype, cmd_id, args);
             status_e s = scheduler_schedule_cmd_in(&g_scheduler, schedule_id, &schedcmd, start_delay_ms, period_ms, reps);
@@ -175,23 +192,25 @@ void cmdimpl_ppm_sched_cmd_in(cmdpkt_s* pkt) {
             sprintf(res, "%u", schedule_id);
             cmd_dispatch(NODE, pkt->orgn, pkt->echo, stat2ack(s), "ppm_sched_cmd_in", res); 
             break;
+        }
     }
 }
 
 void cmdimpl_tlm_get_data(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case REQ:
+        case REQ: {
             sprintf(LOGBUF, "cmdimpl_tlm_get_data REQ"); log_info();
             char res[CMD_MAX_ARGS_LEN] = {0};
             sprintf(res, "%u %u", g_flashmgr.rbt_cnt, g_rbt_cause);
             cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, "tlm_get_data", res);
             break;
+        }
     }
 }
 
 void cmdimpl_mtq_read_1(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case REQ:
+        case REQ: {
             char* p = pkt->args;
             uint16_t key = strtoul(p, &p, 10);
             sprintf(LOGBUF, "cmdimpl_mtq_read_1 key=%u", key); log_info();
@@ -200,12 +219,13 @@ void cmdimpl_mtq_read_1(cmdpkt_s* pkt) {
             sprintf(res, "%u", key);
             cmd_dispatch(NODE, pkt->orgn, pkt->echo, stat2ack(s), "mtq_read_1", res); 
             break;
+        }
     }
 }
 
 void cmdimpl_mtq_get_1(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case REQ:
+        case REQ: {
             char* p = pkt->args;
             uint16_t key = strtoul(p, &p, 10);
             sprintf(LOGBUF, "cmdimpl_mtq_get_1 key=%u", key); log_info();
@@ -215,12 +235,13 @@ void cmdimpl_mtq_get_1(cmdpkt_s* pkt) {
             status_e s = mtq_print_reg_data(&g_mtq, key, res, &j);
             cmd_dispatch(NODE, pkt->orgn, pkt->echo, stat2ack(s), "mtq_get_1", res); 
             break;
+        }
     }
 }
 
 void cmdimpl_mtq_set_1(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case REQ:
+        case REQ: {
             char* p = pkt->args;
             uint16_t key = strtoul(p, &p, 10);
             sprintf(LOGBUF, "cmdimpl_mtq_set_1 key=%u", key); log_info();
@@ -241,7 +262,7 @@ void cmdimpl_mtq_set_1(cmdpkt_s* pkt) {
                         memcpy(&data[i*l], &val, l);
                     }
                     break;
-                case T_INT8:
+                case T_INT8: 
                     for (i = 0; i < reg->value_len; i++) {
                         int8_t val = strtol(p, &p, 10);
                         memcpy(&data[i*l], &val, l);
@@ -272,31 +293,34 @@ void cmdimpl_mtq_set_1(cmdpkt_s* pkt) {
             status_e s = mtq_write_start(&g_mtq, reg, data);
             cmd_dispatch(NODE, pkt->orgn, pkt->echo, stat2ack(s), "mtq_set_1", res); 
             break;
+        }
     }
 }
 
 void cmdimpl_mtq_reset(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case REQ:
+        case REQ: {
             status_e s = mtq_reset(&g_mtq);
             cmd_dispatch(NODE, pkt->orgn, pkt->echo, stat2ack(s), "mtq_reset", "");
             break;
+        }
     }
 }
 
 void cmdimpl_mtq_read_fast(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case REQ:
+        case REQ: {
             sprintf(LOGBUF, "cmdimpl_mtq_read_fast"); log_info();
             status_e s = mtq_read_fast(&g_mtq); 
             cmd_dispatch(NODE, pkt->orgn, pkt->echo, stat2ack(s), "mtq_read_fast", ""); 
             break;
+        }
     }
 }
 
 void cmdimpl_mtq_get_fast(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case REQ:
+        case REQ: {
             char* p = pkt->args;
             uint8_t page = strtoul(p, &p, 10);
             uint8_t j = 0;
@@ -317,22 +341,24 @@ void cmdimpl_mtq_get_fast(cmdpkt_s* pkt) {
             }
             cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, "mtq_get_fast", res); 
             break;
+        }
     }
 }
 
 void cmdimpl_mtq_read_ctrl(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case REQ:
+        case REQ: {
             sprintf(LOGBUF, "cmdimpl_mtq_read_ctrl"); log_info();
             status_e s = mtq_read_ctrl(&g_mtq);
             cmd_dispatch(NODE, pkt->orgn, pkt->echo, stat2ack(s), "mtq_read_ctrl", ""); 
             break;
+        }
     }
 }
 
 void cmdimpl_mtq_get_ctrl(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case REQ:
+        case REQ: {
             char* p = pkt->args;
             uint8_t page = strtoul(p, &p, 10);
             uint8_t j = 0;
@@ -353,22 +379,24 @@ void cmdimpl_mtq_get_ctrl(cmdpkt_s* pkt) {
             }
             cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, "mtq_get_ctrl", res); 
             break;
+        }
     }
 }
 
 void cmdimpl_mtq_read_all(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case REQ:
+        case REQ: {
             sprintf(LOGBUF, "cmdimpl_mtq_read_all"); log_info();
             status_e s = mtq_read_all(&g_mtq); 
             cmd_dispatch(NODE, pkt->orgn, pkt->echo, stat2ack(s), "mtq_read_all", ""); 
             break;
+        }
     }
 }
 
 void cmdimpl_mtq_get_all(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case REQ:
+        case REQ: {
             char* p = pkt->args;
             uint8_t page = strtoul(p, &p, 10);
             uint8_t j = 0;
@@ -390,5 +418,6 @@ void cmdimpl_mtq_get_all(cmdpkt_s* pkt) {
             }
             cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, "mtq_get_all", res); 
             break;
+        }
     }
 }

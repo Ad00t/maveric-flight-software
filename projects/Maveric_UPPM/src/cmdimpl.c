@@ -32,7 +32,7 @@ void cmdimpl_init() {
 
 void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case REQ:
+        case REQ: {
             char* p = pkt->args;
             rtc_time_t time;
             time.tm_wday = strtoul(p, &p, 10); // Other options: strtok(), strtod(), strotol()
@@ -54,35 +54,39 @@ void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
                     g_rtc_time.tm_wday, g_rtc_time.tm_mon, g_rtc_time.tm_mday, g_rtc_time.tm_year, 
                     g_rtc_time.tm_hour, g_rtc_time.tm_min, g_rtc_time.tm_sec); log_info();
             break;
+        }
     }
 }
 
 void cmdimpl_ppm_get_time(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case REQ:
+        case REQ: {
             sprintf(LOGBUF, "cmdimpl_ppm_get_time REQ"); log_info();
             char res[CMD_MAX_ARGS_LEN] = {0};  
             rtc_to_str(g_rtc_time, res);
             cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, "ppm_get_time", res);
             break;
-        case RES:
+        }
+        case RES: {
             sprintf(LOGBUF, "cmdimpl_ppm_get_time RES '%s'", pkt->args); log_info();
             cmdimpl_ppm_set_time(pkt);
             break;
+        }
     }
 }
 
 void cmdimpl_ppm_ping(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case REQ:
+        case REQ: {
             cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, "ppm_ping", "pong");
             break;
+        }
     }
 }
 
 void cmdimpl_tlm_get_data(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case RES:
+        case RES: {
             sprintf(LOGBUF, "cmdimpl_tlm_get_data RES '%s'", pkt->args); log_info();
             char* p = pkt->args;
             switch (pkt->orgn) {
@@ -90,11 +94,16 @@ void cmdimpl_tlm_get_data(cmdpkt_s* pkt) {
                     g_tlm.lppm_rbt_cnt = strtoul(p, &p, 10);  
                     g_tlm.lppm_rbt_cause = strtoul(p, &p, 10);  
                     break;
-                case NODE_EPS: break;
-                case NODE_UPPM: break;
-                case NODE_HOLONAV: break;
-                case NODE_ASTROBOARD: break;
+                case NODE_EPS:
+                    break;
+                case NODE_UPPM:
+                    break;
+                case NODE_HOLONAV: 
+                    break;
+                case NODE_ASTROBOARD:
+                    break;
             }  
-        break;
+            break;
+        }
     }
 }

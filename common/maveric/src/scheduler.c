@@ -26,7 +26,9 @@ status_e schedule_task(scheduler_s* s, schedtask_s task, uint8_t i_start, uint8_
     return SUCCESS;
 }
 
-void create_schedtask(schedtask_s* task, uint8_t id, schedtask_type_e type, uint64_t next_release, uint32_t period_ms, uint16_t reps) {
+// SCHEDTASK
+
+void schedtask_create(schedtask_s* task, uint8_t id, schedtask_type_e type, uint64_t next_release, uint32_t period_ms, uint16_t reps) {
     task->id = id;
     task->type = type;
     task->active = TRUE;
@@ -40,9 +42,6 @@ void create_schedtask(schedtask_s* task, uint8_t id, schedtask_type_e type, uint
 void scheduler_init(scheduler_s* s) {
     memset(s, 0, sizeof(scheduler_s));
     uint8_t i;
-    for (i = 0; i < SCHEDULER_MAX_TASKS; i++) {
-        s->tasks[i].id = 0;
-    }
     for (i = 0; i < SCHEDULER_MAX_CMD_TASKS; i++) {
         cmdpkt_init(&s->cmds[i]);
     }

@@ -10,7 +10,7 @@
 #define SCHEDULER_MAX_TASKS             SCHEDULER_MAX_CMD_TASKS + SCHEDULER_MAX_FUNC_TASKS
 #define SCHEDULE_REPS_INFINITE          0xFFFF
 
-// Provides base management and timing functionality to specialized schedule tasks
+// Schedtask: provides base management and timing functionality to specialized schedule tasks
 
 typedef enum {
     NONE = 0,
@@ -30,6 +30,8 @@ typedef struct {
     uint8_t id;
     int1 active;
 } schedtask_s;
+
+void schedtask_create(schedtask_s* task, uint8_t id, schedtask_type_e type, uint64_t next_release, uint32_t period_ms, uint16_t reps);
 
 // Scheduling manager API
 
