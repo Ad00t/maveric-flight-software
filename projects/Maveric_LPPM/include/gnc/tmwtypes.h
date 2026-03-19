@@ -25,10 +25,8 @@
  *      Define NO_FLOATS to eliminate reference to real_T, etc.
  */
 
-#define MW_LIBTOOLING
 #ifdef MW_LIBTOOLING
-// #include "mwstdint.h"
-#include <stdint.h>
+#include "mwstdint.h"
 #endif
 
 #include <limits.h>
@@ -182,11 +180,11 @@ typedef unsigned long long  ulonglong_T;
 #endif
 
 #ifndef TMW_CHAR_SIGNED
-// # if SCHAR_MAX == CHAR_MAX
-// #  define TMW_CHAR_SIGNED 1
-// # else
+# if SCHAR_MAX == CHAR_MAX
+#  define TMW_CHAR_SIGNED 1
+# else
 #  define TMW_CHAR_SIGNED 0
-// # endif
+# endif
 #endif
 
 /* It is common for one or more of the integer types
@@ -741,55 +739,55 @@ typedef BYTE_T byte_T;
 #  endif
 #endif
 
-// #if (defined(_MSC_VER) && !defined(__clang__))
-//
-// /* Conversion from unsigned __int64 to double is not implemented in Visual Studio
-//  * and results in a compile error, thus the value must first be cast to
-//  * signed __int64, and then to double.
-//  *
-//  * If the 64 bit int value is greater than 2^63-1, which is the signed int64 max,
-//  * the macro below provides a workaround for casting a uint64 value to a double
-//  * in windows.
-//  */
-// #  define uint64_to_double(u) ( ((u) > _I64_MAX) ? \
-//             (double)(__int64)((u) - _I64_MAX - 1) + (double)_I64_MAX + 1: \
-//             (double)(__int64)(u) )
-//
-// /* The following inline function should only be used in the macro double_to_uint64,
-//  * as it only handles the specfic range of double between 2^63 and 2^64-1 */
-// __forceinline
-// uint64_T double_to_uint64_helper(double d) {
-//   union double_to_uint64_union_type {
-//     double dd;
-//     uint64_T i64;
-//   } di;
-//   di.dd = d;
-//   return (((di.i64 & 0x000fffffffffffff) | 0x0010000000000000) << 11);
-// }
-//
-// /* The largest double value that can be cast to uint64 in windows is the
-//  * signed int64 max, which is 2^63-1. The macro below provides
-//  * a workaround for casting large double values to uint64 in windows.
-//  */
-// /* The magic number 18446744073709551616.0 is 2^64 */
-// /* The magic number 9223372036854775808.0 is 2^63 */
-// #  define double_to_uint64(d) ( ((d) >= 18446744073709551616.0) ? \
-//             0xffffffffffffffffULL : \
-//             ((d) >= 0.0) ? \
-//             ((d) >= 9223372036854775808.0) ? \
-//             double_to_uint64_helper(d) : \
-//             (unsigned __int64)(d) : \
-//             0ULL )
-// #else
-// #  define uint64_to_double(u) ((double)(u))
-// #  if defined(__BORLANDC__) || defined(__WATCOMC__) || defined(__TICCSC__)
-// /* double_to_uint64 defined only for MSVC and UNIX */
-// #  else
-// #  define double_to_uint64(d) ( ((d) >= 18446744073709551616.0) ? \
-//             (unsigned long long) 0xffffffffffffffffULL : \
-//             ((d) >= 0) ? (unsigned long long)(d) : (unsigned long long) 0 )
-// #  endif
-// #endif
+#if (defined(_MSC_VER) && !defined(__clang__))
+
+/* Conversion from unsigned __int64 to double is not implemented in Visual Studio
+ * and results in a compile error, thus the value must first be cast to
+ * signed __int64, and then to double.
+ *
+ * If the 64 bit int value is greater than 2^63-1, which is the signed int64 max,
+ * the macro below provides a workaround for casting a uint64 value to a double
+ * in windows.
+ */
+#  define uint64_to_double(u) ( ((u) > _I64_MAX) ? \
+            (double)(__int64)((u) - _I64_MAX - 1) + (double)_I64_MAX + 1: \
+            (double)(__int64)(u) )
+
+/* The following inline function should only be used in the macro double_to_uint64,
+ * as it only handles the specfic range of double between 2^63 and 2^64-1 */
+__forceinline
+uint64_T double_to_uint64_helper(double d) {
+  union double_to_uint64_union_type {
+    double dd;
+    uint64_T i64;
+  } di;
+  di.dd = d;
+  return (((di.i64 & 0x000fffffffffffff) | 0x0010000000000000) << 11);
+}
+
+/* The largest double value that can be cast to uint64 in windows is the
+ * signed int64 max, which is 2^63-1. The macro below provides
+ * a workaround for casting large double values to uint64 in windows.
+ */
+/* The magic number 18446744073709551616.0 is 2^64 */
+/* The magic number 9223372036854775808.0 is 2^63 */
+#  define double_to_uint64(d) ( ((d) >= 18446744073709551616.0) ? \
+            0xffffffffffffffffULL : \
+            ((d) >= 0.0) ? \
+            ((d) >= 9223372036854775808.0) ? \
+            double_to_uint64_helper(d) : \
+            (unsigned __int64)(d) : \
+            0ULL )
+#else
+#  define uint64_to_double(u) ((double)(u))
+#  if defined(__BORLANDC__) || defined(__WATCOMC__) || defined(__TICCSC__)
+/* double_to_uint64 defined only for MSVC and UNIX */
+#  else
+#  define double_to_uint64(d) ( ((d) >= 18446744073709551616.0) ? \
+            (unsigned long long) 0xffffffffffffffffULL : \
+            ((d) >= 0) ? (unsigned long long)(d) : (unsigned long long) 0 )
+#  endif
+#endif
 
 #if !defined(__cplusplus) && !defined(__bool_true_false_are_defined)
 

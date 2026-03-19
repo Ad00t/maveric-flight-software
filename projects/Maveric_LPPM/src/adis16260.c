@@ -1,4 +1,4 @@
-#include "gyro.h"
+#include "adis16260.h"
 #include "spi.h"
 #include "common.h"
 #include <stdint.h>

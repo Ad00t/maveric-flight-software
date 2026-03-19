@@ -7,31 +7,20 @@
  *
  * Code generation for model "GNC_Planner_Core".
  *
- * Model version              : 2.96
+ * Model version              : 2.114
  * Simulink Coder version : 25.2 (R2025b) 28-Jul-2025
- * C source code generated on : Tue Mar 17 12:33:12 2026
+ * C source code generated on : Wed Mar 18 13:23:25 2026
  *
  * Target selection: grt.tlc
  * Note: GRT includes extra infrastructure and instrumentation for prototyping
  * Embedded hardware selection: Custom Processor->Custom Processor
- * Code generation objectives: Unspecified
+ * Code generation objective: Execution efficiency
  * Validation result: Not run
  */
 
 #ifndef GNC_Planner_Core_private_h_
 #define GNC_Planner_Core_private_h_
 #include "rtwtypes.h"
-#include "builtin_typeid_types.h"
 #include "multiword_types.h"
 #include "GNC_Planner_Core_types.h"
-
-/* Private macros used by the generated code to access rtModel */
-#ifndef rtmSetTFinal
-#define rtmSetTFinal(rtm, val)         ((rtm)->Timing.tFinal = (val))
-#endif
-
-extern real_T rt_powd_snf(real_T u0, real_T u1);
-extern real_T rt_remd_snf(real_T u0, real_T u1);
-extern real_T rt_atan2d_snf(real_T u0, real_T u1);
-
 #endif                                 /* GNC_Planner_Core_private_h_ */

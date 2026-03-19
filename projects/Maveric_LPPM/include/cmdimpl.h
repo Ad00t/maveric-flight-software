@@ -13,20 +13,21 @@ void cmdimpl_ppm_get_time(cmdpkt_s* pkt);
 void cmdimpl_ppm_ping(cmdpkt_s* pkt);
 void cmdimpl_ppm_delay(cmdpkt_s* pkt);
 void cmdimpl_ppm_clear_bufs(cmdpkt_s* pkt);
+void cmdimpl_ppm_get_schedules(cmdpkt_s* pkt);
+void cmdimpl_ppm_sched_cmd_in(cmdpkt_s* pkt);
 
 void cmdimpl_tlm_get_data(cmdpkt_s* pkt);
 
-void cmdimpl_mtq_get_conf(cmdpkt_s* pkt);
-void cmdimpl_mtq_set_conf(cmdpkt_s* pkt);
-void cmdimpl_mtq_get_datetime(cmdpkt_s* pkt);
-void cmdimpl_mtq_set_datetime(cmdpkt_s* pkt);
-void cmdimpl_mtq_get_tle(cmdpkt_s* pkt);
-void cmdimpl_mtq_set_tle(cmdpkt_s* pkt);
-void cmdimpl_mtq_get_paxs(cmdpkt_s* pkt);
-void cmdimpl_mtq_set_paxs(cmdpkt_s* pkt);
-void cmdimpl_mtq_get_mtquser(cmdpkt_s* pkt);
-void cmdimpl_mtq_set_mtquser(cmdpkt_s* pkt);
-void cmdimpl_mtq_reset(cmdpkt_s* pkt);
-void cmdimpl_mtq_get_stat(cmdpkt_s* pkt);
+void cmdimpl_mtq_read(cmdpkt_s* pkt);
+void cmdimpl_mtq_get(cmdpkt_s* pkt);
+void cmdimpl_mtq_set(cmdpkt_s* pkt);
+void cmdimpl_mtq_restart(cmdpkt_s* pkt);
+
+void cmdimpl_mtq_read_fast(cmdpkt_s* pkt);
+void cmdimpl_mtq_get_fast(cmdpkt_s* pkt);
+void cmdimpl_mtq_read_ctrl(cmdpkt_s* pkt);
+void cmdimpl_mtq_get_ctrl(cmdpkt_s* pkt);
+void cmdimpl_mtq_read_all(cmdpkt_s* pkt);
+void cmdimpl_mtq_get_all(cmdpkt_s* pkt);
 
 #endif 

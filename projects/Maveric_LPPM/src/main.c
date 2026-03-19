@@ -55,7 +55,7 @@
 #define LOWER_PPM
 #define NODE                NODE_LPPM 
 #define NODE_LBL            "LPPM"
-#define LOG_LEVEL           LL_DEBUG 
+#define LOG_LEVEL           LL_TRACE 
 
 // Module includes (.c necessary)
 
@@ -68,7 +68,7 @@
 #include "ringbuf.c"
 #include "i2c.c"
 #include "spi.c"
-#include "flash_at25df641.c"
+#include "at25df641.c"
 #include "config.c"
 #include "flashmgr.c"
 #include "interrupts.c"
@@ -76,10 +76,10 @@
 #include "framer.c"
 #include "cmdpkt.c"
 #include "logger.c"
-#include "mtq.c"
-#include "gyro.c"
+#include "adcsmtq.c"
+#include "adis16260.c"
 #include "naviguider.c"
-#include "ertc.c"
+#include "m41t81s.c"
 #include "cmdmgr.c"
 #include "scheduler.c"
 #include "cmdimpl.c"
@@ -153,8 +153,6 @@ void system_init(void) {
     
     // Submodules & services init
     mtq_init(&g_mtq, MTQ_PORT);
-    mtq_set_datetime(&g_mtq, g_ertc.time);
-    mtq_set_conf(&g_mtq, 0, MTQ_MODE_SAFE);
     // gyro_init(&g_gyro, GYRO_CS1, GYRO_CS2, GYRO_CS3, GYRO_ON);
     // nvg_init(&g_nvg, NVG_PORT);
     scheduler_init(&g_scheduler);

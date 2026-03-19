@@ -79,9 +79,9 @@
         <targetDevice>PIC24FJ256GA110</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>Simulator</platformTool>
+        <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>CCSC</languageToolchain>
-        <languageToolchainVersion>4.124</languageToolchainVersion>
+        <languageToolchainVersion>5.081</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>

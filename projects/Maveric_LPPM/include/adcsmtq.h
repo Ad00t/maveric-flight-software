@@ -13,6 +13,7 @@
 #define MTQ_REG_TABLE_LEN       23      // 116
 #define MTQ_MAP_COUNT           3       // 3
 #define MTQ_MAX_IDX_COUNT       256     // 256
+#define MTQ_PAGE_SIZE           5
 
 // Register type
 
@@ -93,10 +94,13 @@ void mtq_destroy(mtq_s* mtq);
 // Clear mtq buffer data
 void mtq_clear(mtq_s* mtq);
 
-// Lookup register by map idx, idx in reg_idx_map
+// Lookup register by map idx, idx, or key in reg_idx_map
 mtq_reg_s* mtq_get_reg(mtq_s* mtq, uint8_t midx, uint8_t idx);
-// Lookup register by map idx | idx combined key
 mtq_reg_s* mtq_get_reg(mtq_s* mtq, uint16_t key);
+
+// Print out formatted space separated contents of a register to out buffer, updating p
+status_e mtq_print_reg_data(mtq_s* mtq, mtq_reg_s* reg, uint8_t* out, uint8_t* p);
+status_e mtq_print_reg_data(mtq_s* mtq, uint16_t key, uint8_t* out, uint8_t* p);
 
 // Send register read command to mtq
 status_e mtq_read_start(mtq_s* mtq, mtq_reg_s* reg);
@@ -123,7 +127,10 @@ status_e mtq_get_data(mtq_s* mtq, uint16_t key, void* out);
 // Check if we're still receiving from the mtq
 status_e mtq_heartbeat(mtq_s* mtq);
 
-// Write 1 to nvm register to reset
+// Power cycle the unit
+status_e mtq_reboot(mtq_s* mtq);
+
+// Write 1 to nvm register to power cycle, then set datetime & TLE
 status_e mtq_reset(mtq_s* mtq);
 
 // Read fast frame registers
@@ -131,6 +138,9 @@ status_e mtq_read_fast(mtq_s* mtq);
 
 // Read control frame registers
 status_e mtq_read_ctrl(mtq_s* mtq);
+
+// Read all available registers
+status_e mtq_read_all(mtq_s* mtq);
 
 // Set date and time registers (absolute time)
 status_e mtq_set_datetime(mtq_s* mtq, rtc_time_t rtc);
@@ -144,8 +154,8 @@ status_e mtq_set_datetime(mtq_s* mtq, rtc_time_t rtc);
 #define MTQ_MODE_DETUMBLING         1
 #define MTQ_MODE_SAFE               0
 
-// Set config (target elevation, mode)
-status_e mtq_set_conf(mtq_s* mtq, uint8_t elevation, uint8_t mode);
+// Set mode via conf register. Ignore target elevation.
+status_e mtq_set_mode(mtq_s* mtq, uint8_t mode);
 
 // Map Idx | Idx register keys
 

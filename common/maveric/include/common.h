@@ -33,5 +33,10 @@ typedef enum  {
 uint8_t bcdtohex(uint8_t bcd);
 uint8_t hextobcd(uint8_t hex);
 
+uint8_t maxu8(uint8_t a, uint8_t b);
+uint8_t minu8(uint8_t a, uint8_t b);
+
+int ftoa(float x, char* str, char prec, char format);
+
 #endif // !__COMMON_H__
 

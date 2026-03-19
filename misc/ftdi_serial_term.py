@@ -141,16 +141,16 @@ def epoch_time_ms():
     return round(time.time() * 1000)
 
 def log_trace(msg):
-    log(f"{KNRM}{epoch_time_ms()} [INFO] [FTDI] {msg}\n")
+    log(f"{KNRM}{epoch_time_ms()} [TRACE] [FTDI] {msg}\n")
 
 def log_debug(msg):
-    log(f"{KWHT}{epoch_time_ms()} [INFO] [FTDI] {msg}\n")
+    log(f"{KWHT}{epoch_time_ms()} [DEBUG] [FTDI] {msg}\n")
 
 def log_info(msg):
     log(f"{KCYN}{epoch_time_ms()} [INFO] [FTDI] {msg}\n")
 
 def log_warn(msg):
-    log(f"{KYEL}{epoch_time_ms()} [INFO] [FTDI] {msg}\n")
+    log(f"{KYEL}{epoch_time_ms()} [WARN] [FTDI] {msg}\n")
 
 def log_error(msg):
     log(f"{KRED}{epoch_time_ms()} [ERROR] [FTDI] {msg}\n")

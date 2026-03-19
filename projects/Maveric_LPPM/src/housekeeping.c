@@ -7,9 +7,9 @@
 #include "cmdmgr.h"
 #include "interrupts.h"
 #include "hashtable.h"
-#include "mtq.h"
-#include "ertc.h"
-#include "gyro.h"
+#include "adcsmtq.h"
+#include "m41t81s.h"
+#include "adis16260.h"
 #include "naviguider.h"
 #include "logger.h"
 #include <stdint.h>
@@ -56,13 +56,13 @@ void hk_log(void) {
 void hk_heartbeats(void) {
     // int1 hb_ertc = ertc_heartbeat(&g_ertc);
     // int1 hb_mtq = mtq_heartbeat(&g_mtq);
-    int1 hb_nvg = nvg_heartbeat(&g_nvg);
+    // int1 hb_nvg = nvg_heartbeat(&g_nvg);
     // int1 hb_gyro = gyro_heartbeat(&g_gyro);
 }
 
 void hk_read_sensors(void) {
     // mtq_read_ctrl(&g_mtq);
-    mtq_read_fast(&g_mtq);
+    // mtq_read_fast(&g_mtq);
     // gyro_read_all(&g_gyro);
 }
 

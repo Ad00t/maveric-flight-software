@@ -1,4 +1,4 @@
-#include "mtq.h"
+#include "adcsmtq.h"
 #include "interrupts.h"
 #include "uart.h"
 #include "common.h"
@@ -91,6 +91,10 @@ void mtq_init(mtq_s* mtq, uint8_t port) {
         }
     }
     
+    rtc_time_t dt;
+    epoch_ms_to_rtc(systime_epoch_ms(), &dt); 
+    mtq_set_datetime(mtq, dt);
+    mtq_set_mode(mtq, MTQ_MODE_SAFE);
     sprintf(LOGBUF, "mtq_init: port=%u", mtq->port); log_info();
 }
 
@@ -131,6 +135,45 @@ mtq_reg_s* mtq_get_reg(mtq_s* mtq, uint8_t midx, uint8_t idx) {
 
 mtq_reg_s* mtq_get_reg(mtq_s* mtq, uint16_t key) {
     return mtq_get_reg(mtq, key >> 8, key & 0x00FF);
+}
+
+status_e mtq_print_reg_data(mtq_s* mtq, mtq_reg_s* reg, uint8_t* out, uint8_t* p) {
+    uint8_t j;
+    switch (reg->type) {
+        case T_UINT8:
+            for (j = 0; j < reg->value_len; j++) 
+                *p += sprintf(&out[*p], " %u", ((uint8_t*)reg->value)[j]);
+            break;
+        case T_INT8:
+            for (j = 0; j < reg->value_len; j++) 
+                *p += sprintf(&out[*p], " %d", ((int8_t*)reg->value)[j]);
+            break;
+        case T_UINT16:
+            for (j = 0; j < reg->value_len; j++) 
+                *p += sprintf(&out[*p], " %u", ((uint16_t*)reg->value)[j]);
+            break;
+        case T_INT16:
+            for (j = 0; j < reg->value_len; j++) 
+                *p += sprintf(&out[*p], " %d", ((int16_t*)reg->value)[j]);
+            break;
+        case T_FLOAT:
+            for (j = 0; j < reg->value_len; j++) {
+                char fbuf[32] = {0};
+                ftoa(((float*)reg->value)[j], fbuf, 6, 'f');
+                *p += sprintf(&out[*p], " %s", fbuf); 
+            } 
+            break;
+        case T_CHAR:
+            *p += sprintf(&out[*p], " %s", ((char*)reg->value));
+            break;
+    }
+    return SUCCESS;
+}
+
+status_e mtq_print_reg_data(mtq_s* mtq, uint16_t key, uint8_t* out, uint8_t* p) {
+    mtq_reg_s* reg = mtq_get_reg(mtq, key);
+    if (reg == NULL) return FAILURE;
+    return mtq_print_reg_data(mtq, reg, out, p);
 }
 
 status_e mtq_read_start(mtq_s* mtq, mtq_reg_s* reg) {   
@@ -188,52 +231,16 @@ void mtq_read_complete(mtq_s* mtq) {
     uint8_t n_body_bytes = 4*rcvpkt->cnt;
     memcpy(reg->value, rcvpkt->data, n_body_bytes);
    
-    uint16_t p = 0;
-    uint8_t i;
-    p += sprintf(LOGBUF, "mtq_read_complete: port=UART%u reg=(%u,%u) count=%u err=%u data=[",
+    uint8_t p = 0;
+    p += sprintf(&LOGBUF[p], "mtq_read_complete: port=UART%u reg=(%u,%u) count=%u err=%u data=[",
                  mtq->port, reg->midx, reg->idx, reg->cnt, rcvpkt->err); 
-    
-    switch (reg->type) {
-        case T_UINT8: {
-            for (i = 0; i < n_body_bytes; i++)
-                p += sprintf(&LOGBUF[p], " %u", ((uint8_t*)reg->value)[i]);
-            break;
-        }
-        case T_INT8: {
-            for (i = 0; i < n_body_bytes/2; i++)
-                p += sprintf(&LOGBUF[p], " %d", ((int8_t*)reg->value)[i]);
-            break;
-        }
-        case T_UINT16: {
-            for (i = 0; i < n_body_bytes/2; i++)
-                p += sprintf(&LOGBUF[p], " %u", ((uint16_t*)reg->value)[i]);
-            break;
-        }
-        case T_INT16: {
-            for (i = 0; i < n_body_bytes/2; i++)
-                p += sprintf(&LOGBUF[p], " %d", ((int16_t*)reg->value)[i]);
-            break;
-        }
-        case T_FLOAT: {
-//            for (i = 0; i < n_body_bytes; i++)
-//                p += sprintf(&LOGBUF[p], " 0x%02X", reg->value[i]);
-            for (i = 0; i < n_body_bytes/4; i++) 
-                p += sprintf(&LOGBUF[p], " %.2f", ((float*)reg->value)[i]);
-            break;
-        }
-        case T_CHAR: {
-            ((char*)reg->value)[n_body_bytes] = '\0'; // Null terminate
-            p += sprintf(&LOGBUF[p], " '%s'", (char*)reg->value);
-            break;
-        }
-    }    
-
+    mtq_print_reg_data(mtq, reg, LOGBUF, &p); 
     p += sprintf(&LOGBUF[p], " ]"); log_trace();
 }
 
 status_e mtq_write_start(mtq_s* mtq, mtq_reg_s* reg, void* data) {
     if (!mtq->is_init) return FAILURE;
-    uint8_t w_buf[MTQ_MAX_DATA_LEN];
+    uint8_t w_buf[MTQ_MAX_DATA_LEN] = {0};
     uint8_t n_body_bytes = 4*reg->cnt;
     uint8_t w_buf_len = 4 + n_body_bytes;
     w_buf[0] = MTQ_HEAD_WRITE;
@@ -243,25 +250,8 @@ status_e mtq_write_start(mtq_s* mtq, mtq_reg_s* reg, void* data) {
     
     memcpy(&w_buf[4], data, n_body_bytes);
     uint8_t csum = gen_csum(w_buf, w_buf_len);
-    
-    uint8_t i;
-    switch (reg->type) {
-//        case T_UINT8:
-//            break;
-//        case T_INT8:
-//            break;
-//        case T_UINT16:
-//            break;
-//        case T_INT16:
-//            break;
-//        case T_FLOAT:
-//            break;
-        case T_CHAR:
-            w_buf[4+n_body_bytes] = (uint8_t)('\0'); // Null terminate
-            break;
-    }
    
-    uint16_t p = 0;
+    uint8_t i, p = 0;
     p += sprintf(LOGBUF, "mtq_write_start: port=%u reg=(%u,%u) len=%u data=[", mtq->port, reg->midx, reg->idx, w_buf_len+1);
     for (i = 0; i < w_buf_len; i++)
         p += sprintf(&LOGBUF[p], " %02X", w_buf[i]);
@@ -406,11 +396,12 @@ status_e mtq_heartbeat(mtq_s* mtq) {
     if (hb == FAILURE) {
         sprintf(LOGBUF, "mtq_heartbeat: flatlined. resetting..."); log_error();
         uint8_t port = mtq->port;
+        char tle[140];
+        mtq_get_data(mtq, MTQ_TLE, tle);
+        mtq_reboot(mtq);
         mtq_destroy(mtq);
         mtq_init(mtq, port);
-        rtc_time_t dt;
-        epoch_ms_to_rtc(systime_epoch_ms(), &dt); 
-        mtq_set_datetime(mtq, dt);
+        mtq_write_start(mtq, MTQ_TLE, tle);
     }
     
     memset(snid, 0, reg->value_len);
@@ -418,10 +409,24 @@ status_e mtq_heartbeat(mtq_s* mtq) {
     return hb;
 }
 
-status_e mtq_reset(mtq_s* mtq) {
+status_e mtq_reboot(mtq_s* mtq) {
     if (!mtq->is_init) return FAILURE;
     uint8_t req = 1;
-    return mtq_write_start(mtq, MTQ_NVM, &req);
+    status_e s = mtq_write_start(mtq, MTQ_NVM, &req);
+    delay_ms(100);
+    return s;
+}
+
+status_e mtq_reset(mtq_s* mtq) {
+    if (!mtq->is_init) return FAILURE;
+    char tle[140];
+    mtq_get_data(mtq, MTQ_TLE, tle);
+    status_e s1 = mtq_reboot(mtq);
+    rtc_time_t dt;
+    epoch_ms_to_rtc(systime_epoch_ms(), &dt); 
+    status_e s2 = mtq_set_datetime(mtq, dt);
+    status_e s3 = mtq_write_start(mtq, MTQ_TLE, tle);
+    return (s1 == SUCCESS && s2 == SUCCESS && s3 == SUCCESS);
 }
 
 status_e mtq_read_fast(mtq_s* mtq) {
@@ -446,6 +451,11 @@ status_e mtq_read_ctrl(mtq_s* mtq) {
     return s;
 }
 
+status_e mtq_read_all(mtq_s* mtq) {
+    // TODO
+    return SUCCESS;
+}
+
 status_e mtq_set_datetime(mtq_s* mtq, rtc_time_t rtc) {
     if (!mtq->is_init) return FAILURE;
     uint8_t date[4]; 
@@ -464,12 +474,9 @@ status_e mtq_set_datetime(mtq_s* mtq, rtc_time_t rtc) {
     return (s1 == SUCCESS && s2 == SUCCESS) ? SUCCESS : FAILURE;
 }
 
-status_e mtq_set_conf(mtq_s* mtq, uint8_t elevation, uint8_t mode) {
+status_e mtq_set_mode(mtq_s* mtq, uint8_t mode) {
     if (!mtq->is_init) return FAILURE;
-    uint8_t conf[4];
-    conf[3] = elevation;
-    conf[2] = 0; // Unused
-    conf[1] = 0; // Unused
+    uint8_t conf[4] = {0};
     conf[0] = mode | (1 << 7);
     return mtq_write_start(mtq, MTQ_CONF, conf);
 }

@@ -8,7 +8,7 @@
 #define SCHEDULER_MAX_FUNC_TASKS        16 
 #define SCHEDULER_MAX_CMD_TASKS         4
 #define SCHEDULER_MAX_TASKS             SCHEDULER_MAX_CMD_TASKS + SCHEDULER_MAX_FUNC_TASKS
-#define SCHEDULE_REPS_INFINITE          0xFF
+#define SCHEDULE_REPS_INFINITE          0xFFFF
 
 // Provides base management and timing functionality to specialized schedule tasks
 
@@ -27,7 +27,7 @@ typedef struct {
     schedfunc_f func;
     cmdpkt_s* cmd_ptr; // Only store a pointer to the cmd in the scheduler cmds buffer so we don't have 20 cmd buffers
     schedtask_type_e type;
-    int8_t id;
+    uint8_t id;
     int1 active;
 } schedtask_s;
 
@@ -58,9 +58,9 @@ void scheduler_refresh_all(scheduler_s* s, uint64_t oldtime);
  * Finitely recurring tasks have a limit of 65535 repetitions
  * MAKE SURE THE SCHEDULE PERIOD IS GREATER THAN THE FUNCTION'S RUNTIME
  */
-status_e scheduler_schedule_func_at(scheduler_s* s, int8_t id, schedfunc_f func, rtc_time_t start_time, uint32_t period_ms, uint16_t reps);
+status_e scheduler_schedule_func_at(scheduler_s* s, uint8_t id, schedfunc_f func, rtc_time_t start_time, uint32_t period_ms, uint16_t reps);
 // The command version
-status_e scheduler_schedule_cmd_at(scheduler_s* s, int8_t id, cmdpkt_s* p, rtc_time_t start_time, uint32_t period_ms, uint16_t reps);
+status_e scheduler_schedule_cmd_at(scheduler_s* s, uint8_t id, cmdpkt_s* p, rtc_time_t start_time, uint32_t period_ms, uint16_t reps);
 
 /*
  * Schedule <func> to execute starting in <start_delay_ms> milliseconds from now for <reps> repetitions every <period_ms> milliseconds 
@@ -69,8 +69,8 @@ status_e scheduler_schedule_cmd_at(scheduler_s* s, int8_t id, cmdpkt_s* p, rtc_t
  * Finitely recurring tasks have a limit of 65535 repetitions
  * MAKE SURE THE SCHEDULE PERIOD IS GREATER THAN THE FUNCTION'S RUNTIME
  */
-status_e scheduler_schedule_func_in(scheduler_s* s, int8_t id, schedfunc_f func, uint32_t start_delay_ms, uint32_t period_ms, uint16_t reps);
+status_e scheduler_schedule_func_in(scheduler_s* s, uint8_t id, schedfunc_f func, uint32_t start_delay_ms, uint32_t period_ms, uint16_t reps);
 // The command version
-status_e scheduler_schedule_cmd_in(scheduler_s* s, int8_t id, cmdpkt_s* p, uint32_t start_delay_ms, uint32_t period_ms, uint16_t reps);
+status_e scheduler_schedule_cmd_in(scheduler_s* s, uint8_t id, cmdpkt_s* p, uint32_t start_delay_ms, uint32_t period_ms, uint16_t reps);
 
 #endif // !__SCHEDULER_H__

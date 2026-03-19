@@ -49,8 +49,8 @@ status_e flashmgr_increment_rbt_cnt(flashmgr_s* self) {
 		self->rbt_cnt = 0; // For first iteration.
 
 	// Validate no data corruption
-	if (self->rbt_cnt < 0)
-		self->rbt_cnt = 0;
+	// if (self->rbt_cnt < 0)
+	// 	self->rbt_cnt = 0;
 
 	// Increment the counter
 	self->rbt_cnt++; // Wraps to 0 automatically

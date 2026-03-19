@@ -20,10 +20,12 @@ extern ax100_s g_ax100;             // AX100 transceiver driver
 extern tlm_s g_tlm;                 // Global telemetry state / data store
 
 void cmdimpl_init() {
-    ht_set(&g_cmdmgr.cmdimpls, "ppm_set_time", (cmdimpl_f) cmdimpl_ppm_set_time);
-    ht_set(&g_cmdmgr.cmdimpls, "ppm_get_time", (cmdimpl_f) cmdimpl_ppm_get_time);
-    ht_set(&g_cmdmgr.cmdimpls, "ppm_ping", (cmdimpl_f) cmdimpl_ppm_ping);
-    ht_set(&g_cmdmgr.cmdimpls, "tlm_get_data", (cmdimpl_f) cmdimpl_tlm_get_data);
+    hashtable_s* ht = &g_cmdmgr.cmdimpls;
+    
+    ht_set(ht, "ppm_set_time", (cmdimpl_f) cmdimpl_ppm_set_time);
+    ht_set(ht, "ppm_get_time", (cmdimpl_f) cmdimpl_ppm_get_time);
+    ht_set(ht, "ppm_ping", (cmdimpl_f) cmdimpl_ppm_ping);
+    ht_set(ht, "tlm_get_data", (cmdimpl_f) cmdimpl_tlm_get_data);
 }
 
 void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
