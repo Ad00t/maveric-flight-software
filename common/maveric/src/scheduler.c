@@ -99,9 +99,7 @@ status_e scheduler_schedule_func_at(scheduler_s* s, uint8_t id, schedfunc_f func
     create_schedtask(&task, id, FUNC, rtc_to_epoch_ms(start_time), period_ms, reps);
     task.func = func;
     uint8_t i_task;
-    if (schedule_task(s, task, 0, SCHEDULER_MAX_FUNC_TASKS, &i_task) == FAILURE) // Func tasks segment of tasks buffer
-        return FAILURE;
-    return SUCCESS;
+    return schedule_task(s, task, 0, SCHEDULER_MAX_FUNC_TASKS, &i_task); // Func tasks segment of tasks buffer
 }
 
 status_e scheduler_schedule_cmd_at(scheduler_s* s, uint8_t id, cmdpkt_s* p, rtc_time_t start_time, uint32_t period_ms, uint16_t reps) {
@@ -121,9 +119,7 @@ status_e scheduler_schedule_func_in(scheduler_s* s, uint8_t id, schedfunc_f func
     create_schedtask(&task, id, FUNC, systime_epoch_ms() + start_delay_ms, period_ms, reps);
     task.func = func;
     uint8_t i_task;
-    if (schedule_task(s, task, 0, SCHEDULER_MAX_FUNC_TASKS, &i_task) == FAILURE)
-        return FAILURE;
-    return SUCCESS;
+    return schedule_task(s, task, 0, SCHEDULER_MAX_FUNC_TASKS, &i_task);
 }
 
 status_e scheduler_schedule_cmd_in(scheduler_s* s, uint8_t id, cmdpkt_s* p, uint32_t start_delay_ms, uint32_t period_ms, uint16_t reps) {

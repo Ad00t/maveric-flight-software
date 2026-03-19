@@ -1,10 +1,12 @@
 // LOWER PPM HOUSEKEEPING
 
 #include "housekeeping.h"
+#include "common.h"
 #include "scheduler.h"
 #include "systime.h"
 #include "cmdpkt.h"
 #include "cmdmgr.h"
+#include "flashmgr.h"
 #include "interrupts.h"
 #include "hashtable.h"
 #include "adcsmtq.h"
@@ -16,21 +18,22 @@
 
 #module
 
-extern irqmgr_s g_irqmgr;             // Interrupts manager
-extern cmdmgr_s g_cmdmgr;             // Commands manager
-extern scheduler_s g_scheduler;       // Schedules manager
-extern ertc_s g_ertc;                 // External RTC (on motherboard)
-extern mtq_s g_mtq;                   // Magnetorquer
-extern gyro_s g_gyro;                 // Gyroscope (x3)
-extern nvg_s g_nvg;                   // Naviguider
+extern irqmgr_s g_irqmgr;               // Interrupts manager
+extern cmdmgr_s g_cmdmgr;               // Commands manager
+extern flashmgr_s g_flashmgr;           // Flash manager
+extern scheduler_s g_scheduler;         // Schedules manager
+extern ertc_s g_ertc;                   // External RTC (on motherboard)
+extern mtq_s g_mtq;                     // Magnetorquer
+extern gyro_s g_gyro;                   // Gyroscope (x3)
+extern nvg_s g_nvg;                     // Naviguider
 
 void hk_init(void) {
     // IMPORTANT: AT LEAST ONE SCHEDULE FUNCTION MUST BE ACTIVE OR YOU WILL GET A SCHEDULER ERROR
-    scheduler_schedule_func_in(&g_scheduler, 0, hk_get_ertc_time, 2000, 500, SCHEDULE_REPS_INFINITE);
-    scheduler_schedule_func_in(&g_scheduler, 1, hk_log, 2500, 500, SCHEDULE_REPS_INFINITE);
-    scheduler_schedule_func_in(&g_scheduler, 2, hk_systime_sync, 5000, 30000, SCHEDULE_REPS_INFINITE);
-    scheduler_schedule_func_in(&g_scheduler, 3, hk_heartbeats, 4000, 3000, SCHEDULE_REPS_INFINITE);
-    scheduler_schedule_func_in(&g_scheduler, 4, hk_read_sensors, 3000, 1000, SCHEDULE_REPS_INFINITE);
+    status_e s0 = scheduler_schedule_func_in(&g_scheduler, 0, hk_get_ertc_time, 2000, 500, SCHEDULE_REPS_INFINITE);
+    status_e s1 = scheduler_schedule_func_in(&g_scheduler, 1, hk_log, 2500, 500, SCHEDULE_REPS_INFINITE);
+    status_e s2 = scheduler_schedule_func_in(&g_scheduler, 2, hk_systime_sync, 5000, 30000, SCHEDULE_REPS_INFINITE);
+    status_e s3 = scheduler_schedule_func_in(&g_scheduler, 3, hk_heartbeats, 4000, 3000, SCHEDULE_REPS_INFINITE);
+    status_e s4 = scheduler_schedule_func_in(&g_scheduler, 4, hk_read_sensors, 3000, 1000, SCHEDULE_REPS_INFINITE);
     // scheduler_schedule_func_in(&g_scheduler, 6, hk_test_disable_ertc, 15000, 0, 1);
 }
 
