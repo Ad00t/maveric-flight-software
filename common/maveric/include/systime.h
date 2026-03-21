@@ -17,7 +17,7 @@ uint64_t rtc_to_epoch_ms(rtc_time_t rtc);
 void epoch_ms_to_rtc(uint64_t epoch_ms, rtc_time_t* rtc);
 
 // Creates string representation of rtc time
-void rtc_to_str(rtc_time_t rtc, char* out);
+void rtc_to_str(rtc_time_t* rtc, char* out);
 
 // Initializes system time service
 void systime_init(uint64_t* irq_ms_ptr, rtc_time_t* rtc_ptr);

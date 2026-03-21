@@ -143,3 +143,14 @@ void cmd_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype,
     cmdpkt_create(&pkt, orgn, dest, echo, ptype, id, args);
     cmdpkt_dispatch(&pkt);
 }
+
+// Public helpers 
+
+cmdpkt_type_e stat2ack(status_e s) {
+    return (s == SUCCESS ? ACK : NACK);
+}
+
+void cmd_respond(cmdpkt_s* pkt, cmdpkt_type_e type, char* res) {
+    cmd_dispatch(pkt->dest, pkt->orgn, pkt->echo, type, pkt->id, res); 
+}
+

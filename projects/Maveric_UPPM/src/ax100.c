@@ -8,29 +8,35 @@
 
 // MAIN TRANSCEIVER INTERFACE
 
-void ax100_init(ax100_s* a, uint8_t port) {
+status_e ax100_init(ax100_s* a, uint8_t port) {
     a->port = port;
-    ax100_set_power(a, TRUE);
-    sprintf(LOGBUF, "ax100_init: port=%u", a->port); log_flush(LL_INFO);
+    status_e s1 = ax100_set_power(a, TRUE);
+    uint8_t power = 0;
+    status_e s2 = ax100_get_power(a, &power);
+    sprintf(LOGBUF, "ax100_init: port=%u power=%u", a->port, power); log_info();
+    return (s1 == SUCCESS && s2 == SUCCESS) ? SUCCESS : FAILURE;
 }
 
-void ax100_set_power(ax100_s* a, int1 on) {
-    if (!a->is_init) return;
-    if (on) {
+status_e ax100_get_power(ax100_s* a, uint8_t* power) {
+    if (!a->is_init) return FAILURE;
+	*power = (uint8_t) input_state(AX100_PWR);
+    return SUCCESS;
+}
+
+
+status_e ax100_set_power(ax100_s* a, uint8_t power) {
+    if (!a->is_init) return FAILURE;
+    if (power) {
         output_high(AX100_PWR);
     } else {
         output_low(AX100_PWR);
     }
+    delay_ms(10);
+    return SUCCESS;
 }
 
-int1 ax100_is_on(ax100_s* a) {
-    if (!a->is_init) return 0;
-	return (int1) input_state(AX100_PWR);
-}
-
-// You should not ever need to use this function. Just use cmd_dispatch() with dest as GS
-void ax100_transmit_frame(ax100_s* a, uint8_t* frame, uint16_t len) {
-    if (!a->is_init) return;
+status_e ax100_transmit_frame(ax100_s* a, uint8_t* frame, uint16_t len) {
+    if (!a->is_init) return FAILURE;
     uart_write_buf(a->port, frame, len);
     uint16_t p = 0;
     uint16_t i;
@@ -38,5 +44,6 @@ void ax100_transmit_frame(ax100_s* a, uint8_t* frame, uint16_t len) {
     for (i = 0; i < len; i++) 
         p += sprintf(&LOGBUF[p], " %02X", frame[i]); 
     p += sprintf(&LOGBUF[p], " ]"); 
-    log_flush(LL_TRACE);
+    log_trace();
+    return SUCCESS;
 }

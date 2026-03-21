@@ -45,9 +45,11 @@ void hk_get_ertc_time(void) {
 
 void hk_systime_sync(void) {
     systime_sync();
-    char tm_str[32] = {0};
-    rtc_to_str(g_ertc.time, tm_str);
-    cmd_dispatch(NODE, NODE_UPPM, 0, REQ, "ppm_set_time", tm_str);
+    char req[CMD_MAX_ARGS_LEN] = {0};
+    rtc_time_t rtc;
+    epoch_ms_to_rtc(systime_epoch_ms(), &rtc);  
+    rtc_to_str(&rtc, req);
+    cmd_dispatch(NODE, NODE_UPPM, 0, REQ, "ppm_set_time", req);
 }
 
 void hk_log(void) {
@@ -57,10 +59,11 @@ void hk_log(void) {
 }
 
 void hk_heartbeats(void) {
-    // int1 hb_ertc = ertc_heartbeat(&g_ertc);
-    // int1 hb_mtq = mtq_heartbeat(&g_mtq);
-    // int1 hb_nvg = nvg_heartbeat(&g_nvg);
-    // int1 hb_gyro = gyro_heartbeat(&g_gyro);
+    // status_e hb_ertc = ertc_heartbeat(&g_ertc);
+    // status_e hb_mtq = mtq_heartbeat(&g_mtq);
+    // status_e hb_nvg = nvg_heartbeat(&g_nvg);
+    // status_e hb_gyro = gyro_heartbeat(&g_gyro);
+    // sprintf(LOGBUF, "heartbeats: %u %u %u %", hb_ertc, hb_mtq, hb_nvg, /* hb_gyro */ 0);
 }
 
 void hk_read_sensors(void) {

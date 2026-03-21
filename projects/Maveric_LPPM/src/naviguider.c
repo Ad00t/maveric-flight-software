@@ -56,7 +56,7 @@ void nvg_pkt_clear(nvg_pkt_s* pkt) {
 
 // Naviguider
 
-void nvg_init(nvg_s* nvg, uint8_t port) {
+status_e nvg_init(nvg_s* nvg, uint8_t port) {
     nvg->port = port;
     nvg->is_init = TRUE;
     memcpy(nvg->sensors, NVG_INIT_SENSOR_TABLE, sizeof(NVG_INIT_SENSOR_TABLE));
@@ -67,17 +67,18 @@ void nvg_init(nvg_s* nvg, uint8_t port) {
         nvg->sensors[NVG_SENSOR_IDS[i]].data = (float*) calloc(nvg->sensors[NVG_SENSOR_IDS[i]].len, sizeof(float));
     }
    
-    nvg_reset(nvg);
-    nvg_start_sensor(nvg, NVG_TEMPERATURE, 1);
-    nvg_start_all_sensors(nvg);
+    status_e s1 = nvg_reset(nvg);
+    status_e s2 = nvg_set_sensor(nvg, NVG_TEMPERATURE, 1);
+    status_e s3 = nvg_start_all_sensors(nvg);
 
-    sprintf(LOGBUF, "nvg_init: port=%u", nvg->port); log_flush(LL_INFO);
+    sprintf(LOGBUF, "nvg_init: port=%u", nvg->port); log_info();
+    return (s1 == SUCCESS && s2 == SUCCESS && s3 == SUCCESS) ? SUCCESS : FAILURE;
 }
 
 void nvg_destroy(nvg_s* nvg) {
     if (!nvg->is_init) return;
     nvg_stop_all_sensors(nvg);
-    nvg_power_down(nvg);
+    nvg_power(nvg);
     nvg_clear(nvg);
     uint8_t i;
     for (i = 0; i < NVG_NUM_SENSORS; i++) {
@@ -85,7 +86,7 @@ void nvg_destroy(nvg_s* nvg) {
             free(nvg->sensors[NVG_SENSOR_IDS[i]].data);
     }
     nvg->is_init = FALSE; 
-    sprintf(LOGBUF, "nvg_destroy"); log_flush(LL_INFO);
+    sprintf(LOGBUF, "nvg_destroy"); log_info();
 }
 
 void nvg_clear(nvg_s* nvg) {
@@ -98,15 +99,16 @@ void nvg_clear(nvg_s* nvg) {
         sens->ts = 0;
     }
     nvg_pkt_clear(&nvg->rcvpkt);
-    sprintf(LOGBUF, "nvg_clear"); log_flush(LL_INFO);
+    sprintf(LOGBUF, "nvg_clear"); log_info();
 }
 
-void nvg_send_command(nvg_s* nvg, char* cmd) {
-    if (!nvg->is_init) return;
+status_e nvg_send_cmd(nvg_s* nvg, char* cmd) {
+    if (!nvg->is_init) return FAILURE;
     uint8_t len = strlen(cmd);
     uart_write_buf(nvg->port, cmd, len);
-    sprintf(LOGBUF, "nvg_send_command: len=%u \"%s\"", len, cmd); log_flush(LL_INFO);
-    delay_ms(100);
+    sprintf(LOGBUF, "nvg_send_cmd: len=%u \"%s\"", len, cmd); log_info();
+    delay_ms(10);
+    return SUCCESS;
 } 
 
 void nvg_parse_stream(nvg_s* nvg, ringbuf_s* irqbuf) {
@@ -132,7 +134,7 @@ void nvg_parse_stream(nvg_s* nvg, ringbuf_s* irqbuf) {
         // Line end detected
 
         if (!is_data_line(pkt->buf, pkt->buf_len)) {
-            sprintf(LOGBUF, "nvg_parse_stream: info: len=%u \"%s\"", pkt->buf_len, pkt->buf); log_flush(LL_TRACE);
+            sprintf(LOGBUF, "nvg_parse_stream: info: len=%u \"%s\"", pkt->buf_len, pkt->buf); log_trace();
             nvg_pkt_clear(pkt);
             continue;
         }
@@ -140,10 +142,11 @@ void nvg_parse_stream(nvg_s* nvg, ringbuf_s* irqbuf) {
         // CSV data line detected
 
         if (pkt->buf_len <= 8) {
-            goto malformed;
+            nvg_pkt_clear(pkt);
+            continue;
         }
 
-        // sprintf(LOGBUF, "nvg_parse_stream: data: len=%u \"%s\"", pkt->buf_len, pkt->buf); log_flush(LL_TRACE);
+        // sprintf(LOGBUF, "nvg_parse_stream: data: len=%u \"%s\"", pkt->buf_len, pkt->buf); log_trace();
 
         // Tokenize
         char* argv[16];
@@ -151,12 +154,6 @@ void nvg_parse_stream(nvg_s* nvg, ringbuf_s* irqbuf) {
         memcpy(buf_cp, pkt->buf, sizeof(buf_cp));
         uint8_t argc = split_csv(buf_cp, pkt->buf_len, argv, 16);
         if (argc < 3) goto malformed;
-
-        // fprintf(FTDI_PORT, "%sline='%s' tokens: cnt=%u [ ", KYEL, pkt->buf, argc);
-        // uint8_t j;
-        // for (j = 0; j < argc; j++)
-        //     fprintf(FTDI_PORT, "%s ", argv[j]);
-        // fprintf(FTDI_PORT, "]\n");
 
         // Timestamp
         char* endp;
@@ -188,19 +185,13 @@ void nvg_parse_stream(nvg_s* nvg, ringbuf_s* irqbuf) {
         continue;
 
     malformed:
-        sprintf(LOGBUF, "nvg_parse_stream: malformed: len=%u \"%s\"", pkt->buf_len, pkt->buf); log_flush(LL_ERROR);
+        sprintf(LOGBUF, "nvg_parse_stream: malformed: len=%u \"%s\"", pkt->buf_len, pkt->buf); log_error();
         nvg_pkt_clear(pkt);
     }
 }
 
 void nvg_process_sensor_data(nvg_s* nvg) { 
     if (!nvg->is_init) return;
-    static char* id_to_text[] = { 
-        "NULL", "ACCELEROMETER", "MAGNETOMETER_CAL", "ORIENTATION", "GYROSCOPE_CAL", 
-        "NULL", "PRESSURE", "TEMPERATURE", "NULL", "ACCEL_GRAVITY", "ACCEL_LINEAR", 
-        "QUAT_RV", "NULL", "NULL", "MAGNETOMETER_UNCAL", "QUAT_GAME", 
-        "GYROSCOPE_UNCAL", "NULL", "NULL", "NULL", "QUAT_GEOMAG" 
-    };
 
     nvg_sensor_s* sens = &nvg->sensors[nvg->rcvpkt.id];
     if (sens->len == 0) return;
@@ -209,81 +200,92 @@ void nvg_process_sensor_data(nvg_s* nvg) {
    
     uint16_t p = 0;
     uint8_t i;
-    p += sprintf(LOGBUF, "nvg_rcv_complete: ts=%.3f sens=%s [", sens->ts, id_to_text[sens->id]); 
-    for (i = 0; i < sens->len; i++)
-        p += sprintf(&LOGBUF[p], " %.3f", sens->data[i]);
-    p += sprintf(&LOGBUF[p], " ]"); log_flush(LL_TRACE);
+    char fbuf[32] = {0};
+    ftoa(sens->ts, fbuf, 3, 'f');
+    p += sprintf(LOGBUF, "nvg_rcv_complete: ts=%s sens=%s [", fbuf, NVG_ID_TO_TEXT[sens->id]); 
+    for (i = 0; i < sens->len; i++) {
+        memset(fbuf, 0, sizeof(fbuf));
+        ftoa(sens->data[i], fbuf, 3, 'f');
+        p += sprintf(&LOGBUF[p], " %s", fbuf);
+    }
+    p += sprintf(&LOGBUF[p], " ]"); log_trace();
 }
 
-void nvg_get_sensor_data(nvg_s* nvg, uint8_t id, float* out) {
-    if (!nvg->is_init) return;
+status_e nvg_get_sensor_data(nvg_s* nvg, uint8_t id, float* out) {
+    if (!nvg->is_init) return FAILURE;
     nvg_sensor_s* sens = &nvg->sensors[id];
-    if (sens->len == 0 || sens->data == NULL) {
-        out = NULL;
-        return;
-    };
+    if (sens->len == 0 || sens->data == NULL)
+        return FAILURE;
     memcpy(out, sens->data, sens->len * sizeof(float));
+    return SUCCESS;
 }
 
 // HIGH LEVEL API
 
-void nvg_start_sensor(nvg_s* nvg, uint8_t id, uint16_t rate) {
-    if (!nvg->is_init) return;
+status_e nvg_set_sensor(nvg_s* nvg, uint8_t id, uint16_t rate) {
+    if (!nvg->is_init) return FAILURE;
     uint8_t buf[10];
     sprintf(buf, "s %u,%u\r", id, rate);
-    nvg_send_command(nvg, buf); 
-    delay_ms(10);
+    return nvg_send_cmd(nvg, buf); 
 }
 
-void nvg_start_all_sensors(nvg_s* nvg) {
-    if (!nvg->is_init) return;
+status_e nvg_start_all_sensors(nvg_s* nvg) {
+    if (!nvg->is_init) return FAILURE;
+    status_e s = SUCCESS;
     uint8_t i;
     for (i = 0; i < NVG_NUM_SENSORS; i++) {
-        nvg_start_sensor(nvg, NVG_SENSOR_IDS[i], 1);
+        if (nvg_set_sensor(nvg, NVG_SENSOR_IDS[i], 1) == FAILURE)
+            s = FAILURE;
     } 
+    return s;
 }
         
-void nvg_stop_all_sensors(nvg_s* nvg) {
-    if (!nvg->is_init) return;
+status_e nvg_stop_all_sensors(nvg_s* nvg) {
+    if (!nvg->is_init) return FAILURE;
+    status_e s = SUCCESS;
     uint8_t i;
     for (i = 0; i < NVG_NUM_SENSORS; i++) {
-        nvg_start_sensor(nvg, NVG_SENSOR_IDS[i], 0);
+        if (nvg_set_sensor(nvg, NVG_SENSOR_IDS[i], 0) == FAILURE)
+            s = FAILURE;
     } 
+    return s;
 }
         
-// COMMAND FUNCTIONS
-
-int1 nvg_heartbeat(nvg_s* nvg) {
+status_e nvg_heartbeat(nvg_s* nvg) {
     if (!nvg->is_init) return 0;
-    int1 hb = (nvg->sensors[NVG_TEMPERATURE].ts > 0);
-    if (!hb) {
-        sprintf(LOGBUF, "nvg_heartbeat: flatlined. resetting..."); log_flush(LL_ERROR);
-        uint8_t port = nvg->port;
-        nvg_destroy(nvg);
-        delay_ms(500);
-        nvg_init(nvg, port);
-    }
+    status_e hb = (nvg->sensors[NVG_TEMPERATURE].ts > 0) ? SUCCESS : FAILURE;
+
+    // if (hb == FAILURE) {
+    //     sprintf(LOGBUF, "nvg_heartbeat: flatlined. resetting..."); log_error();
+    //     uint8_t port = nvg->port;
+    //     nvg_destroy(nvg);
+    //     delay_ms(500);
+    //     nvg_init(nvg, port);
+    // }
+
     nvg->sensors[NVG_TEMPERATURE].ts = 0;
     return hb;
 }
 
-void nvg_power_down(nvg_s* nvg) {
-    if (!nvg->is_init) return;
-    nvg_send_command(nvg, "P");
+status_e nvg_power(nvg_s* nvg) {
+    if (!nvg->is_init) return FAILURE;
+    return nvg_send_cmd(nvg, "P");
 }
 
-void nvg_reset(nvg_s* nvg) {
-    if (!nvg->is_init) return;
-    nvg_send_command(nvg, "X");
-    nvg_send_command(nvg, "V0");
-    nvg_send_command(nvg, "M1\r");
-    nvg_send_command(nvg, "m0");
-    nvg_send_command(nvg, "D1");
+status_e nvg_reset(nvg_s* nvg) {
+    if (!nvg->is_init) return FAILURE;
+    status_e s1 = nvg_send_cmd(nvg, "X");
+    status_e s2 = nvg_send_cmd(nvg, "V0");
+    status_e s3 = nvg_send_cmd(nvg, "M1\r");
+    status_e s4 = nvg_send_cmd(nvg, "m0");
+    status_e s5 = nvg_send_cmd(nvg, "D1");
+    return (s1 == SUCCESS && s2 == SUCCESS && s3 == SUCCESS && s4 == SUCCESS && s5 == SUCCESS) ? SUCCESS : FAILURE;
 }
 
-void nvg_magnetometer_mode(nvg_s* nvg) {
-    if (!nvg->is_init) return;
-    nvg_stop_all_sensors(nvg);
-    nvg_start_sensor(nvg, NVG_MAGNETOMETER_UNCAL, 1);
-    nvg_start_sensor(nvg, NVG_MAGNETOMETER_CAL, 1);
+status_e nvg_magnetometer_mode(nvg_s* nvg) {
+    if (!nvg->is_init) return FAILURE;
+    status_e s1 = nvg_stop_all_sensors(nvg);
+    status_e s2 = nvg_set_sensor(nvg, NVG_MAGNETOMETER_UNCAL, 1);
+    status_e s3 = nvg_set_sensor(nvg, NVG_MAGNETOMETER_CAL, 1);
+    return (s1 == SUCCESS && s2 == SUCCESS && s3 == SUCCESS) ? SUCCESS : FAILURE;
 }

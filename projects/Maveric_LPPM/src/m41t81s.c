@@ -9,13 +9,14 @@
 
 // ERTC FUNCTIONS
 
-void ertc_init(ertc_s* ertc, rtc_time_t* init_time) {
+status_e ertc_init(ertc_s* ertc, rtc_time_t* init_time) {
     ertc->is_init = TRUE;
     ertc_clear(ertc);
     memcpy(&ertc->init_time, init_time, sizeof(rtc_time_t));
     ertc->is_using_ertc = TRUE;
     rtc_write(init_time);
     ertc_enable_fpm(ertc);
+    return SUCCESS;
 }
 
 void ertc_clear(ertc_s* ertc) {

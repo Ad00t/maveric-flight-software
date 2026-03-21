@@ -46,16 +46,13 @@
 #use rs232(baud=COM_D_BAUD, UART4, BITS=8, STREAM=COM_D, ERRORS, PARITY=N, STOP=1, TIMEOUT=1000)
 // #use spi(MASTER, FORCE_HW, SPI1, BAUD=2000000, MSB_FIRST, BITS=16, MODE=3, STREAM=SPI_1)
 #use i2c(MASTER, I2C1, STREAM=I2C_1)
-// #use timer(TIMER=1, TICK=1ns, BITS=16, ISR)
-// #use i2c(master, sda=PIN_A3, scl=PIN_A2, STREAM=I2C_1)
-// #use i2c(master, sda=PIN_A15, scl=PIN_A14, STREAM=I2C_1)
 
 // Global defines
 
 #define LOWER_PPM
 #define NODE                NODE_LPPM 
 #define NODE_LBL            "LPPM"
-#define LOG_LEVEL           LL_TRACE 
+#define LOG_LEVEL           LL_DEBUG 
 
 // Module includes (.c necessary)
 
@@ -84,13 +81,6 @@
 #include "scheduler.c"
 #include "cmdimpl.c"
 #include "housekeeping.c"
-// GNC
-// #include "rt_logging.c"
-// #include "rtGetNaN.c"
-// #include "rtGetInf.c"
-// #include "rt_nonfinite.c"
-// #include "GNC_Planner_Core.c"
-// #include "rt_main.c"
 
 void system_init(void);
 void system_superloop(void);
@@ -148,21 +138,24 @@ void system_init(void) {
     dfl_time.tm_hour = 0;
     dfl_time.tm_min = 0;
     dfl_time.tm_sec = 0;
-    ertc_init(&g_ertc, &dfl_time);
+    status_e s_ertc = ertc_init(&g_ertc, &dfl_time);
     systime_init(&g_irqmgr.ms, &g_ertc.time);
     
     // Submodules & services init
-    mtq_init(&g_mtq, MTQ_PORT);
     // gyro_init(&g_gyro, GYRO_CS1, GYRO_CS2, GYRO_CS3, GYRO_ON);
-    // nvg_init(&g_nvg, NVG_PORT);
+    status_e s_mtq = mtq_init(&g_mtq, MTQ_PORT);
+    status_e s_nvg = nvg_init(&g_nvg, NVG_PORT);
     scheduler_init(&g_scheduler);
     cmdmgr_init(&g_cmdmgr);
     hk_init();
     cmdimpl_init();
 
     // Push a time update to UPPM 
+    delay_ms(2000);
     char req[CMD_MAX_ARGS_LEN] = {0};
-    rtc_to_str(g_ertc.time, req);
+    rtc_time_t rtc;
+    epoch_ms_to_rtc(systime_epoch_ms(), &rtc);  
+    rtc_to_str(&rtc, req);
     cmd_dispatch(NODE, NODE_UPPM, 0, REQ, "ppm_set_time", req);
 
     sprintf(LOGBUF, "system initialized"); log_info();
@@ -177,15 +170,16 @@ void system_superloop(void) {
     // Handle received byte interrupts
     // Do driver handling before commands so data is up to date
     mtq_parse_stream(&g_mtq, &g_irqmgr.irqbufs[MTQ_PORT-1]); // Handle magnetorquer data
-    // nvg_parse_stream(&g_nvg, &g_irqmgr.irqbufs[NVG_PORT-1]); // Handle naviguider data
+    nvg_parse_stream(&g_nvg, &g_irqmgr.irqbufs[NVG_PORT-1]); // Handle naviguider data
     cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[UPPM_PORT-1], &g_cmdmgr.rcvpkts[0], FALSE); // Handle UPPM commands 
     cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[FTDI_PORT-1], &g_cmdmgr.rcvpkts[1], FALSE); // Handle FTDI commands
 
+    // Run scheduler
     scheduler_run_tasks(&g_scheduler, &g_cmdmgr);
 }
 
 // Cleanup routine
 void system_cleanup(void) {
     mtq_destroy(&g_mtq);
-    // nvg_destroy(&g_nvg);
+    nvg_destroy(&g_nvg);
 }

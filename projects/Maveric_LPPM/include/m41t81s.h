@@ -18,7 +18,7 @@ typedef struct {
 } ertc_s;
 
 // Initialze ertc module with initial time in buf
-void ertc_init(ertc_s* ertc, rtc_time_t* init_time);
+status_e ertc_init(ertc_s* ertc, rtc_time_t* init_time);
 
 // Clear ertc data
 void ertc_clear(ertc_s* ertc);

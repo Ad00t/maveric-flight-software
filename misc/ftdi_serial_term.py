@@ -155,6 +155,9 @@ def log_warn(msg):
 def log_error(msg):
     log(f"{KRED}{epoch_time_ms()} [ERROR] [FTDI] {msg}\n")
 
+def log_rcvcmd(msg):
+    log(f"{KMAG}{epoch_time_ms()} [RCVCMD] [FTDI] {msg}\n")
+
 def read_serial():
     while True:
         try:
@@ -164,7 +167,7 @@ def read_serial():
                     case 'ftdi_log':
                         log(p['args'])
                     case _:
-                        log_error(f"unimplemented cmd: {p}")
+                        log_rcvcmd(f"{p}")
         except KeyboardInterrupt:
             log_info('read_serial: quitting')
             if ftdi.is_open: 

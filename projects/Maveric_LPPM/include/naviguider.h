@@ -10,6 +10,13 @@
 #define NVG_MAX_PAYLOAD_LEN     7
 #define NVG_SENSOR_TABLE_LEN    21
 
+static char* NVG_ID_TO_TEXT[] = { 
+    "NULL", "ACCELEROMETER", "MAGNETOMETER_CAL", "ORIENTATION", "GYROSCOPE_CAL", 
+    "NULL", "PRESSURE", "TEMPERATURE", "NULL", "ACCEL_GRAVITY", "ACCEL_LINEAR", 
+    "QUAT_RV", "NULL", "NULL", "MAGNETOMETER_UNCAL", "QUAT_GAME", 
+    "GYROSCOPE_UNCAL", "NULL", "NULL", "NULL", "QUAT_GEOMAG" 
+};
+
 // Naviguider UART FSM
 
 typedef enum {
@@ -57,7 +64,7 @@ typedef struct {
 } nvg_s;
 
 // Initialize naviguider on provided COM port
-void nvg_init(nvg_s* nvg, uint8_t port);
+status_e nvg_init(nvg_s* nvg, uint8_t port);
 
 // Free sensor heap allocations
 void nvg_destroy(nvg_s* nvg);
@@ -66,7 +73,7 @@ void nvg_destroy(nvg_s* nvg);
 void nvg_clear(nvg_s* nvg);
 
 // Send command to naviguider
-void nvg_send_command(nvg_s* nvg, char* cmd); 
+status_e nvg_send_cmd(nvg_s* nvg, char* cmd); 
 
 // Parse naviguider data packets out of input buffer/stream 
 void nvg_parse_stream(nvg_s* nvg, ringbuf_s* irqbuf);
@@ -75,24 +82,24 @@ void nvg_parse_stream(nvg_s* nvg, ringbuf_s* irqbuf);
 void nvg_process_sensor_data(nvg_s* nvg);
 
 // Return a copy of the data for a sensor
-void nvg_get_sensor_data(nvg_s* nvg, uint8_t id, float* out);
+status_e nvg_get_sensor_data(nvg_s* nvg, uint8_t id, float* out);
 
 // HIGH LEVEL API
 
 /*
-Starts a sensor at a given rate.
+Sets a sensor to a given rate.
 
 Args:
     id (uint8_t): The ID of the sensor to start (see Table 4-2).
     rate(uint16_t): The data rate for the sensor (aggregate rate <= 1200 Hz).
 */
-void nvg_start_sensor(nvg_s* nvg, uint8_t id, uint16_t rate);
+status_e nvg_set_sensor(nvg_s* nvg, uint8_t id, uint16_t rate);
         
 // Starts all continuous sensors a 1 Hz.
-void nvg_start_all_sensors(nvg_s* nvg);
+status_e nvg_start_all_sensors(nvg_s* nvg);
         
 // Stops all continuous sensors.
-void nvg_stop_all_sensors(nvg_s* nvg);
+status_e nvg_stop_all_sensors(nvg_s* nvg);
         
 // COMMAND FUNCTIONS
 
@@ -102,16 +109,16 @@ Checks last timestamp for each sensor to determine if sensor has reported in las
 Returns
     status (bool): Whether heartbeat check passed for all sensors or not 
 */
-int1 nvg_heartbeat(nvg_s* nvg);
+status_e nvg_heartbeat(nvg_s* nvg);
 
 // Sends the 'P' command to toggle sensor power
-void nvg_power_down(nvg_s* nvg);
+status_e nvg_power(nvg_s* nvg);
 
 // Standard reset initialization sequence 
-void nvg_reset(nvg_s* nvg);
+status_e nvg_reset(nvg_s* nvg);
 
 // Starts magnetometer sensors at continuous 1 Hz.
-void nvg_magnetometer_mode(nvg_s* nvg);
+status_e nvg_magnetometer_mode(nvg_s* nvg);
 
 // Naviguider sensor IDs
 

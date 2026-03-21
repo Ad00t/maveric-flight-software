@@ -46,7 +46,7 @@ uint8_t minu8(uint8_t a, uint8_t b) {
 //  to actually work.
 //-----------------------------------------------------------
 
-int ftoa(float x, char* str, char prec, char format) {
+int ftoa(float x, char* str, uint8_t prec, char format) {
     int k, fstyle;
 
     signed int8 ie, i, ndig;

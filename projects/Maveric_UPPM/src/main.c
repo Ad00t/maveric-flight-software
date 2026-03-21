@@ -81,7 +81,7 @@ void system_init(void);
 void system_superloop(void);
 void system_cleanup(void);
 
-int1 SUPERLOOP_RUNNING = TRUE;
+int1 g_superloop_running = TRUE;
 uint8_t g_rbt_cause = 0;
 
 irqmgr_s g_irqmgr = {0};            // Interrupts manager
@@ -93,7 +93,7 @@ tlm_s g_tlm = {0};                  // Global telemetry state / data store
 
 void main(void) {	
     system_init();
-    while (SUPERLOOP_RUNNING) {
+    while (g_superloop_running) {
         system_superloop(); 
     }
     system_cleanup();
@@ -135,7 +135,7 @@ void system_init(void) {
     cmdimpl_init();
     hk_init();
 
-    delay_ms(2000); // Wait for LPPM to initialize
+    // Fetch time from LPPM
     cmd_dispatch(NODE, NODE_LPPM, 0, REQ, "ppm_get_time", "");
 
     sprintf(LOGBUF, "system initialized"); log_info();

@@ -13,7 +13,6 @@
 #define MTQ_MAX_PAYLOAD_LEN     MTQ_MAX_PKT_LEN - MTQ_HEADER_LEN - MTQ_CSUM_LEN
 #define MTQ_HEAD_READ           0xC9
 #define MTQ_HEAD_WRITE          0xC8
-#define MTQ_REG_TABLE_LEN       23      // 116
 #define MTQ_MAP_COUNT           3       // 3
 #define MTQ_MAX_IDX_COUNT       256     // 256
 #define MTQ_PAGE_SIZE           5
@@ -28,7 +27,6 @@
 #define MTQ_MODE_DETUMBLING         1
 #define MTQ_MODE_SAFE               0
 
-
 // Register type
 
 typedef enum {
@@ -41,6 +39,150 @@ typedef enum {
 } mtq_reg_type_e;
 
 static uint8_t MTQ_REG_TYPE_SIZES[] = { 1, 1, 2, 2, 4, 1 };
+
+// MTQ register struct
+
+typedef struct {
+    uint8_t idx;
+    uint8_t cnt;
+    uint8_t midx;
+    mtq_reg_type_e type;
+    void* value;                // Should be free'd on reinitialization 
+    uint8_t value_len;
+} mtq_reg_s;
+
+/* Register format: [idx, cnt, midx, type, data, len]
+                idx: Denotes the register that the command will read/write from/to.
+                cnt: Size of register in counts. 4 bytes/count.
+                midx: Determins which part of the register is being accesses; always a value from 0 to 2.
+                type: Indicates the kind of data stored in a register.
+                data: Pointer to a buffer to store read register data.
+                len: Length of data in bytes.
+*/
+
+static const mtq_reg_s MTQ_INIT_REG_TABLE[] = {
+    // Table 6-2. User Register (0)
+    // /* FACT */             { 0, 1, 0, T_UINT16, NULL, 0 },
+    /* SNID */             { 1, 3, 0, T_CHAR,   NULL, 0 },
+    /* CONF */             { 4, 1, 0, T_UINT8,  NULL, 0 },
+    /* TIME */             { 5, 1, 0, T_UINT8,  NULL, 0 },
+    /* DATE */             { 6, 1, 0, T_UINT8,  NULL, 0 },
+    // /* LLA_REF */          { 7, 3, 0, T_FLOAT,  NULL, 0 },
+    // /* Q_REF */            { 10, 4, 0, T_FLOAT, NULL, 0 },
+    /* POINTING_AXIS */    { 14, 3, 0, T_FLOAT, NULL, 0 },
+    /* TLE */              { 17, 35, 0, T_CHAR, NULL, 0 },
+    // /* GGA */              { 52, 32, 0, T_CHAR, NULL, 0 },
+    // /* ZDA */              { 84, 16, 0, T_CHAR, NULL, 0 },
+    // /* SV_USER */          { 100, 3, 0, T_FLOAT, NULL, 0 },
+    /* MTQ_USER */         { 103, 3, 0, T_FLOAT, NULL, 0 },
+    // /* CMG0_G_RATE_USER */ { 106, 1, 0, T_FLOAT, NULL, 0 },
+    // /* CMG0_G_TOR_USER */  { 107, 1, 0, T_FLOAT, NULL, 0 },
+    // /* CMG1_G_RATE_USER */ { 108, 1, 0, T_FLOAT, NULL, 0 },
+    // /* CMG1_G_TOR_USER */  { 109, 1, 0, T_FLOAT, NULL, 0 },
+    // /* CMG2_G_RATE_USER */ { 110, 1, 0, T_FLOAT, NULL, 0 },
+    // /* CMG2_G_TOR_USER */  { 111, 1, 0, T_FLOAT, NULL, 0 },
+    // /* CMG3_G_RATE_USER */ { 112, 1, 0, T_FLOAT, NULL, 0 },
+    // /* CMG3_G_TOR_USER */  { 113, 1, 0, T_FLOAT, NULL, 0 },
+    /* STAT */             { 128, 1, 0, T_UINT8, NULL, 0 },
+    /* ACT_ERR */          { 129, 1, 0, T_UINT8, NULL, 0 },
+    /* SEN_ERR */          { 130, 1, 0, T_UINT8, NULL, 0 },
+    /* CSS_ERR */          { 131, 1, 0, T_UINT8, NULL, 0 },
+    /* Q */                { 132, 4, 0, T_FLOAT, NULL, 0 },
+    /* RATE */             { 136, 3, 0, T_FLOAT, NULL, 0 },
+    /* LLA */              { 139, 3, 0, T_FLOAT, NULL, 0 },
+    /* ATT_ERROR */        { 142, 3, 0, T_FLOAT, NULL, 0 },
+    /* ATT_ERROR_RATE */   { 145, 3, 0, T_FLOAT, NULL, 0 },
+    // /* ADCS_TMP */         { 148, 1, 0, T_INT16, NULL, 0 },
+    // /* CMG0_TMP */         { 149, 1, 0, T_INT16, NULL, 0 },
+    // /* CMG1_TMP */         { 150, 1, 0, T_INT16, NULL, 0 },
+    // /* CMG2_TMP */         { 151, 1, 0, T_INT16, NULL, 0 },
+    // /* CMG3_TMP */         { 152, 1, 0, T_INT16, NULL, 0 },
+    // /* FSS_TMP1 */         { 153, 1, 0, T_INT16, NULL, 0 },
+    // /* FSS_TMP2 */         { 154, 1, 0, T_INT16, NULL, 0 },
+    // /* FSS_TMP3 */         { 155, 1, 0, T_INT16, NULL, 0 },
+    /* SV */               { 156, 3, 0, T_FLOAT, NULL, 0 },
+    /* MAG */              { 159, 3, 0, T_FLOAT, NULL, 0 },
+    // Table 6-3. Sensor/Actuator Register (1)
+    // /* MAG_MAT */          { 0, 9, 1, T_FLOAT, NULL, 0 },
+    // /* MAG_VEC */          { 9, 3, 1, T_FLOAT, NULL, 0 },
+    // /* MAG_STAT */         { 12, 1, 1, T_UINT8, NULL, 0 },
+    // /* MAG0_S */           { 13, 3, 1, T_FLOAT, NULL, 0 },
+    // /* MAG1_S */           { 16, 3, 1, T_FLOAT, NULL, 0 },
+    // /* MAG2_S */           { 19, 3, 1, T_FLOAT, NULL, 0 },
+    // /* MAG3_S */           { 22, 3, 1, T_FLOAT, NULL, 0 },
+    // /* MAG4_S */           { 25, 3, 1, T_FLOAT, NULL, 0 },
+    // /* MAG5_S */           { 28, 3, 1, T_FLOAT, NULL, 0 },
+    // /* FSS_STAT */         { 31, 1, 1, T_UINT8, NULL, 0 },
+    // /* FSS0_SV */          { 32, 1, 1, T_UINT16, NULL, 0 },
+    // /* FSS0_PDSUM */       { 33, 1, 1, T_UINT16, NULL, 0 },
+    // /* FSS1_SV */          { 34, 1, 1, T_UINT16, NULL, 0 },
+    // /* FSS1_PDSUM */       { 35, 1, 1, T_UINT16, NULL, 0 },
+    // /* FSS2_SV */          { 36, 1, 1, T_UINT16, NULL, 0 },
+    // /* FSS2_PDSUM */       { 37, 1, 1, T_UINT16, NULL, 0 },
+    // /* FSS3_SV */          { 38, 1, 1, T_UINT16, NULL, 0 },
+    // /* FSS3_PDSUM */       { 39, 1, 1, T_UINT16, NULL, 0 },
+    // /* FSS4_SV */          { 40, 1, 1, T_UINT16, NULL, 0 },
+    // /* FSS4_PDSUM */       { 41, 1, 1, T_UINT16, NULL, 0 },
+    // /* FSS5_SV */          { 42, 1, 1, T_UINT16, NULL, 0 },
+    // /* FSS5_PDSUM */       { 43, 1, 1, T_UINT16, NULL, 0 },
+    // /* IMU_STAT */         { 44, 1, 1, T_UINT8, NULL, 0 },
+    /* IMU0_S */           { 45, 3, 1, T_FLOAT, NULL, 0 },
+    /* IMU1_S */           { 48, 3, 1, T_FLOAT, NULL, 0 },
+    /* IMU2_S */           { 51, 3, 1, T_FLOAT, NULL, 0 },
+    /* IMU3_S */           { 54, 3, 1, T_FLOAT, NULL, 0 },
+    // /* STR_STAT */         { 57, 1, 1, T_UINT8, NULL, 0 },
+    // /* STR0_S */           { 58, 4, 1, T_FLOAT, NULL, 0 },
+    // /* STR1_S */           { 62, 4, 1, T_FLOAT, NULL, 0 },
+    // /* CSS */              { 66, 12,1, T_FLOAT, NULL, 0 },
+    // /* CMG_STAT */         { 78, 1, 1, T_UINT8, NULL, 0 },
+    // /* CMG0_G_ANGLE */     { 79, 1, 1, T_FLOAT, NULL, 0 },
+    // /* CMG0_W_RATE */      { 80, 1, 1, T_FLOAT, NULL, 0 },
+    // /* CMG1_G_ANGLE */     { 81, 1, 1, T_FLOAT, NULL, 0 },
+    // /* CMG1_W_RATE */      { 82, 1, 1, T_FLOAT, NULL, 0 },
+    // /* CMG2_G_ANGLE */     { 83, 1, 1, T_FLOAT, NULL, 0 },
+    // /* CMG2_W_RATE */      { 84, 1, 1, T_FLOAT, NULL, 0 },
+    // /* CMG3_G_ANGLE */     { 85, 1, 1, T_FLOAT, NULL, 0 },
+    // /* CMG3_W_RATE */      { 86, 1, 1, T_FLOAT, NULL, 0 },
+    /* MTQ */              { 87, 3, 1, T_FLOAT, NULL, 0 },
+    // /* CMG0_G_RATE */      { 90, 1, 1, T_FLOAT, NULL, 0 },
+    // /* CMG0_W_ACC */       { 91, 1, 1, T_FLOAT, NULL, 0 },
+    // /* CMG1_G_RATE */      { 92, 1, 1, T_FLOAT, NULL, 0 },
+    // /* CMG1_W_ACC */       { 93, 1, 1, T_FLOAT, NULL, 0 },
+    // /* CMG2_G_RATE */      { 94, 1, 1, T_FLOAT, NULL, 0 },
+    // /* CMG2_W_ACC */       { 95, 1, 1, T_FLOAT, NULL, 0 },
+    // /* CMG3_G_RATE */      { 96, 1, 1, T_FLOAT, NULL, 0 },
+    // /* CMG3_W_ACC */       { 97, 1, 1, T_FLOAT, NULL, 0 },
+    // // Table 6-4. Parameter Register (2)
+    // /* MASS */             { 0, 1, 2, T_FLOAT, NULL, 0 },
+    // /* INE_TEN */          { 1, 9, 2, T_FLOAT, NULL, 0 },
+    // /* POS_HB_B */         { 10, 3, 2, T_FLOAT, NULL, 0 },
+    // /* ORIEN_HB */         { 13, 4, 2, T_FLOAT, NULL, 0 },
+    /* MAG_INFO */         { 17, 1, 2, T_UINT8, NULL, 0 },
+    // /* MAG0_ORIEN_BS */    { 18, 4, 2, T_FLOAT, NULL, 0 },
+    // /* MAG1_ORIEN_BS */    { 22, 4, 2, T_FLOAT, NULL, 0 },
+    // /* MAG2_ORIEN_BS */    { 26, 4, 2, T_FLOAT, NULL, 0 },
+    // /* MAG3_ORIEN_BS */    { 30, 4, 2, T_FLOAT, NULL, 0 },
+    // /* MAG4_ORIEN_BS */    { 34, 4, 2, T_FLOAT, NULL, 0 },
+    // /* MAG5_ORIEN_BS */    { 38, 4, 2, T_FLOAT, NULL, 0 },
+    /* FSS_INFO */         { 42, 1, 2, T_UINT8, NULL, 0 },
+    // /* FSS0_ORIEN_BS */    { 43, 4, 2, T_FLOAT, NULL, 0 },
+    // /* FSS1_ORIEN_BS */    { 47, 4, 2, T_FLOAT, NULL, 0 },
+    // /* FSS2_ORIEN_BS */    { 51, 4, 2, T_FLOAT, NULL, 0 },
+    // /* FSS3_ORIEN_BS */    { 55, 4, 2, T_FLOAT, NULL, 0 },
+    // /* FSS4_ORIEN_BS */    { 59, 4, 2, T_FLOAT, NULL, 0 },
+    // /* FSS5_ORIEN_BS */    { 63, 4, 2, T_FLOAT, NULL, 0 },
+    // /* IMU_INFO */         { 67, 1, 2, T_UINT8, NULL, 0 },
+    // /* IMU0_ORIEN_BS */    { 68, 4, 2, T_FLOAT, NULL, 0 },
+    // /* IMU1_ORIEN_BS */    { 72, 4, 2, T_FLOAT, NULL, 0 },
+    // /* IMU2_ORIEN_BS */    { 76, 4, 2, T_FLOAT, NULL, 0 },
+    // /* IMU3_ORIEN_BS */    { 80, 4, 2, T_FLOAT, NULL, 0 },
+    // /* STR_INFO */         { 84, 1, 2, T_UINT8, NULL, 0 },
+    // /* STR0_ORIEN_BS */    { 85, 4, 2, T_FLOAT, NULL, 0 },
+    // /* STR1_ORIEN_BS */    { 89, 4, 2, T_FLOAT, NULL, 0 },
+    /* NVM */              { 255, 1, 2, T_UINT8, NULL, 0 }
+};
+
+#define MTQ_REG_TABLE_LEN       sizeof(MTQ_INIT_REG_TABLE) / sizeof(mtq_reg_s)   
 
 // Packet parsing FSM states
 
@@ -80,17 +222,6 @@ void mtq_pkt_clear(mtq_pkt_s* pkt);
 // Verify the packet's checksum is valid
 int1 mtq_pkt_verify_csum(mtq_pkt_s* pkt);
 
-// MTQ register struct
-
-typedef struct {
-    uint8_t idx;
-    uint8_t cnt;
-    uint8_t midx;
-    mtq_reg_type_e type;
-    void* value;                // Should be free'd on reinitialization 
-    uint8_t value_len;
-} mtq_reg_s;
-
 // MTQ global manager
 
 typedef struct {
@@ -102,7 +233,7 @@ typedef struct {
 } mtq_s;
 
 // Initialize mtq object
-void mtq_init(mtq_s* mtq, uint8_t port);
+status_e mtq_init(mtq_s* mtq, uint8_t port);
 
 // Free heap allocations 
 void mtq_destroy(mtq_s* mtq);
@@ -283,146 +414,15 @@ status_e mtq_set_mode(mtq_s* mtq, uint8_t mode);
 #define MTQ_STR1_ORIEN_BS       2 << 8 | 89
 #define MTQ_NVM                 2 << 8 | 255
 
-#define MTQ_NUM_FAST_REGS       17
 static const uint16_t MTQ_FAST_FRAME_REGS[] = {
     MTQ_CONF, MTQ_TIME, MTQ_DATE, MTQ_MTQ_USER, MTQ_STAT, MTQ_ACT_ERR, MTQ_SEN_ERR,
     MTQ_CSS_ERR, MTQ_Q, MTQ_RATE, MTQ_LLA, MTQ_ATT_ERROR, MTQ_ATT_ERROR_RATE, MTQ_SV, MTQ_MAG, MTQ_MTQ, MTQ_MTQ_USER
 };
+#define MTQ_NUM_FAST_REGS       sizeof(MTQ_FAST_FRAME_REGS) / sizeof(uint16_t)   
 
-#define MTQ_NUM_CTRL_REGS       10
 static const uint16_t MTQ_CTRL_FRAME_REGS[] = {
     MTQ_Q, MTQ_RATE, MTQ_LLA, MTQ_MAG, MTQ_IMU0_S, MTQ_IMU1_S, MTQ_IMU2_S, MTQ_IMU3_S, MTQ_MTQ, MTQ_MTQ_USER
 };
-
-/* Register format: [idx, cnt, midx, type, data, len]
-                idx: Denotes the register that the command will read/write from/to.
-                cnt: Size of register in counts. 4 bytes/count.
-                midx: Determins which part of the register is being accesses; always a value from 0 to 2.
-                type: Indicates the kind of data stored in a register.
-                data: Pointer to a buffer to store read register data.
-                len: Length of data in bytes.
-*/
-
-static const mtq_reg_s MTQ_INIT_REG_TABLE[] = {
-    // Table 6-2. User Register (0)
-    // /* FACT */             { 0, 1, 0, T_UINT16, NULL, 0 },
-    /* SNID */             { 1, 3, 0, T_CHAR,   NULL, 0 },
-    /* CONF */             { 4, 1, 0, T_UINT8,  NULL, 0 },
-    /* TIME */             { 5, 1, 0, T_UINT8,  NULL, 0 },
-    /* DATE */             { 6, 1, 0, T_UINT8,  NULL, 0 },
-    // /* LLA_REF */          { 7, 3, 0, T_FLOAT,  NULL, 0 },
-    // /* Q_REF */            { 10, 4, 0, T_FLOAT, NULL, 0 },
-    /* POINTING_AXIS */    { 14, 3, 0, T_FLOAT, NULL, 0 },
-    /* TLE */              { 17, 35, 0, T_CHAR, NULL, 0 },
-    // /* GGA */              { 52, 32, 0, T_CHAR, NULL, 0 },
-    // /* ZDA */              { 84, 16, 0, T_CHAR, NULL, 0 },
-    // /* SV_USER */          { 100, 3, 0, T_FLOAT, NULL, 0 },
-    /* MTQ_USER */         { 103, 3, 0, T_FLOAT, NULL, 0 },
-    // /* CMG0_G_RATE_USER */ { 106, 1, 0, T_FLOAT, NULL, 0 },
-    // /* CMG0_G_TOR_USER */  { 107, 1, 0, T_FLOAT, NULL, 0 },
-    // /* CMG1_G_RATE_USER */ { 108, 1, 0, T_FLOAT, NULL, 0 },
-    // /* CMG1_G_TOR_USER */  { 109, 1, 0, T_FLOAT, NULL, 0 },
-    // /* CMG2_G_RATE_USER */ { 110, 1, 0, T_FLOAT, NULL, 0 },
-    // /* CMG2_G_TOR_USER */  { 111, 1, 0, T_FLOAT, NULL, 0 },
-    // /* CMG3_G_RATE_USER */ { 112, 1, 0, T_FLOAT, NULL, 0 },
-    // /* CMG3_G_TOR_USER */  { 113, 1, 0, T_FLOAT, NULL, 0 },
-    /* STAT */             { 128, 1, 0, T_UINT8, NULL, 0 },
-    /* ACT_ERR */          { 129, 1, 0, T_UINT8, NULL, 0 },
-    /* SEN_ERR */          { 130, 1, 0, T_UINT8, NULL, 0 },
-    /* CSS_ERR */          { 131, 1, 0, T_UINT8, NULL, 0 },
-    /* Q */                { 132, 4, 0, T_FLOAT, NULL, 0 },
-    /* RATE */             { 136, 3, 0, T_FLOAT, NULL, 0 },
-    /* LLA */              { 139, 3, 0, T_FLOAT, NULL, 0 },
-    /* ATT_ERROR */        { 142, 3, 0, T_FLOAT, NULL, 0 },
-    /* ATT_ERROR_RATE */   { 145, 3, 0, T_FLOAT, NULL, 0 },
-    // /* ADCS_TMP */         { 148, 1, 0, T_INT16, NULL, 0 },
-    // /* CMG0_TMP */         { 149, 1, 0, T_INT16, NULL, 0 },
-    // /* CMG1_TMP */         { 150, 1, 0, T_INT16, NULL, 0 },
-    // /* CMG2_TMP */         { 151, 1, 0, T_INT16, NULL, 0 },
-    // /* CMG3_TMP */         { 152, 1, 0, T_INT16, NULL, 0 },
-    // /* FSS_TMP1 */         { 153, 1, 0, T_INT16, NULL, 0 },
-    // /* FSS_TMP2 */         { 154, 1, 0, T_INT16, NULL, 0 },
-    // /* FSS_TMP3 */         { 155, 1, 0, T_INT16, NULL, 0 },
-    /* SV */               { 156, 3, 0, T_FLOAT, NULL, 0 },
-    /* MAG */              { 159, 3, 0, T_FLOAT, NULL, 0 },
-    // Table 6-3. Sensor/Actuator Register (1)
-    // /* MAG_MAT */          { 0, 9, 1, T_FLOAT, NULL, 0 },
-    // /* MAG_VEC */          { 9, 3, 1, T_FLOAT, NULL, 0 },
-    // /* MAG_STAT */         { 12, 1, 1, T_UINT8, NULL, 0 },
-    // /* MAG0_S */           { 13, 3, 1, T_FLOAT, NULL, 0 },
-    // /* MAG1_S */           { 16, 3, 1, T_FLOAT, NULL, 0 },
-    // /* MAG2_S */           { 19, 3, 1, T_FLOAT, NULL, 0 },
-    // /* MAG3_S */           { 22, 3, 1, T_FLOAT, NULL, 0 },
-    // /* MAG4_S */           { 25, 3, 1, T_FLOAT, NULL, 0 },
-    // /* MAG5_S */           { 28, 3, 1, T_FLOAT, NULL, 0 },
-    // /* FSS_STAT */         { 31, 1, 1, T_UINT8, NULL, 0 },
-    // /* FSS0_SV */          { 32, 1, 1, T_UINT16, NULL, 0 },
-    // /* FSS0_PDSUM */       { 33, 1, 1, T_UINT16, NULL, 0 },
-    // /* FSS1_SV */          { 34, 1, 1, T_UINT16, NULL, 0 },
-    // /* FSS1_PDSUM */       { 35, 1, 1, T_UINT16, NULL, 0 },
-    // /* FSS2_SV */          { 36, 1, 1, T_UINT16, NULL, 0 },
-    // /* FSS2_PDSUM */       { 37, 1, 1, T_UINT16, NULL, 0 },
-    // /* FSS3_SV */          { 38, 1, 1, T_UINT16, NULL, 0 },
-    // /* FSS3_PDSUM */       { 39, 1, 1, T_UINT16, NULL, 0 },
-    // /* FSS4_SV */          { 40, 1, 1, T_UINT16, NULL, 0 },
-    // /* FSS4_PDSUM */       { 41, 1, 1, T_UINT16, NULL, 0 },
-    // /* FSS5_SV */          { 42, 1, 1, T_UINT16, NULL, 0 },
-    // /* FSS5_PDSUM */       { 43, 1, 1, T_UINT16, NULL, 0 },
-    // /* IMU_STAT */         { 44, 1, 1, T_UINT8, NULL, 0 },
-    /* IMU0_S */           { 45, 3, 1, T_FLOAT, NULL, 0 },
-    /* IMU1_S */           { 48, 3, 1, T_FLOAT, NULL, 0 },
-    /* IMU2_S */           { 51, 3, 1, T_FLOAT, NULL, 0 },
-    /* IMU3_S */           { 54, 3, 1, T_FLOAT, NULL, 0 },
-    // /* STR_STAT */         { 57, 1, 1, T_UINT8, NULL, 0 },
-    // /* STR0_S */           { 58, 4, 1, T_FLOAT, NULL, 0 },
-    // /* STR1_S */           { 62, 4, 1, T_FLOAT, NULL, 0 },
-    // /* CSS */              { 66, 12,1, T_FLOAT, NULL, 0 },
-    // /* CMG_STAT */         { 78, 1, 1, T_UINT8, NULL, 0 },
-    // /* CMG0_G_ANGLE */     { 79, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG0_W_RATE */      { 80, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG1_G_ANGLE */     { 81, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG1_W_RATE */      { 82, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG2_G_ANGLE */     { 83, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG2_W_RATE */      { 84, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG3_G_ANGLE */     { 85, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG3_W_RATE */      { 86, 1, 1, T_FLOAT, NULL, 0 },
-    /* MTQ */              { 87, 3, 1, T_FLOAT, NULL, 0 },
-    // /* CMG0_G_RATE */      { 90, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG0_W_ACC */       { 91, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG1_G_RATE */      { 92, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG1_W_ACC */       { 93, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG2_G_RATE */      { 94, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG2_W_ACC */       { 95, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG3_G_RATE */      { 96, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG3_W_ACC */       { 97, 1, 1, T_FLOAT, NULL, 0 },
-    // // Table 6-4. Parameter Register (2)
-    // /* MASS */             { 0, 1, 2, T_FLOAT, NULL, 0 },
-    // /* INE_TEN */          { 1, 9, 2, T_FLOAT, NULL, 0 },
-    // /* POS_HB_B */         { 10, 3, 2, T_FLOAT, NULL, 0 },
-    // /* ORIEN_HB */         { 13, 4, 2, T_FLOAT, NULL, 0 },
-    // /* MAG_INFO */         { 17, 1, 2, T_UINT8, NULL, 0 },
-    // /* MAG0_ORIEN_BS */    { 18, 4, 2, T_FLOAT, NULL, 0 },
-    // /* MAG1_ORIEN_BS */    { 22, 4, 2, T_FLOAT, NULL, 0 },
-    // /* MAG2_ORIEN_BS */    { 26, 4, 2, T_FLOAT, NULL, 0 },
-    // /* MAG3_ORIEN_BS */    { 30, 4, 2, T_FLOAT, NULL, 0 },
-    // /* MAG4_ORIEN_BS */    { 34, 4, 2, T_FLOAT, NULL, 0 },
-    // /* MAG5_ORIEN_BS */    { 38, 4, 2, T_FLOAT, NULL, 0 },
-    // /* FSS_INFO */         { 42, 1, 2, T_UINT8, NULL, 0 },
-    // /* FSS0_ORIEN_BS */    { 43, 4, 2, T_FLOAT, NULL, 0 },
-    // /* FSS1_ORIEN_BS */    { 47, 4, 2, T_FLOAT, NULL, 0 },
-    // /* FSS2_ORIEN_BS */    { 51, 4, 2, T_FLOAT, NULL, 0 },
-    // /* FSS3_ORIEN_BS */    { 55, 4, 2, T_FLOAT, NULL, 0 },
-    // /* FSS4_ORIEN_BS */    { 59, 4, 2, T_FLOAT, NULL, 0 },
-    // /* FSS5_ORIEN_BS */    { 63, 4, 2, T_FLOAT, NULL, 0 },
-    // /* IMU_INFO */         { 67, 1, 2, T_UINT8, NULL, 0 },
-    // /* IMU0_ORIEN_BS */    { 68, 4, 2, T_FLOAT, NULL, 0 },
-    // /* IMU1_ORIEN_BS */    { 72, 4, 2, T_FLOAT, NULL, 0 },
-    // /* IMU2_ORIEN_BS */    { 76, 4, 2, T_FLOAT, NULL, 0 },
-    // /* IMU3_ORIEN_BS */    { 80, 4, 2, T_FLOAT, NULL, 0 },
-    // /* STR_INFO */         { 84, 1, 2, T_UINT8, NULL, 0 },
-    // /* STR0_ORIEN_BS */    { 85, 4, 2, T_FLOAT, NULL, 0 },
-    // /* STR1_ORIEN_BS */    { 89, 4, 2, T_FLOAT, NULL, 0 },
-    /* NVM */              { 255, 1, 2, T_UINT8, NULL, 0 }
-};
+#define MTQ_NUM_CTRL_REGS       sizeof(MTQ_CTRL_FRAME_REGS) / sizeof(uint16_t)   
 
 #endif

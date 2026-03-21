@@ -17,6 +17,7 @@ Purpose: Provides a base definition for interfacing with the AX100 transceiver
 #include "ringbuf.h"
 #include "cmdpkt.h"
 #include "cmdmgr.h"
+#include "common.h"
 
 // kiss header size (2), csp header size (4), crc32 size (4), kiss footer size (1)
 #define AX100_MAX_FRAME_SIZE          256
@@ -30,10 +31,15 @@ typedef struct {
     int1 is_init;
 } ax100_s;
 
-void ax100_init(ax100_s* a, uint8_t port);
-void ax100_set_power(ax100_s* a, int1 on);
-int1 ax100_is_on(ax100_s* a);
+status_e ax100_init(ax100_s* a, uint8_t port);
+
+// Gets the current power state of AX100_PWR pin
+status_e ax100_get_power(ax100_s* a, uint8_t* power);
+
+// Sets power state of AX100_PWR pin
+status_e ax100_set_power(ax100_s* a, uint8_t power);
+
 // Transmits an arbitrary frame. You should not ever need to use this function. Just use cmd_dispatch() with dest as GS
-void ax100_transmit_frame(ax100_s* a, uint8_t* frame, uint16_t len);
+status_e ax100_transmit_frame(ax100_s* a, uint8_t* frame, uint16_t len);
 
 #endif

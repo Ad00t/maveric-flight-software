@@ -46,7 +46,7 @@ int1 mtq_pkt_verify_csum(mtq_pkt_s* pkt) {
 
 // MTQ API 
 
-void mtq_init(mtq_s* mtq, uint8_t port) {
+status_e mtq_init(mtq_s* mtq, uint8_t port) {
     mtq->port = port;
     mtq->is_init = TRUE;
     memcpy(mtq->reg_table, MTQ_INIT_REG_TABLE, sizeof(MTQ_INIT_REG_TABLE));
@@ -70,9 +70,10 @@ void mtq_init(mtq_s* mtq, uint8_t port) {
     
     rtc_time_t dt;
     epoch_ms_to_rtc(systime_epoch_ms(), &dt); 
-    mtq_set_datetime(mtq, dt);
-    mtq_set_mode(mtq, MTQ_MODE_SAFE);
+    status_e s1 = mtq_set_datetime(mtq, dt);
+    status_e s2 = mtq_set_mode(mtq, MTQ_MODE_SAFE);
     sprintf(LOGBUF, "mtq_init: port=%u", mtq->port); log_info();
+    return (s1 == SUCCESS && s2 == SUCCESS) ? SUCCESS : FAILURE;
 }
 
 void mtq_destroy(mtq_s* mtq) {
@@ -368,18 +369,18 @@ status_e mtq_heartbeat(mtq_s* mtq) {
     mtq_reg_s* reg = mtq_get_reg(mtq, MTQ_SNID);
     if (reg == NULL) return FAILURE;
     char* snid = (char*) reg->value;
-    status_e hb = strncmp(snid, "TAD102063", reg->value_len) == 0 ? SUCCESS : FAILURE; 
+    status_e hb = (strncmp(snid, "TAD102063", reg->value_len) == 0) ? SUCCESS : FAILURE; 
     
-    if (hb == FAILURE) {
-        sprintf(LOGBUF, "mtq_heartbeat: flatlined. resetting..."); log_error();
-        uint8_t port = mtq->port;
-        char tle[140];
-        mtq_get_data(mtq, MTQ_TLE, tle);
-        mtq_reboot(mtq);
-        mtq_destroy(mtq);
-        mtq_init(mtq, port);
-        mtq_write_start(mtq, MTQ_TLE, tle);
-    }
+    // if (hb == FAILURE) {
+    //     sprintf(LOGBUF, "mtq_heartbeat: flatlined. resetting..."); log_error();
+    //     uint8_t port = mtq->port;
+    //     char tle[140];
+    //     mtq_get_data(mtq, MTQ_TLE, tle);
+    //     mtq_reboot(mtq);
+    //     mtq_destroy(mtq);
+    //     mtq_init(mtq, port);
+    //     mtq_write_start(mtq, MTQ_TLE, tle);
+    // }
     
     memset(snid, 0, reg->value_len);
     mtq_read_start(mtq, MTQ_SNID);
@@ -429,8 +430,14 @@ status_e mtq_read_ctrl(mtq_s* mtq) {
 }
 
 status_e mtq_read_all(mtq_s* mtq) {
-    // TODO
-    return SUCCESS;
+    if (!mtq->is_init) return FAILURE;
+    uint8_t i;
+    status_e s = SUCCESS;
+    for (i = 0; i < MTQ_REG_TABLE_LEN; i++) {
+        if (mtq_read_start(mtq, &mtq->reg_table[i]) == FAILURE)
+            s = FAILURE;
+    }
+    return s;
 }
 
 status_e mtq_set_datetime(mtq_s* mtq, rtc_time_t rtc) {

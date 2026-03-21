@@ -62,4 +62,10 @@ void cmdpkt_dispatch(cmdpkt_s* pkt);
 // Create then send command packet
 void cmd_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args);
 
+// Converts SUCCESS -> ACK, anything else -> NACK
+cmdpkt_type_e stat2ack(status_e s);
+
+// Sends a response to a command with flipped o/d, specified type, and response args
+void cmd_respond(cmdpkt_s* pkt, cmdpkt_type_e type, char* res);
+
 #endif

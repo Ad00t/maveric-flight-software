@@ -53,14 +53,6 @@ void scheduler_run_tasks(scheduler_s* s, cmdmgr_s* cmdmgr) {
         uint64_t now = systime_epoch_ms();
         int64_t diff = s->tasks[i].next_release - now; // >= is bugged for large values, so use subtraction instead
         if (!(s->tasks[i].active && diff <= 0)) continue;
-        if (s->tasks[i].remaining_reps != SCHEDULE_REPS_INFINITE) {
-            s->tasks[i].remaining_reps--;
-            s->tasks[i].active = (s->tasks[i].remaining_reps > 0);
-        }
-        if (s->tasks[i].active) {
-            uint64_t newnext = now + s->tasks[i].period_ms;
-            s->tasks[i].next_release = newnext; 
-        }
         switch (s->tasks[i].type) {
             case FUNC:
                 schedfunc_f schedfunc = s->tasks[i].func;
@@ -69,6 +61,15 @@ void scheduler_run_tasks(scheduler_s* s, cmdmgr_s* cmdmgr) {
             case CMD:
                 cmdmgr_process_cmd(cmdmgr, s->tasks[i].cmd_ptr);
                 break;
+        }
+        if (s->tasks[i].remaining_reps != SCHEDULE_REPS_INFINITE) {
+            s->tasks[i].remaining_reps--;
+        }
+        if (s->tasks[i].remaining_reps > 0) {
+            uint64_t newnext = now + s->tasks[i].period_ms;
+            s->tasks[i].next_release = newnext; 
+        } else {
+            scheduler_deschedule(s, s->tasks[i].id);
         }
     }
 }
@@ -95,7 +96,7 @@ void scheduler_refresh_all(scheduler_s* s, uint64_t oldtime) {
 
 status_e scheduler_schedule_func_at(scheduler_s* s, uint8_t id, schedfunc_f func, rtc_time_t start_time, uint32_t period_ms, uint16_t reps) {
     schedtask_s task = {0};
-    create_schedtask(&task, id, FUNC, rtc_to_epoch_ms(start_time), period_ms, reps);
+    schedtask_create(&task, id, FUNC, rtc_to_epoch_ms(start_time), period_ms, reps);
     task.func = func;
     uint8_t i_task;
     return schedule_task(s, task, 0, SCHEDULER_MAX_FUNC_TASKS, &i_task); // Func tasks segment of tasks buffer
@@ -103,7 +104,7 @@ status_e scheduler_schedule_func_at(scheduler_s* s, uint8_t id, schedfunc_f func
 
 status_e scheduler_schedule_cmd_at(scheduler_s* s, uint8_t id, cmdpkt_s* p, rtc_time_t start_time, uint32_t period_ms, uint16_t reps) {
     schedtask_s task = {0};
-    create_schedtask(&task, id, CMD, rtc_to_epoch_ms(start_time), period_ms, reps);
+    schedtask_create(&task, id, CMD, rtc_to_epoch_ms(start_time), period_ms, reps);
     uint8_t i_task;
     if (schedule_task(s, task, SCHEDULER_MAX_FUNC_TASKS, SCHEDULER_MAX_CMD_TASKS, &i_task) == FAILURE) // Cmd tasks segment of tasks buffer
         return FAILURE; 
@@ -115,7 +116,7 @@ status_e scheduler_schedule_cmd_at(scheduler_s* s, uint8_t id, cmdpkt_s* p, rtc_
 
 status_e scheduler_schedule_func_in(scheduler_s* s, uint8_t id, schedfunc_f func, uint32_t start_delay_ms, uint32_t period_ms, uint16_t reps) {
     schedtask_s task = {0};
-    create_schedtask(&task, id, FUNC, systime_epoch_ms() + start_delay_ms, period_ms, reps);
+    schedtask_create(&task, id, FUNC, systime_epoch_ms() + start_delay_ms, period_ms, reps);
     task.func = func;
     uint8_t i_task;
     return schedule_task(s, task, 0, SCHEDULER_MAX_FUNC_TASKS, &i_task);
@@ -123,7 +124,7 @@ status_e scheduler_schedule_func_in(scheduler_s* s, uint8_t id, schedfunc_f func
 
 status_e scheduler_schedule_cmd_in(scheduler_s* s, uint8_t id, cmdpkt_s* p, uint32_t start_delay_ms, uint32_t period_ms, uint16_t reps) {
     schedtask_s task = {0};
-    create_schedtask(&task, id, CMD, systime_epoch_ms() + start_delay_ms, period_ms, reps);
+    schedtask_create(&task, id, CMD, systime_epoch_ms() + start_delay_ms, period_ms, reps);
     uint8_t i_task; 
     if (schedule_task(s, task, SCHEDULER_MAX_FUNC_TASKS, SCHEDULER_MAX_CMD_TASKS, &i_task) == FAILURE)
         return FAILURE;
