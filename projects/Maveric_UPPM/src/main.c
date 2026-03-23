@@ -52,7 +52,7 @@
 #define UPPER_PPM
 #define NODE                NODE_UPPM
 #define NODE_LBL            "UPPM"
-#define LOG_LEVEL           LL_DEBUG
+#define LOG_LEVEL           LL_TRACE
 
 // Module includes (.c necessary)
 
@@ -106,21 +106,16 @@ void main(void) {
 // System initialization routine
 void system_init(void) {
     // Watchdog, millisecond timer, logger, rbt_cause init
+    fprintf(COM_C, "uppm init\r\n");
     setup_wdt(WDT_ON);
 	setup_timer1(TMR_INTERNAL | TMR_DIV_BY_64, 0x00FA); 
     logger_init();
     g_rbt_cause = restart_cause();
     
     // SPI init
-	// output_high(FLASH_CHIP_SELECT);
-	// output_high(SECOND_FLASH_CS);
-	// spi_set_mode(GYRO_SPI_MODE);
-	// setup_spi(SPI_MASTER | SPI_XMIT_L_TO_H | SPI_CLK_DIV_16 | SPI_SCK_IDLE_HIGH);
+	output_high(FLASH_CHIP_SELECT);
+	spi_set_mode(FLASH_SPI_MODE);
     
-    // Flash init
-    flashmgr_init(&g_flashmgr);
-    flashmgr_increment_rbt_cnt(&g_flashmgr);
-
     // Init interrupts 
     irqmgr_init(&g_irqmgr);
     g_irqmgr.started = TRUE;
@@ -137,7 +132,9 @@ void system_init(void) {
     systime_init(&g_irqmgr.ms, &g_rtc_time); // It doesn't look like the UPPM built in RTC works.
     
     // Submodules & services init
-    ax100_init(&g_ax100, AX100_PORT);
+    flashmgr_init(&g_flashmgr);
+    flashmgr_increment_rbt_cnt(&g_flashmgr);
+    status_e s_ax100 = ax100_init(&g_ax100, AX100_PORT);
     cmdmgr_init(&g_cmdmgr);
     scheduler_init(&g_scheduler);
     tlm_init(&g_tlm);

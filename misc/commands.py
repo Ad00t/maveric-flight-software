@@ -142,6 +142,7 @@ class CommandManager():
                     return None
                 
                 if p['dest'] != self.node:
+                    # print(f'bad dest {p}')
                     self.cleanup_frame()
                     return None
 

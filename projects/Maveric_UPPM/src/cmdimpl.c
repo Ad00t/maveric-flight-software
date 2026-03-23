@@ -48,7 +48,7 @@ void cmdimpl_ppm_reset(cmdpkt_s* pkt) {
 }
 
 void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
-    sprintf(LOGBUF, "%u %u %u %u '%s'", pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->args); log_info();
+    sprintf(LOGBUF, "set_time %u %u %u %u", pkt->orgn, pkt->dest, pkt->echo, pkt->ptype); log_info();
     switch (pkt->ptype) {
         case REQ: {
             char* p = pkt->args;
@@ -77,16 +77,19 @@ void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
 }
 
 void cmdimpl_ppm_get_time(cmdpkt_s* pkt) {
+    sprintf(LOGBUF, "get_time %u %u %u %u", pkt->orgn, pkt->dest, pkt->echo, pkt->ptype); log_info();
     switch (pkt->ptype) {
         case REQ: {
             sprintf(LOGBUF, "cmdimpl_ppm_get_time REQ"); log_info();
             char res[CMD_MAX_ARGS_LEN] = {0};  
-            rtc_to_str(&g_rtc_time, res);
+            rtc_time_t rtc;
+            epoch_ms_to_rtc(systime_epoch_ms(), &rtc);  
+            rtc_to_str(&rtc, res);
             cmd_respond(pkt, RES, res);
             break;
         }
         case RES: {
-            sprintf(LOGBUF, "cmdimpl_ppm_get_time RES '%s'", pkt->args); log_info();
+            sprintf(LOGBUF, "cmdimpl_ppm_get_time RES"); log_info();
             cmdpkt_s pkt2;
             cmdpkt_create(&pkt2, NODE, NODE, 0, REQ, "ppm_set_time", pkt->args);
             cmdimpl_ppm_set_time(&pkt2);

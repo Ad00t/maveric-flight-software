@@ -52,7 +52,7 @@
 #define LOWER_PPM
 #define NODE                NODE_LPPM 
 #define NODE_LBL            "LPPM"
-#define LOG_LEVEL           LL_DEBUG 
+#define LOG_LEVEL           LL_DEBUG
 
 // Module includes (.c necessary)
 
@@ -118,12 +118,7 @@ void system_init(void) {
 	output_high(FLASH_CHIP_SELECT);
 	output_high(SECOND_FLASH_CS);
 	spi_set_mode(FLASH_SPI_MODE);
-	// setup_spi(SPI_MASTER | SPI_XMIT_L_TO_H | SPI_CLK_DIV_16 | SPI_SCK_IDLE_HIGH);
    
-    // Flash init
-    flashmgr_init(&g_flashmgr);
-    flashmgr_increment_rbt_cnt(&g_flashmgr);
-
     // Interrupts init 
     irqmgr_init(&g_irqmgr);
     isr_enable_all();
@@ -143,10 +138,12 @@ void system_init(void) {
     
     // Submodules & services init
     // gyro_init(&g_gyro, GYRO_CS1, GYRO_CS2, GYRO_CS3, GYRO_ON);
+    flashmgr_init(&g_flashmgr);
+    flashmgr_increment_rbt_cnt(&g_flashmgr);
     status_e s_mtq = mtq_init(&g_mtq, MTQ_PORT);
     status_e s_nvg = nvg_init(&g_nvg, NVG_PORT);
-    scheduler_init(&g_scheduler);
     cmdmgr_init(&g_cmdmgr);
+    scheduler_init(&g_scheduler);
     hk_init();
     cmdimpl_init();
 

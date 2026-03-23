@@ -19,7 +19,8 @@ void tlm_beacon(tlm_s* tlm, uint8_t bcn_num) {
 
     uint16_t p = 0;
     char bcn_buf[CMD_MAX_ARGS_LEN] = {0};
-    p += sprintf(bcn_buf, "%u %Lu %u %u ", bcn_num, tlm->time, tlm->lppm_rbt_cnt, tlm->lppm_rbt_cause);
+    p += sprintf(bcn_buf, "%u %Lu %u %u %u %u", 
+                 bcn_num, tlm->time, tlm->lppm_rbt_cnt, tlm->lppm_rbt_cause, tlm->uppm_rbt_cnt, tlm->uppm_rbt_cause);
 
     switch (bcn_num) {
         case 1: break;

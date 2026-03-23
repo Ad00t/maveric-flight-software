@@ -33,9 +33,11 @@ void hk_get_rtc_time(void) {
 }
 
 void hk_log(void) {
+    rtc_time_t rtc;
+    epoch_ms_to_rtc(systime_epoch_ms(), &rtc);  
     sprintf(LOGBUF, "housekeeping %02u, %02u/%02u/20%02u %02u:%02u:%02u", 
-            g_rtc_time.tm_wday, g_rtc_time.tm_mon, g_rtc_time.tm_mday, g_rtc_time.tm_year, 
-            g_rtc_time.tm_hour, g_rtc_time.tm_min, g_rtc_time.tm_sec); log_info();
+            rtc.tm_wday, rtc.tm_mon, rtc.tm_mday, rtc.tm_year, 
+            rtc.tm_hour, rtc.tm_min, rtc.tm_sec); log_info();
 }
 
 void hk_update_tlm(void) {

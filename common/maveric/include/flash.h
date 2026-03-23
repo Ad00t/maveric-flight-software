@@ -29,9 +29,9 @@ Date 	 |  Au.  |	Notes
 //========================================
 //  			Dependencies
 //========================================
-#include <stdint.h>
 #include "common.h"
 #include "spi.h"						// SPI functionality					
+#include <stdint.h>
 
 
 //========================================
@@ -62,7 +62,7 @@ uint16_t getPageSize();
 	
 	Notes: If the buffer is not large enough to store the characters, a
 	trap conflict may ensue, or data corruption may occur.
-*/	void flashRead(unsigned long addr, unsigned int len, unsigned char * buf);
+*/	void flashRead(uint32_t addr, uint16_t len, uint8_t * buf);
 //------------------------------------------------------------------------
 
 	
@@ -81,7 +81,7 @@ uint16_t getPageSize();
 
 	See Also:
 		flashWriteSafe()
-*/	void flashWrite(unsigned long addr, unsigned int len, unsigned char * buf);
+*/	void flashWrite(uint32_t addr, uint16_t len, uint8_t * buf);
 //------------------------------------------------------------------------
 
 
@@ -119,11 +119,11 @@ uint16_t getPageSize();
 
 	4. The function can still fail if the length specified exceeds the buffer,
 	   resulting in an trap conflict.
-*/	status_e flashWriteSafe(unsigned long addr, 
-				 			   int len, 
-							   unsigned char * buf,
-						 	   unsigned long lower_bound,
-							   unsigned long upper_bound);		
+*/	status_e flashWriteSafe(uint32_t addr, 
+				 			   uint16_t len, 
+							   uint8_t * buf,
+						 	   uint32_t lower_bound,
+							   uint32_t upper_bound);		
 //------------------------------------------------------------------------
 
 	// Write Enable/Disable
@@ -131,79 +131,79 @@ uint16_t getPageSize();
 	void flashWriteDisable();
 	
 	// Sector Protection
-	unsigned char flashReadSectorProtection(unsigned long address);
-	void flashSectorProtectDisable(unsigned long address);
-	void flashSectorProtectDisable(unsigned int sector);
+	uint8_t flashReadSectorProtection(uint32_t address);
+	void flashSectorProtectDisable(uint32_t address);
+	void flashSectorProtectDisable(uint16_t sector);
 	void flashGlobalUnprotect();
 
 	// Erasing...
-	void flashEraseBlockByNumber(unsigned int block);
-	void flashEraseBlockByAddr(unsigned long addr);
-	void flashErasePage(unsigned int page);		// Safely erases a page by copying everything to/from the SWAP block
+	void flashEraseBlockByNumber(uint16_t block);
+	void flashEraseBlockByAddr(uint32_t addr);
+	void flashErasePage(uint16_t page);		// Safely erases a page by copying everything to/from the SWAP block
 	void flashEraseChip();						// Wipe the whole thing
-	void flashEraseBetweenBlocks(unsigned int start_block, unsigned int end_block);		// Erases blocks, inclusive
+	void flashEraseBetweenBlocks(uint16_t start_block, uint16_t end_block);		// Erases blocks, inclusive
 
 	// Copying...
-	void flashCopyBlockExceptPage(unsigned int destination_block, unsigned int source_block, unsigned int page_to_except);
-	void flashCopyBlock(unsigned int destination_block, unsigned int source_block);
-	void flashCopyPage(unsigned int destination_page, unsigned int source_page);
-	status_e flashCopy(unsigned long source_addr, unsigned long dest_addr, unsigned long len);	// Copies data from 1 address in flash to another.  Can return failure if len is too large, or if area to be written is not empty.
+	void flashCopyBlockExceptPage(uint16_t destination_block, uint16_t source_block, uint16_t page_to_except);
+	void flashCopyBlock(uint16_t destination_block, uint16_t source_block);
+	void flashCopyPage(uint16_t destination_page, uint16_t source_page);
+	status_e flashCopy(uint32_t source_addr, uint32_t dest_addr, uint32_t len);	// Copies data from 1 address in flash to another.  Can return failure if len is too large, or if area to be written is not empty.
 
 	// Status
-	void flashStatus(unsigned char * status);							// Reads the status bytes (2) from flash.
-	void statusReport(int port, unsigned char statusbyte1, unsigned char statusbyte2);
-	void flashVersion(unsigned char * manufact_id, unsigned char * device_id);	// Reads the flash version (manufacturer and device ids)
+	void flashStatus(uint8_t * status);							// Reads the status bytes (2) from flash.
+	void statusReport(uint16_t port, uint8_t statusbyte1, uint8_t statusbyte2);
+	void flashVersion(uint8_t * manufact_id, uint8_t * device_id);	// Reads the flash version (manufacturer and device ids)
 
 	// Diagnostic
-	void flashReadToPort(int port, unsigned long addr, unsigned long len);		// Read a specified length of flash to a port
-	void flashPrintOccupiedBlocks(int port=0,
-							  	  unsigned char ascii=1);			// Sends a listing of occupied blocks (in either ascii or binary) to a specified port
+	void flashReadToPort(uint16_t port, uint32_t addr, uint32_t len);		// Read a specified length of flash to a port
+	void flashPrintOccupiedBlocks(uint16_t port=0,
+							  	  uint8_t ascii=1);			// Sends a listing of occupied blocks (in either ascii or binary) to a specified port
 
 //========================================
 //  		Helper Functions
 //========================================
 	// Manipulating Flash Addresses
-	void IncrementAddrCircular(unsigned long * addr,
-						 	   unsigned long lower_limit, 
-							   unsigned long upper_limit,
-							   unsigned long increment);						// Increments an addr in a circular buffer fashion.  
+	void IncrementAddrCircular(uint32_t * addr,
+						 	   uint32_t lower_limit, 
+							   uint32_t upper_limit,
+							   uint32_t increment);						// Increments an addr in a circular buffer fashion.  
 																				// This means that upper_limit + 1 will equal lower_limit.
 
-	void DecrementAddrCircular(unsigned long * addr,
-						 	   unsigned long lower_limit, 
-							   unsigned long upper_limit,
-							   unsigned long decrement);						// Decrements an addr in a circular buffer fashion.  
+	void DecrementAddrCircular(uint32_t * addr,
+						 	   uint32_t lower_limit, 
+							   uint32_t upper_limit,
+							   uint32_t decrement);						// Decrements an addr in a circular buffer fashion.  
 																				// This means that lower_limit - 1 will equal upper_limit.
-	void flashAddr(unsigned long temp, unsigned char *addr);								// Creates an address from characters
-	unsigned long CharsToFlashAddr(unsigned char addbyte1, unsigned char addbyte2, unsigned char addbyte3);// Creates an address from 3 characters
+	void flashAddr(uint32_t temp, uint8_t *addr);								// Creates an address from characters
+	uint32_t CharsToFlashAddr(uint8_t addbyte1, uint8_t addbyte2, uint8_t addbyte3);// Creates an address from 3 characters
 
 	// Conversion from Flash Address to equivalent characters
-	void LongTo3Chars(unsigned long address, unsigned char * threebytearray);	// Creates 3 chars from an address
+	void LongTo3Chars(uint32_t address, uint8_t * threebytearray);	// Creates 3 chars from an address
 
 	// Conversions from a Flash Address to it's Sector/Block/Page
-	unsigned int FlashAddrToSector(unsigned long addr);							// Address --> Sector Number
-	unsigned int FlashAddrToBlock(unsigned long addr);							// Address --> Block Number
-	unsigned int FlashAddrToPage(unsigned long addr);							// Address --> Page Number
+	uint16_t FlashAddrToSector(uint32_t addr);							// Address --> Sector Number
+	uint16_t FlashAddrToBlock(uint32_t addr);							// Address --> Block Number
+	uint16_t FlashAddrToPage(uint32_t addr);							// Address --> Page Number
 
 	// Conversion from a Sector/Block/Page to the corresponding Flash Addresses (start and end)
-	void SectorToFlashAddr(unsigned int sector, 								
-						   unsigned long * begin, 
-						   unsigned long * end);								
-	void BlockToFlashAddr(unsigned int block, 
-					 	  unsigned long * begin, 
-						  unsigned long * end);
-	void PageToFlashAddr(unsigned int page, 
-						 unsigned long * begin, 
-						 unsigned long * end);
+	void SectorToFlashAddr(uint16_t sector, 								
+						   uint32_t * begin, 
+						   uint32_t * end);								
+	void BlockToFlashAddr(uint16_t block, 
+					 	  uint32_t * begin, 
+						  uint32_t * end);
+	void PageToFlashAddr(uint16_t page, 
+						 uint32_t * begin, 
+						 uint32_t * end);
 
 	// Finding empty parts of flash
-	unsigned char CheckFlashEmpty(unsigned long address,unsigned int len);
-	status_e flashFindEmptyPage(unsigned int startpage,
-								   unsigned int endpage,
-								   unsigned int * returnpage);					// Checks for the first empty page between two page boundaries, inclusive
+	uint8_t CheckFlashEmpty(uint32_t address,uint16_t len);
+	status_e flashFindEmptyPage(uint16_t startpage,
+								   uint16_t endpage,
+								   uint16_t * returnpage);					// Checks for the first empty page between two page boundaries, inclusive
 
 	// Actually performs the reading and writing to SPI.  This should be a private-only function eventually...
-	void SPIWrRd(unsigned char *Write, unsigned int writeL, unsigned char *Read, unsigned int readL);
-	void SPIWrThenRd(unsigned char *Write, unsigned int writeL, unsigned char *Read, unsigned int readL);
+	void SPIWrRd(uint8_t *Write, uint16_t writeL, uint8_t *Read, uint16_t readL);
+	void SPIWrThenRd(uint8_t *Write, uint16_t writeL, uint8_t *Read, uint16_t readL);
 
 #endif 

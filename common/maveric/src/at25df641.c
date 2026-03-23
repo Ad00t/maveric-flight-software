@@ -10,6 +10,7 @@
 
 #include "flash.h" // Contains public flash function prototypes.
 #include "logger.h"
+#include <stdint.h>
 
 //========================================
 //  			Specifications
@@ -76,8 +77,8 @@ uint16_t getPageSize() {
 -----------------------------------------------------------
 */
 void flashAddr(uint32_t tempad, uint8_t* addr) {
-	int len;
-	int n;
+	uint16_t len;
+	uint16_t n;
 	uint8_t* buf2;
 
 	buf2 = &tempad;
@@ -162,9 +163,9 @@ void flashVersion(uint8_t* manufact_id, uint8_t* device_id) {
 // Checks the status bit from the flash and returns when complete or after MAX_SEC seconds,
 // whichever is first.
 void waitForFlash(void) {
-	auto int n;
+	auto uint16_t n;
 	auto uint8_t stat[3];
-	const int MAX_SEC = 120; // Sets the maximum time to wait
+	const uint16_t MAX_SEC = 120; // Sets the maximum time to wait
 
 	n = 0;
 	flashStatus(stat); // Checks the flash status bits
@@ -337,8 +338,8 @@ void flashRead(uint32_t addr, uint16_t len, uint8_t* buf) {
 uint8_t CheckFlashEmpty(uint32_t address, uint16_t len) {
 	uint8_t ReadBuf[FLASH_PAGE_SIZE + 1]; // Flash can only write a page at a time.  So this
 												// should be all we need to read.
-	int i;
-	int sz;
+	uint16_t i;
+	uint16_t sz;
 
 	// Validate
 	if (address + len > MAX_FLASH_ADDR)
@@ -487,7 +488,7 @@ void flashCopyBlockExceptPage(uint16_t destination_block, uint16_t source_block,
 							  uint16_t page_to_except) {
 	// Loop over pages in source block, copying each to destination except for the page_to_except
 
-	int i;
+	uint16_t i;
 	uint16_t source_start_page, source_end_page;
 	uint16_t dest_start_page, dest_end_page;
 	uint32_t start_addr, end_addr;
@@ -519,7 +520,7 @@ void flashCopyBlockExceptPage(uint16_t destination_block, uint16_t source_block,
 //   -- checks if we're outside the max address of the flash chip
 //	 -- writes across page boundaries safely (without wrapping)
 //	 -- doesn't return until writing is complete
-status_e flashWriteSafe(uint32_t addr, int len, uint8_t* buf,
+status_e flashWriteSafe(uint32_t addr, uint16_t len, uint8_t* buf,
 						   uint32_t lower_bound, uint32_t upper_bound) {
 	uint8_t cleared = 0;
 	uint32_t ending_addr, page_boundary, throwaway;
@@ -536,7 +537,7 @@ status_e flashWriteSafe(uint32_t addr, int len, uint8_t* buf,
 	// Compute upper address we're goign to write to
 	ending_addr = addr + len;
 
-    sprintf(LOGBUF, "%u %u %u %u", ending_addr, lower_bound, upper_bound, MAX_FLASH_ADDR); log_error();
+    // sprintf(LOGBUF, "%u %u %u %u", ending_addr, lower_bound, upper_bound, MAX_FLASH_ADDR); log_error();
 
 	// Check the specified memory bounds
 	// Upper
@@ -612,7 +613,7 @@ status_e flashWriteSafe(uint32_t addr, int len, uint8_t* buf,
 void flashCopyBlock(uint16_t destination_block, uint16_t source_block) {
 	// Loop over pages in source block, copying each to destination
 
-	int i;
+	uint16_t i;
 	uint16_t source_start_page, source_end_page;
 	uint16_t dest_start_page, dest_end_page;
 	uint32_t start_addr, end_addr;
@@ -636,7 +637,7 @@ void flashCopyBlock(uint16_t destination_block, uint16_t source_block) {
 }
 
 // Reads from flash to the specified port, one page at a time
-void flashReadToPort(int port, uint32_t addr, uint32_t len) {
+void flashReadToPort(uint16_t port, uint32_t addr, uint32_t len) {
 	uint8_t ReadBuf[FLASH_PAGE_SIZE + 1];
 	uint32_t end_addr;
 
@@ -791,7 +792,7 @@ void DecrementAddrCircular(uint32_t* addr, uint32_t lower_limit,
 }
 
 // Returns an interpretation of status bytes for the AT25DF641 Flash chip
-void statusReport(int port, uint8_t statusbyte1, uint8_t statusbyte2) {
+void statusReport(uint16_t port, uint8_t statusbyte1, uint8_t statusbyte2) {
 	const uint8_t STATUS_BIT = 0x01;
 	const uint8_t ENABLE_BIT = 0x02;
 	const uint8_t SPS_SOME = 0x04;

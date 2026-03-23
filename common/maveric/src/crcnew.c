@@ -19,8 +19,9 @@
 -----------------------------------------------------------
 */
 uint16_t compute_crc16(uint8_t* buf, uint8_t len) {
+    if (buf == NULL) return 0;
     uint16_t crc = 0x0000;  // XMODEM init
-    int i, j;
+    uint8_t i, j;
 
     for (i = 0; i < len; i++) {
         crc ^= ((uint16_t)buf[i]) << 8;

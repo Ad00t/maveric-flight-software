@@ -104,7 +104,9 @@ void cmdimpl_ppm_get_time(cmdpkt_s* pkt) {
         case REQ: {
             sprintf(LOGBUF, "cmdimpl_ppm_get_time REQ"); log_info();
             char res[CMD_MAX_ARGS_LEN] = {0};  
-            rtc_to_str(&g_ertc.time, res);
+            rtc_time_t rtc;
+            epoch_ms_to_rtc(systime_epoch_ms(), &rtc);  
+            rtc_to_str(&rtc, res);
             cmd_respond(pkt, RES, res);
             break;
         }

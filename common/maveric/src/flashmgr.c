@@ -43,8 +43,7 @@ status_e flashmgr_increment_rbt_cnt(flashmgr_s* self) {
 
 	// Read the previous value
 	if (i >= record_size)
-		flashRead(addy, sizeof(self->rbt_cnt),
-				  &self->rbt_cnt); // For values of i greater than first iteration
+		flashRead(addy, record_size, &self->rbt_cnt); // For values of i greater than first iteration
 	else
 		self->rbt_cnt = 0; // For first iteration.
 
@@ -68,7 +67,7 @@ status_e flashmgr_increment_rbt_cnt(flashmgr_s* self) {
 	}
 
 	// Finally, write the new value
-	return flashWriteSafe(RESERVED_ADDR + i, sizeof(self->rbt_cnt), &self->rbt_cnt, RESERVED_ADDR,
+	return flashWriteSafe(RESERVED_ADDR + i, record_size, &self->rbt_cnt, RESERVED_ADDR,
 						  RESERVED_ADDR + FLASH_BLOCK_SIZE - 1);
 }
 

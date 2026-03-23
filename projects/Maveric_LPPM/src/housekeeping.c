@@ -45,9 +45,11 @@ void hk_systime_sync(void) {
 }
 
 void hk_log(void) {
+    rtc_time_t rtc;
+    epoch_ms_to_rtc(systime_epoch_ms(), &rtc);  
     sprintf(LOGBUF, "housekeeping %02u, %02u/%02u/20%02u %02u:%02u:%02u ertc=%u", 
-            g_ertc.time.tm_wday, g_ertc.time.tm_mon, g_ertc.time.tm_mday, g_ertc.time.tm_year, 
-            g_ertc.time.tm_hour, g_ertc.time.tm_min, g_ertc.time.tm_sec, g_ertc.is_using_ertc); log_info();
+            rtc.time.tm_wday, rtc.time.tm_mon, rtc.time.tm_mday, rtc.time.tm_year, 
+            rtc.time.tm_hour, rtc.time.tm_min, rtc.time.tm_sec, rtc.is_using_ertc); log_info();
 }
 
 void hk_heartbeats(void) {

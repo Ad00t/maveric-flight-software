@@ -66,10 +66,12 @@ void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
     kiss_parser_s* p = &pkt->parser;
 
     // Parse cmdpkt buf into fields
+    sprintf(LOGBUF, "cmd rcvd"); log_info();
     if (cmdpkt_parse_buf(pkt) != SUCCESS) {
         sprintf(LOGBUF, "cmdmgr_process_cmd: pkt buf parsing failed: len=%u", p->buf_len); log_error();
         goto cleanup;
     }
+    sprintf(LOGBUF, "rcvcmd: %u %u %u %u '%s' '%s'", pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id, pkt->args); log_info();
 
     // Forward
     if (pkt->dest != NODE) {
@@ -79,14 +81,26 @@ void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
         goto cleanup;
     } 
     
+    sprintf(LOGBUF, "rcvcmd2: %u %u", p->i_start, p->buf_len); log_info();
     // CRC check
-    uint16_t calc_crc = compute_crc16(&p->buf[p->i_start], p->buf_len - 2);
+    uint8_t* start = &p->buf[p->i_start];
+    uint8_t length = p->buf_len - 2;
+    uint8_t i;
+    uint8_t j = 0;
+    for (i = 0; i < length; i++) {
+        j += sprintf(&LOGBUF[j], "%u:%02X ", i, start[i]);
+    }
+    log_info();
+    sprintf(LOGBUF, "crc: %u %u", start[0], length);
+    uint16_t calc_crc = compute_crc16(start, length);
+    sprintf(LOGBUF, "calc crc: %u", calc_crc);
     if (pkt->crc != calc_crc) {
         sprintf(LOGBUF, "cmdmgr_process_cmd: crc check failed on cmd: '%s' crc=%u calculated=%u",
                 pkt->id, pkt->crc, calc_crc); log_error();
         goto cleanup;
     } 
     
+    sprintf(LOGBUF, "rcvcmd3"); log_info();
     // Find and execute cmd implementation
     cmdimpl_f cmdimpl = ht_get(&cmdmgr->cmdimpls, pkt->id);
     if (cmdimpl == NULL) {
@@ -96,6 +110,7 @@ void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
     cmdimpl(pkt);
 
 cleanup:
+    sprintf(LOGBUF, "cleanup"); log_info();
     cmdpkt_clear(pkt);
 }
 
