@@ -13,24 +13,13 @@
 #include "naviguider.h"
 #include "housekeeping.h"
 #include "common.h"
+#include "globals.h"
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
 
 #module
-
-extern int1 g_superloop_running;        // Setting to FALSE will end the superloop and reset PPM
-extern uint8_t g_rbt_cause;             // restart_cause() in init 
-
-extern irqmgr_s g_irqmgr;               // Interrupts manager
-extern cmdmgr_s g_cmdmgr;               // Commands manager
-extern flashmgr_s g_flashmgr;           // Flash manager
-extern scheduler_s g_scheduler;         // Schedules manager
-extern ertc_s g_ertc;                   // External RTC (on motherboard)
-extern mtq_s g_mtq;                     // Magnetorquer
-extern gyro_s g_gyro;                   // Gyroscope (x3)
-extern nvg_s g_nvg;                     // Naviguider
 
 void cmdimpl_init(void) {
     hashtable_s* ht = &g_cmdmgr.cmdimpls;

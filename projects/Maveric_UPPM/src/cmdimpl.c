@@ -5,23 +5,16 @@
 #include "common.h"
 #include "systime.h"
 #include "ax100.h"
+#include "telemetry.h"
 #include "hashtable.h"
 #include "interrupts.h"
 #include "scheduler.h"
+#include "globals.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
 
 #module
-
-extern int1 g_superloop_running;    // Setting to FALSE will end the superloop and reset PPM
-
-extern irqmgr_s g_irqmgr;           // Interrupts manager
-extern cmdmgr_s g_cmdmgr;           // Commands manager
-extern scheduler_s g_scheduler;     // Schedules manager
-extern rtc_time_t g_rtc_time;       // Global RTC time tracking instance (from lower PPM)       
-extern ax100_s g_ax100;             // AX100 transceiver driver 
-extern tlm_s g_tlm;                 // Global telemetry state / data store
 
 void cmdimpl_init() {
     hashtable_s* ht = &g_cmdmgr.cmdimpls;
@@ -203,8 +196,6 @@ void cmdimpl_tlm_get_data(cmdpkt_s* pkt) {
                     g_tlm.lppm_rbt_cause = strtoul(p, &p, 10);  
                     break;
                 case NODE_EPS:
-                    break;
-                case NODE_UPPM:
                     break;
                 case NODE_HOLONAV: 
                     break;

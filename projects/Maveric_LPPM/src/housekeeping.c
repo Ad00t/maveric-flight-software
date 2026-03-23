@@ -9,23 +9,15 @@
 #include "flashmgr.h"
 #include "interrupts.h"
 #include "hashtable.h"
+#include "logger.h"
 #include "adcsmtq.h"
 #include "m41t81s.h"
 #include "adis16260.h"
 #include "naviguider.h"
-#include "logger.h"
+#include "globals.h"
 #include <stdint.h>
 
 #module
-
-extern irqmgr_s g_irqmgr;               // Interrupts manager
-extern cmdmgr_s g_cmdmgr;               // Commands manager
-extern flashmgr_s g_flashmgr;           // Flash manager
-extern scheduler_s g_scheduler;         // Schedules manager
-extern ertc_s g_ertc;                   // External RTC (on motherboard)
-extern mtq_s g_mtq;                     // Magnetorquer
-extern gyro_s g_gyro;                   // Gyroscope (x3)
-extern nvg_s g_nvg;                     // Naviguider
 
 void hk_init(void) {
     // IMPORTANT: AT LEAST ONE SCHEDULE FUNCTION MUST BE ACTIVE OR YOU WILL GET A SCHEDULER ERROR

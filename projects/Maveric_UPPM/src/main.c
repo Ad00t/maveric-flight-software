@@ -71,6 +71,9 @@
 #include "cmdpkt.c"
 #include "logger.c"
 #include "ax100.c"
+#include "config.c"
+#include "at25df641.c"
+#include "flashmgr.c"
 #include "telemetry.c"
 #include "cmdmgr.c"
 #include "scheduler.c"
@@ -87,6 +90,7 @@ uint8_t g_rbt_cause = 0;
 irqmgr_s g_irqmgr = {0};            // Interrupts manager
 cmdmgr_s g_cmdmgr = {0};            // Commands manager
 scheduler_s g_scheduler = {0};      // Schedules manager
+flashmgr_s g_flashmgr = {0};        // Flash manager
 rtc_time_t g_rtc_time = {0};        // Global RTC time tracking instance (from lower PPM)      
 ax100_s g_ax100 = {0};              // AX100 transceiver driver
 tlm_s g_tlm = {0};                  // Global telemetry state / data store
@@ -112,6 +116,10 @@ void system_init(void) {
 	// output_high(SECOND_FLASH_CS);
 	// spi_set_mode(GYRO_SPI_MODE);
 	// setup_spi(SPI_MASTER | SPI_XMIT_L_TO_H | SPI_CLK_DIV_16 | SPI_SCK_IDLE_HIGH);
+    
+    // Flash init
+    flashmgr_init(&g_flashmgr);
+    flashmgr_increment_rbt_cnt(&g_flashmgr);
 
     // Init interrupts 
     irqmgr_init(&g_irqmgr);
@@ -132,8 +140,13 @@ void system_init(void) {
     ax100_init(&g_ax100, AX100_PORT);
     cmdmgr_init(&g_cmdmgr);
     scheduler_init(&g_scheduler);
+    tlm_init(&g_tlm);
     cmdimpl_init();
     hk_init();
+
+    // Update UPPM telemetry
+    g_tlm.uppm_rbt_cnt = g_flashmgr.rbt_cnt;
+    g_tlm.uppm_rbt_cause = g_rbt_cause;
 
     // Fetch time from LPPM
     cmd_dispatch(NODE, NODE_LPPM, 0, REQ, "ppm_get_time", "");

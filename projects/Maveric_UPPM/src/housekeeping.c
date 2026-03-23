@@ -8,18 +8,12 @@
 #include "scheduler.h"
 #include "cmdmgr.h"
 #include "ax100.h"
+#include "globals.h"
 #include <stdint.h>
 #include <time.h>
 #include <string.h>
 
 #module
-
-extern irqmgr_s g_irqmgr;           // Interrupts manager
-extern cmdmgr_s g_cmdmgr;           // Commands manager
-extern scheduler_s g_scheduler;     // Schedules manager
-extern rtc_time_t g_rtc_time;       // Global RTC time tracking instance (from lower PPM) 
-extern ax100_s g_ax100;             // AX100 transceiver driver 
-extern tlm_s g_tlm;                 // Global telemetry state / data store
 
 void hk_init(void) {
     // IMPORTANT: AT LEAST ONE SCHEDULE FUNCTION MUST BE ACTIVE OR YOU WILL GET A SCHEDULER ERROR
