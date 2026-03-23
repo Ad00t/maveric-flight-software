@@ -27,5 +27,8 @@ void cmdmgr_parse_stream(cmdmgr_s* cmdmgr, ringbuf_s* rcvbuf, cmdpkt_s* pkt, int
 
 // Checks link layer headers, CRC, and forwards/runs command appropriately
 void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt);
+// Easy use wrapper functions
+void cmd_process(cmdmgr_s* cmdmgr, uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, uint8_t* args, uint8_t args_len);
+void cmd_process(cmdmgr_s* cmdmgr, uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args);
 
 #endif

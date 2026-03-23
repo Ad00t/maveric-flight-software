@@ -98,3 +98,15 @@ void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
 cleanup:
     cmdpkt_clear(pkt);
 }
+
+void cmd_process(cmdmgr_s* cmdmgr, uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, uint8_t* args, uint8_t args_len) {
+    cmdpkt_s pkt;
+    cmdpkt_create(&pkt, orgn, dest, echo, ptype, id, args, args_len);
+    cmdmgr_process_cmd(cmdmgr, &pkt);
+}
+
+void cmd_process(cmdmgr_s* cmdmgr, uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args) {
+    cmdpkt_s pkt;
+    cmdpkt_create(&pkt, orgn, dest, echo, ptype, id, args);
+    cmdmgr_process_cmd(cmdmgr, &pkt);
+}

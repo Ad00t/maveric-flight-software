@@ -48,6 +48,7 @@ typedef struct {
 void cmdpkt_init(cmdpkt_s* pkt);
 
 // Initialize this cmdpkt populated with a cmd
+void cmdpkt_create(cmdpkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, uint8_t* args, uint8_t args_len);
 void cmdpkt_create(cmdpkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args);
 
 // Clear this cmdpkt
@@ -58,8 +59,8 @@ status_e cmdpkt_parse_buf(cmdpkt_s* pkt);
 
 // Send a command packet along its appropriate route. Assumes pkt buf field is populated correctly.
 void cmdpkt_dispatch(cmdpkt_s* pkt);
-
-// Create then send command packet
+// Easy use command creation & dispatch
+void cmd_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, uint8_t* args, uint8_t args_len);
 void cmd_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args);
 
 // Converts SUCCESS -> ACK, anything else -> NACK

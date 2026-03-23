@@ -12,14 +12,13 @@ void cmdpkt_init(cmdpkt_s* pkt) {
     cmdpkt_clear(pkt);
 }
 
-void cmdpkt_create(cmdpkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args) {
+void cmdpkt_create(cmdpkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, uint8_t* args, uint8_t args_len) {
     cmdpkt_init(pkt);
 
     uint16_t len = 0;
     kiss_parser_s* p = &pkt->parser;
     uint8_t* buf = p->buf;
     uint8_t id_len = strlen(id);
-    uint8_t args_len = strlen(args);
    
     // Add header
     pkt->orgn = orgn;
@@ -54,6 +53,11 @@ void cmdpkt_create(cmdpkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, cmdp
     p->buf_len = len;
     p->i_start = 0;
 }
+
+void cmdpkt_create(cmdpkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args) {
+    cmdpkt_create(pkt, orgn, dest, echo, ptype, id, args, strlen(args));
+}
+
 
 void cmdpkt_clear(cmdpkt_s* pkt) {
     memset(pkt, 0, sizeof(cmdpkt_s));
@@ -138,6 +142,12 @@ void cmdpkt_dispatch(cmdpkt_s* pkt) {
 }
 
 // Nice little wrapper function for sending commands from anywhere
+void cmd_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, uint8_t* args, uint8_t args_len) {
+    cmdpkt_s pkt;
+    cmdpkt_create(&pkt, orgn, dest, echo, ptype, id, args, args_len);
+    cmdpkt_dispatch(&pkt);
+}
+
 void cmd_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args) {
     cmdpkt_s pkt;
     cmdpkt_create(&pkt, orgn, dest, echo, ptype, id, args);
