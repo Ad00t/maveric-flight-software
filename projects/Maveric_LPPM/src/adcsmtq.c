@@ -21,6 +21,19 @@ uint16_t sum_buf(uint8_t* buf, uint8_t len) {
     return sum;
 }
 
+uint8_t mtq_stat_parse_mode(uint32_t stat) {
+    uint8_t mode_mask = 7;
+    return (uint8_t)(stat & mode_mask);
+}
+
+int1 mtq_stat_parse_sun(uint32_t stat) {
+    return (stat & (1U << 13)) != 0;
+}
+
+int1 mtq_stat_parse_tumb(uint32_t stat) {
+    return (stat & (1U << 11)) != 0;
+}
+
 // Generate checksum (two's complement of buf sum, so original sum + checksum should = 0)
 uint8_t gen_csum(uint8_t* buf, uint8_t len) {
     uint16_t sum = sum_buf(buf, len);
@@ -364,10 +377,16 @@ status_e mtq_get_data(mtq_s* mtq, uint16_t key, void* out) {
     return SUCCESS;
 }
 
-status_e mtq_heartbeat(mtq_s* mtq) {
-    if (!mtq->is_init) return FAILURE;
+void mtq_check_heartbeat(mtq_s* mtq) {
+    if (!mtq->is_init) {
+        mtq->heartbeat = FAILURE;
+        return;
+    }
     mtq_reg_s* reg = mtq_get_reg(mtq, MTQ_SNID);
-    if (reg == NULL) return FAILURE;
+    if (reg == NULL) {
+        mtq->heartbeat = FAILURE;
+        return;
+    }
     char* snid = (char*) reg->value;
     status_e hb = (strncmp(snid, "TAD102063", reg->value_len) == 0) ? SUCCESS : FAILURE; 
     
@@ -384,7 +403,7 @@ status_e mtq_heartbeat(mtq_s* mtq) {
     
     memset(snid, 0, reg->value_len);
     mtq_read_start(mtq, MTQ_SNID);
-    return hb;
+    mtq->heartbeat = hb;
 }
 
 status_e mtq_reboot(mtq_s* mtq) {

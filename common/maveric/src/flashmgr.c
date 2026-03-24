@@ -1,5 +1,6 @@
 #include "flashmgr.h"
-#include "config.h"
+#include "flash.h"
+#include <stdint.h>
 
 #module
 
@@ -21,9 +22,16 @@ static const uint32_t AllocatedSizeOfSection[NUM_SECTIONS] = {
 	RESERVED_ALLOC_SIZE, MISC_ALLOC_SIZE,         MACROS_ALLOC_SIZE,          CONFIG_ALLOC_SIZE,
 	HEXFILE_ALLOC_SIZE,  PAYLOAD_DATA_ALLOC_SIZE, PAYLOAD_PROGRAM_ALLOC_SIZE, SWAP_ALLOC_SIZE};
 
-void flashmgr_init(flashmgr_s* self) {
+status_e flashmgr_init(flashmgr_s* self) {
 	memset(self, 0, sizeof(flashmgr_s));
-    config_load_defaults(&self->config);
+#if NODE == NODE_LPPM
+    self->config.gyro_rate_src = 0; 
+    self->config.attitude_src = 0;
+#elif NODE == NODE_UPPM
+    self->config.last_holonav_seq = 0;
+    self->config.last_astroboard_seq = 0;
+#endif
+    return flashmgr_config_load(self);
 }
 
 status_e flashmgr_increment_rbt_cnt(flashmgr_s* self) {
@@ -79,6 +87,37 @@ status_e flashmgr_reset_rbt_cnt(flashmgr_s* self) {
 				   RESERVED_ADDR + FLASH_BLOCK_SIZE - 1);
     return SUCCESS;
 }
+
+status_e flashmgr_config_load(flashmgr_s* self) {
+	uint16_t n = sizeof(config_s);
+	static const uint8_t TIMES_TO_CHECK = 10;
+	// Setup
+	waitForFlash();
+	// Read and check CRC, exiting successfully if the CRC matches
+    uint16_t i;
+	for (i = 0; i < TIMES_TO_CHECK; i++) {
+		flashRead(CONFIG_ADDR, n, (uint8_t*)self->config);
+		if (check_crc16((uint8_t*)self->config, n-2, self->config.crc) == SUCCESS)
+			return SUCCESS;
+	}
+	return FAILURE;
+}
+
+status_e flashmgr_config_flush(flashmgr_s* self) {
+	uint16_t n = sizeof(config_s);
+	self->config.crc = compute_crc16((uint8_t*)self->config, n-2);
+
+    uint16_t m = 0;
+	for (m = 0; m < n; m += FLASH_BLOCK_SIZE){
+		flashEraseBlockByAddr((uint32_t)(CONFIG_ADDR + m)); // Erase the block at Config + m
+		// -------------NOTE THAT A REBOOT HERE WOULD BE REALLY BAD ----------//
+	}
+
+	// Now program the new stuff, handling any errors if they happen
+	return flashWriteSafe(CONFIG_ADDR, n, self->config, CONFIG_ADDR, CONFIG_ADDR + n + 1);
+}
+
+//////////////////////////////////////////////////////////////////////////////////
 
 uint8_t saveDataToFlash(flashmgr_s* self, char* data, uint16_t dataSize, MemorySection section) {
 	uint32_t nextWritableAddress = GetNextWritableAddress(self, section);

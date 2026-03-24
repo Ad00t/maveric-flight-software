@@ -1,4 +1,5 @@
 #include "common.h"
+#include <math.h>
 #include <stdint.h>
 
 #module
@@ -30,6 +31,14 @@ uint8_t minu8(uint8_t a, uint8_t b) {
     return a <= b ? a : b;
 }
 
+float rad2deg(float rad) {
+    return rad * (180.0f / PI);
+}
+
+float deg2rad(float deg) {
+    return deg * (PI / 180.0f);
+}
+
 //  FUNCTION: ftoa
 //  AUTHOR = TRAMPAS STERN
 //  FILE = strio.c
@@ -46,10 +55,10 @@ uint8_t minu8(uint8_t a, uint8_t b) {
 //  to actually work.
 //-----------------------------------------------------------
 
-int ftoa(float x, char* str, uint8_t prec, char format) {
+uint8_t ftoa(float x, char* str, uint8_t prec, char format) {
     int k, fstyle;
 
-    signed int8 ie, i, ndig;
+    int8_t ie, i, ndig;
 
     //double y;
     //float y;

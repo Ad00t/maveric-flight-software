@@ -25,8 +25,8 @@ void ertc_clear(ertc_s* ertc) {
     memset(&ertc->halted_time, 0, sizeof(rtc_time_t));
 }
 
-void ertc_get_time(ertc_s* ertc) {
-    if (!ertc->is_init) return;
+status_e ertc_get_time(ertc_s* ertc) {
+    if (!ertc->is_init) return FAILURE;
     if (ertc->is_using_ertc) {
         i2c_start();					// RTC READ SEQ
         i2c_write(0xD0);  				// Device address/write mode
@@ -54,10 +54,11 @@ void ertc_get_time(ertc_s* ertc) {
     if (!ertc->is_using_ertc) {
         rtc_read(&ertc->time);
     }
+    return SUCCESS;
 }
 
-void ertc_set_time(ertc_s* ertc, rtc_time_t time) {
-    if (!ertc->is_init) return;
+status_e ertc_set_time(ertc_s* ertc, rtc_time_t time) {
+    if (!ertc->is_init) return FAILURE;
     if (ertc->is_using_ertc) {
         i2c_start();
         i2c_write(0xD0);
@@ -73,18 +74,21 @@ void ertc_set_time(ertc_s* ertc, rtc_time_t time) {
     }
    
     rtc_write(&time);
-    ertc_get_time(ertc);
+    return ertc_get_time(ertc);
 }
 
-int1 ertc_heartbeat(ertc_s* ertc) {
-    if (!ertc->is_init) return 0;
-    if (!ertc->is_using_ertc) {
-        sprintf(LOGBUF, "ertc_heartbeat: flatlined. resetting..."); log_error();
-        rtc_time_t init_time;
-        memcpy(&init_time, &ertc->time, sizeof(rtc_time_t));
-        ertc_init(ertc, &init_time); 
+void ertc_check_heartbeat(ertc_s* ertc) {
+    if (!ertc->is_init) {
+        ertc->heartbeat = FAILURE;
+        return;
     }
-    return ertc->is_using_ertc;
+    // if (!ertc->is_using_ertc) {
+    //     sprintf(LOGBUF, "ertc_heartbeat: flatlined. resetting..."); log_error();
+    //     rtc_time_t init_time;
+    //     memcpy(&init_time, &ertc->time, sizeof(rtc_time_t));
+    //     ertc_init(ertc, &init_time); 
+    // }
+    ertc->heartbeat = ertc->is_using_ertc ? SUCCESS : FAILURE;
 }
 
 void ertc_enable_fpm(ertc_s* ertc) {

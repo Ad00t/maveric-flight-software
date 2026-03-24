@@ -60,6 +60,7 @@ typedef struct {
     nvg_sensor_s sensors[NVG_SENSOR_TABLE_LEN];
     nvg_pkt_s rcvpkt;
     uint8_t port;
+    status_e heartbeat;
     int1 is_init;
 } nvg_s;
 
@@ -103,13 +104,8 @@ status_e nvg_stop_all_sensors(nvg_s* nvg);
         
 // COMMAND FUNCTIONS
 
-/*
-Checks last timestamp for each sensor to determine if sensor has reported in last FLATLINE_TIME_MS 
-
-Returns
-    status (bool): Whether heartbeat check passed for all sensors or not 
-*/
-status_e nvg_heartbeat(nvg_s* nvg);
+// Check for heartbeat and store value
+void nvg_check_heartbeat(nvg_s* nvg);
 
 // Sends the 'P' command to toggle sensor power
 status_e nvg_power(nvg_s* nvg);

@@ -36,7 +36,10 @@ uint8_t hextobcd(uint8_t hex);
 uint8_t maxu8(uint8_t a, uint8_t b);
 uint8_t minu8(uint8_t a, uint8_t b);
 
-int ftoa(float x, char* str, uint8_t prec, char format);
+float rad2deg(float rad);
+float deg2rad(float deg);
+
+uint8_t ftoa(float x, char* str, uint8_t prec, char format);
 
 #endif // !__COMMON_H__
 

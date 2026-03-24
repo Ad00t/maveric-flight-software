@@ -3,7 +3,6 @@
 
 #include "common.h"
 #include "flash.h"
-#include "config.h"
 
 //========================================
 //    		 	Address Locations
@@ -48,16 +47,36 @@ typedef enum {
 	NUM_SECTIONS = 8
 } MemorySection;
 
+typedef enum {
+    DATASRC_MTQ = 0,
+    DATASRC_NVG = 1,
+    DATASRC_GYRO = 2
+} datasrc_e;
+
+typedef struct {
+#if NODE == NODE_LPPM
+    datasrc_e gyro_rate_src;
+    datasrc_e attitude_src;
+#elif NODE == NODE_UPPM
+    uint16_t last_holonav_seq;
+    uint16_t last_astroboard_seq;
+#endif
+    uint16_t crc;
+} config_s;
+
 typedef struct {
     config_s config;
 	uint16_t numPagesWrittenTo[NUM_SECTIONS];
     uint16_t rbt_cnt;
 } flashmgr_s;
 
-void flashmgr_init(flashmgr_s* self);
+status_e flashmgr_init(flashmgr_s* self);
 
 status_e flashmgr_increment_rbt_cnt(flashmgr_s* self);
 status_e flashmgr_reset_rbt_cnt(flashmgr_s* self);
+
+status_e flashmgr_config_load(flashmgr_s* self);
+status_e flashmgr_config_flush(flashmgr_s* self);
 
 uint8_t saveDataToFlash(flashmgr_s* self, char* data, uint16_t dataSize, MemorySection section);
 /*

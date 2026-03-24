@@ -41,7 +41,7 @@ Usage: See the descriptions of each function below.
 //========================================
 uint16_t compute_crc16(uint8_t* buf, uint8_t len);
 uint16_t compute_crc16_cont(uint8_t restart, uint8_t* buf, uint8_t len);
-int1 check_crc16(uint8_t* buf, int len, uint16_t crc);
+status_e check_crc16(uint8_t* buf, int len, uint16_t crc);
 
 uint32_t compute_crc32(uint8_t* data, uint8_t length);
 

@@ -9,6 +9,7 @@
 // CMDPKT PUBLIC API
 
 void cmdpkt_init(cmdpkt_s* pkt) {
+    memset(&pkt->parser, 0, sizeof(kiss_parser_s));
     cmdpkt_clear(pkt);
 }
 

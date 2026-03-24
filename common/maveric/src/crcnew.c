@@ -71,9 +71,9 @@ uint16_t compute_crc16_cont(uint8_t restart, uint8_t* buf, uint8_t len) {
 }
 
 // Checks the CRC of a Message.  1 for Good CRC, 0 for bad.
-int1 check_crc16(uint8_t* buf, int len, uint16_t crc) {
+status_e check_crc16(uint8_t* buf, int len, uint16_t crc) {
     uint16_t calc = compute_crc16(buf, len);
-    return calc == crc;
+    return calc == crc ? SUCCESS : FAILURE;
 }
 
 static const uint32_t CRC_TABLE[256] = {

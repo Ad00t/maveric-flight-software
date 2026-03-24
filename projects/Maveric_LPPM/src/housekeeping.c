@@ -24,9 +24,9 @@ void hk_init(void) {
     scheduler_schedule_func_in(&g_scheduler, 0, hk_get_ertc_time, 2000, 500, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 1, hk_log, 2500, 500, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 2, hk_systime_sync, 5000, 30000, SCHEDULE_REPS_INFINITE);
-    scheduler_schedule_func_in(&g_scheduler, 3, hk_heartbeats, 4000, 3000, SCHEDULE_REPS_INFINITE);
-    scheduler_schedule_func_in(&g_scheduler, 4, hk_read_sensors, 3000, 1000, SCHEDULE_REPS_INFINITE);
-    // scheduler_schedule_func_in(&g_scheduler, 6, hk_test_disable_ertc, 15000, 0, 1);
+    scheduler_schedule_func_in(&g_scheduler, 3, hk_heartbeats, 4000, 5000, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 4, hk_read_sensors, 3000, 2000, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 5, hk_gnc_step, 4000, 10000, SCHEDULE_REPS_INFINITE);
 }
 
 // HOUSEKEEPING FUNCTIONS
@@ -48,25 +48,32 @@ void hk_log(void) {
     rtc_time_t rtc;
     epoch_ms_to_rtc(systime_epoch_ms(), &rtc);  
     sprintf(LOGBUF, "housekeeping %02u, %02u/%02u/20%02u %02u:%02u:%02u ertc=%u", 
-            rtc.time.tm_wday, rtc.time.tm_mon, rtc.time.tm_mday, rtc.time.tm_year, 
-            rtc.time.tm_hour, rtc.time.tm_min, rtc.time.tm_sec, rtc.is_using_ertc); log_info();
+            rtc.tm_wday, rtc.tm_mon, rtc.tm_mday, rtc.tm_year, 
+            rtc.tm_hour, rtc.tm_min, rtc.tm_sec, g_ertc.is_using_ertc); log_info();
 }
 
 void hk_heartbeats(void) {
-    // status_e hb_ertc = ertc_heartbeat(&g_ertc);
-    // status_e hb_mtq = mtq_heartbeat(&g_mtq);
-    // status_e hb_nvg = nvg_heartbeat(&g_nvg);
-    // status_e hb_gyro = gyro_heartbeat(&g_gyro);
-    // sprintf(LOGBUF, "heartbeats: %u %u %u %", hb_ertc, hb_mtq, hb_nvg, /* hb_gyro */ 0);
+    ertc_check_heartbeat(&g_ertc);
+    mtq_check_heartbeat(&g_mtq);
+    nvg_check_heartbeat(&g_nvg);
+    sprintf(LOGBUF, "heartbeats: ertc=%u mtq=%u nvg=%u", g_ertc.heartbeat, g_mtq.heartbeat, g_nvg.heartbeat);
 }
 
 void hk_read_sensors(void) {
     // mtq_read_ctrl(&g_mtq);
-    // mtq_read_fast(&g_mtq);
+    mtq_read_fast(&g_mtq);
     // gyro_read_all(&g_gyro);
 }
 
-void hk_test_disable_ertc(void) {
-    g_ertc.is_using_ertc = FALSE;
-} 
-
+void hk_gnc_step(void) {
+    float gyro_rate_rad[3] = {0};
+    switch (g_flashmgr.config.gyro_rate_src) {
+        case DATASRC_MTQ:
+            mtq_get_data(&g_mtq, MTQ_RATE, gyro_rate_rad);
+        case DATASRC_NVG:
+            nvg_get_sensor_data(&g_nvg, NVG_GYROSCOPE_CAL, gyro_rate_rad);
+        case DATASRC_GYRO:
+            break;
+    }
+    gnc_step(&g_gnc, &g_mtq, gyro_rate_rad);
+}

@@ -229,6 +229,7 @@ typedef struct {
     mtq_reg_s* reg_idx_map[MTQ_MAP_COUNT][MTQ_MAX_IDX_COUNT];
     mtq_pkt_s rcvpkt;
     uint8_t port;  
+    status_e heartbeat;
     int1 is_init;
 } mtq_s;
 
@@ -271,8 +272,8 @@ void mtq_parse_stream(mtq_s* mtq, ringbuf_s* irqbuf);
 // Get a copy of the data for a given register, if it exists
 status_e mtq_get_data(mtq_s* mtq, uint16_t key, void* out);
 
-// Check if we're still receiving from the mtq
-status_e mtq_heartbeat(mtq_s* mtq);
+// Check if we're still receiving from the mtq and store the heartbeat val
+void mtq_check_heartbeat(mtq_s* mtq);
 
 // Power cycle the unit
 status_e mtq_reboot(mtq_s* mtq);
@@ -294,6 +295,11 @@ status_e mtq_set_datetime(mtq_s* mtq, rtc_time_t rtc);
 
 // Set mode via conf register. Ignore target elevation.
 status_e mtq_set_mode(mtq_s* mtq, uint8_t mode);
+
+// Public helpers
+uint8_t mtq_stat_parse_mode(uint32_t stat);
+int1 mtq_stat_parse_sun(uint32_t stat);
+int1 mtq_stat_parse_tumb(uint32_t stat);
 
 // Map Idx | Idx register keys
 

@@ -13,6 +13,7 @@ typedef struct {
     rtc_time_t time; 
     rtc_time_t init_time;
     rtc_time_t halted_time;
+    status_e heartbeat;
     int1 is_using_ertc; // Are we using the external I2C RTC or the internal one?
     int1 is_init;
 } ertc_s;
@@ -23,13 +24,13 @@ status_e ertc_init(ertc_s* ertc, rtc_time_t* init_time);
 // Clear ertc data
 void ertc_clear(ertc_s* ertc);
 
-void ertc_get_time(ertc_s* ertc);
+status_e ertc_get_time(ertc_s* ertc);
 
 // Set ertc time to buf
-void ertc_set_time(ertc_s* ertc, rtc_time_t* time);
+status_e ertc_set_time(ertc_s* ertc, rtc_time_t* time);
 
-// Periodicially reset if not using ertc
-int1 ertc_heartbeat(ertc_s* ertc);
+// Periodicially check and store heartbeat 
+void ertc_check_heartbeat(ertc_s* ertc);
 
 // Idk what this is for
 void ertc_enable_fpm(ertc_s* ertc);

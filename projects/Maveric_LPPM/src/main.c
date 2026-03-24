@@ -66,7 +66,6 @@
 #include "i2c.c"
 #include "spi.c"
 #include "at25df641.c"
-#include "config.c"
 #include "flashmgr.c"
 #include "interrupts.c"
 #include "systime.c"
@@ -81,6 +80,7 @@
 #include "scheduler.c"
 #include "cmdimpl.c"
 #include "housekeeping.c"
+#include "gnc.c"
 
 void system_init(void);
 void system_superloop(void);
@@ -97,6 +97,7 @@ ertc_s g_ertc = {0};                // External RTC (on motherboard)
 mtq_s g_mtq = {0};                  // Magnetorquer
 gyro_s g_gyro = {0};                // Gyroscope (x3)
 nvg_s g_nvg = {0};                  // Naviguider
+gnc_s g_gnc = {0};                  // GNC script state
 
 void main(void) {	
     system_init();

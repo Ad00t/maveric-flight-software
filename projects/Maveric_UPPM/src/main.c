@@ -52,7 +52,7 @@
 #define UPPER_PPM
 #define NODE                NODE_UPPM
 #define NODE_LBL            "UPPM"
-#define LOG_LEVEL           LL_TRACE
+#define LOG_LEVEL           LL_DEBUG
 
 // Module includes (.c necessary)
 
@@ -71,7 +71,6 @@
 #include "cmdpkt.c"
 #include "logger.c"
 #include "ax100.c"
-#include "config.c"
 #include "at25df641.c"
 #include "flashmgr.c"
 #include "telemetry.c"

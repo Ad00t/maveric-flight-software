@@ -24,10 +24,11 @@
 void cmdimpl_init(void) {
     hashtable_s* ht = &g_cmdmgr.cmdimpls;
 
+    ht_set(ht, "ping", (cmdimpl_f) cmdimpl_ping);
+    
     ht_set(ht, "ppm_reset", (cmdimpl_f) cmdimpl_ppm_reset);
     ht_set(ht, "ppm_set_time", (cmdimpl_f) cmdimpl_ppm_set_time);
     ht_set(ht, "ppm_get_time", (cmdimpl_f) cmdimpl_ppm_get_time);
-    ht_set(ht, "ppm_ping", (cmdimpl_f) cmdimpl_ppm_ping);
     ht_set(ht, "ppm_delay", (cmdimpl_f) cmdimpl_ppm_delay);
     ht_set(ht, "ppm_clear_bufs", (cmdimpl_f) cmdimpl_ppm_clear_bufs);
     ht_set(ht, "ppm_get_scheds", (cmdimpl_f) cmdimpl_ppm_get_scheds);
@@ -57,6 +58,16 @@ void cmdimpl_init(void) {
 }
 
 // COMMAND IMPLEMENTATIONS
+
+void cmdimpl_ping(cmdpkt_s* pkt) {
+    switch (pkt->ptype) {
+        case REQ: {
+            sprintf(LOGBUF, "cmdimpl_ping '%s'", pkt->args); log_info();
+            cmd_respond(pkt, RES, "pong");
+            break;
+        }
+    }
+}
 
 void cmdimpl_ppm_reset(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
@@ -90,9 +101,11 @@ void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
             mtq_set_datetime(&g_mtq, time);
             cmd_dispatch(NODE, NODE_UPPM, 0, REQ, "ppm_set_time", pkt->args);
 
+            rtc_time_t rtc;
+            epoch_ms_to_rtc(systime_epoch_ms(), &rtc);  
             sprintf(LOGBUF, "cmdimpl_ppm_set_time '%s' [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", pkt->args,
-                    g_ertc.time.tm_wday, g_ertc.time.tm_mon, g_ertc.time.tm_mday, g_ertc.time.tm_year, 
-                    g_ertc.time.tm_hour, g_ertc.time.tm_min, g_ertc.time.tm_sec); log_info();
+                    rtc.tm_wday, rtc.tm_mon, rtc.tm_mday, rtc.tm_year, 
+                    rtc.tm_hour, rtc.tm_min, rtc.tm_sec); log_info();
             cmd_respond(pkt, ACK, "");
             break;
         }
@@ -108,16 +121,6 @@ void cmdimpl_ppm_get_time(cmdpkt_s* pkt) {
             epoch_ms_to_rtc(systime_epoch_ms(), &rtc);  
             rtc_to_str(&rtc, res);
             cmd_respond(pkt, RES, res);
-            break;
-        }
-    }
-}
-
-void cmdimpl_ppm_ping(cmdpkt_s* pkt) {
-    switch (pkt->ptype) {
-        case REQ: {
-            sprintf(LOGBUF, "cmdimpl_ppm_ping '%s'", pkt->args); log_info();
-            cmd_respond(pkt, RES, "pong");
             break;
         }
     }
@@ -209,7 +212,37 @@ void cmdimpl_tlm_get_data(cmdpkt_s* pkt) {
         case REQ: {
             sprintf(LOGBUF, "cmdimpl_tlm_get_data REQ"); log_info();
             char res[CMD_MAX_ARGS_LEN] = {0};
-            sprintf(res, "%u %u", g_flashmgr.rbt_cnt, g_rbt_cause);
+            uint8_t j = sprintf(res, "%u %u %u %u %u", g_flashmgr.rbt_cnt, g_rbt_cause, g_ertc.heartbeat, g_mtq.heartbeat, g_nvg.heartbeat);
+
+            float gyro_rate_rad[3] = {0};
+            switch (g_flashmgr.config.gyro_rate_src) {
+                case DATASRC_MTQ:
+                    mtq_get_data(&g_mtq, MTQ_RATE, gyro_rate_rad);
+                case DATASRC_NVG:
+                    nvg_get_sensor_data(&g_nvg, NVG_GYROSCOPE_CAL, gyro_rate_rad);
+                case DATASRC_GYRO:
+                    break;
+            }
+            uint8_t i;
+            for (i = 0; i < 3; i++) {
+                j += sprintf(&res[j], " ");
+                j += ftoa(gyro_rate_rad[0], &res[j], 3, 'f');
+            }
+            
+            float attitude[5] = {0};
+            switch (g_flashmgr.config.attitude_src) {
+                case DATASRC_MTQ:
+                    mtq_get_data(&g_mtq, MTQ_Q, attitude);
+                case DATASRC_NVG:
+                    nvg_get_sensor_data(&g_nvg, NVG_QUAT_RV, attitude);
+                case DATASRC_GYRO:
+                    break;
+            }
+            for (i = 0; i < 4; i++) {
+                j += sprintf(&res[j], " ");
+                j += ftoa(attitude[0], &res[j], 3, 'f');
+            }
+
             cmd_respond(pkt, RES, res);
             break;
         }
@@ -219,8 +252,8 @@ void cmdimpl_tlm_get_data(cmdpkt_s* pkt) {
 void cmdimpl_mtq_heartbeat(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
         case REQ: {
-            status_e s = mtq_heartbeat(&g_mtq);
-            cmd_respond(pkt, stat2ack(s), "");
+            mtq_check_heartbeat(&g_mtq);
+            cmd_respond(pkt, stat2ack(g_mtq.heartbeat), "");
             break;
         }
     }
@@ -448,8 +481,8 @@ void cmdimpl_mtq_get_all(cmdpkt_s* pkt) {
 void cmdimpl_nvg_heartbeat(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
         case REQ: {
-            status_e s = nvg_heartbeat(&g_nvg);
-            cmd_respond(pkt, stat2ack(s), "");
+            nvg_check_heartbeat(&g_nvg);
+            cmd_respond(pkt, stat2ack(g_nvg.heartbeat), "");
             break;
         }
     }

@@ -5,53 +5,43 @@
 
 typedef struct {
     // Generic
-    uint64_t time;
-    uint16_t lppm_rbt_cnt;
-    uint8_t lppm_rbt_cause;
-    uint16_t uppm_rbt_cnt;
-    uint8_t uppm_rbt_cause;
-    uint32_t mode;
-    float quat_attitude[4];
+    uint64_t time;                      // UPPM
+    uint16_t lppm_rbt_cnt;              // LPPM
+    uint8_t lppm_rbt_cause;             // LPPM
+    uint16_t uppm_rbt_cnt;              // UPPM
+    uint8_t uppm_rbt_cause;             // UPPM
+    uint8_t ertc_heartbeat;             // LPPM
+    uint8_t mtq_heartbeat;              // LPPM
+    uint8_t nvg_heartbeat;              // LPPM
+    uint8_t mtq_stat;                   // LPPM
     // Beacon 1
-    float gyro_rate[3];
-    float mtq_sv[3];
-    float ss[3];
-    float mag[3];
-    uint64_t gnc_state;
-    uint8_t mtq_mode;
-    float mtq_dipole[3];
+    float gyro_rate[3];                 // LPPM
+    float attitude[4];                  // LPPM
+    float sv[3];                        // LPPM
+    float ss[3];                        // LPPM
+    float mag[3];                       // LPPM
+    float mtq_dipole[3];                // LPPM
+    float quat_error[4];                // LPPM
+    float rate_error[4];                // LPPM
+    float mtq_act_error[3];             // LPPM
     // Beacon 2
-    float model_orbit[7];
-    float model_sun[3];
-    float model_geomag[3];
-    float gyro_temp[3];
-    int1 sp_check_failed_out;
+    float batt_voltage[4];              // EPS
+    float batt_current[4];              // EPS
+    float solarcell_voltage[5];         // EPS
+    float solarcell_current[10];        // EPS
+    float eps_temp[8];                  // EPS
+    float adcs_temp;                    // LPPM
+    uint8_t eps_state;                  // EPS
     // Beacon 3
-    float quat_error[4];
-    float rate_error[4];
-    int1 global_en;
-    float mtq_act_error[3];
-    float sl_error;
-    // Beacon 4
-    float batt_voltage[4];
-    float batt_current[4];
-    float solarcell_voltage[5];
-    float solarcell_current[10];
-    float batt_sens[6];
-    float eps_temp[8];
-    float adcs_temp;
-    uint8_t eps_state;
-    // Beacon 5
-    uint8_t ax100_flash_status[3];
-    float uppm_temp[4];
-    uint8_t payload_status[2];
-    float ax100_temp[2];
-    uint64_t next_downlink;
-    uint8_t dep_mag_status;
-    // Beacon 6
-    uint16_t ab_seq; 
-    // Beacon 7
-    uint16_t hn_seq;
+    uint8_t ax100_flash_status[3];      // UPPM
+    float uppm_temp[4];                 // UPPM
+    uint8_t holonav_status;             // HOLONAV 
+    uint8_t astroboard_status;          // ASTROBOARD 
+    float ax100_temp[2];                // UPPM
+    uint64_t next_downlink;             // UPPM             
+    uint8_t dep_mag_status[2];          // UPPM
+    uint16_t ab_seq;                    // ASTROBOARD
+    uint16_t hn_seq;                    // HOLONAV
 } tlm_s;
 
 void tlm_init(tlm_s* tlm);

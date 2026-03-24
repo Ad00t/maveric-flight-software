@@ -251,8 +251,11 @@ status_e nvg_stop_all_sensors(nvg_s* nvg) {
     return s;
 }
         
-status_e nvg_heartbeat(nvg_s* nvg) {
-    if (!nvg->is_init) return 0;
+void nvg_check_heartbeat(nvg_s* nvg) {
+    if (!nvg->is_init) {
+        nvg->heartbeat = FAILURE;
+        return;
+    }
     status_e hb = (nvg->sensors[NVG_TEMPERATURE].ts > 0) ? SUCCESS : FAILURE;
 
     // if (hb == FAILURE) {
@@ -264,7 +267,7 @@ status_e nvg_heartbeat(nvg_s* nvg) {
     // }
 
     nvg->sensors[NVG_TEMPERATURE].ts = 0;
-    return hb;
+    nvg->heartbeat = hb;
 }
 
 status_e nvg_power(nvg_s* nvg) {
