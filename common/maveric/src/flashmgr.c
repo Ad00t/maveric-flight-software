@@ -24,14 +24,8 @@ static const uint32_t AllocatedSizeOfSection[NUM_SECTIONS] = {
 
 status_e flashmgr_init(flashmgr_s* self) {
 	memset(self, 0, sizeof(flashmgr_s));
-#if NODE == NODE_LPPM
-    self->config.gyro_rate_src = 0; 
-    self->config.attitude_src = 0;
-#elif NODE == NODE_UPPM
-    self->config.last_holonav_seq = 0;
-    self->config.last_astroboard_seq = 0;
-#endif
-    return flashmgr_config_load(self);
+    flashmgr_config_load_defaults(self);
+    return flashmgr_config_load_flash(self);
 }
 
 status_e flashmgr_increment_rbt_cnt(flashmgr_s* self) {
@@ -88,7 +82,19 @@ status_e flashmgr_reset_rbt_cnt(flashmgr_s* self) {
     return SUCCESS;
 }
 
-status_e flashmgr_config_load(flashmgr_s* self) {
+void flashmgr_config_load_defaults(flashmgr_s* self) {
+#if NODE == NODE_LPPM
+    self->config.log_level = LL_INFO;
+    self->config.gyro_rate_src = 0; 
+    self->config.attitude_src = 0;
+#elif NODE == NODE_UPPM
+    self->config.log_level = LL_INFO;
+    self->config.last_holonav_seq = 0;
+    self->config.last_astroboard_seq = 0;
+#endif
+}
+
+status_e flashmgr_config_load_flash(flashmgr_s* self) {
 	uint16_t n = sizeof(config_s);
 	static const uint8_t TIMES_TO_CHECK = 10;
 	// Setup

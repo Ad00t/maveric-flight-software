@@ -217,5 +217,5 @@ uint8_t ftoa(float x, char* str, uint8_t prec, char format) {
 
       }
     *str++ = '\0';
-    return (str - start);  // Return string length
+    return (str - start - 1);  // Return string length
 }

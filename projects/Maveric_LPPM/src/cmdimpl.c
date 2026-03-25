@@ -27,14 +27,17 @@ void cmdimpl_init(void) {
     ht_set(ht, "ping", (cmdimpl_f) cmdimpl_ping);
     
     ht_set(ht, "ppm_reset", (cmdimpl_f) cmdimpl_ppm_reset);
-    ht_set(ht, "ppm_set_time", (cmdimpl_f) cmdimpl_ppm_set_time);
     ht_set(ht, "ppm_get_time", (cmdimpl_f) cmdimpl_ppm_get_time);
+    ht_set(ht, "ppm_set_time", (cmdimpl_f) cmdimpl_ppm_set_time);
     ht_set(ht, "ppm_delay", (cmdimpl_f) cmdimpl_ppm_delay);
     ht_set(ht, "ppm_clear_bufs", (cmdimpl_f) cmdimpl_ppm_clear_bufs);
     ht_set(ht, "ppm_get_scheds", (cmdimpl_f) cmdimpl_ppm_get_scheds);
     ht_set(ht, "ppm_sched_cmd_in", (cmdimpl_f) cmdimpl_ppm_sched_cmd_in);
 
     ht_set(ht, "tlm_get_data", (cmdimpl_f) cmdimpl_tlm_get_data);
+    
+    ht_set(ht, "flash_get_cfg", (cmdimpl_f) cmdimpl_flash_get_cfg);
+    ht_set(ht, "flash_set_cfg", (cmdimpl_f) cmdimpl_flash_set_cfg);
 
     ht_set(ht, "mtq_heartbeat", (cmdimpl_f) cmdimpl_mtq_heartbeat);
     ht_set(ht, "mtq_reset", (cmdimpl_f) cmdimpl_mtq_reset);
@@ -80,6 +83,18 @@ void cmdimpl_ppm_reset(cmdpkt_s* pkt) {
     }
 }
 
+void cmdimpl_ppm_get_time(cmdpkt_s* pkt) {
+    switch (pkt->ptype) {
+        case REQ: {
+            sprintf(LOGBUF, "cmdimpl_ppm_get_time REQ"); log_info();
+            char res[CMD_MAX_ARGS_LEN] = {0};  
+            systime_str(res);
+            cmd_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
 void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
         case REQ: {
@@ -107,20 +122,6 @@ void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
                     rtc.tm_wday, rtc.tm_mon, rtc.tm_mday, rtc.tm_year, 
                     rtc.tm_hour, rtc.tm_min, rtc.tm_sec); log_info();
             cmd_respond(pkt, ACK, "");
-            break;
-        }
-    }
-}
-
-void cmdimpl_ppm_get_time(cmdpkt_s* pkt) {
-    switch (pkt->ptype) {
-        case REQ: {
-            sprintf(LOGBUF, "cmdimpl_ppm_get_time REQ"); log_info();
-            char res[CMD_MAX_ARGS_LEN] = {0};  
-            rtc_time_t rtc;
-            epoch_ms_to_rtc(systime_epoch_ms(), &rtc);  
-            rtc_to_str(&rtc, res);
-            cmd_respond(pkt, RES, res);
             break;
         }
     }
@@ -211,39 +212,71 @@ void cmdimpl_tlm_get_data(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
         case REQ: {
             sprintf(LOGBUF, "cmdimpl_tlm_get_data REQ"); log_info();
+            return;
             char res[CMD_MAX_ARGS_LEN] = {0};
-            uint8_t j = sprintf(res, "%u %u %u %u %u", g_flashmgr.rbt_cnt, g_rbt_cause, g_ertc.heartbeat, g_mtq.heartbeat, g_nvg.heartbeat);
+            uint8_t p = sprintf(res, "%u %u %u %u %u", g_flashmgr.rbt_cnt, g_rbt_cause, g_ertc.heartbeat, g_mtq.heartbeat, g_nvg.heartbeat);
 
             float gyro_rate_rad[3] = {0};
             switch (g_flashmgr.config.gyro_rate_src) {
                 case DATASRC_MTQ:
                     mtq_get_data(&g_mtq, MTQ_RATE, gyro_rate_rad);
+                    break;
                 case DATASRC_NVG:
                     nvg_get_sensor_data(&g_nvg, NVG_GYROSCOPE_CAL, gyro_rate_rad);
+                    break;
                 case DATASRC_GYRO:
                     break;
             }
             uint8_t i;
             for (i = 0; i < 3; i++) {
-                j += sprintf(&res[j], " ");
-                j += ftoa(gyro_rate_rad[0], &res[j], 3, 'f');
+                p += sprintf(&res[p], " ");
+                p += ftoa(gyro_rate_rad[i], &res[p], 3, 'f');
             }
             
             float attitude[5] = {0};
             switch (g_flashmgr.config.attitude_src) {
                 case DATASRC_MTQ:
                     mtq_get_data(&g_mtq, MTQ_Q, attitude);
+                    break;
                 case DATASRC_NVG:
                     nvg_get_sensor_data(&g_nvg, NVG_QUAT_RV, attitude);
+                    break;
                 case DATASRC_GYRO:
                     break;
             }
             for (i = 0; i < 4; i++) {
-                j += sprintf(&res[j], " ");
-                j += ftoa(attitude[0], &res[j], 3, 'f');
+                p += sprintf(&res[p], " ");
+                p += ftoa(attitude[i], &res[p], 3, 'f');
             }
 
             cmd_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
+void cmdimpl_flash_get_cfg(cmdpkt_s* pkt) {
+    switch (pkt->ptype) {
+        case REQ: {
+            char res[CMD_MAX_ARGS_LEN] = {0};
+            config_s* cfg = &g_flashmgr.config;
+            sprintf(res, "%u %u %u", cfg->log_level, cfg->gyro_rate_src, cfg->attitude_src);
+            cmd_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
+void cmdimpl_flash_set_cfg(cmdpkt_s* pkt) {
+    switch (pkt->ptype) {
+        case REQ: {
+            char* p = pkt->args;
+            config_s* cfg = &g_flashmgr.config;
+            cfg->log_level = strtoul(p, &p, 10);
+            cfg->gyro_rate_src = strtoul(p, &p, 10);
+            cfg->attitude_src = strtoul(p, &p, 10);
+            status_e s = flashmgr_config_flush(&g_flashmgr);
+            cmd_respond(pkt, stat2ack(s), "");
             break;
         }
     }

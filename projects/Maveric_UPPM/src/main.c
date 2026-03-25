@@ -49,10 +49,8 @@
 
 // Global defines
 
-#define UPPER_PPM
 #define NODE                NODE_UPPM
 #define NODE_LBL            "UPPM"
-#define LOG_LEVEL           LL_DEBUG
 
 // Module includes (.c necessary)
 
@@ -67,12 +65,12 @@
 #include "spi.c"
 #include "interrupts.c"
 #include "systime.c"
+#include "at25df641.c"
+#include "flashmgr.c"
 #include "framer.c"
 #include "cmdpkt.c"
 #include "logger.c"
 #include "ax100.c"
-#include "at25df641.c"
-#include "flashmgr.c"
 #include "telemetry.c"
 #include "cmdmgr.c"
 #include "scheduler.c"
@@ -107,7 +105,7 @@ void system_init(void) {
     // Watchdog, millisecond timer, logger, rbt_cause init
     fprintf(COM_C, "uppm init\r\n");
     setup_wdt(WDT_ON);
-	setup_timer1(TMR_INTERNAL | TMR_DIV_BY_64, 0x00FA); 
+	setup_timer1(TMR_INTERNAL | TMR_DIV_BY_64, 249); 
     logger_init();
     g_rbt_cause = restart_cause();
     
@@ -148,7 +146,6 @@ void system_init(void) {
     cmd_dispatch(NODE, NODE_LPPM, 0, REQ, "ppm_get_time", "");
 
     sprintf(LOGBUF, "system initialized"); log_info();
-    delay_ms(1000);
 }
 
 // Main master routine run in superloop

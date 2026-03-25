@@ -1,7 +1,15 @@
 #include <stdint.h>
 #include "adcsmtq.h"
+#include "logger.h"
+#include "common.h"
 
 // HELPERS
+ 
+
+void gnc_init(gnc_s* gnc) {
+    memset(gnc, 0, sizeof(gnc_s));
+    gnc->auto_mode_enabled = FALSE;
+}
 
 void gnc_step(gnc_s* state, mtq_s* mtq, float* gyro_rate_rad) {
     // Extract Mode and Flags from STAT
@@ -10,6 +18,8 @@ void gnc_step(gnc_s* state, mtq_s* mtq, float* gyro_rate_rad) {
     uint8_t current_mode = mtq_stat_parse_mode(stat);
     int1 sun = mtq_stat_parse_sun(stat);
     int1 tumb = mtq_stat_parse_tumb(stat);
+
+    sprintf(LOGBUF, "gnc_step: curr_mode=%u expected_mode=%u sun=%u tumb=%u", current_mode, state->expected_mode, sun, tumb); log_info();
 
     // Check for unexpected mode transitions
     if (state->expected_mode != current_mode) {
@@ -31,7 +41,7 @@ void gnc_step(gnc_s* state, mtq_s* mtq, float* gyro_rate_rad) {
 
     // Manual Override Check
     // If auto_mode is disabled, force Manual mode and skip automatic transitions
-    if (!state->auto_mode_enabled) {
+    if (state->auto_mode_enabled) {
         if (current_mode != MTQ_MODE_MANUAL) {
             if (mtq_set_mode(mtq, MTQ_MODE_MANUAL) == SUCCESS) {
                 state->expected_mode = MTQ_MODE_MANUAL;
@@ -48,7 +58,9 @@ void gnc_step(gnc_s* state, mtq_s* mtq, float* gyro_rate_rad) {
                 if (mtq_set_mode(mtq, MTQ_MODE_SUN_SPIN) == SUCCESS) {
                     state->expected_mode = MTQ_MODE_SUN_SPIN;
                 }
-            } else if (gyro_rate_rad[0] < GNC_MAX_DETUMBLE_RATE && gyro_rate_rad[1] < GNC_MAX_DETUMBLE_RATE && gyro_rate_rad[2] < GNC_MAX_DETUMBLE_RATE) {
+            } else if (gyro_rate_rad[0] < GNC_MAX_DETUMBLE_RATE 
+                        && gyro_rate_rad[1] < GNC_MAX_DETUMBLE_RATE 
+                        && gyro_rate_rad[2] < GNC_MAX_DETUMBLE_RATE) {
                 if (mtq_set_mode(mtq, MTQ_MODE_DETUMBLING) == SUCCESS) {
                     state->expected_mode = MTQ_MODE_DETUMBLING;
                 }

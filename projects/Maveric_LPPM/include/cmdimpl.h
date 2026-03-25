@@ -11,14 +11,17 @@ void cmdimpl_init(void);
 void cmdimpl_ping(cmdpkt_s* pkt);
 
 void cmdimpl_ppm_reset(cmdpkt_s* pkt);
-void cmdimpl_ppm_set_time(cmdpkt_s* pkt);
 void cmdimpl_ppm_get_time(cmdpkt_s* pkt);
+void cmdimpl_ppm_set_time(cmdpkt_s* pkt);
 void cmdimpl_ppm_delay(cmdpkt_s* pkt);
 void cmdimpl_ppm_clear_bufs(cmdpkt_s* pkt);
 void cmdimpl_ppm_get_scheds(cmdpkt_s* pkt);
 void cmdimpl_ppm_sched_cmd_in(cmdpkt_s* pkt);
 
 void cmdimpl_tlm_get_data(cmdpkt_s* pkt);
+
+void cmdimpl_flash_get_cfg(cmdpkt_s* pkt);
+void cmdimpl_flash_set_cfg(cmdpkt_s* pkt);
 
 void cmdimpl_mtq_heartbeat(cmdpkt_s* pkt);
 void cmdimpl_mtq_reset(cmdpkt_s* pkt);

@@ -22,14 +22,17 @@ void cmdimpl_init() {
     ht_set(ht, "ping", (cmdimpl_f) cmdimpl_ping);
     
     ht_set(ht, "ppm_reset", (cmdimpl_f) cmdimpl_ppm_reset);
-    ht_set(ht, "ppm_set_time", (cmdimpl_f) cmdimpl_ppm_set_time);
     ht_set(ht, "ppm_get_time", (cmdimpl_f) cmdimpl_ppm_get_time);
+    ht_set(ht, "ppm_set_time", (cmdimpl_f) cmdimpl_ppm_set_time);
     ht_set(ht, "ppm_delay", (cmdimpl_f) cmdimpl_ppm_delay);
     ht_set(ht, "ppm_clear_bufs", (cmdimpl_f) cmdimpl_ppm_clear_bufs);
     ht_set(ht, "ppm_get_scheds", (cmdimpl_f) cmdimpl_ppm_get_scheds);
     ht_set(ht, "ppm_sched_cmd_in", (cmdimpl_f) cmdimpl_ppm_sched_cmd_in);
     
     ht_set(ht, "tlm_get_data", (cmdimpl_f) cmdimpl_tlm_get_data);
+
+    ht_set(ht, "flash_get_cfg", (cmdimpl_f) cmdimpl_flash_get_cfg);
+    ht_set(ht, "flash_set_cfg", (cmdimpl_f) cmdimpl_flash_set_cfg);
     
     ht_set(ht, "ax100_get_power", (cmdimpl_f) cmdimpl_ax100_get_power);
     ht_set(ht, "ax100_set_power", (cmdimpl_f) cmdimpl_ax100_set_power);
@@ -38,8 +41,8 @@ void cmdimpl_init() {
 // HELPERS
 
 void ppm_set_time_from_str(char* args) {
-    rtc_time_t time = {0};
     char* p = args;
+    rtc_time_t time = {0};
     time.tm_wday = strtoul(p, &p, 10);
     time.tm_mon = strtoul(p, &p, 10); 
     time.tm_mday = strtoul(p, &p, 10);
@@ -76,6 +79,23 @@ void cmdimpl_ppm_reset(cmdpkt_s* pkt) {
     }
 }
 
+void cmdimpl_ppm_get_time(cmdpkt_s* pkt) {
+    switch (pkt->ptype) {
+        case REQ: {
+            sprintf(LOGBUF, "cmdimpl_ppm_get_time REQ"); log_info();
+            char res[CMD_MAX_ARGS_LEN] = {0};  
+            systime_str(res);
+            cmd_respond(pkt, RES, res);
+            break;
+        }
+        case RES: {
+            sprintf(LOGBUF, "cmdimpl_ppm_get_time RES"); log_info();
+            ppm_set_time_from_str(pkt->args);
+            break;
+        }
+    }
+}
+
 void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
         case REQ: {
@@ -85,25 +105,6 @@ void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
             sprintf(LOGBUF, "cmdimpl_ppm_set_time '%s' [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", pkt->args,
                     rtc.tm_wday, rtc.tm_mon, rtc.tm_mday, rtc.tm_year, 
                     rtc.tm_hour, rtc.tm_min, rtc.tm_sec); log_info();
-            break;
-        }
-    }
-}
-
-void cmdimpl_ppm_get_time(cmdpkt_s* pkt) {
-    switch (pkt->ptype) {
-        case REQ: {
-            sprintf(LOGBUF, "cmdimpl_ppm_get_time REQ"); log_info();
-            char res[CMD_MAX_ARGS_LEN] = {0};  
-            rtc_time_t rtc;
-            epoch_ms_to_rtc(systime_epoch_ms(), &rtc);  
-            rtc_to_str(&rtc, res);
-            cmd_respond(pkt, RES, res);
-            break;
-        }
-        case RES: {
-            sprintf(LOGBUF, "cmdimpl_ppm_get_time RES"); log_info();
-            ppm_set_time_from_str(pkt->args);
             break;
         }
     }
@@ -218,6 +219,33 @@ void cmdimpl_tlm_get_data(cmdpkt_s* pkt) {
                 case NODE_ASTROBOARD:
                     break;
             }  
+            break;
+        }
+    }
+}
+
+void cmdimpl_flash_get_cfg(cmdpkt_s* pkt) {
+    switch (pkt->ptype) {
+        case REQ: {
+            char res[CMD_MAX_ARGS_LEN] = {0};
+            config_s* cfg = &g_flashmgr.config;
+            sprintf(res, "%u %u %u", cfg->log_level, cfg->last_holonav_seq, cfg->last_astroboard_seq);
+            cmd_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
+void cmdimpl_flash_set_cfg(cmdpkt_s* pkt) {
+    switch (pkt->ptype) {
+        case REQ: {
+            char* p = pkt->args;
+            config_s* cfg = &g_flashmgr.config;
+            cfg->log_level = strtoul(p, &p, 10);
+            cfg->last_holonav_seq = strtoul(p, &p, 10);
+            cfg->last_astroboard_seq = strtoul(p, &p, 10);
+            status_e s = flashmgr_config_flush(&g_flashmgr);
+            cmd_respond(pkt, stat2ack(s), "");
             break;
         }
     }

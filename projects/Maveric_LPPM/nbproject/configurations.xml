@@ -19,7 +19,6 @@
       <itemPath>../../common/maveric/include/cmdpkt.h</itemPath>
       <itemPath>../../common/maveric/include/common.h</itemPath>
       <itemPath>../../common/maveric/include/logger.h</itemPath>
-      <itemPath>include/config.h</itemPath>
       <itemPath>../../common/maveric/include/flash.h</itemPath>
       <itemPath>../../common/maveric/include/flashmgr.h</itemPath>
       <itemPath>../../common/maveric/include/framer.h</itemPath>
@@ -58,7 +57,6 @@
       <itemPath>../../common/maveric/src/flashmgr.c</itemPath>
       <itemPath>../../common/maveric/src/framer.c</itemPath>
       <itemPath>../../common/maveric/src/interrupts.c</itemPath>
-      <itemPath>src/config.c</itemPath>
       <itemPath>src/adcsmtq.c</itemPath>
       <itemPath>src/adis16260.c</itemPath>
       <itemPath>src/m41t81s.c</itemPath>

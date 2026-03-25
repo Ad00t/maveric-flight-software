@@ -29,12 +29,12 @@ void hk_init(void) {
 
 void hk_get_rtc_time(void) {
     // rtc_read(&g_rtc_time); // This doesn't work on UPPM
-    epoch_ms_to_rtc(systime_epoch_ms(), &g_rtc_time);  
+    systime_rtc(&g_rtc_time);
 }
 
 void hk_log(void) {
     rtc_time_t rtc;
-    epoch_ms_to_rtc(systime_epoch_ms(), &rtc);  
+    systime_rtc(&rtc);
     sprintf(LOGBUF, "housekeeping %02u, %02u/%02u/20%02u %02u:%02u:%02u", 
             rtc.tm_wday, rtc.tm_mon, rtc.tm_mday, rtc.tm_year, 
             rtc.tm_hour, rtc.tm_min, rtc.tm_sec); log_info();

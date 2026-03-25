@@ -49,10 +49,7 @@
 
 // Global defines
 
-#define LOWER_PPM
 #define NODE                NODE_LPPM 
-#define NODE_LBL            "LPPM"
-#define LOG_LEVEL           LL_DEBUG
 
 // Module includes (.c necessary)
 
@@ -65,10 +62,10 @@
 #include "ringbuf.c"
 #include "i2c.c"
 #include "spi.c"
-#include "at25df641.c"
-#include "flashmgr.c"
 #include "interrupts.c"
 #include "systime.c"
+#include "at25df641.c"
+#include "flashmgr.c"
 #include "framer.c"
 #include "cmdpkt.c"
 #include "logger.c"
@@ -110,8 +107,9 @@ void main(void) {
 // System initialization routine
 void system_init(void) {
     // Watchdog, millisecond timer, logger, rbt_cause init
+    fprintf(COM_D, "lppm init\r\n");
     setup_wdt(WDT_ON);
-	setup_timer1(TMR_INTERNAL | TMR_DIV_BY_64, 0x00FA); 
+	setup_timer1(TMR_INTERNAL | TMR_DIV_BY_64, 249); 
     logger_init();
     g_rbt_cause = restart_cause();
 
@@ -149,15 +147,11 @@ void system_init(void) {
     cmdimpl_init();
 
     // Push a time update to UPPM 
-    delay_ms(2000);
     char req[CMD_MAX_ARGS_LEN] = {0};
-    rtc_time_t rtc;
-    epoch_ms_to_rtc(systime_epoch_ms(), &rtc);  
-    rtc_to_str(&rtc, req);
+    systime_str(req); // Outputs current time as string to req
     cmd_dispatch(NODE, NODE_UPPM, 0, REQ, "ppm_set_time", req);
 
     sprintf(LOGBUF, "system initialized"); log_info();
-    delay_ms(1000);
 }
 
 // Master code of what runs every superloop iteration
@@ -167,7 +161,7 @@ void system_superloop(void) {
 
     // Handle received byte interrupts
     // Do driver handling before commands so data is up to date
-    mtq_parse_stream(&g_mtq, &g_irqmgr.irqbufs[MTQ_PORT-1]); // Handle magnetorquer data
+    // mtq_parse_stream(&g_mtq, &g_irqmgr.irqbufs[MTQ_PORT-1]); // Handle magnetorquer data
     nvg_parse_stream(&g_nvg, &g_irqmgr.irqbufs[NVG_PORT-1]); // Handle naviguider data
     cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[UPPM_PORT-1], &g_cmdmgr.rcvpkts[0], FALSE); // Handle UPPM commands 
     cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[FTDI_PORT-1], &g_cmdmgr.rcvpkts[1], FALSE); // Handle FTDI commands

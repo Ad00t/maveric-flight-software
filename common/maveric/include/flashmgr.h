@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "flash.h"
+#include "logger.h"
 
 //========================================
 //    		 	Address Locations
@@ -55,9 +56,11 @@ typedef enum {
 
 typedef struct {
 #if NODE == NODE_LPPM
+    log_level_e log_level;
     datasrc_e gyro_rate_src;
     datasrc_e attitude_src;
 #elif NODE == NODE_UPPM
+    log_level_e log_level;
     uint16_t last_holonav_seq;
     uint16_t last_astroboard_seq;
 #endif
@@ -70,12 +73,16 @@ typedef struct {
     uint16_t rbt_cnt;
 } flashmgr_s;
 
+// Initialize flashmgr and config
 status_e flashmgr_init(flashmgr_s* self);
 
+// Reboot counter manipulation
 status_e flashmgr_increment_rbt_cnt(flashmgr_s* self);
 status_e flashmgr_reset_rbt_cnt(flashmgr_s* self);
 
-status_e flashmgr_config_load(flashmgr_s* self);
+// Config manipulation
+void flashmgr_config_load_defaults(flashmgr_s* self);
+status_e flashmgr_config_load_flash(flashmgr_s* self);
 status_e flashmgr_config_flush(flashmgr_s* self);
 
 uint8_t saveDataToFlash(flashmgr_s* self, char* data, uint16_t dataSize, MemorySection section);

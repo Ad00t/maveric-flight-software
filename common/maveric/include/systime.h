@@ -28,4 +28,10 @@ void systime_sync(void);
 // Calculates current extended epoch time (milliseconds since epoch)
 uint64_t systime_epoch_ms(void);
 
+// Outputs a rtc_time_t representation of systime_epoch_ms()
+void systime_rtc(rtc_time_t* out);
+
+// Outputs string representation of systime_epoch_ms()
+void systime_str(char* out);
+
 #endif

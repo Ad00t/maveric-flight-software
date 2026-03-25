@@ -83,3 +83,14 @@ uint64_t systime_epoch_ms(void) {
     uint64_t now = _s_epoch_sec_sync + diff;
     return now;
 }
+
+void systime_rtc(rtc_time_t* out) {
+    epoch_ms_to_rtc(systime_epoch_ms(), out);  
+}
+
+void systime_str(char* out) {
+    rtc_time_t rtc;
+    systime_rtc(&rtc);
+    rtc_to_str(&rtc, out);
+}
+

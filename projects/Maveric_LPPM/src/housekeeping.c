@@ -23,7 +23,7 @@ void hk_init(void) {
     // IMPORTANT: AT LEAST ONE SCHEDULE FUNCTION MUST BE ACTIVE OR YOU WILL GET A SCHEDULER ERROR
     scheduler_schedule_func_in(&g_scheduler, 0, hk_get_ertc_time, 2000, 500, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 1, hk_log, 2500, 500, SCHEDULE_REPS_INFINITE);
-    scheduler_schedule_func_in(&g_scheduler, 2, hk_systime_sync, 5000, 30000, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 2, hk_systime_sync, 5000, 42000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 3, hk_heartbeats, 4000, 5000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 4, hk_read_sensors, 3000, 2000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 5, hk_gnc_step, 4000, 10000, SCHEDULE_REPS_INFINITE);
@@ -38,9 +38,7 @@ void hk_get_ertc_time(void) {
 void hk_systime_sync(void) {
     systime_sync();
     char req[CMD_MAX_ARGS_LEN] = {0};
-    rtc_time_t rtc;
-    epoch_ms_to_rtc(systime_epoch_ms(), &rtc);  
-    rtc_to_str(&rtc, req);
+    systime_str(req);
     cmd_dispatch(NODE, NODE_UPPM, 0, REQ, "ppm_set_time", req);
 }
 
@@ -56,7 +54,7 @@ void hk_heartbeats(void) {
     ertc_check_heartbeat(&g_ertc);
     mtq_check_heartbeat(&g_mtq);
     nvg_check_heartbeat(&g_nvg);
-    sprintf(LOGBUF, "heartbeats: ertc=%u mtq=%u nvg=%u", g_ertc.heartbeat, g_mtq.heartbeat, g_nvg.heartbeat);
+    sprintf(LOGBUF, "heartbeats: ertc=%u mtq=%u nvg=%u", g_ertc.heartbeat, g_mtq.heartbeat, g_nvg.heartbeat); log_info();
 }
 
 void hk_read_sensors(void) {
@@ -70,8 +68,10 @@ void hk_gnc_step(void) {
     switch (g_flashmgr.config.gyro_rate_src) {
         case DATASRC_MTQ:
             mtq_get_data(&g_mtq, MTQ_RATE, gyro_rate_rad);
+            break;
         case DATASRC_NVG:
             nvg_get_sensor_data(&g_nvg, NVG_GYROSCOPE_CAL, gyro_rate_rad);
+            break;
         case DATASRC_GYRO:
             break;
     }

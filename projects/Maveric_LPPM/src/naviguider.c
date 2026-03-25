@@ -106,7 +106,7 @@ status_e nvg_send_cmd(nvg_s* nvg, char* cmd) {
     if (!nvg->is_init) return FAILURE;
     uint8_t len = strlen(cmd);
     uart_write_buf(nvg->port, cmd, len);
-    sprintf(LOGBUF, "nvg_send_cmd: len=%u \"%s\"", len, cmd); log_info();
+    sprintf(LOGBUF, "nvg_send_cmd: len=%u \"%s\"", len, cmd); log_debug();
     delay_ms(10);
     return SUCCESS;
 } 
@@ -185,7 +185,7 @@ void nvg_parse_stream(nvg_s* nvg, ringbuf_s* irqbuf) {
         continue;
 
     malformed:
-        sprintf(LOGBUF, "nvg_parse_stream: malformed: len=%u \"%s\"", pkt->buf_len, pkt->buf); log_error();
+        sprintf(LOGBUF, "nvg_parse_stream: malformed: len=%u", pkt->buf_len); log_error();
         nvg_pkt_clear(pkt);
     }
 }
@@ -198,15 +198,13 @@ void nvg_process_sensor_data(nvg_s* nvg) {
     sens->ts = nvg->rcvpkt.ts;
     memcpy(sens->data, nvg->rcvpkt.payload, sens->len * sizeof(float));
    
-    uint16_t p = 0;
+    uint8_t p = sprintf(LOGBUF, "nvg_rcv_complete: ts=");
+    p += ftoa(sens->ts, &LOGBUF[p], 3, 'f');
+    p += sprintf(&LOGBUF[p], " sens=%s [", NVG_ID_TO_TEXT[sens->id]); 
     uint8_t i;
-    char fbuf[32] = {0};
-    ftoa(sens->ts, fbuf, 3, 'f');
-    p += sprintf(LOGBUF, "nvg_rcv_complete: ts=%s sens=%s [", fbuf, NVG_ID_TO_TEXT[sens->id]); 
     for (i = 0; i < sens->len; i++) {
-        memset(fbuf, 0, sizeof(fbuf));
-        ftoa(sens->data[i], fbuf, 3, 'f');
-        p += sprintf(&LOGBUF[p], " %s", fbuf);
+        p += sprintf(&LOGBUF[p], " ");
+        p += ftoa(sens->data[i], &LOGBUF[p], 3, 'f');
     }
     p += sprintf(&LOGBUF[p], " ]"); log_trace();
 }
