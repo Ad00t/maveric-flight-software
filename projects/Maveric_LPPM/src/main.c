@@ -47,8 +47,7 @@
 // #use spi(MASTER, FORCE_HW, SPI1, BAUD=2000000, MSB_FIRST, BITS=16, MODE=3, STREAM=SPI_1)
 #use i2c(MASTER, I2C1, STREAM=I2C_1)
 
-// Global defines
-
+#include "nodes.h"
 #define NODE                NODE_LPPM 
 
 // Module includes (.c necessary)
@@ -137,7 +136,7 @@ void system_init(void) {
     
     // Submodules & services init
     // gyro_init(&g_gyro, GYRO_CS1, GYRO_CS2, GYRO_CS3, GYRO_ON);
-    flashmgr_init(&g_flashmgr);
+    status_e s_flashmgr = flashmgr_init(&g_flashmgr);
     flashmgr_increment_rbt_cnt(&g_flashmgr);
     status_e s_mtq = mtq_init(&g_mtq, MTQ_PORT);
     status_e s_nvg = nvg_init(&g_nvg, NVG_PORT);
@@ -151,7 +150,8 @@ void system_init(void) {
     systime_str(req); // Outputs current time as string to req
     cmd_dispatch(NODE, NODE_UPPM, 0, REQ, "ppm_set_time", req);
 
-    sprintf(LOGBUF, "system initialized"); log_info();
+    sprintf(LOGBUF, "system initialized ertc=%u flashmgr=%u mtq=%u nvg=%u",
+            s_ertc, s_flashmgr, s_mtq, s_nvg); log_info();
 }
 
 // Master code of what runs every superloop iteration
@@ -161,7 +161,7 @@ void system_superloop(void) {
 
     // Handle received byte interrupts
     // Do driver handling before commands so data is up to date
-    // mtq_parse_stream(&g_mtq, &g_irqmgr.irqbufs[MTQ_PORT-1]); // Handle magnetorquer data
+    mtq_parse_stream(&g_mtq, &g_irqmgr.irqbufs[MTQ_PORT-1]); // Handle magnetorquer data
     nvg_parse_stream(&g_nvg, &g_irqmgr.irqbufs[NVG_PORT-1]); // Handle naviguider data
     cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[UPPM_PORT-1], &g_cmdmgr.rcvpkts[0], FALSE); // Handle UPPM commands 
     cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[FTDI_PORT-1], &g_cmdmgr.rcvpkts[1], FALSE); // Handle FTDI commands

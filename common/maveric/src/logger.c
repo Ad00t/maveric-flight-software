@@ -1,5 +1,6 @@
 #include "logger.h"
 #include "common.h"
+#include "flashmgr.h"
 #include "uart.h"
 #include "systime.h"
 #include "cmdpkt.h"
@@ -24,8 +25,16 @@ void log_flush(log_level_e lvl) {
     static char* node_id_to_lbl[] = { "N/A", "LPPM", "EPS", "UPPM", "HN", "AB", "GS", "FTDI" };
 
     if (lvl >= g_flashmgr.config.log_level) {
-        char logfmt[LOGBUF_MAX_LEN] = {0};
-        sprintf(logfmt, "%s%Lu [%s] [%s] %s\n", ll_to_color[lvl], systime_epoch_ms(), ll_to_text[lvl], node_id_to_lbl[NODE], LOGBUF);
+        char logfmt[CMD_MAX_ARGS_LEN] = {0};
+        uint16_t j = sprintf(logfmt, "%s%Lu [%s] [%s] ", ll_to_color[lvl], systime_epoch_ms(), ll_to_text[lvl], node_id_to_lbl[NODE]);
+        uint16_t msg_cap = CMD_MAX_ARGS_LEN - j - 3;
+        if (strlen(LOGBUF) >= msg_cap) {
+            LOGBUF[msg_cap] = '\0';
+            LOGBUF[msg_cap - 1] = '.';
+            LOGBUF[msg_cap - 2] = '.';
+            LOGBUF[msg_cap - 3] = '.';
+        }
+        sprintf(&logfmt[j], "%s\n", LOGBUF);
         cmd_dispatch(NODE, NODE_FTDI, 0, REQ, "ftdi_log", logfmt);
     }
 

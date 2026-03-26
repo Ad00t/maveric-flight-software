@@ -9,12 +9,13 @@
 // MAIN TRANSCEIVER INTERFACE
 
 status_e ax100_init(ax100_s* a, uint8_t port) {
+    a->is_init = TRUE;
     a->port = port;
     status_e s1 = ax100_set_power(a, TRUE);
     uint8_t power = 0;
     status_e s2 = ax100_get_power(a, &power);
     sprintf(LOGBUF, "ax100_init: port=%u power=%u", a->port, power); log_info();
-    return (s1 == SUCCESS && s2 == SUCCESS) ? SUCCESS : FAILURE;
+    return (s1 == SUCCESS && s2 == SUCCESS && power == 1) ? SUCCESS : FAILURE;
 }
 
 status_e ax100_get_power(ax100_s* a, uint8_t* power) {
@@ -26,13 +27,15 @@ status_e ax100_get_power(ax100_s* a, uint8_t* power) {
 
 status_e ax100_set_power(ax100_s* a, uint8_t power) {
     if (!a->is_init) return FAILURE;
+    uint8_t new_power = 0;
     if (power) {
         output_high(AX100_PWR);
     } else {
         output_low(AX100_PWR);
     }
     delay_ms(10);
-    return SUCCESS;
+    ax100_get_power(a, &new_power);
+    return (new_power == power) ? SUCCESS : FAILURE;
 }
 
 status_e ax100_transmit_frame(ax100_s* a, uint8_t* frame, uint16_t len) {

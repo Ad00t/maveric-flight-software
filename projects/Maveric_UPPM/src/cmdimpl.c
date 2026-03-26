@@ -101,7 +101,7 @@ void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
         case REQ: {
             ppm_set_time_from_str(pkt->args);
             rtc_time_t rtc;
-            epoch_ms_to_rtc(systime_epoch_ms(), &rtc);  
+            systime_rtc(&rtc);
             sprintf(LOGBUF, "cmdimpl_ppm_set_time '%s' [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", pkt->args,
                     rtc.tm_wday, rtc.tm_mon, rtc.tm_mday, rtc.tm_year, 
                     rtc.tm_hour, rtc.tm_min, rtc.tm_sec); log_info();
@@ -152,7 +152,7 @@ void cmdimpl_ppm_get_scheds(cmdpkt_s* pkt) {
             sprintf(LOGBUF, "cmdimpl_ppm_get_scheds"); log_info();
             char res[CMD_MAX_ARGS_LEN] = {0}; 
             uint8_t i;
-            uint8_t j = 0;
+            uint16_t j = 0;
             for (i = 0; i < SCHEDULER_MAX_TASKS; i++) {
                 schedtask_s* st = &g_scheduler.tasks[i];
                 j += sprintf(&res[j], "%u:%u,%u,%u ", i, st->id, st->active, st->type);

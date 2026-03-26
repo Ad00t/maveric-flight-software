@@ -36,14 +36,14 @@ void cmdmgr_parse_stream(cmdmgr_s* cmdmgr, ringbuf_s* rcvbuf, cmdpkt_s* pkt, int
         uint8_t b = 0;
         if (!rb_pop(rcvbuf, 1, &b)) return;
 
-        // if (b == FEND) {
-        //     fprintf(COM_D, "%s%02X ", KRED, b);
-        // } else {
-        //     fprintf(COM_D, "%s%02X ", KYEL, b);
-        // }
+        if (b == FEND) {
+            fprintf(COM_D, "%s%02X ", KRED, b);
+        } else {
+            fprintf(COM_D, "%s%02X ", KYEL, b);
+        }
 
         if (kiss_process_byte(p, b)) {
-            // fprintf(COM_D, "%sFRAME\n", KGRN);
+            fprintf(COM_D, "%sFRAME\n", KGRN);
             // cmdpkt_clear(pkt);
             // p->fsm = KISS_IN_FRAME;
             // continue;
@@ -74,7 +74,7 @@ void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
     // Forward
     if (pkt->dest != NODE) {
         sprintf(LOGBUF, "cmdmgr_process_cmd: forwarding cmd: o=%u d=%u e=%u p=%u id='%s'", 
-                pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id); log_trace();
+                pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id); log_debug();
         cmdpkt_dispatch(pkt);
         goto cleanup;
     } 

@@ -57,8 +57,8 @@ void nvg_pkt_clear(nvg_pkt_s* pkt) {
 // Naviguider
 
 status_e nvg_init(nvg_s* nvg, uint8_t port) {
-    nvg->port = port;
     nvg->is_init = TRUE;
+    nvg->port = port;
     memcpy(nvg->sensors, NVG_INIT_SENSOR_TABLE, sizeof(NVG_INIT_SENSOR_TABLE));
     nvg_pkt_init(&nvg->rcvpkt);
 
@@ -107,7 +107,7 @@ status_e nvg_send_cmd(nvg_s* nvg, char* cmd) {
     uint8_t len = strlen(cmd);
     uart_write_buf(nvg->port, cmd, len);
     sprintf(LOGBUF, "nvg_send_cmd: len=%u \"%s\"", len, cmd); log_debug();
-    delay_ms(10);
+    delay_ms(20);
     return SUCCESS;
 } 
 

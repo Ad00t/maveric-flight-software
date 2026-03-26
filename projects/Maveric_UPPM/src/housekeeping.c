@@ -22,7 +22,6 @@ void hk_init(void) {
     scheduler_schedule_func_in(&g_scheduler, 2, hk_update_tlm, 5000, 5000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 3, hk_tlm_beacon, 7000, 7000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 4, hk_heartbeats, 4000, 3000, SCHEDULE_REPS_INFINITE);
-    // scheduler_schedule_func_in(&g_scheduler, 4, hk_test_ax100, 2000, 3000, SCHEDULE_REPS_INFINITE);
 }
 
 // HOUSEKEEPING FUNCTIONS
@@ -53,8 +52,4 @@ void hk_tlm_beacon(void) {
 
 void hk_heartbeats(void) {
 
-}
-
-void hk_test_ax100(void) {
-    cmd_dispatch(NODE, NODE_GS, 0, REQ, "hello", "world");
 }

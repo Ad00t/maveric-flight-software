@@ -113,11 +113,11 @@ void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
             systime_sync();
             scheduler_refresh_all(&g_scheduler, oldtime);
 
-            mtq_set_datetime(&g_mtq, time);
+            mtq_set_datetime(&g_mtq, &time);
             cmd_dispatch(NODE, NODE_UPPM, 0, REQ, "ppm_set_time", pkt->args);
 
             rtc_time_t rtc;
-            epoch_ms_to_rtc(systime_epoch_ms(), &rtc);  
+            systime_rtc(&rtc);
             sprintf(LOGBUF, "cmdimpl_ppm_set_time '%s' [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", pkt->args,
                     rtc.tm_wday, rtc.tm_mon, rtc.tm_mday, rtc.tm_year, 
                     rtc.tm_hour, rtc.tm_min, rtc.tm_sec); log_info();
@@ -169,7 +169,7 @@ void cmdimpl_ppm_get_scheds(cmdpkt_s* pkt) {
             sprintf(LOGBUF, "cmdimpl_ppm_get_scheds"); log_info();
             char res[CMD_MAX_ARGS_LEN] = {0}; 
             uint8_t i;
-            uint8_t j = 0;
+            uint16_t j = 0;
             for (i = 0; i < SCHEDULER_MAX_TASKS; i++) {
                 schedtask_s* st = &g_scheduler.tasks[i];
                 j += sprintf(&res[j], "%u:%u,%u,%u ", i, st->id, st->active, st->type);
@@ -214,7 +214,8 @@ void cmdimpl_tlm_get_data(cmdpkt_s* pkt) {
             sprintf(LOGBUF, "cmdimpl_tlm_get_data REQ"); log_info();
             return;
             char res[CMD_MAX_ARGS_LEN] = {0};
-            uint8_t p = sprintf(res, "%u %u %u %u %u", g_flashmgr.rbt_cnt, g_rbt_cause, g_ertc.heartbeat, g_mtq.heartbeat, g_nvg.heartbeat);
+            uint16_t j = sprintf(res, "%u %u %u %u %u", 
+                                 g_flashmgr.rbt_cnt, g_rbt_cause, g_ertc.heartbeat, g_mtq.heartbeat, g_nvg.heartbeat);
 
             float gyro_rate_rad[3] = {0};
             switch (g_flashmgr.config.gyro_rate_src) {
@@ -229,8 +230,8 @@ void cmdimpl_tlm_get_data(cmdpkt_s* pkt) {
             }
             uint8_t i;
             for (i = 0; i < 3; i++) {
-                p += sprintf(&res[p], " ");
-                p += ftoa(gyro_rate_rad[i], &res[p], 3, 'f');
+                j += sprintf(&res[j], " ");
+                j += ftoa(gyro_rate_rad[i], &res[j], 3, 'f');
             }
             
             float attitude[5] = {0};
@@ -245,8 +246,8 @@ void cmdimpl_tlm_get_data(cmdpkt_s* pkt) {
                     break;
             }
             for (i = 0; i < 4; i++) {
-                p += sprintf(&res[p], " ");
-                p += ftoa(attitude[i], &res[p], 3, 'f');
+                j += sprintf(&res[j], " ");
+                j += ftoa(attitude[i], &res[j], 3, 'f');
             }
 
             cmd_respond(pkt, RES, res);
@@ -312,7 +313,7 @@ void cmdimpl_mtq_read_1(cmdpkt_s* pkt) {
             uint16_t key = (uint16_t) midx << 8 | idx;
             status_e s = mtq_read_start(&g_mtq, key);
             char res[CMD_MAX_ARGS_LEN] = {0};
-            sprintf(res, "%u", key);
+            sprintf(res, "%u %u", midx, idx);
             cmd_respond(pkt, stat2ack(s), res); 
             break;
         }
@@ -327,9 +328,8 @@ void cmdimpl_mtq_get_1(cmdpkt_s* pkt) {
             uint8_t idx = strtoul(p, &p, 10);
             sprintf(LOGBUF, "cmdimpl_mtq_get_1 midx=%u idx=%u", midx, idx); log_info();
             char res[CMD_MAX_ARGS_LEN] = {0};
-            uint8_t j = 0;
-            j += sprintf(&res[j], "%u %u", midx, idx);
-            uint16_t key = (uint16_t) midx << 8 | idx;
+            uint16_t j = sprintf(res, "%u %u", midx, idx);
+            uint16_t key = ((uint16_t) midx << 8) | idx;
             status_e s = mtq_print_reg_data(&g_mtq, key, res, &j);
             cmd_respond(pkt, stat2ack(s), res); 
             break;
@@ -346,7 +346,7 @@ void cmdimpl_mtq_set_1(cmdpkt_s* pkt) {
             sprintf(LOGBUF, "cmdimpl_mtq_set_1 midx=%u idx=%u", midx, idx); log_info();
             char res[CMD_MAX_ARGS_LEN] = {0};
             sprintf(res, "%u %u", midx, idx);
-            uint16_t key = (uint16_t) midx << 8 | idx;
+            uint16_t key = ((uint16_t) midx << 8) | idx;
             mtq_reg_s* reg = mtq_get_reg(&g_mtq, key);
             if (reg == NULL) {
                 cmd_dispatch(NODE, pkt->orgn, pkt->echo, NACK, pkt->id, res); 
@@ -413,7 +413,7 @@ void cmdimpl_mtq_get_fast(cmdpkt_s* pkt) {
         case REQ: {
             char* p = pkt->args;
             uint8_t page = strtoul(p, &p, 10);
-            uint8_t j = 0;
+            uint16_t j = 0;
             char res[CMD_MAX_ARGS_LEN] = {0};
             j += sprintf(&res[j], "%u", page);
             if (page > MTQ_FAST_FRAME_REGS / MTQ_PAGE_SIZE) {
@@ -451,7 +451,7 @@ void cmdimpl_mtq_get_ctrl(cmdpkt_s* pkt) {
         case REQ: {
             char* p = pkt->args;
             uint8_t page = strtoul(p, &p, 10);
-            uint8_t j = 0;
+            uint16_t j = 0;
             char res[CMD_MAX_ARGS_LEN] = {0};
             j += sprintf(&res[j], "%u", page);
             if (page > MTQ_CTRL_FRAME_REGS / MTQ_PAGE_SIZE) {
@@ -489,7 +489,7 @@ void cmdimpl_mtq_get_all(cmdpkt_s* pkt) {
         case REQ: {
             char* p = pkt->args;
             uint8_t page = strtoul(p, &p, 10);
-            uint8_t j = 0;
+            uint16_t j = 0;
             char res[CMD_MAX_ARGS_LEN] = {0};
             j += sprintf(&res[j], "%u", page);
             if (page > MTQ_REG_TABLE_LEN / MTQ_PAGE_SIZE) {
@@ -564,7 +564,7 @@ void cmdimpl_nvg_get_1(cmdpkt_s* pkt) {
             float data[8] = {0}; 
             status_e s = nvg_get_sensor_data(&g_nvg, sensor_id, data); 
             if (s == SUCCESS) {
-                uint8_t j = 0;
+                uint16_t j = 0;
                 char res[CMD_MAX_ARGS_LEN] = {0};
                 char fbuf[32] = {0};
                 nvg_sensor_s* sensor = &g_nvg.sensors[sensor_id];
@@ -572,9 +572,8 @@ void cmdimpl_nvg_get_1(cmdpkt_s* pkt) {
                 sprintf(&res[j], "%u %s", sensor_id, fbuf);
                 uint8_t i;
                 for (i = 0; i < sensor->len; i++) {
-                    memset(fbuf, 0, sizeof(fbuf));
-                    ftoa(sensor->data[i], fbuf, 6, 'f');
-                    sprintf(res, " %s", fbuf);
+                    j += sprintf(&res[j], " ");
+                    j += ftoa(sensor->data[i], &res[j], 6, 'f');
                 }
                 cmd_respond(pkt, RES, res); 
             } else {

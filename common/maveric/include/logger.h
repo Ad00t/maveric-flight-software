@@ -1,9 +1,7 @@
 #ifndef __LOGGER_H__
 #define __LOGGER_H__
 
-#include "cmdpkt.h"
-
-#define LOGBUF_MAX_LEN          CMD_MAX_ARGS_LEN 
+#define LOGBUF_MAX_LEN          512 
 char LOGBUF[LOGBUF_MAX_LEN] = {0};    // Global log buffer
 
 typedef enum {

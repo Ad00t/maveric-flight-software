@@ -47,10 +47,8 @@
 #use spi(MASTER, FORCE_HW, SPI1, BAUD=2000000, MSB_FIRST, BITS=16, MODE=3, STREAM=SPI_1)
 #use i2c(MASTER, I2C1, STREAM=I2C_1)
 
-// Global defines
-
-#define NODE                NODE_UPPM
-#define NODE_LBL            "UPPM"
+#include "nodes.h"
+#define NODE                NODE_UPPM 
 
 // Module includes (.c necessary)
 
@@ -129,7 +127,7 @@ void system_init(void) {
     systime_init(&g_irqmgr.ms, &g_rtc_time); // It doesn't look like the UPPM built in RTC works.
     
     // Submodules & services init
-    flashmgr_init(&g_flashmgr);
+    status_e s_flashmgr = flashmgr_init(&g_flashmgr);
     flashmgr_increment_rbt_cnt(&g_flashmgr);
     status_e s_ax100 = ax100_init(&g_ax100, AX100_PORT);
     cmdmgr_init(&g_cmdmgr);
@@ -145,7 +143,7 @@ void system_init(void) {
     // Fetch time from LPPM
     cmd_dispatch(NODE, NODE_LPPM, 0, REQ, "ppm_get_time", "");
 
-    sprintf(LOGBUF, "system initialized"); log_info();
+    sprintf(LOGBUF, "system initialized flashmgr=%u ax100=%u", s_flashmgr, s_ax100); log_info();
 }
 
 // Main master routine run in superloop
@@ -154,10 +152,10 @@ void system_superloop(void) {
     restart_wdt();
 
     // Handle received byte interrupts
-    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[ASTROBOARD_PORT-1], &g_cmdmgr.rcvpkts[0], FALSE); // Handle Astroboard commands 
+    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[HOLONAV_PORT-1], &g_cmdmgr.rcvpkts[0], FALSE); // Handle Holonav commands 
     cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[AX100_PORT-1], &g_cmdmgr.rcvpkts[1], TRUE); // Handle AX100 commands 
     cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[LPPM_PORT-1], &g_cmdmgr.rcvpkts[2], FALSE); // Handle LPPM commands
-    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[HOLONAV_PORT-1], &g_cmdmgr.rcvpkts[3], FALSE); // Handle Holonav commands
+    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[ASTROBOARD_PORT-1], &g_cmdmgr.rcvpkts[3], FALSE); // Handle Astroboard commands
    
     scheduler_run_tasks(&g_scheduler, &g_cmdmgr);
 }

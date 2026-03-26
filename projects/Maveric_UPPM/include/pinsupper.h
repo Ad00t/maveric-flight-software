@@ -66,7 +66,7 @@
 //  		        UART
 //=============================================
 
-#define COM_A		1 // Astroboard
+#define COM_A		1 // Holonav 
 #define COM_A_BAUD  115200 
 #pin_select U1TX = PIN_F3 
 #pin_select U1RX = PIN_F2 
@@ -83,12 +83,12 @@
 #pin_select U3TX = PIN_D8 
 #pin_select U3RX = PIN_D3 
 
-#define COM_D       4 // Holonav 
+#define COM_D       4 // Astroboard 
 #define COM_D_BAUD  115200 
 #pin_select U4TX = PIN_D4 
 #pin_select U4RX = PIN_D12 
 
-#define ASTROBOARD_PORT     COM_A
+#define HOLONAV_PORT        COM_A
 #define AX100_PORT          COM_B
 #define LPPM_PORT           COM_C
-#define HOLONAV_PORT        COM_D
+#define ASTROBOARD_PORT     COM_D
