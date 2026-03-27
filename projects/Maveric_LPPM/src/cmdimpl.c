@@ -564,16 +564,14 @@ void cmdimpl_nvg_get_1(cmdpkt_s* pkt) {
             float data[8] = {0}; 
             status_e s = nvg_get_sensor_data(&g_nvg, sensor_id, data); 
             if (s == SUCCESS) {
-                uint16_t j = 0;
                 char res[CMD_MAX_ARGS_LEN] = {0};
-                char fbuf[32] = {0};
                 nvg_sensor_s* sensor = &g_nvg.sensors[sensor_id];
-                ftoa(sensor->ts, fbuf, 6, 'f');
-                sprintf(&res[j], "%u %s", sensor_id, fbuf);
+                uint16_t j = sprintf(&res[j], "%u ", sensor_id);
+                j += ftoa(sensor->ts, &res[j], 6, 'f');
                 uint8_t i;
                 for (i = 0; i < sensor->len; i++) {
                     j += sprintf(&res[j], " ");
-                    j += ftoa(sensor->data[i], &res[j], 6, 'f');
+                    j += ftoa(data[i], &res[j], 6, 'f');
                 }
                 cmd_respond(pkt, RES, res); 
             } else {

@@ -101,7 +101,8 @@ void main(void) {
 // System initialization routine
 void system_init(void) {
     // Watchdog, millisecond timer, logger, rbt_cause init
-    fprintf(COM_C, "uppm init\r\n");
+    delay_ms(2000);
+    // fprintf(COM_C, "uppm init\r\n");
     setup_wdt(WDT_ON);
 	setup_timer1(TMR_INTERNAL | TMR_DIV_BY_64, 249); 
     logger_init();
@@ -143,7 +144,8 @@ void system_init(void) {
     // Fetch time from LPPM
     cmd_dispatch(NODE, NODE_LPPM, 0, REQ, "ppm_get_time", "");
 
-    sprintf(LOGBUF, "system initialized flashmgr=%u ax100=%u", s_flashmgr, s_ax100); log_info();
+    sprintf(LOGBUF, "system initialized rs232_err=%u flashmgr=%u ax100=%u", 
+            rs232_errors, s_flashmgr, s_ax100); log_info();
 }
 
 // Main master routine run in superloop

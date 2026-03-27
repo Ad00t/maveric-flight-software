@@ -106,7 +106,7 @@ void main(void) {
 // System initialization routine
 void system_init(void) {
     // Watchdog, millisecond timer, logger, rbt_cause init
-    fprintf(COM_D, "lppm init\r\n");
+    // fprintf(COM_D, "lppm init\r\n");
     setup_wdt(WDT_ON);
 	setup_timer1(TMR_INTERNAL | TMR_DIV_BY_64, 249); 
     logger_init();
@@ -150,8 +150,8 @@ void system_init(void) {
     systime_str(req); // Outputs current time as string to req
     cmd_dispatch(NODE, NODE_UPPM, 0, REQ, "ppm_set_time", req);
 
-    sprintf(LOGBUF, "system initialized ertc=%u flashmgr=%u mtq=%u nvg=%u",
-            s_ertc, s_flashmgr, s_mtq, s_nvg); log_info();
+    sprintf(LOGBUF, "system initialized rs232_err=%u ertc=%u flashmgr=%u mtq=%u nvg=%u",
+            rs232_errors, s_ertc, s_flashmgr, s_mtq, s_nvg); log_info();
 }
 
 // Master code of what runs every superloop iteration

@@ -23,8 +23,7 @@ uint16_t sum_buf(uint8_t* buf, uint8_t len) {
 }
 
 uint8_t mtq_stat_parse_mode(uint32_t stat) {
-    uint8_t mode_mask = 7;
-    return (uint8_t)(stat & mode_mask);
+    return (uint8_t)(stat & 0b1110000);
 }
 
 int1 mtq_stat_parse_sun(uint32_t stat) {

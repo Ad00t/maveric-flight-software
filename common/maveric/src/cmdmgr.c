@@ -36,14 +36,14 @@ void cmdmgr_parse_stream(cmdmgr_s* cmdmgr, ringbuf_s* rcvbuf, cmdpkt_s* pkt, int
         uint8_t b = 0;
         if (!rb_pop(rcvbuf, 1, &b)) return;
 
-        if (b == FEND) {
-            fprintf(COM_D, "%s%02X ", KRED, b);
-        } else {
-            fprintf(COM_D, "%s%02X ", KYEL, b);
-        }
+        // if (b == FEND) {
+        //     fprintf(COM_D, "%s%02X ", KRED, b);
+        // } else {
+        //     fprintf(COM_D, "%s%02X ", KYEL, b);
+        // }
 
         if (kiss_process_byte(p, b)) {
-            fprintf(COM_D, "%sFRAME\n", KGRN);
+            // fprintf(COM_D, "%sFRAME\n", KGRN);
             // cmdpkt_clear(pkt);
             // p->fsm = KISS_IN_FRAME;
             // continue;
@@ -67,14 +67,17 @@ void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
 
     // Parse cmdpkt buf into fields
     if (cmdpkt_parse_buf(pkt) != SUCCESS) {
-        sprintf(LOGBUF, "cmdmgr_process_cmd: pkt buf parsing failed: len=%u", p->buf_len); log_error();
+        sprintf(LOGBUF, "proc_cmd: pkt buf parsing failed: len=%u", p->buf_len); log_error();
         goto cleanup;
     }
 
+    sprintf(LOGBUF, "proc_cmd: parsed o=%u d=%u e=%u p=%u id='%s' arglen=%u",
+            pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id, pkt->args_len); log_debug();
+
     // Forward
     if (pkt->dest != NODE) {
-        sprintf(LOGBUF, "cmdmgr_process_cmd: forwarding cmd: o=%u d=%u e=%u p=%u id='%s'", 
-                pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id); log_debug();
+        sprintf(LOGBUF, "proc_cmd: forwarding: o=%u d=%u e=%u p=%u id='%s' arglen=%u", 
+                pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id, pkt->args_len); log_debug();
         cmdpkt_dispatch(pkt);
         goto cleanup;
     } 
@@ -82,7 +85,7 @@ void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
     // CRC check
     uint16_t calc_crc = compute_crc16(&p->buf[p->i_start], p->buf_len - 2);
     if (pkt->crc != calc_crc) {
-        sprintf(LOGBUF, "cmdmgr_process_cmd: crc check failed on cmd: '%s' crc=%u calculated=%u",
+        sprintf(LOGBUF, "proc_cmd: crc check failed on cmd: '%s' crc=%u calculated=%u",
                 pkt->id, pkt->crc, calc_crc); log_error();
         goto cleanup;
     } 
@@ -90,9 +93,11 @@ void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
     // Find and execute cmd implementation
     cmdimpl_f cmdimpl = ht_get(&cmdmgr->cmdimpls, pkt->id);
     if (cmdimpl == NULL) {
-        sprintf(LOGBUF, "cmdmgr_process_cmd: cmd not recognized: '%s'", pkt->id); log_error();
+        sprintf(LOGBUF, "proc_cmd: cmd not recognized: '%s'", pkt->id); log_error();
         goto cleanup;
     }
+    sprintf(LOGBUF, "proc_cmd: executing: o=%u d=%u e=%u p=%u id='%s' arglen=%u", 
+            pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id, pkt->args_len); log_debug();
     cmdimpl(pkt);
 
 cleanup:
