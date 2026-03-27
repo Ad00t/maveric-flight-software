@@ -20,5 +20,3 @@ extern void cmd_get_prmts(unsigned char *params, unsigned int8 *pmt1, unsigned i
 extern void cmd_get_prmts3(unsigned char *params, unsigned int8 *pmt1, unsigned int8 *pmt2, unsigned int8 *pmt3);
 
 #endif
-
-#include "cmd.c"

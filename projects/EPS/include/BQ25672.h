@@ -69,7 +69,7 @@ extern void bq25672_state(unsigned int8 add = BQ_ADDR,unsigned char *output, uns
 extern void bq25672_update(unsigned int8 add = BQ_ADDR);
 #endif
 
-#include "BQ25672.c"
+//#include "BQ25672.c"
 /*
 def main():
     bbq = BQ25672(0x6B)
