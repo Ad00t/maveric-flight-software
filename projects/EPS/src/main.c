@@ -330,10 +330,10 @@ void eps_init(void) {
     g_i2cmgr.started = TRUE;
     cmdmgr_init(&g_cmdmgr);	
     cmdimpl_init();	
+    
     //Start EPS Manager
     sprintf(LOGBUF, "system initialized"); log_info();
     delay_ms(1000);
-    fprintf(COM_A,"S7\n\r");
 	
     int1 bq_bit = bq25672_init();
 	bq25672_update();
@@ -355,7 +355,8 @@ void eps_init(void) {
 	//5V Bus
 	//N/A
 	//5V Input 6
-	output_low(PIN_D6);
+	//output_low(PIN_D6);
+    output_high(PIN_D6);
 	//5V Input 5
 	output_low(PIN_D5);
 	//5V Input 4
@@ -381,7 +382,7 @@ void eps_init(void) {
 void eps_superloop(void) {
     //Kick the dog
     //restart_wdt();
-
+    fprintf(COM_A,"Waiting for Commands\n\r");	
     // Handle received byte interrupts
     // Do driver handling before commands so data is up to date
     // HERE IT SHOULD BE THE HOUSE KEEPING VARIABLES BEFORE 
