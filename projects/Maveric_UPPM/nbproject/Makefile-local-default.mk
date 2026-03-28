@@ -34,4 +34,4 @@ MP_CC_DIR="C:\Program Files (x86)\PICC"
 # MP_AS_DIR is not defined
 MP_LD_DIR="C:\Program Files (x86)\PICC"
 # MP_AR_DIR is not defined
-DFP_DIR=C:/Users/adhit/.mchp_packs/Microchip/PIC24F-GA-GB_DFP/1.10.375
+DFP_DIR=C:/Users/crist/.mchp_packs/Microchip/PIC24F-GA-GB_DFP/1.10.375

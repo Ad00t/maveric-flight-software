@@ -10,8 +10,8 @@
             <make-dep-projects/>
             <sourceRootList>
                 <sourceRootElem>.</sourceRootElem>
-                <sourceRootElem>scr</sourceRootElem>
-                <sourceRootElem>include</sourceRootElem>
+                <sourceRootElem>src</sourceRootElem>
+                <sourceRootElem>../../common/maveric/include</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>

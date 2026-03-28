@@ -51,17 +51,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=scr/main.c
+SOURCEFILES_QUOTED_IF_SPACED=src/main.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/scr/main.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/scr/main.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/src/main.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/src/main.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/scr/main.o
+OBJECTFILES=${OBJECTDIR}/src/main.o
 
 # Source Files
-SOURCEFILES=scr/main.c
+SOURCEFILES=src/main.c
 
 
 
@@ -92,28 +92,28 @@ sourceline.gcccompat=sourceline="\#device ANSI" sourceline="\#device PASS_STRING
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: compile
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
-${OBJECTDIR}/scr/main.o: scr/main.c  nbproject/Makefile-${CND_CONF}.mk 
-	${MKDIR} ${OBJECTDIR}/scr 
+${OBJECTDIR}/src/main.o: src/main.c  nbproject/Makefile-${CND_CONF}.mk 
+	${MKDIR} ${OBJECTDIR}/src 
 ifeq (1,1) 
 	${MKDIR} ${DISTDIR} 
-	${MP_CC}  out="${OBJECTDIR}\scr"  scr/main.c +FD +DF +CC +Y=9 +EA +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 
-	@mv ${OBJECTDIR}/scr/main.cof "${DISTDIR}/EPS.${IMAGE_TYPE}.cof" 
-	@mv ${OBJECTDIR}/scr/main.hex "${DISTDIR}/EPS.${IMAGE_TYPE}.hex"
+	${MP_CC}  out="${OBJECTDIR}\src"  src/main.c +FD +DF +CC #__DEBUG=1 +ICD +Y=9 +EA +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 
+	@mv ${OBJECTDIR}/src/main.cof "${DISTDIR}/EPS.${IMAGE_TYPE}.cof" 
+	@mv ${OBJECTDIR}/src/main.hex "${DISTDIR}/EPS.${IMAGE_TYPE}.hex"
 else 
-	${MP_CC}  out=""${OBJECTDIR}\scr"" scr/main.c +EXPORT +FD +DF +CC +Y=9 +EA +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 +EXPORTD="${OBJECTDIR}/scr"  
+	${MP_CC}  out=""${OBJECTDIR}\src"" src/main.c +EXPORT +FD +DF +CC #__DEBUG=1 +ICD +Y=9 +EA +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 +EXPORTD="${OBJECTDIR}/src"  
 	
 endif 
 	
 else
-${OBJECTDIR}/scr/main.o: scr/main.c  nbproject/Makefile-${CND_CONF}.mk 
-	${MKDIR} ${OBJECTDIR}/scr 
+${OBJECTDIR}/src/main.o: src/main.c  nbproject/Makefile-${CND_CONF}.mk 
+	${MKDIR} ${OBJECTDIR}/src 
 ifeq (1,1) 
 	${MKDIR} ${DISTDIR} 
-	${MP_CC}  out="${OBJECTDIR}\scr"  scr/main.c +FD +DF +CC +Y=9 +EA +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 
-	@mv ${OBJECTDIR}/scr/main.cof "${DISTDIR}/EPS.${IMAGE_TYPE}.cof" 
-	@mv ${OBJECTDIR}/scr/main.hex "${DISTDIR}/EPS.${IMAGE_TYPE}.hex"
+	${MP_CC}  out="${OBJECTDIR}\src"  src/main.c +FD +DF +CC +Y=9 +EA +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 
+	@mv ${OBJECTDIR}/src/main.cof "${DISTDIR}/EPS.${IMAGE_TYPE}.cof" 
+	@mv ${OBJECTDIR}/src/main.hex "${DISTDIR}/EPS.${IMAGE_TYPE}.hex"
 else 
-	${MP_CC}  out=""${OBJECTDIR}\scr"" scr/main.c +EXPORT +FD +DF +CC +Y=9 +EA +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 +EXPORTD="${OBJECTDIR}/scr"  
+	${MP_CC}  out=""${OBJECTDIR}\src"" src/main.c +EXPORT +FD +DF +CC +Y=9 +EA +DF +LN +T +A +M +J +Z -P #__PIC24FJ256GA110__=1 +EXPORTD="${OBJECTDIR}/src"  
 	
 endif 
 	
@@ -127,7 +127,7 @@ ${DISTDIR}/EPS.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefil
 ifeq (1,1) 
 	
 else 
-	${MP_LD}   out="${DISTDIR}"  +FD +DF +CC LINK=EPS.${IMAGE_TYPE}.hex=${OBJECTDIR}/scr/main.o +Y=9 +EA +DF +LN +T +A +M +J +Z -P
+	${MP_LD}   out="${DISTDIR}"  +FD +DF +CC LINK=EPS.${IMAGE_TYPE}.hex=${OBJECTDIR}/src/main.o +Y=9 +EA +DF +LN +T +A +M +J +Z -P
 	
 endif 
 	
@@ -137,7 +137,7 @@ ${DISTDIR}/EPS.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefil
 ifeq (1,1) 
 	
 else 
-	${MP_LD}   out="${DISTDIR}"  +FD +DF +CC LINK=EPS.${IMAGE_TYPE}.hex=${OBJECTDIR}/scr/main.o +Y=9 +EA +DF +LN +T +A +M +J +Z -P
+	${MP_LD}   out="${DISTDIR}"  +FD +DF +CC LINK=EPS.${IMAGE_TYPE}.hex=${OBJECTDIR}/src/main.o +Y=9 +EA +DF +LN +T +A +M +J +Z -P
 	
 endif 
 	

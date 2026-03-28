@@ -1,0 +1,562 @@
+[33mcommit 1b65cdfe78827e9dce7751979cbaf10923997d6d[m[33m ([m[1;36mHEAD -> [m[1;32mdev[m[33m)[m
+Author: CGCSAMR <cristobal.garrido@hotmail.com>
+Date:   Fri Mar 27 12:12:45 2026 -0700
+
+    EPS I2C Slave implemetation
+
+[33mcommit 3e8f4d55f4a6e96b4b3e14210439ce682fa5703b[m[33m ([m[1;31morigin/dev[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Thu Mar 26 17:20:33 2026 -0700
+
+    fixed uart sync, more testing
+
+[33mcommit 1fa694e82684d1e0a384e461f9bfc38a8b99d24d[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Wed Mar 25 18:27:32 2026 -0700
+
+    command testing & mtq fixes, debugging issue with uppm->lppm rx
+
+[33mcommit 8161131f4fa2d7163bb47450d9a7aeda9172d7a6[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Tue Mar 24 18:14:06 2026 -0700
+
+    debugging mtq_set_1 tle, telemetry timing out
+
+[33mcommit 8b5a7ce7095cdb6b97d6debdfa747dbc68ed1708[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Mon Mar 23 23:37:37 2026 -0700
+
+    implemented gnc, reorganized flash/cfg, added more lppm telemetry
+
+[33mcommit 7a7a496a567fd6f2b6e5151d886f7712db0101ed[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Mon Mar 23 15:47:37 2026 -0700
+
+    fixed not booting, debugging time issue (command crc parsing crashing)
+
+[33mcommit 3a1374752567c1f54ae72036699d849994061ee9[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Mon Mar 23 09:03:39 2026 -0700
+
+    more flexible command creation
+
+[33mcommit 02cb83204a7664cf530f7caf5d73f8f3ec0f2043[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Sun Mar 22 23:33:40 2026 -0700
+
+    globals.h, uppm flash
+
+[33mcommit e50fbcc09b65c30683e9f09437fd48620895061f[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Fri Mar 20 18:26:20 2026 -0700
+
+    more commands, time sync issue is back
+
+[33mcommit b7f6160c42f240c19f91c894eefecc31be9a4cb5[m
+Merge: 4d89894 8f99585
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Thu Mar 19 16:16:03 2026 -0700
+
+    Merge branch 'dev' of https://github.com/Ad00t/maveric-flight-software into dev
+    idk
+
+[33mcommit 4d898941730ff1ddc043743382fefb6a01ac14c1[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Thu Mar 19 16:15:52 2026 -0700
+
+    moved mtq modes up
+
+[33mcommit 8f99585ef912d74f33ea52ca4273c73088a93986[m
+Author: personthree13 <personthree13@gmail.com>
+Date:   Thu Mar 19 15:50:04 2026 -0700
+
+    Initial release of the GNC Planner source file
+    
+    This is the first iteration of the GNC Planner that has been manually written in C. Auto-code versions of the GNC Planner are present elsewhere in the repository but should not be used.
+
+[33mcommit 5ecbdf7b20bbbe7f802d57693570ea4faf8d4892[m
+Author: personthree13 <personthree13@gmail.com>
+Date:   Thu Mar 19 15:47:55 2026 -0700
+
+    Initial release of the GNC Planner Header
+
+[33mcommit ace4a4266072571a724dcba7d2c3680fc104fe8e[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Thu Mar 19 15:44:16 2026 -0700
+
+    scheduling cmds test ready
+
+[33mcommit b30d3cde10e3e6586752e33797b6e2cf6f0ca6e5[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Thu Mar 19 15:20:53 2026 -0700
+
+    cmdimpl_mtq_set_1
+
+[33mcommit 40c464bcc7258e9f89b9baf2c629de11e17b452a[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Thu Mar 19 14:16:56 2026 -0700
+
+    small bugfix
+
+[33mcommit 1a0137b1100b21055776141637c7a69a745d0634[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Thu Mar 19 14:15:35 2026 -0700
+
+    stupid fixes
+
+[33mcommit d66af9a8e5102ba74ab7d3d66047e3a7af8f16f2[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Wed Mar 18 19:05:06 2026 -0700
+
+    some bullshit going on with lppm hk
+
+[33mcommit f7a63e6ad93bb5a687580e71847b9471c549033e[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Wed Mar 18 18:27:30 2026 -0700
+
+    updated mtq commands
+
+[33mcommit e1c3ac870a4b0cca232f85abb4d69606e29ae489[m
+Merge: 6e71502 d3f159e
+Author: CGCSAMR <cristobal.garrido@hotmail.com>
+Date:   Tue Mar 17 18:22:27 2026 -0700
+
+    Merge branch 'dev' of https://github.com/Ad00t/maveric-flight-software into dev
+
+[33mcommit 6e71502f97cc5ce968571b1a57338b762f9a4aca[m
+Author: CGCSAMR <cristobal.garrido@hotmail.com>
+Date:   Tue Mar 17 18:21:40 2026 -0700
+
+    EPS Project
+
+[33mcommit d3f159ef48e3fc6b45a4c07d902b042152806c96[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Tue Mar 17 18:13:30 2026 -0700
+
+    mtq command fixes
+
+[33mcommit 9f1998eb25c7a46507d5fd58044d8c3330313bdd[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Tue Mar 17 17:23:02 2026 -0700
+
+    mtq commands, nbproject
+
+[33mcommit d94c05ceadedccace66835ae175fa8c430df4ace[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Mon Mar 16 18:28:12 2026 -0700
+
+    telemetry, flash driver
+
+[33mcommit c748e5c37eb26f6d1ec637e3c1215140c7215c61[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Fri Mar 13 21:05:25 2026 -0700
+
+    start of telemetry
+
+[33mcommit 116e87e9fd665bdf6455dbc1522c426b86ca9fc5[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Wed Mar 11 18:14:33 2026 -0700
+
+    fixed time sync
+
+[33mcommit eab669ef9e1b9666b67df00cd50613b4d677b5d2[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Tue Mar 10 18:05:17 2026 -0700
+
+    fixes to commands.py, holonav comms done
+
+[33mcommit 6113f3d0ffdf4256ed6fd47da0805a535d0a6d94[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Fri Mar 6 20:03:15 2026 -0800
+
+    commands.py
+
+[33mcommit 4f13bed64d907db2739ae9e19d96ac43655be145[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Fri Mar 6 12:31:08 2026 -0800
+
+    reimplemented ping
+
+[33mcommit 852d1f9a589784307cbbf679034b2759067c96f6[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Fri Mar 6 11:15:10 2026 -0800
+
+    removed nbproject
+
+[33mcommit c3808cb0a4e4e3c8a3c69ada2519a6e6f357085e[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Thu Mar 5 17:54:13 2026 -0800
+
+    ignore nbproject
+
+[33mcommit 66f4ec9c8e6a6b6f41f6171e27c769ef975bfc4a[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Thu Mar 5 17:51:21 2026 -0800
+
+    fixed cmd forwarding
+
+[33mcommit ce583f3ce7179c16e6136aac0cc28e139ee43c35[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Thu Mar 5 16:23:44 2026 -0800
+
+    disabled uppm rtc
+
+[33mcommit 9d0634533e74036148a8df5df56c002b30e856fc[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Thu Mar 5 16:20:31 2026 -0800
+
+    fixed commands
+
+[33mcommit 8c143c2401528f2560b467be40b546332fe56a20[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Wed Mar 4 18:29:14 2026 -0800
+
+    inter-subsystem commands testing
+
+[33mcommit 648a9b034edfa6533117dc1f26db8484cb61c822[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Wed Mar 4 11:49:21 2026 -0800
+
+    scheduler fixes
+
+[33mcommit 7b485de2a5614f379ce8aaea42ca2962f7f8f1cf[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Wed Mar 4 11:37:21 2026 -0800
+
+    commands reorganization, routing
+
+[33mcommit 71139ddafe1d09f670c957c6a029a518defb2c6e[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Fri Feb 27 16:14:39 2026 -0800
+
+    idk man
+
+[33mcommit 3c3ebf16490920a2837810dd34a7576a61d66e56[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Thu Feb 26 23:29:03 2026 -0800
+
+    fixed issues with cmd framing
+
+[33mcommit 29cb27d9b9e5fccf7d1f0e9651fae3161d7e7ad3[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Thu Feb 26 21:26:06 2026 -0800
+
+    fixed cmd bugs
+
+[33mcommit 5c3d84b37bfc3fe02c909ec580b8eac9514eaee1[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Thu Feb 26 16:09:00 2026 -0800
+
+    ax100 testing, new cmd format
+
+[33mcommit b762a41c259c8f6704f2628de940246d607110ff[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Tue Feb 24 15:00:28 2026 -0800
+
+    ?
+
+[33mcommit cd49048497ebb01b3534d6d41fe18d6a49e365c2[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Tue Feb 24 14:02:13 2026 -0800
+
+    ?
+
+[33mcommit ad00e882da312eb78e88cf9f15782c190b3b4871[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Sat Feb 21 22:13:40 2026 -0800
+
+    scheduler memory optimizations
+
+[33mcommit 4d69ab83dbd6e9531228e780a4916442939cc4ef[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Fri Feb 20 20:07:11 2026 -0800
+
+    ringbuf rename
+
+[33mcommit f3e990832c3e1a8188360405b736b90e1a9ed2b4[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Fri Feb 20 19:46:35 2026 -0800
+
+    cmdimpl, housekeeping, command scheduling
+
+[33mcommit b24511c1073b91c4a50651a6b36f7394c38495cc[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Thu Feb 19 17:22:20 2026 -0800
+
+    ax100 testing pt. 1
+
+[33mcommit 6ed7475665c9bf0c628fc3ca6521ddeafc7fc70e[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Wed Feb 18 18:30:24 2026 -0800
+
+    fixed logger, investigating nvg bugs
+
+[33mcommit cd774e017c8062942a8ce15ddb8fc25b0d1948f3[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Tue Feb 10 18:01:00 2026 -0800
+
+    imported serial term
+
+[33mcommit ce0bba93734f59bfac8781d10d7fbae6ecc4d6b7[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Tue Feb 10 17:16:09 2026 -0800
+
+    ax100 testing
+
+[33mcommit 32a8517c0bc77906bf2d092fbd2913b64660c4a8[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Fri Feb 6 18:07:51 2026 -0800
+
+    ertc/irtc sync upgrades, upper ppm modern base
+
+[33mcommit d5b71b5c3327c946c53a9709b9a81ea9cd624470[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Thu Feb 5 18:30:25 2026 -0800
+
+    scheduler working. debugging external rtc
+
+[33mcommit 708a6de828f925aae4ba2528fcdbb398bd16b0f7[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Wed Feb 4 18:46:01 2026 -0800
+
+    comment
+
+[33mcommit 07cfb3b6f7bb5ff02fb2c21f63920e0b746af26a[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Wed Feb 4 18:43:53 2026 -0800
+
+    systime private name changes
+
+[33mcommit d985f7a58b9d941bbad124be3af26258ee21e782[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Wed Feb 4 18:29:15 2026 -0800
+
+    cleanups, fixed 64 bit epoch time, started scheduler
+
+[33mcommit 8bf0084ee62b869df9907afe8c6a7a36d770ffd1[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Tue Feb 3 17:28:20 2026 -0800
+
+    working systime module. TODO: scheduler
+
+[33mcommit f22979676b329c3bec508d5945f1b2145dec933d[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Thu Jan 29 18:24:25 2026 -0800
+
+    fixed naviguider driver, functional now. implemented working external rtc driver.
+
+[33mcommit b10c5646f67bba592d9ff2efc9c6c39c70cbfa57[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Wed Jan 28 18:27:58 2026 -0800
+
+    better nvg parser
+
+[33mcommit 6c4521206da864ed61ccbf49dd1b49ec8e1b4a64[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Tue Jan 27 21:39:01 2026 -0800
+
+    naviguider hardware fixed, mtq tests
+
+[33mcommit 16b5e96b2ecad36bdcd7da69f7be9b99fdb97b21[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Tue Jan 20 23:26:06 2026 -0800
+
+    mtq functions, time, ax100
+
+[33mcommit 27063443c314317ed088d26c2e20b5f5d5c09132[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Fri Jan 16 16:16:24 2026 -0800
+
+    gyro testing
+
+[33mcommit 90f480dca4ca6163d15c5050a6de2950733ef922[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Wed Jan 14 18:17:52 2026 -0800
+
+    rm3100 driver in progress
+
+[33mcommit 761aec5925ff2aa658f764cecf83891f6a901967[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Tue Jan 13 18:10:17 2026 -0800
+
+    naviguider driver implementation
+
+[33mcommit 95bbfc391aad61c299196dcd0cffb3c4ae656dc7[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Mon Jan 12 15:36:14 2026 -0800
+
+    started naviguider driver implementation
+
+[33mcommit 679c4c000a6b54da18d4019b9b20579bce7807de[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Wed Dec 17 18:21:39 2025 -0800
+
+    rtc debugging
+
+[33mcommit 8cacd84949a89d4491945b3fb184e00b512cb783[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Fri Dec 12 19:43:02 2025 -0800
+
+    ?
+
+[33mcommit 4479a7c708ac31b20800595587b050385af89c3c[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Fri Dec 5 19:28:52 2025 -0800
+
+    better mtq driver, gyro testing
+
+[33mcommit d77a33478b7aa3d0c8d1cec9683d26c448d28916[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Thu Dec 4 21:06:07 2025 -0800
+
+    test-ready gyro driver
+
+[33mcommit c3ecbf35bd5408f91220e76f752a1e5f2139f71d[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Mon Dec 1 17:41:45 2025 -0800
+
+    wdt, better cmd arg parsing, started gyro driver
+
+[33mcommit 1c4431453757089f5b5fc1ac9f5a4da2c10048a8[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Wed Nov 26 18:11:14 2025 -0800
+
+    working crc16, error handling, command parsing
+
+[33mcommit 69a0236dc99367b969547d168b32381024f09f10[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Wed Nov 26 13:36:07 2025 -0800
+
+    fixed cmd fsm bug
+
+[33mcommit fe777231d6a08eabddc80c8b61c094bab14853a4[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Mon Nov 24 18:26:07 2025 -0800
+
+    adcsmtq working, cmd bugged
+
+[33mcommit 1c0c1a44cf7f476e3c4c500e1146c8c8effed05b[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Mon Nov 24 11:25:03 2025 -0800
+
+    cmd hashtable, while loops on FSMs
+
+[33mcommit 207cd280946530f6a761ff7ecc1290a0fa516074[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Sun Nov 23 22:53:54 2025 -0800
+
+    isr deferred handling FSMs
+
+[33mcommit 5347084be73f208b1ba7dd66b944ce25472f849d[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Wed Nov 19 18:20:09 2025 -0800
+
+    switching to ring buffer for interrupts
+
+[33mcommit e197bd313a48eab1519edb93ec4b293ce30632bc[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Mon Nov 10 18:15:46 2025 -0800
+
+    started cmd revamp
+
+[33mcommit 1813e330ce7708639c003e8ce7a79e5d01d8da2e[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Fri Oct 31 16:07:06 2025 -0700
+
+    fixed mtq bugs
+
+[33mcommit 25261b55482b029ed8a71974a358019eebfd9e38[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Wed Oct 29 18:26:46 2025 -0700
+
+    interrupts restructuring, unfixed uart :(
+
+[33mcommit c71066ac541897933cf026bb12751cd8480e76e1[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Mon Oct 27 18:20:54 2025 -0700
+
+    fixed uart issues, hashing issue still prevalent
+
+[33mcommit 6f5e398876812429cc774243cdce573481273e98[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Fri Oct 24 18:12:10 2025 -0700
+
+    debugging ADCSMTQ UART issues
+
+[33mcommit 450608252a9fe0f1636cf907ff3809883470ca8e[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Fri Oct 17 18:19:04 2025 -0700
+
+    interrupt, adcsmtq debugging
+
+[33mcommit 2854e78ef242aa17e12192a015c12968d86f6301[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Wed Oct 15 15:16:43 2025 -0700
+
+    uppm and lppm compiling
+
+[33mcommit e5d2f3407b86d4dfb81184b9c47a8b1efede1670[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Sat Oct 11 13:08:37 2025 -0700
+
+    ADCSMTQ test ready
+
+[33mcommit d8f3f617242410b70c0bfb75ef029a7c7536c6f9[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Sat Oct 11 11:56:51 2025 -0700
+
+    more ADCS driver interruptification
+
+[33mcommit f393eea919c9c4a9424c1fd463305a58f53b9df8[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Sat Oct 11 11:56:31 2025 -0700
+
+    more ADCS driver interruptification
+
+[33mcommit bccbd2dd525d165ec4863b4bb0f5004a42e8ae14[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Thu Oct 9 20:54:02 2025 -0700
+
+    isr-ifying adcsmtq
+
+[33mcommit 3985864ea2a8063e5089603f80ee1f8c104458da[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Wed Oct 8 17:47:17 2025 -0700
+
+    adcsmtq compiles
+
+[33mcommit fc0d9e1b23f11bdc5a4bcdea367c6928c1732bb1[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Wed Oct 1 18:18:45 2025 -0700
+
+    TAD102063 driver 50%
+
+[33mcommit 1abc7debdaa1270e22b2ae0c320d9d288c4b6945[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Mon Sep 29 20:44:08 2025 -0700
+
+    interrupts
+
+[33mcommit c0e4cf077eb7a3fd346312f859bf966221a9615d[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Mon Sep 29 20:34:03 2025 -0700
+
+    fixed build issues
+
+[33mcommit 306dc186caac3ebcd37c12a84ad3c2a5ebc9731b[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Mon Sep 29 20:32:28 2025 -0700
+
+    fixed project structure/build issues
+
+[33mcommit 638cadddbd78d0446a5efd6ee1948071d2119496[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Wed Sep 24 19:26:03 2025 -0700
+
+    readme
+
+[33mcommit 9dc7862ab623f938625b74b05e153e8699ca30d0[m
+Author: Adhit Siripurapu <asiripur@usc.edu>
+Date:   Wed Sep 24 19:21:51 2025 -0700
+
+    initial commit
