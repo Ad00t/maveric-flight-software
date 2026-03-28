@@ -1,7 +1,7 @@
 ## MPLAB Ignores
-# **/nbproject/**
 
 # Project files
+**/nbproject/**
 *.mcs
 *.ccspjt
 
