@@ -12,15 +12,6 @@
 #define CMD_MAX_ID_LEN          20
 #define CMD_MAX_ARGS_LEN        CMD_MAX_LEN - CMD_MAX_ID_LEN - CMD_HEADER_SIZE - CMD_FOOTER_SIZE - 2
 
-// NODE IDs
-#define NODE_LPPM        1
-#define NODE_EPS         2
-#define NODE_UPPM        3
-#define NODE_HOLONAV     4
-#define NODE_ASTROBOARD  5
-#define NODE_GS          6          
-#define NODE_FTDI        7
-
 // Command packet & reader FSM
 
 typedef enum {

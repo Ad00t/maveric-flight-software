@@ -26,7 +26,8 @@
 #fuses CKSFSM						// Clock fail-safe monitor	
 #pragma case						// Makes all code case-sensitive
 
-#use delay(clock=4000000)
+//#use delay(clock=4000000)
+#use delay(clock=32MHZ, internal=8M)  // Tells compiler what the clock speed is
 
 // PIC registers
 
@@ -67,7 +68,7 @@
 //#pin_select U4RX = U4RX_PIN
 
 
-#define COM_A_BAUD  9600  // UART Testing Port
+#define COM_A_BAUD  115200  // UART Testing Port
 //#define COM_B_BAUD  115200  // Transceiver (Test purposes)
 //#define COM_C_BAUD  115200 // Other PPM
 //#define COM_D_BAUD  115200 // Payload
@@ -88,9 +89,10 @@
 
 // Global defines
 
+#include "nodes.h"                                                               // C standard time library header
+
 #define EPS
 #define NODE                NODE_EPS 
-#define NODE_LBL            "EPS"
 #define LOG_LEVEL           LL_DEBUG 
 
 #include <time.h>                                                               // C standard time library header
@@ -168,7 +170,10 @@ void main(void)
     //isr_enable_all();
 	//start_flag = TRUE;
 	//delay_ms(1000);
-
+    
+    fprintf(COM_A,"EPS_USC_SERC\n\r");	
+	delay_ms(1000);
+    
     eps_init();
     while (g_superloop_running) {
         eps_superloop(); 
@@ -314,22 +319,22 @@ void eps_init(void) {
     // Watchdog, millisecond timer, logger, rbt_cause init
     //setup_wdt(WDT_ON);
 	//setup_timer1(TMR_INTERNAL | TMR_DIV_BY_64, 0x00FA); 
-    //logger_init();
-    //g_rbt_cause = restart_cause();
     logger_init();
+    g_rbt_cause = restart_cause();
+    	
     // Interrupts init 
     irqmgr_init(&g_irqmgr);
-    i2cmgr_init(&g_i2cmgr);
-    isr_enable_all();
+    i2cmgr_init(&g_i2cmgr);	
+    isr_enable_all();	
     g_irqmgr.started = TRUE;
     g_i2cmgr.started = TRUE;
-    
-    cmdmgr_init(&g_cmdmgr);
-    cmdimpl_init();
+    cmdmgr_init(&g_cmdmgr);	
+    cmdimpl_init();	
     //Start EPS Manager
     sprintf(LOGBUF, "system initialized"); log_info();
     delay_ms(1000);
-    
+    fprintf(COM_A,"S7\n\r");
+	
     int1 bq_bit = bq25672_init();
 	bq25672_update();
     //Calibrate INA226 sensors
@@ -383,8 +388,8 @@ void eps_superloop(void) {
     // CHECKING THE COMMANDS
     // nvg_parse_stream(&g_nvg, &g_irqmgr.irqbufs[NVG_PORT-1]); // Handle naviguider data
     cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[EPS_PORT-1], &g_cmdmgr.rcvpkts[0], FALSE); // Handle UART commands 
-    cmdmgr_parse_stream(&g_cmdmgr, &g_i2cmgr.i2cbufs[LPPM_PORT-2], &g_cmdmgr.rcvpkts[0], FALSE); // Handle LPPM commands 
-    cmdmgr_parse_stream(&g_cmdmgr, &g_i2cmgr.i2cbufs[UPPM_PORT-2], &g_cmdmgr.rcvpkts[0], FALSE); // Handle UPPM commands 
+    cmdmgr_parse_stream(&g_cmdmgr, &g_i2cmgr.i2cbufs[LPPM_PORT-2], &g_cmdmgr.rcvpkts[1], FALSE); // Handle LPPM commands 
+    cmdmgr_parse_stream(&g_cmdmgr, &g_i2cmgr.i2cbufs[UPPM_PORT-2], &g_cmdmgr.rcvpkts[2], FALSE); // Handle UPPM commands 
 }
 
 /*

@@ -9,17 +9,17 @@
 // CMDPKT PUBLIC API
 
 void cmdpkt_init(cmdpkt_s* pkt) {
+    memset(&pkt->parser, 0, sizeof(kiss_parser_s));
     cmdpkt_clear(pkt);
 }
 
-void cmdpkt_create(cmdpkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args) {
+void cmdpkt_create(cmdpkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, uint8_t* args, uint8_t args_len) {
     cmdpkt_init(pkt);
 
     uint16_t len = 0;
     kiss_parser_s* p = &pkt->parser;
     uint8_t* buf = p->buf;
     uint8_t id_len = strlen(id);
-    uint8_t args_len = strlen(args);
    
     // Add header
     pkt->orgn = orgn;
@@ -55,6 +55,11 @@ void cmdpkt_create(cmdpkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, cmdp
     p->i_start = 0;
 }
 
+void cmdpkt_create(cmdpkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args) {
+    cmdpkt_create(pkt, orgn, dest, echo, ptype, id, args, strlen(args));
+}
+
+
 void cmdpkt_clear(cmdpkt_s* pkt) {
     memset(pkt, 0, sizeof(cmdpkt_s));
 }
@@ -72,30 +77,36 @@ status_e cmdpkt_parse_buf(cmdpkt_s* pkt) {
     pkt->ptype = buf[len++];
     pkt->id_len = buf[len++];
     pkt->args_len = buf[len++];
-    // sprintf(LOGBUF, "header parsed is=%u o=%u d=%u e=%u t=%u idl=%u al=%u", p->i_start, pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id_len, pkt->args_len); log_flush(LL_TRACE);
+    sprintf(LOGBUF, "header parsed is=%u o=%u d=%u e=%u t=%u idl=%u al=%u", 
+            p->i_start, pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id_len, pkt->args_len); log_debug();
 
     // Parse id field
     pkt->id = &buf[len];
-    if (len + pkt->id_len >= p->buf_len
-        || buf[len + pkt->id_len] != '\0') return FAILURE;
+    if (len + pkt->id_len >= p->buf_len || buf[len + pkt->id_len] != '\0')
+        return FAILURE;
     len += pkt->id_len + 1;
-    // sprintf(LOGBUF, "id parsed '%s'", pkt->id);log_flush(LL_TRACE);
+    sprintf(LOGBUF, "id parsed '%s'", pkt->id); log_debug();
    
     // Parse args field
     pkt->args = &buf[len];
-    if (len + pkt->args_len >= p->buf_len
-        || buf[len + pkt->args_len] != '\0') return FAILURE;
+    if (pkt->args_len > 0) {
+        if (len + pkt->args_len >= p->buf_len || buf[len + pkt->args_len] != '\0') 
+            return FAILURE;
+        sprintf(LOGBUF, "args parsed end=%u", pkt->args[pkt->args_len-1]); log_debug();
+    } else {
+        sprintf(LOGBUF, "args empty"); log_debug();
+    }
     len += pkt->args_len + 1;
-    // sprintf(LOGBUF, "args parsed '%s'", pkt->args);log_flush(LL_TRACE);
    
     // Parse CRC as uint16
     uint8_t crc_low = buf[len++];
     uint8_t crc_high = buf[len++];
     pkt->crc = make16(crc_high, crc_low);
-    // sprintf(LOGBUF, "crc parsed %u %u %u", pkt->crc, len, p->buf_len);log_flush(LL_TRACE);
+    sprintf(LOGBUF, "crc parsed %u %u %u", pkt->crc, len, p->buf_len); log_debug();
     return len == p->buf_len ? SUCCESS : FAILURE;
 }
 
+extern i2cmgr_s g_i2cmgr;
 // Handles all packet routing
 void cmdpkt_dispatch(cmdpkt_s* pkt) {
     uint8_t frame[FRAME_MAX_SIZE] = {0};
@@ -136,12 +147,40 @@ void cmdpkt_dispatch(cmdpkt_s* pkt) {
     }
 #elif NODE == NODE_EPS
     uart_write_buf(EPS_PORT, frame, frame_len);
-#endif
+    switch (pkt->dest) {
+        case NODE_FTDI:
+            rb_push_n(&g_i2cmgr.i2cbufs[2], frame, frame_len);
+            break;
+        case NODE_UPPM:
+        case NODE_GS:
+        case NODE_ASTROBOARD:
+        case NODE_HOLONAV:
+            rb_push_n(&g_i2cmgr.i2cbufs[3], frame, frame_len);
+            break;
+    }
+#endif    
 }
 
 // Nice little wrapper function for sending commands from anywhere
+void cmd_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, uint8_t* args, uint8_t args_len) {
+    cmdpkt_s pkt;
+    cmdpkt_create(&pkt, orgn, dest, echo, ptype, id, args, args_len);
+    cmdpkt_dispatch(&pkt);
+}
+
 void cmd_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args) {
     cmdpkt_s pkt;
     cmdpkt_create(&pkt, orgn, dest, echo, ptype, id, args);
     cmdpkt_dispatch(&pkt);
 }
+
+// Public helpers 
+
+cmdpkt_type_e stat2ack(status_e s) {
+    return (s == SUCCESS ? ACK : NACK);
+}
+
+void cmd_respond(cmdpkt_s* pkt, cmdpkt_type_e type, char* res) {
+    cmd_dispatch(pkt->dest, pkt->orgn, pkt->echo, type, pkt->id, res); 
+}
+

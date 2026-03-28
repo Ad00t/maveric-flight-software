@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 
 extern uint8_t g_rbt_cause;         // restart_cause() in init 
 
@@ -31,11 +32,11 @@ extern cmdmgr_s g_cmdmgr;               // Commands manager
 
 void cmdimpl_init(void) {
     hashtable_s* ht = &g_cmdmgr.cmdimpls;
-    char* cmd_ppm_set_time = "ppm_set_time";
-    char* cmd_ppm_get_time = "ppm_get_time";
-    char* cmd_ppm_ping = "ppm_ping";
-    char* cmd_ppm_delay = "ppm_delay";
-    char* cmd_ppm_clear_bufs = "ppm_clear_bufs";
+    char cmd_ppm_set_time[] = "ppm_set_time";
+    char cmd_ppm_get_time[] = "ppm_get_time";
+    char cmd_ppm_ping[] = "ppm_ping";
+    char cmd_ppm_delay[] = "ppm_delay";
+    char cmd_ppm_clear_bufs[] = "ppm_clear_bufs";
     
     ht_set(ht, cmd_ppm_set_time, (cmdimpl_f) cmdimpl_ppm_set_time);
     ht_set(ht, cmd_ppm_get_time, (cmdimpl_f) cmdimpl_ppm_get_time);
@@ -86,7 +87,7 @@ void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
 }
 
 void cmdimpl_ppm_get_time(cmdpkt_s* pkt) {
-    char* cmd_ppm_get_time = "ppm_get_time";
+    char cmd_ppm_get_time[] = "ppm_get_time";
     
     if (pkt->ptype != REQ) return;
     // Only implement REQ here because LPPM should never be replacing its time from another subsystem
@@ -98,8 +99,8 @@ void cmdimpl_ppm_get_time(cmdpkt_s* pkt) {
 }
 
 void cmdimpl_ppm_ping(cmdpkt_s* pkt) {
-    char* cmd_ppm_ping = "ppm_ping";
-    char* cmd_ans_pong = "pong";
+    char cmd_ppm_ping[] = "ppm_ping";
+    char cmd_ans_pong[] = "pong";
     sprintf(LOGBUF, "cmdimpl_ppm_ping '%s'", pkt->args); log_info();
     if (pkt->ptype == REQ) {
         cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, cmd_ppm_ping, cmd_ans_pong);
@@ -108,8 +109,8 @@ void cmdimpl_ppm_ping(cmdpkt_s* pkt) {
 
 void cmdimpl_ppm_delay(cmdpkt_s* pkt) {
     char* p = pkt->args;
-    char* cmd_ppm_delay = "ppm_delay";
-    char* cmd_empty = "";
+    char cmd_ppm_delay[] = "ppm_delay";
+    char cmd_empty[] = "";
     uint32_t delay = strtoul(p, &p, 10);
     sprintf(LOGBUF, "cmdimpl_ppm_delay d=%u", delay); log_info();
     if (delay < 60000) {

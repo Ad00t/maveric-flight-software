@@ -61,6 +61,7 @@
       <itemPath>src/adis16260.c</itemPath>
       <itemPath>src/m41t81s.c</itemPath>
       <itemPath>../../common/maveric/src/at25df641.c</itemPath>
+      <itemPath>../../common/maveric/src/logger.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
@@ -79,7 +80,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>CCSC</languageToolchain>
-        <languageToolchainVersion>5.081</languageToolchainVersion>
+        <languageToolchainVersion>4.124</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>

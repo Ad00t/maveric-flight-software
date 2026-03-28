@@ -4,11 +4,19 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/src/interrupt.c</file>
+            <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/src/i2c.c</file>
             <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/src/hashtable.c</file>
+            <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/include/cmdimpl.h</file>
             <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/src/main.c</file>
-            <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/src/common.c</file>
-            <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/src/systime.c</file>
+            <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/src/logger.c</file>
+            <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/include/cmdpkt.h</file>
+            <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/src/cmdimpl.c</file>
+            <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/src/cmdpkt.c</file>
+            <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/include/i2c.h</file>
             <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/src/ringbuf.c</file>
+            <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/include/interrupt.h</file>
+            <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/include/ringbuf.h</file>
+            <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/src/cmdmgr.c</file>
         </group>
     </open-files>
 </project-private>

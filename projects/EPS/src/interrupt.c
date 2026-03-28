@@ -123,7 +123,7 @@ void RDA_isr(void)
 #INT_SI2C2
 void i2c2_isr(void) {
     BYTE state;
-    uint8_t send_byte;
+    uint8_t send_byte = 0;
     
     state = i2c_isr_state(I2C_2);
     
@@ -132,7 +132,7 @@ void i2c2_isr(void) {
     if((state == 0 ) || (state == 0x80))
         i2c_read_byte(I2C_2);
     if(state >= 0x80){ 
-        rb_peek(&g_i2cmgr.i2cbufs[2], state - 0x80,  send_byte);
+        rb_pop(&g_i2cmgr.i2cbufs[2], 1,  &send_byte);
         i2c_write_byte(I2C_2, send_byte);
         //i2c_write(send_buffer[state - 0x80]);
     }
@@ -143,7 +143,7 @@ void i2c2_isr(void) {
 #INT_SI2C3
 void i2c3_isr(void) {
     BYTE state;
-    uint8_t send_byte;
+    uint8_t send_byte = 0;
     
     state = i2c_isr_state(I2C_3);
     
@@ -152,7 +152,7 @@ void i2c3_isr(void) {
     if((state == 0 ) || (state == 0x80))
         i2c_read_byte(I2C_3);
     if(state >= 0x80){ 
-        rb_peek(&g_i2cmgr.i2cbufs[3], state - 0x80,  send_byte);
+        rb_pop(&g_i2cmgr.i2cbufs[3], 1,  &send_byte);
         i2c_write_byte(I2C_3, send_byte);
         //i2c_write(send_buffer[state - 0x80]);
     }

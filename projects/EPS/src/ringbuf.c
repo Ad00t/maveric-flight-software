@@ -38,6 +38,13 @@ int1 rb_push(ringbuf_s* buf, uint8_t b) {
     return 1;
 }
 
+void rb_push_n(ringbuf_s* buf, uint8_t* in, uint16_t n){
+    size_t j;
+    for(j = 0; j < n; j++){
+        rb_push(buf, in[j]);
+    }
+}
+
 // Pop n bytes from the buffer; pass NULL for out to just drop n bytes
 int1 rb_pop(ringbuf_s* buf, uint16_t n, uint8_t* out) {
     if (n > rb_len(buf)) return 0;
