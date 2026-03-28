@@ -168,8 +168,9 @@ void system_superloop(void) {
     // Do driver handling before commands so data is up to date
     mtq_parse_stream(&g_mtq, &g_irqmgr.irqbufs[MTQ_PORT-1]); // Handle magnetorquer data
     nvg_parse_stream(&g_nvg, &g_irqmgr.irqbufs[NVG_PORT-1]); // Handle naviguider data
-    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[UPPM_PORT-1], &g_cmdmgr.rcvpkts[0], FALSE); // Handle UPPM commands 
-    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[FTDI_PORT-1], &g_cmdmgr.rcvpkts[1], FALSE); // Handle FTDI commands
+    cmdmgr_parse_stream(&g_cmdmgr, &g_i2cmgr.rxbufs[0], &g_cmdmgr.rcvpkts[0], FALSE); // Handle EPS commands 
+    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[UPPM_PORT-1], &g_cmdmgr.rcvpkts[1], FALSE); // Handle UPPM commands 
+    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[FTDI_PORT-1], &g_cmdmgr.rcvpkts[2], FALSE); // Handle FTDI commands
 
     // Run scheduler
     scheduler_run_tasks(&g_scheduler, &g_cmdmgr);

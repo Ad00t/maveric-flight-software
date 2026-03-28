@@ -159,10 +159,11 @@ void system_superloop(void) {
     restart_wdt();
 
     // Handle received byte interrupts
-    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[HOLONAV_PORT-1], &g_cmdmgr.rcvpkts[0], FALSE); // Handle Holonav commands 
-    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[AX100_PORT-1], &g_cmdmgr.rcvpkts[1], TRUE); // Handle AX100 commands 
-    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[LPPM_PORT-1], &g_cmdmgr.rcvpkts[2], FALSE); // Handle LPPM commands
-    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[ASTROBOARD_PORT-1], &g_cmdmgr.rcvpkts[3], FALSE); // Handle Astroboard commands
+    cmdmgr_parse_stream(&g_cmdmgr, &g_i2cmgr.rxbufs[0], &g_cmdmgr.rcvpkts[0], FALSE); // Handle EPS commands 
+    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[HOLONAV_PORT-1], &g_cmdmgr.rcvpkts[1], FALSE); // Handle Holonav commands 
+    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[AX100_PORT-1], &g_cmdmgr.rcvpkts[2], TRUE); // Handle AX100 commands 
+    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[LPPM_PORT-1], &g_cmdmgr.rcvpkts[3], FALSE); // Handle LPPM commands
+    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[ASTROBOARD_PORT-1], &g_cmdmgr.rcvpkts[4], FALSE); // Handle Astroboard commands
    
     scheduler_run_tasks(&g_scheduler, &g_cmdmgr);
 }

@@ -5,7 +5,11 @@
 #include "hashtable.h"
 #include "cmdpkt.h"
 
-#define CMDMGR_NUM_BUFS     4
+#if NODE == NODE_LPPM
+#define CMDMGR_NUM_BUFS     3
+#elif NODE == NODE_UPPM
+#define CMDMGR_NUM_BUFS     5
+#endif
 
 // Command implementation function
 typedef void (*cmdimpl_f)(cmdpkt_s* pkt);
