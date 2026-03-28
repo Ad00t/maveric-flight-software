@@ -163,11 +163,10 @@ def read_serial():
         try:
             p = cmdmgr.parse_stream()
             if p is not None:
-                match p['id']:
-                    case 'ftdi_log':
-                        log(p['args'])
-                    case _:
-                        log_rcvcmd(f"{p}")
+                if p['id'] == 'ftdi_log':
+                    log(p['args'])
+                else:
+                    log_rcvcmd(f"{p}")
         except KeyboardInterrupt:
             log_info('read_serial: quitting')
             if ftdi.is_open: 

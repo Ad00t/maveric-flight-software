@@ -21,13 +21,13 @@ class CommandManager():
     ptype_lbl_to_id = { 'NONE': 0, 'REQ': 1, 'RES': 2, 'ACK': 3, 'RES': 4 }
     ptype_id_to_lbl = { v: k for k, v in ptype_lbl_to_id.items() }
 
-    def __init__(self, node: int, serial: serial.Serial | None = None):
+    def __init__(self, node: int, serial):
         self.frame = bytearray()
         self.state = WAIT_FEND
         self.node = node
         self.serial = serial
 
-    def create_cmd(self, orgn: int, dest: int, echo: int, ptype: int, id: str, args: str) -> bytearray:
+    def create_cmd(self, orgn: int, dest: int, echo: int, ptype: int, id: str, args: str):
         msg_data = [ orgn, dest, echo, ptype, len(id), len(args), id, 0, args, 0 ]
 
         msg_ba = bytearray()
@@ -50,14 +50,14 @@ class CommandManager():
         pkt_ba.extend(b'\xC0')
         return pkt_ba 
 
-    def send_cmd_serial(self, orgn: int, dest: int, echo: int, ptype: int, id: str, args: str) -> tuple:
+    def send_cmd_serial(self, orgn: int, dest: int, echo: int, ptype: int, id: str, args: str):
         if not (self.serial and self.serial.is_open): return (bytearray(), 0)
         ba = self.create_cmd(orgn, dest, echo, ptype, id, args)
         cnt = self.serial.write(ba)
         time.sleep(0.01)
         return (ba, cnt)
 
-    def kiss_process_byte(self, byte: int) -> bool:
+    def kiss_process_byte(self, byte: int):
         if self.state == WAIT_FEND:
             if byte == FEND:
                 self.frame.clear()
@@ -88,7 +88,7 @@ class CommandManager():
                 self.state = WAIT_FEND
         return False 
 
-    def parse_frame(self) -> dict | None: 
+    def parse_frame(self): 
         exp_msg_len = len(self.frame) - 1
         if exp_msg_len < 10: return None
         p = {}
@@ -128,7 +128,7 @@ class CommandManager():
         self.state = IN_FRAME
 
     # Reads a single command frame out of a serial stream if available
-    def parse_stream(self) -> dict | None:
+    def parse_stream(self):
         if not (self.serial and self.serial.is_open): return None
         n_bytes = self.serial.in_waiting
 
@@ -157,7 +157,7 @@ class CommandManager():
         return None
 
     # Reads a single command out of an arbitrary input buffer 
-    def parse_ba(self, ba) -> dict | None:
+    def parse_ba(self, ba):
         for i in range(len(ba)):
             b = ba[i]
             if self.kiss_process_byte(b):

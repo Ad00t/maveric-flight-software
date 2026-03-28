@@ -77,9 +77,8 @@ status_e flashmgr_reset_rbt_cnt(flashmgr_s* self) {
 	self->rbt_cnt = 0;
 	flashSectorProtectDisable(RESERVED_ADDR);
 	flashEraseBlockByAddr(RESERVED_ADDR);
-	flashWriteSafe(RESERVED_ADDR, sizeof(self->rbt_cnt), &self->rbt_cnt, RESERVED_ADDR,
-				   RESERVED_ADDR + FLASH_BLOCK_SIZE - 1);
-    return SUCCESS;
+	return flashWriteSafe(RESERVED_ADDR, sizeof(self->rbt_cnt), &self->rbt_cnt, RESERVED_ADDR,
+				          RESERVED_ADDR + FLASH_BLOCK_SIZE - 1);
 }
 
 void flashmgr_config_load_defaults(flashmgr_s* self) {
@@ -88,9 +87,7 @@ void flashmgr_config_load_defaults(flashmgr_s* self) {
     self->config.gyro_rate_src = 0; 
     self->config.attitude_src = 0;
 #elif NODE == NODE_UPPM
-    self->config.log_level = LL_INFO;
-    self->config.last_holonav_seq = 0;
-    self->config.last_astroboard_seq = 0;
+    self->config.log_level = LL_DEBUG;
 #endif
 }
 

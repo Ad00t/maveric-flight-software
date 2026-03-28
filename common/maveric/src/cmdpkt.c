@@ -178,7 +178,12 @@ cmdpkt_type_e stat2ack(status_e s) {
     return (s == SUCCESS ? ACK : NACK);
 }
 
+void cmd_respond(cmdpkt_s* pkt, cmdpkt_type_e type, uint8_t* res, uint8_t res_len) {
+    cmd_dispatch(pkt->dest, pkt->orgn, pkt->echo, type, pkt->id, res, res_len); 
+}
+
 void cmd_respond(cmdpkt_s* pkt, cmdpkt_type_e type, char* res) {
     cmd_dispatch(pkt->dest, pkt->orgn, pkt->echo, type, pkt->id, res); 
 }
+
 

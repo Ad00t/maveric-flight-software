@@ -520,8 +520,7 @@ void flashCopyBlockExceptPage(uint16_t destination_block, uint16_t source_block,
 //   -- checks if we're outside the max address of the flash chip
 //	 -- writes across page boundaries safely (without wrapping)
 //	 -- doesn't return until writing is complete
-status_e flashWriteSafe(uint32_t addr, uint16_t len, uint8_t* buf,
-						   uint32_t lower_bound, uint32_t upper_bound) {
+status_e flashWriteSafe(uint32_t addr, uint16_t len, uint8_t* buf, uint32_t lower_bound, uint32_t upper_bound) {
 	uint8_t cleared = 0;
 	uint32_t ending_addr, page_boundary, throwaway;
 	uint16_t startPage, endPage, currentPage;

@@ -84,7 +84,7 @@ void cmdimpl_ppm_get_time(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
         case REQ: {
             sprintf(LOGBUF, "cmdimpl_ppm_get_time REQ"); log_info();
-            char res[CMD_MAX_ARGS_LEN] = {0};  
+            char res[32] = {0};  
             systime_str(res);
             cmd_respond(pkt, RES, res);
             break;
@@ -187,7 +187,7 @@ void cmdimpl_ppm_sched_cmd_in(cmdpkt_s* pkt) {
             cmdpkt_s schedcmd;
             cmdpkt_create(&schedcmd, orgn, dest, echo, ptype, cmd_id, args);
             status_e s = scheduler_schedule_cmd_in(&g_scheduler, schedule_id, &schedcmd, start_delay_ms, period_ms, reps);
-            char res[CMD_MAX_ARGS_LEN] = {0};
+            char res[8] = {0};
             sprintf(res, "%u", schedule_id);
             cmd_respond(pkt, stat2ack(s), res); 
             break;
@@ -202,7 +202,7 @@ void cmdimpl_ppm_deschedule(cmdpkt_s* pkt) {
             uint8_t sched_id = strtoul(p, &p, 10);
             sprintf(LOGBUF, "cmdimpl_ppm_deschedule id=%u", sched_id); log_info();
             status_e s = scheduler_deschedule(&g_scheduler, sched_id);
-            char res[CMD_MAX_ARGS_LEN] = {0};
+            char res[8] = {0};
             sprintf(res, "%u", sched_id);
             cmd_respond(pkt, stat2ack(s), res);
             break;
@@ -247,7 +247,7 @@ void cmdimpl_flash_get_cfg(cmdpkt_s* pkt) {
         case REQ: {
             char res[CMD_MAX_ARGS_LEN] = {0};
             config_s* cfg = &g_flashmgr.config;
-            sprintf(res, "%u %u %u", cfg->log_level, cfg->last_holonav_seq, cfg->last_astroboard_seq);
+            sprintf(res, "%u", cfg->log_level);
             cmd_respond(pkt, RES, res);
             break;
         }
@@ -260,8 +260,6 @@ void cmdimpl_flash_set_cfg(cmdpkt_s* pkt) {
             char* p = pkt->args;
             config_s* cfg = &g_flashmgr.config;
             cfg->log_level = strtoul(p, &p, 10);
-            cfg->last_holonav_seq = strtoul(p, &p, 10);
-            cfg->last_astroboard_seq = strtoul(p, &p, 10);
             status_e s = flashmgr_config_flush(&g_flashmgr);
             cmd_respond(pkt, stat2ack(s), "");
             break;
@@ -274,7 +272,7 @@ void cmdimpl_ax100_get_power(cmdpkt_s* pkt) {
         case REQ: {
             uint8_t power = 0;
             if (ax100_get_power(&g_ax100, &power) == SUCCESS) {
-                char res[CMD_MAX_ARGS_LEN] = {0};
+                char res[8] = {0};
                 sprintf(res, "%u", power);
                 cmd_respond(pkt, RES, res);
             } else {

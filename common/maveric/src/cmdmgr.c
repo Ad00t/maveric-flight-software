@@ -74,6 +74,11 @@ void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
     sprintf(LOGBUF, "proc_cmd: parsed o=%u d=%u e=%u p=%u id='%s' arglen=%u",
             pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id, pkt->args_len); log_debug();
 
+    // ACK every request packet a node receives
+    if (pkt->ptype == REQ) {
+        cmd_respond(pkt, ACK, pkt->args);
+    }
+
     // Forward
     if (pkt->dest != NODE) {
         sprintf(LOGBUF, "proc_cmd: forwarding: o=%u d=%u e=%u p=%u id='%s' arglen=%u", 

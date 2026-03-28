@@ -37,6 +37,9 @@ void cmdimpl_init(void) {
 
     ht_set(ht, "tlm_get_data", (cmdimpl_f) cmdimpl_tlm_get_data);
     
+    ht_set(ht, "flash_read", (cmdimpl_f) cmdimpl_flash_read);
+    ht_set(ht, "flash_write", (cmdimpl_f) cmdimpl_flash_write);
+    ht_set(ht, "flash_erase", (cmdimpl_f) cmdimpl_flash_erase);
     ht_set(ht, "flash_get_cfg", (cmdimpl_f) cmdimpl_flash_get_cfg);
     ht_set(ht, "flash_set_cfg", (cmdimpl_f) cmdimpl_flash_set_cfg);
 
@@ -88,7 +91,7 @@ void cmdimpl_ppm_get_time(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
         case REQ: {
             sprintf(LOGBUF, "cmdimpl_ppm_get_time REQ"); log_info();
-            char res[CMD_MAX_ARGS_LEN] = {0};  
+            char res[32] = {0};  
             systime_str(res);
             cmd_respond(pkt, RES, res);
             break;
@@ -204,7 +207,7 @@ void cmdimpl_ppm_sched_cmd_in(cmdpkt_s* pkt) {
             cmdpkt_s schedcmd;
             cmdpkt_create(&schedcmd, orgn, dest, echo, ptype, cmd_id, args);
             status_e s = scheduler_schedule_cmd_in(&g_scheduler, schedule_id, &schedcmd, start_delay_ms, period_ms, reps);
-            char res[CMD_MAX_ARGS_LEN] = {0};
+            char res[8] = {0};
             sprintf(res, "%u", schedule_id);
             cmd_respond(pkt, stat2ack(s), res); 
             break;
@@ -219,7 +222,7 @@ void cmdimpl_ppm_deschedule(cmdpkt_s* pkt) {
             uint8_t sched_id = strtoul(p, &p, 10);
             sprintf(LOGBUF, "cmdimpl_ppm_deschedule id=%u", sched_id); log_info();
             status_e s = scheduler_deschedule(&g_scheduler, sched_id);
-            char res[CMD_MAX_ARGS_LEN] = {0};
+            char res[8] = {0};
             sprintf(res, "%u", sched_id);
             cmd_respond(pkt, stat2ack(s), res);
             break;
@@ -230,7 +233,6 @@ void cmdimpl_tlm_get_data(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
         case REQ: {
             sprintf(LOGBUF, "cmdimpl_tlm_get_data REQ"); log_info();
-            return;
             char res[CMD_MAX_ARGS_LEN] = {0};
             uint16_t j = sprintf(res, "%u %u %u %u %u", 
                                  g_flashmgr.rbt_cnt, g_rbt_cause, g_ertc.heartbeat, g_mtq.heartbeat, g_nvg.heartbeat);
@@ -269,6 +271,53 @@ void cmdimpl_tlm_get_data(cmdpkt_s* pkt) {
             }
 
             cmd_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
+void cmdimpl_flash_read(cmdpkt_s* pkt) {
+    switch (pkt->ptype) {
+        case REQ: {
+            char* p = pkt->args;
+            uint32_t addr = strtoul(p, &p, 16);
+            uint8_t len = maxu8(strtoul(p, &p, 10), 200);
+            sprintf(LOGBUF, "cmdimpl_flash_read addr=0x%02X len=%u", addr, len); log_info();
+            char res[CMD_MAX_ARGS_LEN] = {0};
+            uint8_t j = sprintf(res, "0x%02X %u ", addr, len);
+            flashRead(addr, len, &res[j]); 
+            cmd_respond(pkt, RES, res, j+len);
+            break;
+        }
+    }
+}
+
+void cmdimpl_flash_write(cmdpkt_s* pkt) {
+    switch (pkt->ptype) {
+        case REQ: {
+            char* p = pkt->args;
+            uint32_t addr = strtoul(p, &p, 16);
+            uint8_t len = maxu8(strtoul(p, &p, 10), 200);
+            sprintf(LOGBUF, "cmdimpl_flash_write addr=0x%02X len=%u", addr, len); log_info();
+            status_e s = flashWriteSafe(addr, len, p+1, addr, addr + FLASH_BLOCK_SIZE - 1); 
+            char res[32] = {0};
+            sprintf(res, "0x%02X %u", addr, len);
+            cmd_respond(pkt, stat2ack(s), res);
+            break;
+        }
+    }
+}
+
+void cmdimpl_flash_erase(cmdpkt_s* pkt) {
+    switch (pkt->ptype) {
+        case REQ: {
+            char* p = pkt->args;
+            uint32_t addr = strtoul(p, &p, 16);
+            sprintf(LOGBUF, "cmdimpl_flash_erase addr=%u", addr); log_info();
+            flashEraseBlockByAddr(addr); 
+            char res[16] = {0};
+            sprintf(res, "0x%02X", addr);
+            cmd_respond(pkt, ACK, res);
             break;
         }
     }
@@ -330,7 +379,7 @@ void cmdimpl_mtq_read_1(cmdpkt_s* pkt) {
             sprintf(LOGBUF, "cmdimpl_mtq_read_1 midx=%u idx=%u", midx, idx); log_info();
             uint16_t key = (uint16_t) midx << 8 | idx;
             status_e s = mtq_read_start(&g_mtq, key);
-            char res[CMD_MAX_ARGS_LEN] = {0};
+            char res[8] = {0};
             sprintf(res, "%u %u", midx, idx);
             cmd_respond(pkt, stat2ack(s), res); 
             break;
@@ -362,7 +411,7 @@ void cmdimpl_mtq_set_1(cmdpkt_s* pkt) {
             uint8_t midx = strtoul(p, &p, 10);
             uint8_t idx = strtoul(p, &p, 10);
             sprintf(LOGBUF, "cmdimpl_mtq_set_1 midx=%u idx=%u", midx, idx); log_info();
-            char res[CMD_MAX_ARGS_LEN] = {0};
+            char res[8] = {0};
             sprintf(res, "%u %u", midx, idx);
             uint16_t key = ((uint16_t) midx << 8) | idx;
             mtq_reg_s* reg = mtq_get_reg(&g_mtq, key);
@@ -608,7 +657,7 @@ void cmdimpl_nvg_set_1(cmdpkt_s* pkt) {
             uint8_t rate = strtoul(p, &p, 10);  
             sprintf(LOGBUF, "cmdimpl_nvg_set_1 sid=%u rate=%u", sensor_id, rate); log_info();
             status_e s = nvg_set_sensor(&g_nvg, sensor_id, rate); 
-            char res[CMD_MAX_ARGS_LEN] = {0};
+            char res[16] = {0};
             sprintf(res, "%u %u", sensor_id, rate);
             cmd_respond(pkt, stat2ack(s), res); 
             break;

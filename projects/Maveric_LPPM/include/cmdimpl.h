@@ -21,6 +21,9 @@ void cmdimpl_ppm_deschedule(cmdpkt_s* pkt);
 
 void cmdimpl_tlm_get_data(cmdpkt_s* pkt);
 
+void cmdimpl_flash_read(cmdpkt_s* pkt);
+void cmdimpl_flash_write(cmdpkt_s* pkt);
+void cmdimpl_flash_erase(cmdpkt_s* pkt);
 void cmdimpl_flash_get_cfg(cmdpkt_s* pkt);
 void cmdimpl_flash_set_cfg(cmdpkt_s* pkt);
 

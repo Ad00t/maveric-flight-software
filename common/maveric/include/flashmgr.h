@@ -62,8 +62,6 @@ typedef struct {
     datasrc_e attitude_src;
 #elif NODE == NODE_UPPM
     log_level_e log_level;
-    uint16_t last_holonav_seq;
-    uint16_t last_astroboard_seq;
 #endif
     uint16_t crc;
 } config_s;

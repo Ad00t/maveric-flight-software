@@ -149,7 +149,7 @@ void system_init(void) {
     // Fetch time from LPPM
     cmd_dispatch(NODE, NODE_LPPM, 0, REQ, "ppm_get_time", "");
 
-    sprintf(LOGBUF, "system initialized rs232_err=%u rbt=%u flashmgr=%u ax100=%u", 
+    sprintf(LOGBUF, "system initialized rs232_err=%u rbt_cnt=%u s_flashmgr=%u s_ax100=%u", 
             rs232_errors, g_flashmgr.rbt_cnt, s_flashmgr, s_ax100); log_info();
 }
 

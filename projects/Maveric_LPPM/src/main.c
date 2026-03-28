@@ -154,8 +154,8 @@ void system_init(void) {
     char req[CMD_MAX_ARGS_LEN] = {0};
     systime_str(req); // Outputs current time as string to req
     cmd_dispatch(NODE, NODE_UPPM, 0, REQ, "ppm_set_time", req);
-
-    sprintf(LOGBUF, "system initialized rs232_err=%u rbt=%u ertc=%u flashmgr=%u mtq=%u nvg=%u",
+    
+    sprintf(LOGBUF, "system initialized rs232_err=%u rbt_cnt=%u s_ertc=%u s_flashmgr=%u s_mtq=%u s_nvg=%u",
             rs232_errors, g_flashmgr.rbt_cnt, s_ertc, s_flashmgr, s_mtq, s_nvg); log_info();
 }
 
