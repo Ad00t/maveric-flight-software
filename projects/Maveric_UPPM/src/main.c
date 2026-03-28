@@ -144,8 +144,8 @@ void system_init(void) {
     // Fetch time from LPPM
     cmd_dispatch(NODE, NODE_LPPM, 0, REQ, "ppm_get_time", "");
 
-    sprintf(LOGBUF, "system initialized rs232_err=%u flashmgr=%u ax100=%u", 
-            rs232_errors, s_flashmgr, s_ax100); log_info();
+    sprintf(LOGBUF, "system initialized rs232_err=%u rbt=%u flashmgr=%u ax100=%u", 
+            rs232_errors, g_flashmgr.rbt_cnt, s_flashmgr, s_ax100); log_info();
 }
 
 // Main master routine run in superloop

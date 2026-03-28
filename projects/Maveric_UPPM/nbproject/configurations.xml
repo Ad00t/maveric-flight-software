@@ -13,7 +13,6 @@
       <itemPath>../../common/maveric/include/systime.h</itemPath>
       <itemPath>../../common/maveric/include/uart.h</itemPath>
       <itemPath>include/ax100.h</itemPath>
-      <itemPath>include/interrupts.h</itemPath>
       <itemPath>include/pinsupper.h</itemPath>
       <itemPath>include/rm3100.h</itemPath>
       <itemPath>../../common/maveric/include/common.h</itemPath>
@@ -39,7 +38,6 @@
     </logicalFolder>
     <logicalFolder name="OtherFiles" displayName="Other Files" projectFiles="false">
       <itemPath>src/ax100.c</itemPath>
-      <itemPath>src/interrupts.c</itemPath>
       <itemPath>src/rm3100.c</itemPath>
       <itemPath>../../common/maveric/src/cmdmgr.c</itemPath>
       <itemPath>../../common/maveric/src/crcnew.c</itemPath>

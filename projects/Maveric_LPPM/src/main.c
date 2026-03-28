@@ -150,8 +150,8 @@ void system_init(void) {
     systime_str(req); // Outputs current time as string to req
     cmd_dispatch(NODE, NODE_UPPM, 0, REQ, "ppm_set_time", req);
 
-    sprintf(LOGBUF, "system initialized rs232_err=%u ertc=%u flashmgr=%u mtq=%u nvg=%u",
-            rs232_errors, s_ertc, s_flashmgr, s_mtq, s_nvg); log_info();
+    sprintf(LOGBUF, "system initialized rs232_err=%u rbt=%u ertc=%u flashmgr=%u mtq=%u nvg=%u",
+            rs232_errors, g_flashmgr.rbt_cnt, s_ertc, s_flashmgr, s_mtq, s_nvg); log_info();
 }
 
 // Master code of what runs every superloop iteration

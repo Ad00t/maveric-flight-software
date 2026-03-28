@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-// UPPER PPM INTERRUPTS CONFIG
+// LOWER PPM INTERRUPTS CONFIG
 
 #define IRQ_NUM_PORTS   4
 

@@ -22,7 +22,6 @@
       <itemPath>../../common/maveric/include/flash.h</itemPath>
       <itemPath>../../common/maveric/include/flashmgr.h</itemPath>
       <itemPath>../../common/maveric/include/framer.h</itemPath>
-      <itemPath>../../common/maveric/include/interrupts.h</itemPath>
       <itemPath>include/adcsmtq.h</itemPath>
       <itemPath>include/adis16260.h</itemPath>
       <itemPath>include/m41t81s.h</itemPath>
@@ -56,7 +55,6 @@
       <itemPath>../../common/maveric/src/cmdpkt.c</itemPath>
       <itemPath>../../common/maveric/src/flashmgr.c</itemPath>
       <itemPath>../../common/maveric/src/framer.c</itemPath>
-      <itemPath>../../common/maveric/src/interrupts.c</itemPath>
       <itemPath>src/adcsmtq.c</itemPath>
       <itemPath>src/adis16260.c</itemPath>
       <itemPath>src/m41t81s.c</itemPath>
@@ -163,6 +161,7 @@
         <property key="event.recorder.debugger.behavior" value="Running"/>
         <property key="event.recorder.enabled" value="false"/>
         <property key="event.recorder.scvd.files" value=""/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="lastid" value=""/>
         <property key="memories.aux" value="false"/>

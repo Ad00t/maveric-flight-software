@@ -33,6 +33,7 @@ void cmdimpl_init(void) {
     ht_set(ht, "ppm_clear_bufs", (cmdimpl_f) cmdimpl_ppm_clear_bufs);
     ht_set(ht, "ppm_get_scheds", (cmdimpl_f) cmdimpl_ppm_get_scheds);
     ht_set(ht, "ppm_sched_cmd_in", (cmdimpl_f) cmdimpl_ppm_sched_cmd_in);
+    ht_set(ht, "ppm_deschedule", (cmdimpl_f) cmdimpl_ppm_deschedule);
 
     ht_set(ht, "tlm_get_data", (cmdimpl_f) cmdimpl_tlm_get_data);
     
@@ -205,6 +206,20 @@ void cmdimpl_ppm_sched_cmd_in(cmdpkt_s* pkt) {
             cmd_respond(pkt, stat2ack(s), res); 
             break;
         }
+    }
+}
+
+void cmdimpl_ppm_deschedule(cmdpkt_s* pkt) {
+    switch (pkt->ptype) {
+        case REQ:
+            char* p = pkt->args;
+            uint8_t sched_id = strtoul(p, &p, 10);
+            sprintf(LOGBUF, "cmdimpl_ppm_deschedule id=%u", sched_id); log_info();
+            status_e s = scheduler_deschedule(&g_scheduler, sched_id);
+            char res[CMD_MAX_ARGS_LEN] = {0};
+            sprintf(res, "%u", sched_id);
+            cmd_respond(pkt, stat2ack(s), res);
+            break;
     }
 }
 
