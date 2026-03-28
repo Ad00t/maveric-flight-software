@@ -5,7 +5,7 @@
 #include "cmdmgr.h"
 #include <stdint.h>
 
-#define SCHEDULER_MAX_FUNC_TASKS        16 
+#define SCHEDULER_MAX_FUNC_TASKS        10 
 #define SCHEDULER_MAX_CMD_TASKS         4
 #define SCHEDULER_MAX_TASKS             SCHEDULER_MAX_CMD_TASKS + SCHEDULER_MAX_FUNC_TASKS
 #define SCHEDULE_REPS_INFINITE          0xFFFF
