@@ -26,7 +26,7 @@ int1 rb_peek(ringbuf_s* buf, uint16_t off, uint8_t* out);
 // Push a byte into the buffer
 int1 rb_push(ringbuf_s* buf, uint8_t b);
 
-// Push a byte into the buffer
+// Push n bytes into the buffer
 void rb_push_n(ringbuf_s* buf, uint8_t* in, uint16_t n);
 
 // Pop n bytes from the buffer; pass NULL for out to just drop n bytes

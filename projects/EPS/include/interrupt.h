@@ -21,7 +21,6 @@ typedef struct {
 typedef struct {
     int1 started;
     volatile ringbuf_s i2cbufs[I2C_NUM_PORTS];
-    volatile uint64_t ms;
 } i2cmgr_s;
 
 // Initialize uart interrupt requests manager

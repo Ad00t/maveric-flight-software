@@ -22,6 +22,21 @@ void irqmgr_clear(irqmgr_s* irqmgr) {
     }
 }
 
+// I2C manager
+
+void i2cmgr_init(i2cmgr_s* i2cmgr) {
+    i2cmgr->started = FALSE;
+    i2cmgr_clear(i2cmgr);
+    isr_disable_all();
+}
+
+void i2cmgr_clear(i2cmgr_s* i2cmgr) {
+    uint8_t p;
+    for (p = 0; p < I2C_NUM_RX_BUFS; p++) {
+        rb_clear(&i2cmgr->rxbufs[p]);
+    }
+}
+
 // Interrupt service routines
 
 void isr_enable_all(void) {

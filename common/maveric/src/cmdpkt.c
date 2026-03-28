@@ -3,6 +3,7 @@
 #include "cmdpkt.h"
 #include "crcnew.h"
 #include "common.h"
+#include "i2c.h"
 
 #module
 
@@ -106,6 +107,8 @@ status_e cmdpkt_parse_buf(cmdpkt_s* pkt) {
     return len == p->buf_len ? SUCCESS : FAILURE;
 }
 
+extern i2cmgr_s g_i2cmgr;
+
 // Handles all packet routing
 void cmdpkt_dispatch(cmdpkt_s* pkt) {
     uint8_t frame[FRAME_MAX_SIZE] = {0};
@@ -115,6 +118,11 @@ void cmdpkt_dispatch(cmdpkt_s* pkt) {
 #if NODE == NODE_LPPM
     switch (pkt->dest) {
         case NODE_EPS:
+            i2c_write_buf(I2C_1, 0x15, frame, frame_len);
+            delay_ms(50);
+            uint8_t res[FRAME_MAX_SIZE] = {0}; 
+            i2c_read_buf(I2C_1, 0x15, res, I2C_MAX_SIZE);
+            rb_push_n(&g_i2cmgr.rxbufs[0], res, I2C_MAX_SIZE);
             break;
         case NODE_FTDI:
             uart_write_buf(FTDI_PORT, frame, frame_len);
@@ -129,7 +137,11 @@ void cmdpkt_dispatch(cmdpkt_s* pkt) {
 #elif NODE == NODE_UPPM
     switch (pkt->dest) {
         case NODE_EPS:
-            break;
+            i2c_write_buf(I2C_1, 0x12, frame, frame_len);
+            delay_ms(50);
+            uint8_t res[FRAME_MAX_SIZE] = {0}; 
+            i2c_read_buf(I2C_1, 0x12, res, I2C_MAX_SIZE);
+            rb_push_n(&g_i2cmgr.rxbufs[0], res, I2C_MAX_SIZE);
         case NODE_FTDI:
         case NODE_LPPM:
             uart_write_buf(LPPM_PORT, frame, frame_len);

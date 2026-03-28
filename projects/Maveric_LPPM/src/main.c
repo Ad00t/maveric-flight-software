@@ -46,6 +46,8 @@
 #use rs232(baud=COM_D_BAUD, UART4, BITS=8, STREAM=COM_D, ERRORS, PARITY=N, STOP=1, TIMEOUT=1000)
 // #use spi(MASTER, FORCE_HW, SPI1, BAUD=2000000, MSB_FIRST, BITS=16, MODE=3, STREAM=SPI_1)
 #use i2c(MASTER, I2C1, STREAM=I2C_1)
+#use i2c(MASTER, I2C2, STREAM=I2C_2)
+#use i2c(MASTER, I2C3, STREAM=I2C_3)
 
 #include "nodes.h"
 #define NODE                NODE_LPPM 
@@ -86,6 +88,7 @@ int1 g_superloop_running = TRUE;
 uint8_t g_rbt_cause = 0;
 
 irqmgr_s g_irqmgr = {0};            // Interrupts manager
+i2cmgr_s g_i2cmgr = {0};            // I2C manager
 cmdmgr_s g_cmdmgr = {0};            // Commands manager
 flashmgr_s g_flashmgr = {0};        // Flash manager. Includes config, rbtcnt.
 scheduler_s g_scheduler = {0};      // Schedules manager
@@ -119,8 +122,10 @@ void system_init(void) {
    
     // Interrupts init 
     irqmgr_init(&g_irqmgr);
-    isr_enable_all();
+    i2cmgr_init(&g_i2cmgr);
     g_irqmgr.started = TRUE;
+    g_i2cmgr.started = TRUE;
+    isr_enable_all();
 
     // eRTC, iRTC, system time init 
     rtc_time_t dfl_time;

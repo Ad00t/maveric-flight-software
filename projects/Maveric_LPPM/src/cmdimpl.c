@@ -155,7 +155,10 @@ void cmdimpl_ppm_clear_bufs(cmdpkt_s* pkt) {
                 case 0: 
                     irqmgr_clear(&g_irqmgr);
                     break;
-                case 1:
+                case 1: 
+                    i2cmgr_clear(&g_i2cmgr);
+                    break;
+                case 2:
                     cmdmgr_clear(&g_cmdmgr);
                     break;
             }

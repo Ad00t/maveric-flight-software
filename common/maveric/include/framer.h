@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include "ringbuf.h"
 
-#define FRAME_MAX_SIZE          RINGBUF_MAX_CAPACITY - 1
+#define FRAME_MAX_SIZE          RINGBUF_MAX_CAPACITY
 
 #define CSP_HEADER_SIZE         4
 #define CSP_NORMAL_PRIORITY     2L

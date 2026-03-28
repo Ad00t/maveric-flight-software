@@ -23,7 +23,7 @@ uint16_t sum_buf(uint8_t* buf, uint8_t len) {
 }
 
 uint8_t mtq_stat_parse_mode(uint32_t stat) {
-    return (uint8_t)(stat & 0b1110000);
+    return (uint8_t)(stat & 0b0000111); // Remember the documentation is wrong, mode is the bottom 3 bits
 }
 
 int1 mtq_stat_parse_sun(uint32_t stat) {
