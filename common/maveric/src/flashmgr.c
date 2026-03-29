@@ -87,7 +87,7 @@ void flashmgr_config_load_defaults(flashmgr_s* self) {
     self->config.gyro_rate_src = 0; 
     self->config.attitude_src = 0;
 #elif NODE == NODE_UPPM
-    self->config.log_level = LL_DEBUG;
+    self->config.log_level = LL_INFO;
 #endif
 }
 

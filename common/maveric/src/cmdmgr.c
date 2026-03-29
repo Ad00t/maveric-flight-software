@@ -74,9 +74,12 @@ void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
     sprintf(LOGBUF, "proc_cmd: parsed o=%u d=%u e=%u p=%u id='%s' arglen=%u",
             pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id, pkt->args_len); log_debug();
 
-    // ACK every request packet a node receives
-    if (pkt->ptype == REQ) {
-        cmd_respond(pkt, ACK, pkt->args);
+    // ACK every request packet a node receives from GS or FTDI
+    if (pkt->ptype == REQ && (pkt->orgn == NODE_GS || pkt->orgn == NODE_FTDI)) {
+        sprintf(LOGBUF, "proc_cmd: ack o=%u d=%u e=%u p=%u id='%s' arglen=%u",
+                pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id, pkt->args_len); log_debug();
+        cmd_respond(pkt, ACK, "");
+        delay_ms(100);
     }
 
     // Forward
@@ -95,6 +98,11 @@ void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
         goto cleanup;
     } 
     
+    // // Don't continue handling rcvd ACKs
+    // if (pkt->ptype != REQ && pkt->ptype != RES) {
+    //     goto cleanup;
+    // }
+
     // Find and execute cmd implementation
     cmdimpl_f cmdimpl = ht_get(&cmdmgr->cmdimpls, pkt->id);
     if (cmdimpl == NULL) {

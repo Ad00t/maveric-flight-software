@@ -37,6 +37,8 @@ void cmdimpl_init(void) {
 
     ht_set(ht, "tlm_get_data", (cmdimpl_f) cmdimpl_tlm_get_data);
     
+    ht_set(ht, "gnc_set_mode", (cmdimpl_f) cmdimpl_gnc_set_mode);
+    
     ht_set(ht, "flash_read", (cmdimpl_f) cmdimpl_flash_read);
     ht_set(ht, "flash_write", (cmdimpl_f) cmdimpl_flash_write);
     ht_set(ht, "flash_erase", (cmdimpl_f) cmdimpl_flash_erase);
@@ -81,7 +83,9 @@ void cmdimpl_ppm_reset(cmdpkt_s* pkt) {
         case REQ: {
             sprintf(LOGBUF, "cmdimpl_ppm_reset"); log_info();
             g_superloop_running = FALSE;
-            cmd_respond(pkt, ACK, "");
+            char res[8] = {0};
+            sprintf(res, "%u", SUCCESS);
+            cmd_respond(pkt, RES, res);
             break;
         }
     }
@@ -125,7 +129,9 @@ void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
             sprintf(LOGBUF, "cmdimpl_ppm_set_time '%s' [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", pkt->args,
                     rtc.tm_wday, rtc.tm_mon, rtc.tm_mday, rtc.tm_year, 
                     rtc.tm_hour, rtc.tm_min, rtc.tm_sec); log_info();
-            cmd_respond(pkt, ACK, "");
+            char res[8] = {0};
+            sprintf(res, "%u", SUCCESS);
+            cmd_respond(pkt, RES, res);
             break;
         }
     }
@@ -137,11 +143,14 @@ void cmdimpl_ppm_delay(cmdpkt_s* pkt) {
             char* p = pkt->args;
             uint32_t delay = strtoul(p, &p, 10);
             sprintf(LOGBUF, "cmdimpl_ppm_delay d=%u", delay); log_info();
+            char res[8] = {0};
             if (delay < 60000) {
-                cmd_respond(pkt, ACK, "");
+                sprintf(res, "%u", SUCCESS);
+                cmd_respond(pkt, RES, res);
                 delay_ms(delay);
             } else {
-                cmd_respond(pkt, NACK, "");
+                sprintf(res, "%u", FAILURE);
+                cmd_respond(pkt, RES, res);
             }
             break;
         }
@@ -154,15 +163,26 @@ void cmdimpl_ppm_clear_bufs(cmdpkt_s* pkt) {
             char* p = pkt->args;
             uint8_t mode = strtoul(p, &p, 10);
             sprintf(LOGBUF, "cmdimpl_ppm_clear_bufs m=%u", mode); log_info();
+            char res[8] = {0};
             switch (mode) {
                 case 0: 
                     irqmgr_clear(&g_irqmgr);
+                    sprintf(res, "%u", SUCCESS);
+                    cmd_respond(pkt, RES, res);
                     break;
                 case 1: 
                     i2cmgr_clear(&g_i2cmgr);
+                    sprintf(res, "%u", SUCCESS);
+                    cmd_respond(pkt, RES, res);
                     break;
                 case 2:
                     cmdmgr_clear(&g_cmdmgr);
+                    sprintf(res, "%u", SUCCESS);
+                    cmd_respond(pkt, RES, res);
+                    break;
+                default:
+                    sprintf(res, "%u", FAILURE);
+                    cmd_respond(pkt, RES, res);
                     break;
             }
             break;
@@ -208,8 +228,8 @@ void cmdimpl_ppm_sched_cmd_in(cmdpkt_s* pkt) {
             cmdpkt_create(&schedcmd, orgn, dest, echo, ptype, cmd_id, args);
             status_e s = scheduler_schedule_cmd_in(&g_scheduler, schedule_id, &schedcmd, start_delay_ms, period_ms, reps);
             char res[8] = {0};
-            sprintf(res, "%u", schedule_id);
-            cmd_respond(pkt, stat2ack(s), res); 
+            sprintf(res, "%u %u", s, schedule_id);
+            cmd_respond(pkt, RES, res); 
             break;
         }
     }
@@ -217,15 +237,31 @@ void cmdimpl_ppm_sched_cmd_in(cmdpkt_s* pkt) {
 
 void cmdimpl_ppm_deschedule(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case REQ:
+        case REQ: {
             char* p = pkt->args;
             uint8_t sched_id = strtoul(p, &p, 10);
             sprintf(LOGBUF, "cmdimpl_ppm_deschedule id=%u", sched_id); log_info();
             status_e s = scheduler_deschedule(&g_scheduler, sched_id);
             char res[8] = {0};
-            sprintf(res, "%u", sched_id);
-            cmd_respond(pkt, stat2ack(s), res);
+            sprintf(res, "%u %u", s, sched_id);
+            cmd_respond(pkt, RES, res);
             break;
+        }
+    }
+}
+
+void cmdimpl_gnc_set_mode(cmdpkt_s* pkt) {
+    switch (pkt->ptype) {
+        case REQ: {
+            char* p = pkt->args;
+            uint8_t mode = strtoul(p, &p, 10);
+            sprintf(LOGBUF, "cmdimpl_gnc_set_mode mode=%u", mode); log_info();
+            // TODO: set gnc mode
+            char res[8] = {0};
+            sprintf(res, "%u", FAILURE);
+            cmd_respond(pkt, RES, res);
+            break;
+        }
     }
 }
 
@@ -301,8 +337,8 @@ void cmdimpl_flash_write(cmdpkt_s* pkt) {
             sprintf(LOGBUF, "cmdimpl_flash_write addr=0x%02X len=%u", addr, len); log_info();
             status_e s = flashWriteSafe(addr, len, p+1, addr, addr + FLASH_BLOCK_SIZE - 1); 
             char res[32] = {0};
-            sprintf(res, "0x%02X %u", addr, len);
-            cmd_respond(pkt, stat2ack(s), res);
+            sprintf(res, "%u 0x%02X %u", s, addr, len);
+            cmd_respond(pkt, RES, res);
             break;
         }
     }
@@ -317,7 +353,7 @@ void cmdimpl_flash_erase(cmdpkt_s* pkt) {
             flashEraseBlockByAddr(addr); 
             char res[16] = {0};
             sprintf(res, "0x%02X", addr);
-            cmd_respond(pkt, ACK, res);
+            cmd_respond(pkt, RES, res);
             break;
         }
     }
@@ -344,7 +380,9 @@ void cmdimpl_flash_set_cfg(cmdpkt_s* pkt) {
             cfg->gyro_rate_src = strtoul(p, &p, 10);
             cfg->attitude_src = strtoul(p, &p, 10);
             status_e s = flashmgr_config_flush(&g_flashmgr);
-            cmd_respond(pkt, stat2ack(s), "");
+            char res[8] = {0};
+            sprintf(res, "%u", s);
+            cmd_respond(pkt, RES, res);
             break;
         }
     }
@@ -354,7 +392,9 @@ void cmdimpl_mtq_heartbeat(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
         case REQ: {
             mtq_check_heartbeat(&g_mtq);
-            cmd_respond(pkt, stat2ack(g_mtq.heartbeat), "");
+            char res[8] = {0};
+            sprintf(res, "%u", g_mtq.heartbeat);
+            cmd_respond(pkt, RES, res);
             break;
         }
     }
@@ -364,7 +404,9 @@ void cmdimpl_mtq_reset(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
         case REQ: {
             status_e s = mtq_reset(&g_mtq);
-            cmd_respond(pkt, stat2ack(s), "");
+            char res[8] = {0};
+            sprintf(res, "%u", s);
+            cmd_respond(pkt, RES, res);
             break;
         }
     }
@@ -379,9 +421,9 @@ void cmdimpl_mtq_read_1(cmdpkt_s* pkt) {
             sprintf(LOGBUF, "cmdimpl_mtq_read_1 midx=%u idx=%u", midx, idx); log_info();
             uint16_t key = (uint16_t) midx << 8 | idx;
             status_e s = mtq_read_start(&g_mtq, key);
-            char res[8] = {0};
-            sprintf(res, "%u %u", midx, idx);
-            cmd_respond(pkt, stat2ack(s), res); 
+            char res[16] = {0};
+            sprintf(res, "%u %u %u", s, midx, idx);
+            cmd_respond(pkt, RES, res);
             break;
         }
     }
@@ -397,8 +439,8 @@ void cmdimpl_mtq_get_1(cmdpkt_s* pkt) {
             char res[CMD_MAX_ARGS_LEN] = {0};
             uint16_t j = sprintf(res, "%u %u", midx, idx);
             uint16_t key = ((uint16_t) midx << 8) | idx;
-            status_e s = mtq_print_reg_data(&g_mtq, key, res, &j);
-            cmd_respond(pkt, stat2ack(s), res); 
+            mtq_print_reg_data(&g_mtq, key, res, &j);
+            cmd_respond(pkt, RES, res);
             break;
         }
     }
@@ -411,12 +453,12 @@ void cmdimpl_mtq_set_1(cmdpkt_s* pkt) {
             uint8_t midx = strtoul(p, &p, 10);
             uint8_t idx = strtoul(p, &p, 10);
             sprintf(LOGBUF, "cmdimpl_mtq_set_1 midx=%u idx=%u", midx, idx); log_info();
-            char res[8] = {0};
-            sprintf(res, "%u %u", midx, idx);
             uint16_t key = ((uint16_t) midx << 8) | idx;
             mtq_reg_s* reg = mtq_get_reg(&g_mtq, key);
+            char res[16] = {0};
             if (reg == NULL) {
-                cmd_dispatch(NODE, pkt->orgn, pkt->echo, NACK, pkt->id, res); 
+                sprintf(res, "%u %u %u", FAILURE, midx, idx);
+                cmd_respond(pkt, RES, res);
                 break;
             }
             uint8_t i;
@@ -458,7 +500,8 @@ void cmdimpl_mtq_set_1(cmdpkt_s* pkt) {
                     break;
             }
             status_e s = mtq_write_start(&g_mtq, reg, data);
-            cmd_respond(pkt, stat2ack(s), res); 
+            sprintf(res, "%u %u %u", s, midx, idx);
+            cmd_respond(pkt, RES, res); 
             break;
         }
     }
@@ -469,7 +512,9 @@ void cmdimpl_mtq_read_fast(cmdpkt_s* pkt) {
         case REQ: {
             sprintf(LOGBUF, "cmdimpl_mtq_read_fast"); log_info();
             status_e s = mtq_read_fast(&g_mtq); 
-            cmd_respond(pkt, stat2ack(s), ""); 
+            char res[8] = {0};
+            sprintf(res, "%u", s);
+            cmd_respond(pkt, RES, res);
             break;
         }
     }
@@ -480,16 +525,16 @@ void cmdimpl_mtq_get_fast(cmdpkt_s* pkt) {
         case REQ: {
             char* p = pkt->args;
             uint8_t page = strtoul(p, &p, 10);
-            uint16_t j = 0;
             char res[CMD_MAX_ARGS_LEN] = {0};
-            j += sprintf(&res[j], "%u", page);
             if (page > MTQ_FAST_FRAME_REGS / MTQ_PAGE_SIZE) {
-                cmd_dispatch(NODE, pkt->orgn, pkt->echo, NACK, pkt->id, res); 
+                sprintf(res, "%u %u", FAILURE, page);
+                cmd_respond(pkt, RES, res);
                 break;
             }
             uint8_t i1 = MTQ_PAGE_SIZE * page;
             uint8_t i2 = minu8(i1 + MTQ_PAGE_SIZE, MTQ_NUM_FAST_REGS);
             sprintf(LOGBUF, "cmdimpl_mtq_get_fast pg=%u i1=%u i2=%u", page, i1, i2); log_info();
+            uint16_t j = sprintf(res, "%u %u", SUCCESS, page);
             uint8_t i;
             for (i = i1; i < i2; i++) {
                 uint16_t key = MTQ_FAST_FRAME_REGS[i];
@@ -507,7 +552,9 @@ void cmdimpl_mtq_read_ctrl(cmdpkt_s* pkt) {
         case REQ: {
             sprintf(LOGBUF, "cmdimpl_mtq_read_ctrl"); log_info();
             status_e s = mtq_read_ctrl(&g_mtq);
-            cmd_respond(pkt, stat2ack(s), ""); 
+            char res[8] = {0};
+            sprintf(res, "%u", s);
+            cmd_respond(pkt, RES, res);
             break;
         }
     }
@@ -518,16 +565,16 @@ void cmdimpl_mtq_get_ctrl(cmdpkt_s* pkt) {
         case REQ: {
             char* p = pkt->args;
             uint8_t page = strtoul(p, &p, 10);
-            uint16_t j = 0;
             char res[CMD_MAX_ARGS_LEN] = {0};
-            j += sprintf(&res[j], "%u", page);
             if (page > MTQ_CTRL_FRAME_REGS / MTQ_PAGE_SIZE) {
-                cmd_dispatch(NODE, pkt->orgn, pkt->echo, NACK, pkt->id, res); 
+                sprintf(res, "%u %u", FAILURE, page);
+                cmd_respond(pkt, RES, res);
                 break;
             }
             uint8_t i1 = MTQ_PAGE_SIZE * page;
             uint8_t i2 = minu8(i1 + MTQ_PAGE_SIZE, MTQ_NUM_CTRL_REGS);
             sprintf(LOGBUF, "cmdimpl_mtq_get_ctrl pg=%u i1=%u i2=%u", page, i1, i2); log_info();
+            uint16_t j = sprintf(res, "%u %u", SUCCESS, page);
             uint8_t i;
             for (i = i1; i < i2; i++) {
                 uint16_t key = MTQ_CTRL_FRAME_REGS[i];
@@ -545,7 +592,9 @@ void cmdimpl_mtq_read_all(cmdpkt_s* pkt) {
         case REQ: {
             sprintf(LOGBUF, "cmdimpl_mtq_read_all"); log_info();
             status_e s = mtq_read_all(&g_mtq); 
-            cmd_respond(pkt, stat2ack(s), ""); 
+            char res[8] = {0};
+            sprintf(res, "%u", s);
+            cmd_respond(pkt, RES, res); 
             break;
         }
     }
@@ -556,16 +605,16 @@ void cmdimpl_mtq_get_all(cmdpkt_s* pkt) {
         case REQ: {
             char* p = pkt->args;
             uint8_t page = strtoul(p, &p, 10);
-            uint16_t j = 0;
             char res[CMD_MAX_ARGS_LEN] = {0};
-            j += sprintf(&res[j], "%u", page);
             if (page > MTQ_REG_TABLE_LEN / MTQ_PAGE_SIZE) {
-                cmd_dispatch(NODE, pkt->orgn, pkt->echo, NACK, pkt->id, res); 
+                sprintf(res, "%u %u", FAILURE, page);
+                cmd_respond(pkt, RES, res);
                 break;
             }
             uint8_t i1 = MTQ_PAGE_SIZE * page;
             uint8_t i2 = minu8(i1 + MTQ_PAGE_SIZE, MTQ_REG_TABLE_LEN);
             sprintf(LOGBUF, "cmdimpl_mtq_get_all pg=%u i1=%u i2=%u", page, i1, i2); log_info();
+            uint16_t j = sprintf(res, "%u %u", SUCCESS, page);
             uint8_t i;
             for (i = i1; i < i2; i++) {
                 mtq_reg_s* reg = &g_mtq.reg_table[i];
@@ -582,7 +631,9 @@ void cmdimpl_nvg_heartbeat(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
         case REQ: {
             nvg_check_heartbeat(&g_nvg);
-            cmd_respond(pkt, stat2ack(g_nvg.heartbeat), "");
+            char res[8] = {0};
+            sprintf(res, "%u", g_nvg.heartbeat);
+            cmd_respond(pkt, RES, res);
             break;
         }
     }
@@ -593,7 +644,9 @@ void cmdimpl_nvg_reset(cmdpkt_s* pkt) {
         case REQ: {
             sprintf(LOGBUF, "cmdimpl_nvg_reset"); log_info();
             status_e s = nvg_reset(&g_nvg); 
-            cmd_respond(pkt, stat2ack(s), ""); 
+            char res[8] = {0};
+            sprintf(res, "%u", s);
+            cmd_respond(pkt, RES, res);
             break;
         }
     }
@@ -604,7 +657,9 @@ void cmdimpl_nvg_power(cmdpkt_s* pkt) {
         case REQ: {
             sprintf(LOGBUF, "cmdimpl_nvg_power"); log_info();
             status_e s = nvg_power(&g_nvg); 
-            cmd_respond(pkt, stat2ack(s), ""); 
+            char res[8] = {0};
+            sprintf(res, "%u", s);
+            cmd_respond(pkt, RES, res);
             break;
         }
     }
@@ -616,7 +671,9 @@ void cmdimpl_nvg_send_cmd(cmdpkt_s* pkt) {
             char* p = pkt->args;
             sprintf(LOGBUF, "cmdimpl_nvg_send_cmd '%s'", p); log_info();
             status_e s = nvg_send_cmd(&g_nvg, p); 
-            cmd_dispatch(NODE, pkt->orgn, pkt->echo, stat2ack(s), pkt->id, p); 
+            char res[16] = {0};
+            sprintf(res, "%u %s", s, p);
+            cmd_respond(pkt, RES, res);
             break;
         }
     }
@@ -633,7 +690,7 @@ void cmdimpl_nvg_get_1(cmdpkt_s* pkt) {
             if (s == SUCCESS) {
                 char res[CMD_MAX_ARGS_LEN] = {0};
                 nvg_sensor_s* sensor = &g_nvg.sensors[sensor_id];
-                uint16_t j = sprintf(&res[j], "%u ", sensor_id);
+                uint16_t j = sprintf(&res[j], "%u %u ", s, sensor_id);
                 j += ftoa(sensor->ts, &res[j], 6, 'f');
                 uint8_t i;
                 for (i = 0; i < sensor->len; i++) {
@@ -642,7 +699,9 @@ void cmdimpl_nvg_get_1(cmdpkt_s* pkt) {
                 }
                 cmd_respond(pkt, RES, res); 
             } else {
-                cmd_respond(pkt, NACK, ""); 
+                char res[8] = {0};
+                sprintf(res, "%u", FAILURE);
+                cmd_respond(pkt, RES, res); 
             }
             break;
         }
@@ -658,8 +717,8 @@ void cmdimpl_nvg_set_1(cmdpkt_s* pkt) {
             sprintf(LOGBUF, "cmdimpl_nvg_set_1 sid=%u rate=%u", sensor_id, rate); log_info();
             status_e s = nvg_set_sensor(&g_nvg, sensor_id, rate); 
             char res[16] = {0};
-            sprintf(res, "%u %u", sensor_id, rate);
-            cmd_respond(pkt, stat2ack(s), res); 
+            sprintf(res, "%u %u %u", s, sensor_id, rate);
+            cmd_respond(pkt, RES, res); 
             break;
         }
     }
@@ -670,7 +729,9 @@ void cmdimpl_nvg_start_all(cmdpkt_s* pkt) {
         case REQ: {
             sprintf(LOGBUF, "cmdimpl_nvg_start_all"); log_info();
             status_e s = nvg_start_all_sensors(&g_nvg); 
-            cmd_respond(pkt, stat2ack(s), ""); 
+            char res[8] = {0};
+            sprintf(res, "%u", s);
+            cmd_respond(pkt, RES, res); 
             break;
         }
     }
@@ -681,7 +742,9 @@ void cmdimpl_nvg_stop_all(cmdpkt_s* pkt) {
         case REQ: {
             sprintf(LOGBUF, "cmdimpl_nvg_stop_all"); log_info();
             status_e s = nvg_stop_all_sensors(&g_nvg); 
-            cmd_respond(pkt, stat2ack(s), ""); 
+            char res[8] = {0};
+            sprintf(res, "%u", s);
+            cmd_respond(pkt, RES, res); 
             break;
         }
     }

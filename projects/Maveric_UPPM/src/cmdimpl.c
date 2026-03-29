@@ -63,6 +63,7 @@ void ppm_set_time_from_str(char* args) {
 void cmdimpl_ping(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
         case REQ: {
+            sprintf(LOGBUF, "cmdimpl_ping '%s'", pkt->args); log_info();
             cmd_respond(pkt, RES, "pong");
             break;
         }
@@ -74,7 +75,9 @@ void cmdimpl_ppm_reset(cmdpkt_s* pkt) {
         case REQ: {
             sprintf(LOGBUF, "cmdimpl_ppm_reset"); log_info();
             g_superloop_running = FALSE;
-            cmd_respond(pkt, ACK, "");
+            char res[8] = {0};
+            sprintf(res, "%u", SUCCESS);
+            cmd_respond(pkt, RES, res);
             break;
         }
     }
@@ -106,6 +109,9 @@ void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
             sprintf(LOGBUF, "cmdimpl_ppm_set_time '%s' [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", pkt->args,
                     rtc.tm_wday, rtc.tm_mon, rtc.tm_mday, rtc.tm_year, 
                     rtc.tm_hour, rtc.tm_min, rtc.tm_sec); log_info();
+            char res[8] = {0};
+            sprintf(res, "%u", SUCCESS);
+            cmd_respond(pkt, RES, res);
             break;
         }
     }
@@ -117,11 +123,14 @@ void cmdimpl_ppm_delay(cmdpkt_s* pkt) {
             char* p = pkt->args;
             uint32_t delay = strtoul(p, &p, 10);
             sprintf(LOGBUF, "cmdimpl_ppm_delay d=%u", delay); log_info();
+            char res[8] = {0};
             if (delay < 60000) {
-                cmd_respond(pkt, ACK, "");
+                sprintf(res, "%u", SUCCESS);
+                cmd_respond(pkt, RES, res);
                 delay_ms(delay);
             } else {
-                cmd_respond(pkt, NACK, "");
+                sprintf(res, "%u", FAILURE);
+                cmd_respond(pkt, RES, res);
             }
             break;
         }
@@ -134,15 +143,26 @@ void cmdimpl_ppm_clear_bufs(cmdpkt_s* pkt) {
             char* p = pkt->args;
             uint8_t mode = strtoul(p, &p, 10);
             sprintf(LOGBUF, "cmdimpl_ppm_clear_bufs m=%u", mode); log_info();
+            char res[8] = {0};
             switch (mode) {
                 case 0: 
                     irqmgr_clear(&g_irqmgr);
+                    sprintf(res, "%u", SUCCESS);
+                    cmd_respond(pkt, RES, res);
                     break;
                 case 1: 
                     i2cmgr_clear(&g_i2cmgr);
+                    sprintf(res, "%u", SUCCESS);
+                    cmd_respond(pkt, RES, res);
                     break;
                 case 2:
                     cmdmgr_clear(&g_cmdmgr);
+                    sprintf(res, "%u", SUCCESS);
+                    cmd_respond(pkt, RES, res);
+                    break;
+                default:
+                    sprintf(res, "%u", FAILURE);
+                    cmd_respond(pkt, RES, res);
                     break;
             }
             break;
@@ -188,8 +208,8 @@ void cmdimpl_ppm_sched_cmd_in(cmdpkt_s* pkt) {
             cmdpkt_create(&schedcmd, orgn, dest, echo, ptype, cmd_id, args);
             status_e s = scheduler_schedule_cmd_in(&g_scheduler, schedule_id, &schedcmd, start_delay_ms, period_ms, reps);
             char res[8] = {0};
-            sprintf(res, "%u", schedule_id);
-            cmd_respond(pkt, stat2ack(s), res); 
+            sprintf(res, "%u %u", s, schedule_id);
+            cmd_respond(pkt, RES, res); 
             break;
         }
     }
@@ -197,15 +217,16 @@ void cmdimpl_ppm_sched_cmd_in(cmdpkt_s* pkt) {
 
 void cmdimpl_ppm_deschedule(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
-        case REQ:
+        case REQ: {
             char* p = pkt->args;
             uint8_t sched_id = strtoul(p, &p, 10);
             sprintf(LOGBUF, "cmdimpl_ppm_deschedule id=%u", sched_id); log_info();
             status_e s = scheduler_deschedule(&g_scheduler, sched_id);
             char res[8] = {0};
-            sprintf(res, "%u", sched_id);
-            cmd_respond(pkt, stat2ack(s), res);
+            sprintf(res, "%u %u", s, sched_id);
+            cmd_respond(pkt, RES, res);
             break;
+        }
     }
 }
 
@@ -261,7 +282,9 @@ void cmdimpl_flash_set_cfg(cmdpkt_s* pkt) {
             config_s* cfg = &g_flashmgr.config;
             cfg->log_level = strtoul(p, &p, 10);
             status_e s = flashmgr_config_flush(&g_flashmgr);
-            cmd_respond(pkt, stat2ack(s), "");
+            char res[8] = {0};
+            sprintf(res, "%u", s);
+            cmd_respond(pkt, RES, res);
             break;
         }
     }
@@ -271,13 +294,10 @@ void cmdimpl_ax100_get_power(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
         case REQ: {
             uint8_t power = 0;
-            if (ax100_get_power(&g_ax100, &power) == SUCCESS) {
-                char res[8] = {0};
-                sprintf(res, "%u", power);
-                cmd_respond(pkt, RES, res);
-            } else {
-                cmd_respond(pkt, NACK, "");
-            }
+            status_e s = ax100_get_power(&g_ax100, &power);
+            char res[8] = {0};
+            sprintf(res, "%u", s);
+            cmd_respond(pkt, RES, res);
             break;
         }
     }
@@ -289,7 +309,9 @@ void cmdimpl_ax100_set_power(cmdpkt_s* pkt) {
             char* p = pkt->args;
             uint8_t power = strtoul(p, &p, 10);
             status_e s = ax100_set_power(&g_ax100, power);
-            cmd_respond(pkt, stat2ack(s), "");
+            char res[8] = {0};
+            sprintf(res, "%u", s);
+            cmd_respond(pkt, RES, res);
             break;
         }
     }

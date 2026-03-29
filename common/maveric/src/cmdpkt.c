@@ -142,6 +142,7 @@ void cmdpkt_dispatch(cmdpkt_s* pkt) {
             uint8_t res[FRAME_MAX_SIZE] = {0}; 
             i2c_read_buf(I2C_1, 0x12, res, I2C_MAX_SIZE);
             rb_push_n(&g_i2cmgr.rxbufs[0], res, I2C_MAX_SIZE);
+            break;
         case NODE_FTDI:
         case NODE_LPPM:
             uart_write_buf(LPPM_PORT, frame, frame_len);
@@ -174,16 +175,12 @@ void cmd_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype,
 
 // Public helpers 
 
-cmdpkt_type_e stat2ack(status_e s) {
-    return (s == SUCCESS ? ACK : NACK);
-}
-
 void cmd_respond(cmdpkt_s* pkt, cmdpkt_type_e type, uint8_t* res, uint8_t res_len) {
-    cmd_dispatch(pkt->dest, pkt->orgn, pkt->echo, type, pkt->id, res, res_len); 
+    cmd_dispatch(NODE, pkt->orgn, pkt->echo, type, pkt->id, res, res_len); 
 }
 
 void cmd_respond(cmdpkt_s* pkt, cmdpkt_type_e type, char* res) {
-    cmd_dispatch(pkt->dest, pkt->orgn, pkt->echo, type, pkt->id, res); 
+    cmd_dispatch(NODE, pkt->orgn, pkt->echo, type, pkt->id, res); 
 }
 
 
