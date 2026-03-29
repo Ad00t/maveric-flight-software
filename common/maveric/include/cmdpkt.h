@@ -50,14 +50,13 @@ status_e cmdpkt_parse_buf(cmdpkt_s* pkt);
 
 // Send a command packet along its appropriate route. Assumes pkt buf field is populated correctly.
 void cmdpkt_dispatch(cmdpkt_s* pkt);
+
 // Easy use command creation & dispatch
 void cmd_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, uint8_t* args, uint8_t args_len);
 void cmd_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args);
 
-// Converts SUCCESS -> ACK, anything else -> NACK
-cmdpkt_type_e stat2ack(status_e s);
-
 // Sends a response to a command with flipped o/d, specified type, and response args
+void cmd_respond(cmdpkt_s* pkt, cmdpkt_type_e type, uint8_t* res, uint8_t res_len);
 void cmd_respond(cmdpkt_s* pkt, cmdpkt_type_e type, char* res);
 
 #endif
