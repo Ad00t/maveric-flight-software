@@ -18,7 +18,7 @@ class CommandManager():
     crcalc = Calculator(Crc16.XMODEM)
     node_lbl_to_id = { 'NONE': 0, 'LPPM': 1, 'EPS': 2, 'UPPM': 3, 'HOLONAV': 4, 'ASTROBOARD': 5, 'GS': 6, 'FTDI': 7 }
     node_id_to_lbl = { v: k for k, v in node_lbl_to_id.items() }
-    ptype_lbl_to_id = { 'NONE': 0, 'REQ': 1, 'RES': 2, 'ACK': 3, 'RES': 4 }
+    ptype_lbl_to_id = { 'NONE': 0, 'REQ': 1, 'RES': 2, 'ACK': 3, 'NACK': 4 }
     ptype_id_to_lbl = { v: k for k, v in ptype_lbl_to_id.items() }
 
     def __init__(self, node: int, serial):
@@ -27,7 +27,7 @@ class CommandManager():
         self.node = node
         self.serial = serial
 
-    def create_cmd(self, orgn: int, dest: int, echo: int, ptype: int, id: str, args: str):
+    def create_cmd(self, orgn: int, dest: int, echo: int, ptype: int, id: str, args):
         msg_data = [ orgn, dest, echo, ptype, len(id), len(args), id, 0, args, 0 ]
 
         msg_ba = bytearray()
@@ -50,7 +50,7 @@ class CommandManager():
         pkt_ba.extend(b'\xC0')
         return pkt_ba 
 
-    def send_cmd_serial(self, orgn: int, dest: int, echo: int, ptype: int, id: str, args: str):
+    def send_cmd_serial(self, orgn: int, dest: int, echo: int, ptype: int, id: str, args):
         if not (self.serial and self.serial.is_open): return (bytearray(), 0)
         ba = self.create_cmd(orgn, dest, echo, ptype, id, args)
         cnt = self.serial.write(ba)
@@ -113,7 +113,11 @@ class CommandManager():
         size += p['id_len'] + 1
         
         if size + p['args_len'] > exp_msg_len: return None
-        p['args'] = buf[size:size+p['args_len']].decode('ascii')
+        p['args_raw'] = buf[size:size+p['args_len']]
+        try:
+            p['args'] = p['args_raw'].decode('ascii')
+        except:
+            pass
         size += p['args_len'] + 1
 
         if size + 2 > exp_msg_len: return None

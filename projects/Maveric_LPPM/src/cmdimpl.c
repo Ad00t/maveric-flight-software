@@ -33,7 +33,9 @@ void cmdimpl_init(void) {
     ht_set(ht, "ppm_clear_bufs", (cmdimpl_f) cmdimpl_ppm_clear_bufs);
     ht_set(ht, "ppm_get_scheds", (cmdimpl_f) cmdimpl_ppm_get_scheds);
     ht_set(ht, "ppm_sched_cmd_in", (cmdimpl_f) cmdimpl_ppm_sched_cmd_in);
-    ht_set(ht, "ppm_deschedule", (cmdimpl_f) cmdimpl_ppm_deschedule);
+    ht_set(ht, "ppm_desched", (cmdimpl_f) cmdimpl_ppm_desched);
+    ht_set(ht, "ppm_resched_in", (cmdimpl_f) cmdimpl_ppm_resched_in);
+    ht_set(ht, "ppm_clear_sched", (cmdimpl_f) cmdimpl_ppm_clear_sched);
 
     ht_set(ht, "tlm_get_data", (cmdimpl_f) cmdimpl_tlm_get_data);
     
@@ -211,7 +213,7 @@ void cmdimpl_ppm_sched_cmd_in(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
         case REQ: {
             char* p = pkt->args;
-            uint8_t schedule_id = strtoul(p, &p, 10);
+            uint8_t sched_id = strtoul(p, &p, 10);
             uint32_t start_delay_ms = strtoul(p, &p, 10);
             uint32_t period_ms = strtoul(p, &p, 10);
             uint16_t reps = strtoul(p, &p, 10);
@@ -223,25 +225,62 @@ void cmdimpl_ppm_sched_cmd_in(cmdpkt_s* pkt) {
             char* cmd_id = strtok(++p, sep);
             char* args = strtok(0, sep);
             sprintf(LOGBUF, "cmdimpl_ppm_sched_cmd_in sid=%u del=%u per=%u rep=%u o=%u d=%u e=%u p=%u id='%s' args='%s'",
-                    schedule_id, start_delay_ms, period_ms, reps, orgn, dest, echo, ptype, cmd_id, args); log_info();
+                    sched_id, start_delay_ms, period_ms, reps, orgn, dest, echo, ptype, cmd_id, args); log_info();
             cmdpkt_s schedcmd;
             cmdpkt_create(&schedcmd, orgn, dest, echo, ptype, cmd_id, args);
-            status_e s = scheduler_schedule_cmd_in(&g_scheduler, schedule_id, &schedcmd, start_delay_ms, period_ms, reps);
-            char res[8] = {0};
-            sprintf(res, "%u %u", s, schedule_id);
+            status_e s = scheduler_schedule_cmd_in(&g_scheduler, sched_id, &schedcmd, start_delay_ms, period_ms, reps);
+            char res[32] = {0};
+            uint8_t j = sprintf(res, "%u %u", s, sched_id);
+            if (s == SUCCESS) {
+                j += sprintf(&res[j], " %u", &g_scheduler.id_map[sched_id]->next_release);
+            }
             cmd_respond(pkt, RES, res); 
             break;
         }
     }
 }
 
-void cmdimpl_ppm_deschedule(cmdpkt_s* pkt) {
+void cmdimpl_ppm_desched(cmdpkt_s* pkt) {
     switch (pkt->ptype) {
         case REQ: {
             char* p = pkt->args;
             uint8_t sched_id = strtoul(p, &p, 10);
-            sprintf(LOGBUF, "cmdimpl_ppm_deschedule id=%u", sched_id); log_info();
+            sprintf(LOGBUF, "cmdimpl_ppm_desched id=%u", sched_id); log_info();
             status_e s = scheduler_deschedule(&g_scheduler, sched_id);
+            char res[8] = {0};
+            sprintf(res, "%u %u", s, sched_id);
+            cmd_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
+void cmdimpl_ppm_resched_in(cmdpkt_s* pkt) {
+    switch (pkt->ptype) {
+        case REQ: {
+            char* p = pkt->args;
+            uint8_t sched_id = strtoul(p, &p, 10);
+            uint32_t start_delay_ms = strtoul(p, &p, 10);
+            sprintf(LOGBUF, "cmdimpl_ppm_resched_in id=%u", sched_id); log_info();
+            status_e s = scheduler_reschedule_in(&g_scheduler, sched_id, start_delay_ms);
+            char res[32] = {0};
+            uint8_t j = sprintf(res, "%u %u", s, sched_id);
+            if (s == SUCCESS) {
+                j += sprintf(&res[j], " %u", &g_scheduler.id_map[sched_id]->next_release);
+            }
+            cmd_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
+void cmdimpl_ppm_clear_sched(cmdpkt_s* pkt) {
+    switch (pkt->ptype) {
+        case REQ: {
+            char* p = pkt->args;
+            uint8_t sched_id = strtoul(p, &p, 10);
+            sprintf(LOGBUF, "cmdimpl_ppm_clear_sched id=%u", sched_id); log_info();
+            status_e s = scheduler_clear_task(&g_scheduler, sched_id);
             char res[8] = {0};
             sprintf(res, "%u %u", s, sched_id);
             cmd_respond(pkt, RES, res);

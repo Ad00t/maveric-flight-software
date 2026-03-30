@@ -47,8 +47,15 @@ void scheduler_init(scheduler_s* s);
 // Check scheduler for tasks that need to run and execute them
 void scheduler_run_tasks(scheduler_s* s, cmdmgr_s* cmdmgr);
 
-// Find the scheduled task with this id and clear it
+// Find the scheduled task with this id and deschedule it
 status_e scheduler_deschedule(scheduler_s* s, uint8_t id);
+
+// Reschedule a previously descheduled task
+status_e scheduler_reschedule_at(scheduler_s*, uint8_t id, rtc_time_t rtc);
+status_e scheduler_reschedule_in(scheduler_s*, uint8_t id, uint32_t start_delay_ms);
+
+// Find the scheduled task with this id and clear it
+status_e scheduler_clear_task(scheduler_s* s, uint8_t id);
 
 // Update the next releases of all queued schedules if we've updated systime
 void scheduler_refresh_all(scheduler_s* s, uint64_t oldtime);

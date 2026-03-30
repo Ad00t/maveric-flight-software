@@ -14,7 +14,7 @@ status_e schedule_task(scheduler_s* s, schedtask_s task, uint8_t i_start, uint8_
         return FAILURE;
     }
     uint8_t i_free = i_start;
-    while (s->tasks[i_free].active) {
+    while (s->tasks[i_free].type != NONE) {
         if (++i_free == i_start + max_tasks) {
             sprintf(LOGBUF, "schedule_task: tasks buffer full"); log_error();
             return FAILURE;
@@ -52,7 +52,7 @@ void scheduler_run_tasks(scheduler_s* s, cmdmgr_s* cmdmgr) {
     for (i = 0; i < SCHEDULER_MAX_TASKS; i++) {
         uint64_t now = systime_epoch_ms();
         int64_t diff = s->tasks[i].next_release - now; // >= is bugged for large values, so use subtraction instead
-        if (!(s->tasks[i].active && diff <= 0)) continue;
+        if (!s->tasks[i].active || diff > 0) continue;
         switch (s->tasks[i].type) {
             case FUNC:
                 schedfunc_f schedfunc = s->tasks[i].func;
@@ -69,12 +69,35 @@ void scheduler_run_tasks(scheduler_s* s, cmdmgr_s* cmdmgr) {
             uint64_t newnext = now + s->tasks[i].period_ms;
             s->tasks[i].next_release = newnext; 
         } else {
-            scheduler_deschedule(s, s->tasks[i].id);
+            scheduler_clear_task(s, s->tasks[i].id);
         }
     }
 }
 
 status_e scheduler_deschedule(scheduler_s* s, uint8_t id) {
+    schedtask_s* task_ptr = s->id_map[id];
+    if (task_ptr == NULL) return FAILURE;
+    task_ptr->active = FALSE;
+    return SUCCESS;
+}
+
+status_e scheduler_reschedule_at(scheduler_s* s, uint8_t id, rtc_time_t rtc) {
+    schedtask_s* task_ptr = s->id_map[id];
+    if (task_ptr == NULL) return FAILURE;
+    task_ptr->active = TRUE;
+    task_ptr->next_release = rtc_to_epoch_ms(rtc);
+    return SUCCESS;
+}
+
+status_e scheduler_reschedule_in(scheduler_s* s, uint8_t id, uint32_t start_delay_ms) {
+    schedtask_s* task_ptr = s->id_map[id];
+    if (task_ptr == NULL) return FAILURE;
+    task_ptr->active = TRUE;
+    task_ptr->next_release = systime_epoch_ms() + start_delay_ms;
+    return SUCCESS;
+}
+
+status_e scheduler_clear_task(scheduler_s* s, uint8_t id) {
     schedtask_s* task_ptr = s->id_map[id];
     if (task_ptr == NULL) return FAILURE;
     if (task_ptr->type == CMD) memset(task_ptr->cmd_ptr, 0, CMD_MAX_LEN);
