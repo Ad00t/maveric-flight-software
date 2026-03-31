@@ -1,10 +1,6 @@
 #include "ax100.h"
-#include "crcnew.h"
 #include "uart.h"
-#include "ringbuf.h"
-#include "cmdpkt.h"
 #include "common.h"
-#include "cmdmgr.h"
 
 // MAIN TRANSCEIVER INTERFACE
 

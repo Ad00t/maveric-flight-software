@@ -68,13 +68,13 @@
 #include "at25df641.c"
 #include "flashmgr.c"
 #include "framer.c"
-#include "cmdpkt.c"
+#include "mcppkt.c"
 #include "logger.c"
 #include "adcsmtq.c"
 #include "adis16260.c"
 #include "naviguider.c"
 #include "m41t81s.c"
-#include "cmdmgr.c"
+#include "mcpmgr.c"
 #include "scheduler.c"
 #include "cmdimpl.c"
 #include "housekeeping.c"
@@ -88,8 +88,7 @@ int1 g_superloop_running = TRUE;
 uint8_t g_rbt_cause = 0;
 
 irqmgr_s g_irqmgr = {0};            // Interrupts manager
-i2cmgr_s g_i2cmgr = {0};            // I2C manager
-cmdmgr_s g_cmdmgr = {0};            // Commands manager
+mcpmgr_s g_mcpmgr = {0};            // MCP comms manager
 flashmgr_s g_flashmgr = {0};        // Flash manager. Includes config, rbtcnt.
 scheduler_s g_scheduler = {0};      // Schedules manager
 ertc_s g_ertc = {0};                // External RTC (on motherboard)
@@ -122,9 +121,7 @@ void system_init(void) {
    
     // Interrupts init 
     irqmgr_init(&g_irqmgr);
-    i2cmgr_init(&g_i2cmgr);
     g_irqmgr.started = TRUE;
-    g_i2cmgr.started = TRUE;
     isr_enable_all();
 
     // eRTC, iRTC, system time init 
@@ -145,15 +142,15 @@ void system_init(void) {
     flashmgr_increment_rbt_cnt(&g_flashmgr);
     status_e s_mtq = mtq_init(&g_mtq, MTQ_PORT);
     status_e s_nvg = nvg_init(&g_nvg, NVG_PORT);
-    cmdmgr_init(&g_cmdmgr);
+    mcpmgr_init(&g_mcpmgr);
     scheduler_init(&g_scheduler);
     hk_init();
     cmdimpl_init();
 
     // Push a time update to UPPM 
-    char req[CMD_MAX_ARGS_LEN] = {0};
+    char req[32] = {0};
     systime_str(req); // Outputs current time as string to req
-    cmd_dispatch(NODE, NODE_UPPM, 0, REQ, "ppm_set_time", req);
+    mcp_dispatch(NODE, NODE_UPPM, 0, CMD, "ppm_set_time", req);
     
     sprintf(LOGBUF, "system initialized rs232_err=%u rbt_cnt=%u s_ertc=%u s_flashmgr=%u s_mtq=%u s_nvg=%u",
             rs232_errors, g_flashmgr.rbt_cnt, s_ertc, s_flashmgr, s_mtq, s_nvg); log_info();
@@ -168,12 +165,11 @@ void system_superloop(void) {
     // Do driver handling before commands so data is up to date
     mtq_parse_stream(&g_mtq, &g_irqmgr.irqbufs[MTQ_PORT-1]); // Handle magnetorquer data
     nvg_parse_stream(&g_nvg, &g_irqmgr.irqbufs[NVG_PORT-1]); // Handle naviguider data
-    cmdmgr_parse_stream(&g_cmdmgr, &g_i2cmgr.rxbufs[0], &g_cmdmgr.rcvpkts[0], FALSE); // Handle EPS commands 
-    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[UPPM_PORT-1], &g_cmdmgr.rcvpkts[1], FALSE); // Handle UPPM commands 
-    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[FTDI_PORT-1], &g_cmdmgr.rcvpkts[2], FALSE); // Handle FTDI commands
+    mcpmgr_parse_stream(&g_mcpmgr, &g_irqmgr.irqbufs[UPPM_PORT-1], &g_mcpmgr.rcvpkts[0], FALSE); // Handle UPPM commands 
+    mcpmgr_parse_stream(&g_mcpmgr, &g_irqmgr.irqbufs[FTDI_PORT-1], &g_mcpmgr.rcvpkts[1], FALSE); // Handle FTDI commands
 
     // Run scheduler
-    scheduler_run_tasks(&g_scheduler, &g_cmdmgr);
+    scheduler_run_tasks(&g_scheduler, &g_mcpmgr);
 }
 
 // Cleanup routine

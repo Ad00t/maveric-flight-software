@@ -24,7 +24,7 @@ TPL file SCCS version  : 1.2
 --
 --   Scheduler Frequency:    4.0
 --
---   SUBSYSTEM  FREQUENCY  TIME_SKEW  OUTPUT_TIME  TASK_TYPE
+--   SUBSYSTEM  FCMDUENCY  TIME_SKEW  OUTPUT_TIME  TASK_TYPE
 --   ---------  ---------  ---------  -----------  ---------
 --   1          4.0        0.0        0.0          PERIODIC
 
@@ -7017,7 +7017,7 @@ static void Init_Application_Data ()
 enum SUBSYSTEM_TYPE  { CONTINUOUS, PERIODIC, ENABLED_PERIODIC, TRIGGERED_ANT,
                           TRIGGERED_ATR, TRIGGERED_SAF, NONE };
 static RT_DURATION              SCHEDULER_INTERVAL              =
-                                      (RT_DURATION) (1.0/SCHEDULER_FREQ);
+                                      (RT_DURATION) (1.0/SCHEDULER_FCMD);
 static const enum SUBSYSTEM_TYPE      TASK_TYPE            [NTASKS+1] =
   {NONE, PERIODIC};
 static const enum TASK_STATE_TYPE     INITIAL_TASK_STATE   [NTASKS+1] =

@@ -1566,7 +1566,7 @@ void Init_Device(void) {
 
 	// Set the RTS line for the MHX Low indicating we are ready to talk!
 	// Note: this should be done automatically somewhere else.
-	output_low(MHX_REQUEST_TO_SEND);
+	output_low(MHX_CMDUEST_TO_SEND);
 
 	// Set the DTR line for the MHX low indicating we are ready to talk.
 	// Note: this should be done automatically somewhere else.

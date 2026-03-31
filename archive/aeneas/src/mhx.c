@@ -183,7 +183,7 @@ void MHXStatus(unsigned char * status)
 	if(input_state(MHX_OUTPUT_ENABLE)) bit_set(*status,1);
 	if(input_state(MHX_DATA_TERMINAL_READY)) bit_set(*status,2);
 	if(input_state(MHX_DATA_SEND_READY)) bit_set(*status,3);
-	if(input_state(MHX_REQUEST_TO_SEND)) bit_set(*status,4);
+	if(input_state(MHX_CMDUEST_TO_SEND)) bit_set(*status,4);
 	if(input_state(MHX_CLEAR_TO_SEND)) bit_set(*status,5);
 	if(input_state(MHX_CARRIER_DETECT)) bit_set(*status,6);
 
@@ -217,7 +217,7 @@ void ReadMHXPins(int port)
 	if(input_state(MHX_OUTPUT_ENABLE)) sendDBGALL(port,"\r\nOUTPUT ENABLE HIGH"); else sendDBGALL(port,"\r\nOUTPUT ENABLE LOW");
 	if(input_state(MHX_DATA_TERMINAL_READY)) sendDBGALL(port,"\r\nDTR HIGH"); else sendDBGALL(port,"\r\nDTR LOW");
 	if(input_state(MHX_DATA_SEND_READY)) sendDBGALL(port,"\r\nDSR HIGH"); else sendDBGALL(port,"\r\nDSR LOW");
-	if(input_state(MHX_REQUEST_TO_SEND)) sendDBGALL(port,"\r\nRTS HIGH"); else sendDBGALL(port,"\r\nRTS LOW");
+	if(input_state(MHX_CMDUEST_TO_SEND)) sendDBGALL(port,"\r\nRTS HIGH"); else sendDBGALL(port,"\r\nRTS LOW");
 	if(input_state(MHX_CLEAR_TO_SEND)) sendDBGALL(port,"\r\nCTS HIGH"); else sendDBGALL(port,"\r\nCTS LOW");
 	if(input_state(MHX_CARRIER_DETECT)) sendDBGALL(port,"\r\nDCD HIGH"); else sendDBGALL(port,"\r\nDCD LOW");
 }

@@ -4,7 +4,7 @@ import traceback
 import threading
 import sys
 import os
-from commands import CommandManager
+from mcp import MCPManager 
 from crc import Calculator, Crc16
 from prompt_toolkit.application import Application
 from prompt_toolkit.layout import Layout, HSplit, Window, ScrollablePane
@@ -32,13 +32,13 @@ KCYN = "\033[36m"
 KWHT = "\033[37m"
 
 ftdi = serial.Serial(sys.argv[1], baudrate=115200, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, timeout=1)
-cmdmgr = CommandManager(7, ftdi)
+mcpmgr = MCPManager(ftdi)
 
 log_lines = []
 is_manual_scrolling = False
 scroll_top = 0
 is_paused = False
-cmd_hist = []
+pkt_hist = []
 i_ch = 0
 
 log_ctrl = FormattedTextControl(
@@ -53,14 +53,14 @@ app = Application(layout=layout, key_bindings=kb, full_screen=True, mouse_suppor
 
 @kb.add("enter") # Submit input
 def _(event):
-    global i_ch, cmd_hist
-    cmd = input_box.text.strip()
-    cmd_hist.append(cmd)
-    i_ch = len(cmd_hist)
+    global i_ch, pkt_hist
+    pktstr = input_box.text.strip()
+    pkt_hist.append(pktstr)
+    i_ch = len(pkt_hist)
     try:
-        send_command_str(cmd)
+        send_pkt_str(pktstr)
     except Exception as e:
-        log_error(f'invalid command "{cmd}": {traceback.format_exc()}')
+        log_error(f'invalid pkt "{pkt}": {traceback.format_exc()}')
     finally:
         input_box.text = ""
         app.invalidate()
@@ -101,19 +101,19 @@ def _(event):
         
 @kb.add("up") # Backward in command history
 def _(event):
-    global i_ch, cmd_hist
-    if len(cmd_hist) == 0: return
+    global i_ch, pkt_hist
+    if len(pkt_hist) == 0: return
     i_ch = max(i_ch - 1, 0)
-    input_box.text = cmd_hist[i_ch]
+    input_box.text = pkt_hist[i_ch]
     input_box.buffer.cursor_position = len(input_box.text)
     app.invalidate()
 
 @kb.add("down") # Forward in command history
 def _(event):
-    global i_ch, cmd_hist
-    if len(cmd_hist) == 0: return
-    i_ch = min(i_ch + 1, len(cmd_hist) - 1)
-    input_box.text = cmd_hist[i_ch]
+    global i_ch, pkt_hist
+    if len(pkt_hist) == 0: return
+    i_ch = min(i_ch + 1, len(pkt_hist) - 1)
+    input_box.text = pkt_hist[i_ch]
     input_box.buffer.cursor_position = len(input_box.text)
     app.invalidate()
 
@@ -155,18 +155,18 @@ def log_warn(msg):
 def log_error(msg):
     log(f"{KRED}{epoch_time_ms()} [ERROR] [FTDI] {msg}\n")
 
-def log_rcvcmd(msg):
-    log(f"{KMAG}{epoch_time_ms()} [RCVCMD] [FTDI] {msg}\n")
+def log_res(msg):
+    log(f"{KMAG}{epoch_time_ms()} [RES] [FTDI] {msg}\n")
 
 def read_serial():
     while True:
         try:
-            p = cmdmgr.parse_stream()
+            p = mcpmgr.parse_stream()
             if p is not None:
                 if p['id'] == 'ftdi_log':
                     log(p['args'])
                 else:
-                    log_rcvcmd(f"{p}")
+                    log_res(f"{p}")
         except KeyboardInterrupt:
             log_info('read_serial: quitting')
             if ftdi.is_open: 
@@ -175,11 +175,11 @@ def read_serial():
         except Exception as e:
             log_error(f'read_serial: {traceback.format_exc()}')
             
-def send_command_str(cmdstr):
-    cmdstr = cmdstr.strip()
-    spl = cmdstr.split(' ')
-    ba, cnt = cmdmgr.send_cmd_serial(int(spl[0]), int(spl[1]), int(spl[2]), int(spl[3]), spl[4], ' '.join(spl[5:]))
-    log_info(f"sending cmd: cnt={cnt} {repr(ba.decode('ascii', errors='replace'))}")
+def send_pkt_str(pktstr):
+    pktstr = pktstr.strip()
+    spl = pktstr.split(' ')
+    ba, cnt = mcpmgr.send_pkt_serial(int(spl[0]), int(spl[1]), int(spl[2]), int(spl[3]), spl[4], ' '.join(spl[5:]))
+    log_info(f"sending pkt: cnt={cnt} {repr(ba.decode('ascii', errors='replace'))}")
 
 if __name__ == "__main__":      
     rx_thread = threading.Thread(target=read_serial, daemon=True)

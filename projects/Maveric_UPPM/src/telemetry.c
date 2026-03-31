@@ -1,6 +1,6 @@
 #include "telemetry.h"
 #include "systime.h"
-#include "cmdpkt.h"
+#include "mcppkt.h"
 #include "logger.h"
 
 #module
@@ -17,7 +17,7 @@ void tlm_clear(tlm_s* tlm) {
 void tlm_beacon(tlm_s* tlm, uint8_t bcn_num) {
     tlm->time = systime_epoch_ms();
 
-    char msg[CMD_MAX_ARGS_LEN] = {0};
+    char msg[MCP_MAX_ARGS_LEN] = {0};
     uint16_t j = sprintf(msg, "%u %Lu %u %u %u %u", 
                  bcn_num, tlm->time, tlm->lppm_rbt_cnt, tlm->lppm_rbt_cause, tlm->uppm_rbt_cnt, tlm->uppm_rbt_cause);
 
@@ -45,5 +45,5 @@ void tlm_beacon(tlm_s* tlm, uint8_t bcn_num) {
     }
 
     sprintf(LOGBUF, "tlm_beacon: %s", msg); log_info();
-    cmd_dispatch(NODE, NODE_GS, 0, REQ, "tlm_beacon", msg);
+    mcp_dispatch(NODE, NODE_GS, 0, TLM, "tlm_beacon", msg);
 }

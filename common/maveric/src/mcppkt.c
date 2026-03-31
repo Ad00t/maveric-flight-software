@@ -1,21 +1,21 @@
 #include "logger.h"
 #include "framer.h"
-#include "cmdpkt.h"
+#include "mcppkt.h"
 #include "crcnew.h"
 #include "common.h"
 #include "i2c.h"
 
 #module
 
-// CMDPKT PUBLIC API
+// MCPPKT PUBLIC API
 
-void cmdpkt_init(cmdpkt_s* pkt) {
+void mcppkt_init(mcppkt_s* pkt) {
     memset(&pkt->parser, 0, sizeof(kiss_parser_s));
-    cmdpkt_clear(pkt);
+    mcppkt_clear(pkt);
 }
 
-void cmdpkt_create(cmdpkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, uint8_t* args, uint8_t args_len) {
-    cmdpkt_init(pkt);
+void mcppkt_create(mcppkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, mcppkt_type_e ptype, char* id, uint8_t* args, uint8_t args_len) {
+    mcppkt_init(pkt);
 
     uint16_t len = 0;
     kiss_parser_s* p = &pkt->parser;
@@ -56,16 +56,16 @@ void cmdpkt_create(cmdpkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, cmdp
     p->i_start = 0;
 }
 
-void cmdpkt_create(cmdpkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args) {
-    cmdpkt_create(pkt, orgn, dest, echo, ptype, id, args, strlen(args));
+void mcppkt_create(mcppkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, mcppkt_type_e ptype, char* id, char* args) {
+    mcppkt_create(pkt, orgn, dest, echo, ptype, id, args, strlen(args));
 }
 
 
-void cmdpkt_clear(cmdpkt_s* pkt) {
-    memset(pkt, 0, sizeof(cmdpkt_s));
+void mcppkt_clear(mcppkt_s* pkt) {
+    memset(pkt, 0, sizeof(mcppkt_s));
 }
 
-status_e cmdpkt_parse_buf(cmdpkt_s* pkt) {
+status_e mcppkt_parse_buf(mcppkt_s* pkt) {
     kiss_parser_s* p = &pkt->parser;
     if (p->buf_len < 10) return FAILURE;
     uint16_t len = 0;
@@ -107,23 +107,18 @@ status_e cmdpkt_parse_buf(cmdpkt_s* pkt) {
     return len == p->buf_len ? SUCCESS : FAILURE;
 }
 
+#if NODE == NODE_UPPM
 extern i2cmgr_s g_i2cmgr;
+#endif
 
 // Handles all packet routing
-void cmdpkt_dispatch(cmdpkt_s* pkt) {
+void mcppkt_dispatch(mcppkt_s* pkt) {
     uint8_t frame[FRAME_MAX_SIZE] = {0};
     int1 csp = (NODE == NODE_UPPM && pkt->dest == NODE_GS);
     kiss_parser_s* p = &pkt->parser;
     uint16_t frame_len = framer_create(&p->buf[p->i_start], p->buf_len, frame, csp);
 #if NODE == NODE_LPPM
     switch (pkt->dest) {
-        case NODE_EPS:
-            i2c_write_buf(I2C_1, 0x15, frame, frame_len);
-            delay_ms(50);
-            uint8_t res[FRAME_MAX_SIZE] = {0}; 
-            i2c_read_buf(I2C_1, 0x15, res, I2C_MAX_SIZE);
-            rb_push_n(&g_i2cmgr.rxbufs[0], res, I2C_MAX_SIZE);
-            break;
         case NODE_FTDI:
             uart_write_buf(FTDI_PORT, frame, frame_len);
             break;
@@ -161,26 +156,26 @@ void cmdpkt_dispatch(cmdpkt_s* pkt) {
 }
 
 // Nice little wrapper function for sending commands from anywhere
-void cmd_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, uint8_t* args, uint8_t args_len) {
-    cmdpkt_s pkt;
-    cmdpkt_create(&pkt, orgn, dest, echo, ptype, id, args, args_len);
-    cmdpkt_dispatch(&pkt);
+void mcp_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, mcppkt_type_e ptype, char* id, uint8_t* args, uint8_t args_len) {
+    mcppkt_s pkt;
+    mcppkt_create(&pkt, orgn, dest, echo, ptype, id, args, args_len);
+    mcppkt_dispatch(&pkt);
 }
 
-void cmd_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args) {
-    cmdpkt_s pkt;
-    cmdpkt_create(&pkt, orgn, dest, echo, ptype, id, args);
-    cmdpkt_dispatch(&pkt);
+void mcp_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, mcppkt_type_e ptype, char* id, char* args) {
+    mcppkt_s pkt;
+    mcppkt_create(&pkt, orgn, dest, echo, ptype, id, args);
+    mcppkt_dispatch(&pkt);
 }
 
 // Public helpers 
 
-void cmd_respond(cmdpkt_s* pkt, cmdpkt_type_e type, uint8_t* res, uint8_t res_len) {
-    cmd_dispatch(NODE, pkt->orgn, pkt->echo, type, pkt->id, res, res_len); 
+void mcp_respond(mcppkt_s* pkt, mcppkt_type_e type, uint8_t* res, uint8_t res_len) {
+    mcp_dispatch(NODE, pkt->orgn, pkt->echo, type, pkt->id, res, res_len); 
 }
 
-void cmd_respond(cmdpkt_s* pkt, cmdpkt_type_e type, char* res) {
-    cmd_dispatch(NODE, pkt->orgn, pkt->echo, type, pkt->id, res); 
+void mcp_respond(mcppkt_s* pkt, mcppkt_type_e type, char* res) {
+    mcp_dispatch(NODE, pkt->orgn, pkt->echo, type, pkt->id, res); 
 }
 
 

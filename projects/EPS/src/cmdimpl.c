@@ -79,7 +79,7 @@ void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
     //scheduler_refresh_all(&g_scheduler, oldtime);
 
     //mtq_set_datetime(&g_mtq, time);
-    //cmd_dispatch(NODE, NODE_UPPM, 0, REQ, "ppm_set_time", pkt->args);
+    //cmd_dispatch(NODE, NODE_UPPM, 0, CMD, "ppm_set_time", pkt->args);
 
     //sprintf(LOGBUF, "cmdimpl_ppm_set_time '%s' [ %02u, %02u/%02u/20%02u %02u:%02u:%02u ]", pkt->args
     //        g_ertc.time.tm_wday, g_ertc.time.tm_mon, g_ertc.time.tm_mday, g_ertc.time.tm_year, 
@@ -89,12 +89,12 @@ void cmdimpl_ppm_set_time(cmdpkt_s* pkt) {
 void cmdimpl_ppm_get_time(cmdpkt_s* pkt) {
     char cmd_ppm_get_time[] = "ppm_get_time";
     
-    if (pkt->ptype != REQ) return;
-    // Only implement REQ here because LPPM should never be replacing its time from another subsystem
+    if (pkt->ptype != CMD) return;
+    // Only implement CMD here because LPPM should never be replacing its time from another subsystem
     char tm_str[32] = {0};  
     //rtc_to_str(g_ertc.time, tm_str);
     cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, cmd_ppm_get_time, tm_str);
-    sprintf(LOGBUF, "cmdimpl_ppm_get_time REQ '%s'", tm_str); log_info();
+    sprintf(LOGBUF, "cmdimpl_ppm_get_time CMD '%s'", tm_str); log_info();
     break;
 }
 
@@ -102,7 +102,7 @@ void cmdimpl_ppm_ping(cmdpkt_s* pkt) {
     char cmd_ppm_ping[] = "ppm_ping";
     char cmd_ans_pong[] = "pong";
     sprintf(LOGBUF, "cmdimpl_ppm_ping '%s'", pkt->args); log_info();
-    if (pkt->ptype == REQ) {
+    if (pkt->ptype == CMD) {
         cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, cmd_ppm_ping, cmd_ans_pong);
     }
 }
@@ -136,15 +136,15 @@ void cmdimpl_ppm_clear_bufs(cmdpkt_s* pkt) {
 }
 /*
 void cmdimpl_tlm_get_data(cmdpkt_s* pkt) {
-    if (pkt->ptype != REQ) return;
-    sprintf(LOGBUF, "cmdimpl_tlm_get_data REQ"); log_info();
+    if (pkt->ptype != CMD) return;
+    sprintf(LOGBUF, "cmdimpl_tlm_get_data CMD"); log_info();
     char args[CMD_MAX_ARGS_LEN] = {0};
     sprintf(args, "%u %u", g_flashmgr.rbt_cnt, g_rbt_cause);
     cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, "tlm_get_data", args);
 }
 
 void cmdimpl_mtq_get_conf(cmdpkt_s* pkt) {
-    if (pkt->ptype != REQ) return;
+    if (pkt->ptype != CMD) return;
     uint8_t conf[4] = {0};
     if (mtq_get_data(&g_mtq, MTQ_CONF, conf) == SUCCESS) {
         char args[32] = {0};
@@ -156,7 +156,7 @@ void cmdimpl_mtq_get_conf(cmdpkt_s* pkt) {
 }
 
 void cmdimpl_mtq_set_conf(cmdpkt_s* pkt) {
-    if (pkt->ptype != REQ) return;
+    if (pkt->ptype != CMD) return;
     char* p = pkt->args;
     uint8_t data[4] = {0};
     data[3] = strtoul(p, &p, 10);
@@ -172,7 +172,7 @@ void cmdimpl_mtq_set_conf(cmdpkt_s* pkt) {
 }
 
 void cmdimpl_mtq_get_datetime(cmdpkt_s* pkt) {
-    if (pkt->ptype != REQ) return;
+    if (pkt->ptype != CMD) return;
     uint8_t date[4] = {0};
     uint8_t time[4] = {0};
     if (mtq_get_data(&g_mtq, MTQ_DATE, date) == SUCCESS && mtq_get_data(&g_mtq, MTQ_TIME, time) == SUCCESS) {
@@ -187,7 +187,7 @@ void cmdimpl_mtq_get_datetime(cmdpkt_s* pkt) {
 }
 
 void cmdimpl_mtq_set_datetime(cmdpkt_s* pkt) {
-    if (pkt->ptype != REQ) return;
+    if (pkt->ptype != CMD) return;
     char* p = pkt->args;
     rtc_time_t time;
     time.tm_wday = strtoul(p, &p, 10); // Other options: strtok(), strtod(), strotol()
@@ -206,7 +206,7 @@ void cmdimpl_mtq_set_datetime(cmdpkt_s* pkt) {
 }
 
 void cmdimpl_mtq_get_tle(cmdpkt_s* pkt) {
-    if (pkt->ptype != REQ) return;
+    if (pkt->ptype != CMD) return;
     char tle[140] = {0};
     if (mtq_get_data(&g_mtq, MTQ_TLE, tle) == SUCCESS) {
         cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, "mtq_get_tle", tle);
@@ -216,7 +216,7 @@ void cmdimpl_mtq_get_tle(cmdpkt_s* pkt) {
 }
 
 void cmdimpl_mtq_set_tle(cmdpkt_s* pkt) {
-    if (pkt->ptype != REQ) return;
+    if (pkt->ptype != CMD) return;
     if ((mtq_write_start(&g_mtq, MTQ_TLE, pkt->args)) == SUCCESS) { 
         cmd_dispatch(NODE, pkt->orgn, pkt->echo, ACK, "mtq_set_tle", "");
     } else {
@@ -225,7 +225,7 @@ void cmdimpl_mtq_set_tle(cmdpkt_s* pkt) {
 }
 
 void cmdimpl_mtq_get_paxs(cmdpkt_s* pkt) {
-    if (pkt->ptype != REQ) return;
+    if (pkt->ptype != CMD) return;
     float paxs[3] = {0};
     if (mtq_get_data(&g_mtq, MTQ_POINTING_AXIS, paxs) == SUCCESS) {
         char args[32] = {0};
@@ -237,7 +237,7 @@ void cmdimpl_mtq_get_paxs(cmdpkt_s* pkt) {
 }
 
 void cmdimpl_mtq_set_paxs(cmdpkt_s* pkt) {
-    if (pkt->ptype != REQ) return;
+    if (pkt->ptype != CMD) return;
     char* p = pkt->args;
     float data[3] = {0};
     data[0] = strtof(p, &p);
@@ -252,7 +252,7 @@ void cmdimpl_mtq_set_paxs(cmdpkt_s* pkt) {
 }
 
 void cmdimpl_mtq_get_mtquser(cmdpkt_s* pkt) {
-    if (pkt->ptype != REQ) return;
+    if (pkt->ptype != CMD) return;
     float mtquser[3] = {0};
     if (mtq_get_data(&g_mtq, MTQ_MTQ_USER, mtquser) == SUCCESS) {
         char args[32] = {0};
@@ -264,7 +264,7 @@ void cmdimpl_mtq_get_mtquser(cmdpkt_s* pkt) {
 }
 
 void cmdimpl_mtq_set_mtquser(cmdpkt_s* pkt) {
-    if (pkt->ptype != REQ) return;
+    if (pkt->ptype != CMD) return;
     char* p = pkt->args;
     float data[3] = {0};
     data[0] = strtof(p, &p);
@@ -279,7 +279,7 @@ void cmdimpl_mtq_set_mtquser(cmdpkt_s* pkt) {
 }
 
 void cmdimpl_mtq_reset(cmdpkt_s* pkt) {
-    if (pkt->ptype != REQ) return;
+    if (pkt->ptype != CMD) return;
     if (mtq_reset(&g_mtq) == SUCCESS) {
         cmd_dispatch(NODE, pkt->orgn, pkt->echo, ACK, "mtq_reset", "");
     } else {
@@ -288,7 +288,7 @@ void cmdimpl_mtq_reset(cmdpkt_s* pkt) {
 }
 
 void cmdimpl_mtq_get_stat(cmdpkt_s* pkt) {
-    if (pkt->ptype != REQ) return;
+    if (pkt->ptype != CMD) return;
     uint8_t stat[4] = {0};
     if (mtq_get_data(&g_mtq, MTQ_STAT, stat) == SUCCESS) {
         char args[32] = {0};

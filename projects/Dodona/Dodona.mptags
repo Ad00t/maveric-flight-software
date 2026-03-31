@@ -660,7 +660,7 @@ MHX_PORT	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\ports.
 MHX_PORT	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\ports.h	119;"	d	line:119
 MHX_PWR::PIN_B0	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\pinscustom.h	16;"	d	line:16
 MHX_RCV_DATA::PIN_F4	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\pinscustom.h	25;"	d	line:25
-MHX_REQUEST_TO_SEND::PIN_D5	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\pinscustom.h	21;"	d	line:21
+MHX_CMDUEST_TO_SEND::PIN_D5	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\pinscustom.h	21;"	d	line:21
 MHX_RESET::PIN_D1	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\pinscustom.h	18;"	d	line:18
 MHX_SEND_DATA::PIN_F5	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\pinscustom.h	24;"	d	line:24
 MIN	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\fsw.h	278;"	f	line:278	signature:(float A, float B)
@@ -1058,7 +1058,7 @@ S	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\lower_tx.h	36
 SCHEDULED_PORT::USER_PORT	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\schedule.h	41;"	d	line:41
 SCHEDULED_TASKS::'S'	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\time.h	15;"	d	line:15
 SCHEDULER	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\fsw.h	69;"	p	line:69	signature:()
-SCHEDULER_FREQ::4.0	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\fsw.h	78;"	d	line:78
+SCHEDULER_FCMD::4.0	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\fsw.h	78;"	d	line:78
 SCK1OUT::SCK1OUT_PIN	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\pinslower.h	98;"	d	line:98
 SCK1OUT_PIN::PIN_D10	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\pinslower.h	16;"	d	line:16
 SCREEN_HEIGHT::24	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\hyperterm.h	44;"	d	line:44
@@ -1204,7 +1204,7 @@ TRANSCEIVER_ON	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\
 TRANSCEIVER_OUTPUT_ENABLE::PIN_E2	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\pinsupper.h	17;"	d	line:17
 TRANSCEIVER_PORT::1	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\ports.h	101;"	d	line:101
 TRANSCEIVER_PWR::PIN_B1	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\pinsupper.h	16;"	d	line:16
-TRANSCEIVER_REQUEST_TO_SEND::PIN_D5	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\pinsupper.h	21;"	d	line:21
+TRANSCEIVER_CMDUEST_TO_SEND::PIN_D5	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\pinsupper.h	21;"	d	line:21
 TRANSCEIVER_RESET::PIN_D1	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\pinsupper.h	18;"	d	line:18
 TRANSMIT_MODE	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\linkmanager.h	34;"	e	line:34
 TROPICALYR::365.2422	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\orbit.h	60;"	d	line:60
@@ -1266,7 +1266,7 @@ U2CTS_PIN::PIN_A6	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\s
 U2CTS_PIN::TRANSCEIVER_CLEAR_TO_SEND	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\pinsupper.h	61;"	d	line:61
 U2RTS_PIN::PIN_A6	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\pinscustom.h	106;"	d	line:106
 U2RTS_PIN::PIN_A6	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\pinslower.h	32;"	d	line:32
-U2RTS_PIN::TRANSCEIVER_REQUEST_TO_SEND	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\pinsupper.h	62;"	d	line:62
+U2RTS_PIN::TRANSCEIVER_CMDUEST_TO_SEND	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\pinsupper.h	62;"	d	line:62
 U2RX_PIN::PIN_F4	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\pinscustom.h	104;"	d	line:104
 U2RX_PIN::PIN_F4	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\pinslower.h	30;"	d	line:30
 U2RX_PIN::PIN_F4	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\src\pinsupper.h	60;"	d	line:60

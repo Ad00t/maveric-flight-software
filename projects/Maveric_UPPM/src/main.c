@@ -68,11 +68,11 @@
 #include "at25df641.c"
 #include "flashmgr.c"
 #include "framer.c"
-#include "cmdpkt.c"
+#include "mcppkt.c"
 #include "logger.c"
 #include "ax100.c"
 #include "telemetry.c"
-#include "cmdmgr.c"
+#include "mcpmgr.c"
 #include "scheduler.c"
 #include "cmdimpl.c"
 #include "housekeeping.c"
@@ -86,7 +86,7 @@ uint8_t g_rbt_cause = 0;
 
 irqmgr_s g_irqmgr = {0};            // Interrupts manager
 i2cmgr_s g_i2cmgr = {0};            // I2C manager
-cmdmgr_s g_cmdmgr = {0};            // Commands manager
+mcpmgr_s g_mcpmgr = {0};            // MCP comms manager
 scheduler_s g_scheduler = {0};      // Schedules manager
 flashmgr_s g_flashmgr = {0};        // Flash manager
 rtc_time_t g_rtc_time = {0};        // Global RTC time tracking instance (from lower PPM)      
@@ -136,7 +136,7 @@ void system_init(void) {
     status_e s_flashmgr = flashmgr_init(&g_flashmgr);
     flashmgr_increment_rbt_cnt(&g_flashmgr);
     status_e s_ax100 = ax100_init(&g_ax100, AX100_PORT);
-    cmdmgr_init(&g_cmdmgr);
+    mcpmgr_init(&g_mcpmgr);
     scheduler_init(&g_scheduler);
     tlm_init(&g_tlm);
     cmdimpl_init();
@@ -147,7 +147,7 @@ void system_init(void) {
     g_tlm.uppm_rbt_cause = g_rbt_cause;
 
     // Fetch time from LPPM
-    cmd_dispatch(NODE, NODE_LPPM, 0, REQ, "ppm_get_time", "");
+    mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "ppm_get_time", "");
 
     sprintf(LOGBUF, "system initialized rs232_err=%u rbt_cnt=%u s_flashmgr=%u s_ax100=%u", 
             rs232_errors, g_flashmgr.rbt_cnt, s_flashmgr, s_ax100); log_info();
@@ -159,13 +159,13 @@ void system_superloop(void) {
     restart_wdt();
 
     // Handle received byte interrupts
-    cmdmgr_parse_stream(&g_cmdmgr, &g_i2cmgr.rxbufs[0], &g_cmdmgr.rcvpkts[0], FALSE); // Handle EPS commands 
-    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[HOLONAV_PORT-1], &g_cmdmgr.rcvpkts[1], FALSE); // Handle Holonav commands 
-    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[AX100_PORT-1], &g_cmdmgr.rcvpkts[2], TRUE); // Handle AX100 commands 
-    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[LPPM_PORT-1], &g_cmdmgr.rcvpkts[3], FALSE); // Handle LPPM commands
-    cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[ASTROBOARD_PORT-1], &g_cmdmgr.rcvpkts[4], FALSE); // Handle Astroboard commands
+    mcpmgr_parse_stream(&g_mcpmgr, &g_i2cmgr.rxbufs[0], &g_mcpmgr.rcvpkts[0], FALSE); // Handle EPS commands 
+    mcpmgr_parse_stream(&g_mcpmgr, &g_irqmgr.irqbufs[HOLONAV_PORT-1], &g_mcpmgr.rcvpkts[1], FALSE); // Handle Holonav commands 
+    mcpmgr_parse_stream(&g_mcpmgr, &g_irqmgr.irqbufs[AX100_PORT-1], &g_mcpmgr.rcvpkts[2], TRUE); // Handle AX100 commands 
+    mcpmgr_parse_stream(&g_mcpmgr, &g_irqmgr.irqbufs[LPPM_PORT-1], &g_mcpmgr.rcvpkts[3], FALSE); // Handle LPPM commands
+    mcpmgr_parse_stream(&g_mcpmgr, &g_irqmgr.irqbufs[ASTROBOARD_PORT-1], &g_mcpmgr.rcvpkts[4], FALSE); // Handle Astroboard commands
    
-    scheduler_run_tasks(&g_scheduler, &g_cmdmgr);
+    scheduler_run_tasks(&g_scheduler, &g_mcpmgr);
 }
 
 // Cleanup routine

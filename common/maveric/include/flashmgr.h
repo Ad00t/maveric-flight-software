@@ -3,8 +3,6 @@
 
 #include "common.h"
 #include "flash.h"
-#include "logger.h"
-#include "cmdpkt.h"
 
 //========================================
 //    		 	Address Locations
