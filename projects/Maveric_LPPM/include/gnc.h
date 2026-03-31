@@ -7,11 +7,17 @@
 
 #define GNC_MAX_DETUMBLE_RATE       2*PI
 
+// Modes for GNC Planner set mode
+#define GNC_MODE_SAFE               0
+#define GNC_MODE_AUTO               1
+#define GNC_MODE_MANUAL             2
+
 typedef struct {
     uint8_t expected_mode;                  // Tracks expected MTQ mode to catch unexpected transitions
-    int1 auto_mode_enabled;                 // Set to false to stay in Manual mode
+    uint8_t gnc_mode;                       // Determines mode of the GNC Planner
     uint16_t unexpected_safe_count;         // Number of unexpected transitions to SAFE
     uint16_t unexpected_detumble_count;     // Number of unexpected transitions to DETUMBLING
+    uint16_t sunspin_count;                 // Number of transitions to SUNSPIN
 } gnc_s;
 
 void gnc_init(gnc_s* gnc);
