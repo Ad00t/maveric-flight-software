@@ -21,7 +21,7 @@ class MCPManager():
     ptype_lbl_to_id = { 'NONE': 0, 'CMD': 1, 'RES': 2, 'ACK': 3, 'TLM': 4, 'FILE': 5 }
     ptype_id_to_lbl = { v: k for k, v in ptype_lbl_to_id.items() }
 
-    def __init__(self, serial):
+    def __init__(self, serial=None):
         self.frame = bytearray()
         self.state = WAIT_FEND
         self.serial = serial
@@ -136,7 +136,7 @@ class MCPManager():
         n_bytes = self.serial.in_waiting
 
         for _ in range(n_bytes):
-            b = int.from_bytes(self.serial.read(1))
+            b = int.from_bytes(self.serial.read(1), byteorder='little')
             if self.kiss_process_byte(b):
                 p = self.parse_frame()
 

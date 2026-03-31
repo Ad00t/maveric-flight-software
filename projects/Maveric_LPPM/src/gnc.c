@@ -89,7 +89,7 @@ void gnc_step(gnc_s* state, mtq_s* mtq, float* gyro_rate_rad) {
                     break;
 
                 case MTQ_MODE_SUN_SPIN:
-                    state->sunspin_count++
+                    state->sunspin_count++;
                     break;
 
                 case MTQ_MODE_MANUAL:
@@ -110,3 +110,4 @@ void gnc_step(gnc_s* state, mtq_s* mtq, float* gyro_rate_rad) {
                     break;
             }
         }
+}

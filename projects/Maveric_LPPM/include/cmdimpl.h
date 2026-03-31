@@ -23,6 +23,7 @@ void cmdimpl_ppm_clear_sched(mcppkt_s* pkt);
 
 void cmdimpl_tlm_get_data(mcppkt_s* pkt);
 
+void cmdimpl_gnc_get_mode(mcppkt_s* pkt);
 void cmdimpl_gnc_set_mode(mcppkt_s* pkt);
 
 void cmdimpl_flash_read(mcppkt_s* pkt);

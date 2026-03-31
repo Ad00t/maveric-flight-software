@@ -39,6 +39,7 @@ void cmdimpl_init(void) {
 
     ht_set(ht, "tlm_get_data", (cmdimpl_f) cmdimpl_tlm_get_data);
     
+    ht_set(ht, "gnc_get_mode", (cmdimpl_f) cmdimpl_gnc_get_mode);
     ht_set(ht, "gnc_set_mode", (cmdimpl_f) cmdimpl_gnc_set_mode);
     
     ht_set(ht, "flash_read", (cmdimpl_f) cmdimpl_flash_read);
@@ -284,15 +285,28 @@ void cmdimpl_ppm_clear_sched(mcppkt_s* pkt) {
     }
 }
 
+void cmdimpl_gnc_get_mode(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            char* p = pkt->args;
+            sprintf(LOGBUF, "cmdimpl_gnc_get_mode mode=%u", g_gnc.gnc_mode); log_info();
+            char res[8] = {0};
+            sprintf(res, "%u", g_gnc.gnc_mode);
+            mcp_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
 void cmdimpl_gnc_set_mode(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case CMD: {
             char* p = pkt->args;
             uint8_t mode = strtoul(p, &p, 10);
             sprintf(LOGBUF, "cmdimpl_gnc_set_mode mode=%u", mode); log_info();
-            // TODO: set gnc mode
+            g_gnc.gnc_mode = mode;
             char res[8] = {0};
-            sprintf(res, "%u", FAILURE);
+            sprintf(res, "%u", (g_gnc.gnc_mode == mode) ? SUCCESS : FAILURE);
             mcp_respond(pkt, RES, res);
             break;
         }

@@ -21,6 +21,6 @@ typedef struct {
 } gnc_s;
 
 void gnc_init(gnc_s* gnc);
-void gnc_step(gnc_s* gnc, mtq_s* mtq, float* gyro_rate_deg);
+void gnc_step(gnc_s* gnc, mtq_s* mtq, float* gyro_rate_rad);
 
 #endif
