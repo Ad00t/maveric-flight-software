@@ -11,7 +11,6 @@
 #include "m41t81s.h"
 #include "adis16260.h"
 #include "naviguider.h"
-#include "housekeeping.h"
 #include "common.h"
 #include "globals.h"
 #include <stdint.h>
@@ -24,7 +23,7 @@
 void cmdimpl_init(void) {
     hashtable_s* ht = &g_mcpmgr.cmdimpls;
 
-    ht_set(ht, "ping", (cmdimpl_f) cmdimpl_ping);
+    ht_set(ht, "pang", (cmdimpl_f) cmdimpl_com_ping);
     
     ht_set(ht, "ppm_reset", (cmdimpl_f) cmdimpl_ppm_reset);
     ht_set(ht, "ppm_get_time", (cmdimpl_f) cmdimpl_ppm_get_time);
@@ -71,10 +70,10 @@ void cmdimpl_init(void) {
 
 // COMMAND IMPLEMENTATIONS
 
-void cmdimpl_ping(mcppkt_s* pkt) {
+void cmdimpl_com_ping(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case CMD: {
-            sprintf(LOGBUF, "cmdimpl_ping '%s'", pkt->args); log_info();
+            sprintf(LOGBUF, "cmdimpl_com_ping '%s'", pkt->args); log_info();
             mcp_respond(pkt, RES, "pong");
             break;
         }
@@ -288,7 +287,6 @@ void cmdimpl_ppm_clear_sched(mcppkt_s* pkt) {
 void cmdimpl_gnc_get_mode(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case CMD: {
-            char* p = pkt->args;
             sprintf(LOGBUF, "cmdimpl_gnc_get_mode mode=%u", g_gnc.gnc_mode); log_info();
             char res[8] = {0};
             sprintf(res, "%u", g_gnc.gnc_mode);

@@ -109,6 +109,7 @@ status_e mcppkt_parse_buf(mcppkt_s* pkt) {
 
 #if NODE == NODE_UPPM
 extern i2cmgr_s g_i2cmgr;
+extern ax100_s g_ax100;
 #endif
 
 // Handles all packet routing
@@ -143,7 +144,8 @@ void mcppkt_dispatch(mcppkt_s* pkt) {
             uart_write_buf(LPPM_PORT, frame, frame_len);
             break;
         case NODE_GS:
-            uart_write_buf(AX100_PORT, frame, frame_len);
+            ax100_transmit_frame(&g_ax100, frame, frame_len);
+            // uart_write_buf(AX100_PORT, frame, frame_len);
             break;
         case NODE_ASTROBOARD:
             uart_write_buf(ASTROBOARD_PORT, frame, frame_len);

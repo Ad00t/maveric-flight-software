@@ -8,7 +8,7 @@ void cmdimpl_init(void);
 
 // COMMAND IMPLEMENTATIONS 
 
-void cmdimpl_ping(mcppkt_s* pkt);
+void cmdimpl_com_ping(mcppkt_s* pkt);
 
 void cmdimpl_ppm_reset(mcppkt_s* pkt);
 void cmdimpl_ppm_get_time(mcppkt_s* pkt);

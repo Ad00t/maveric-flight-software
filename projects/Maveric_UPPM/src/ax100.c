@@ -39,10 +39,10 @@ status_e ax100_transmit_frame(ax100_s* a, uint8_t* frame, uint16_t len) {
     uart_write_buf(a->port, frame, len);
     uint16_t p = 0;
     uint16_t i;
-    p += sprintf(LOGBUF, "ax100_transmit_frame: len=%u [", frame); 
+    p += sprintf(LOGBUF, "ax100_tx_frame: len=%u [", frame); 
     for (i = 0; i < len; i++) 
         p += sprintf(&LOGBUF[p], " %02X", frame[i]); 
     p += sprintf(&LOGBUF[p], " ]"); 
-    log_trace();
+    log_info();
     return SUCCESS;
 }

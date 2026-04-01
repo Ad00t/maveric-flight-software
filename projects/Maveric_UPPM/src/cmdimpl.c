@@ -19,7 +19,7 @@
 void cmdimpl_init() {
     hashtable_s* ht = &g_mcpmgr.cmdimpls;
     
-    ht_set(ht, "ping", (cmdimpl_f) cmdimpl_ping);
+    ht_set(ht, "com_ping", (cmdimpl_f) cmdimpl_com_ping);
     
     ht_set(ht, "ppm_reset", (cmdimpl_f) cmdimpl_ppm_reset);
     ht_set(ht, "ppm_get_time", (cmdimpl_f) cmdimpl_ppm_get_time);
@@ -62,10 +62,10 @@ void ppm_set_time_from_str(char* args) {
 
 // COMMAND IMPLEMENTATIONS
 
-void cmdimpl_ping(mcppkt_s* pkt) {
+void cmdimpl_com_ping(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case CMD: {
-            sprintf(LOGBUF, "cmdimpl_ping '%s'", pkt->args); log_info();
+            sprintf(LOGBUF, "cmdimpl_com_ping '%s'", pkt->args); log_info();
             mcp_respond(pkt, RES, "pong");
             break;
         }
