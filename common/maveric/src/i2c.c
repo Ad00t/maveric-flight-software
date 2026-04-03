@@ -147,6 +147,7 @@ void i2c_stop_transaction(uint8_t port) {
 
 //MASTER FUNCTION ONLY
 void i2c_read_buf(uint8_t port, uint8_t add, uint8_t* buf, uint16_t len) {
+    if (len > I2C_FRAME_SIZE) return;
     uint16_t i;
     
     uint8_t addw, addr;
@@ -158,7 +159,7 @@ void i2c_read_buf(uint8_t port, uint8_t add, uint8_t* buf, uint16_t len) {
     // Send Address for Slave Device
     i2c_write_byte(port, addr);
     // Receive Data
-    for (i = 0; i < len; i++) {
+    for (i = 0; i < I2C_FRAME_SIZE; i++) {
         buf[i] = i2c_read_byte(port);
     }
     // End the Master Port Transfer
@@ -167,6 +168,7 @@ void i2c_read_buf(uint8_t port, uint8_t add, uint8_t* buf, uint16_t len) {
 
 //MASTER FUNCTION ONLY
 void i2c_write_buf(uint8_t port, uint8_t add, uint8_t* buf, uint16_t len) {
+    if (len > I2C_FRAME_SIZE) return;
     uint16_t i;
     
     uint8_t addw;//, addr;
@@ -180,10 +182,14 @@ void i2c_write_buf(uint8_t port, uint8_t add, uint8_t* buf, uint16_t len) {
     i2c_write_byte(port, addw);
     
     // Send Data
-    for (i = 0; i < len; i++) {
-        i2c_write_byte(port, buf[i]);
+    for (i = 0; i < I2C_FRAME_SIZE; i++) {
+        if (i < len) {
+            i2c_write_byte(port, buf[i]);
+        } else {
+            i2c_write_byte(port, 0);
+        }
     }
     
     //End Slave Port Transfer
-    i2c_stop_transaction(I2C_1);
+    i2c_stop_transaction(port);
 }

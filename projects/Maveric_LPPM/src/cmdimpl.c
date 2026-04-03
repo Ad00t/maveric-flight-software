@@ -23,7 +23,7 @@
 void cmdimpl_init(void) {
     hashtable_s* ht = &g_mcpmgr.cmdimpls;
 
-    ht_set(ht, "pang", (cmdimpl_f) cmdimpl_com_ping);
+    ht_set(ht, "com_ping", (cmdimpl_f) cmdimpl_com_ping);
     
     ht_set(ht, "ppm_reset", (cmdimpl_f) cmdimpl_ppm_reset);
     ht_set(ht, "ppm_get_time", (cmdimpl_f) cmdimpl_ppm_get_time);
@@ -537,7 +537,7 @@ void cmdimpl_mtq_set_1(mcppkt_s* pkt) {
                     break;
                 case T_FLOAT:
                     for (i = 0; i < reg->value_len; i++) {
-                        float val = strtol(p, &p, 10);
+                        float val = strtof(p, &p);
                         memcpy(&data[i*l], &val, l);
                     }
                     break;

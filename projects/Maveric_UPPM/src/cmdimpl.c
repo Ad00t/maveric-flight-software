@@ -335,7 +335,7 @@ void cmdimpl_ax100_get_power(mcppkt_s* pkt) {
             uint8_t power = 0;
             status_e s = ax100_get_power(&g_ax100, &power);
             char res[8] = {0};
-            sprintf(res, "%u", s);
+            sprintf(res, "%u %u", s, power);
             mcp_respond(pkt, RES, res);
             break;
         }

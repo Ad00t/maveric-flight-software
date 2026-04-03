@@ -36,14 +36,14 @@ void mcpmgr_parse_stream(mcpmgr_s* mcpmgr, ringbuf_s* rcvbuf, mcppkt_s* pkt, int
         uint8_t b = 0;
         if (!rb_pop(rcvbuf, 1, &b)) return;
 
-        // if (b == FEND) {
-        //     fprintf(COM_D, "%s%02X ", KRED, b);
-        // } else {
-        //     fprintf(COM_D, "%s%02X ", KYEL, b);
-        // }
+        if (b == FEND) {
+            fprintf(COM_D, "%s%02X ", KRED, b);
+        } else {
+            fprintf(COM_D, "%s%02X ", KYEL, b);
+        }
 
         if (kiss_process_byte(p, b)) {
-            // fprintf(COM_D, "%sFRAME\n", KGRN);
+            fprintf(COM_D, "%sFRAME\n", KGRN);
             // mcppkt_clear(pkt);
             // p->fsm = KISS_IN_FRAME;
             // continue;

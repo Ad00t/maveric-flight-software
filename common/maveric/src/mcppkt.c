@@ -93,7 +93,7 @@ status_e mcppkt_parse_buf(mcppkt_s* pkt) {
     if (pkt->args_len > 0) {
         if (len + pkt->args_len >= p->buf_len || buf[len + pkt->args_len] != '\0') 
             return FAILURE;
-        sprintf(LOGBUF, "args parsed end=%u", pkt->args[pkt->args_len-1]); log_debug();
+        sprintf(LOGBUF, "args parsed id='%s' end=%u", pkt->id, pkt->args[pkt->args_len-1]); log_debug();
     } else {
         sprintf(LOGBUF, "args empty"); log_debug();
     }
@@ -103,13 +103,12 @@ status_e mcppkt_parse_buf(mcppkt_s* pkt) {
     uint8_t crc_low = buf[len++];
     uint8_t crc_high = buf[len++];
     pkt->crc = make16(crc_high, crc_low);
-    sprintf(LOGBUF, "crc parsed %u %u %u", pkt->crc, len, p->buf_len); log_debug();
+    sprintf(LOGBUF, "crc parsed id='%s' %u %u %u", pkt->id, pkt->crc, len, p->buf_len); log_debug();
     return len == p->buf_len ? SUCCESS : FAILURE;
 }
 
 #if NODE == NODE_UPPM
 extern i2cmgr_s g_i2cmgr;
-extern ax100_s g_ax100;
 #endif
 
 // Handles all packet routing
@@ -144,8 +143,7 @@ void mcppkt_dispatch(mcppkt_s* pkt) {
             uart_write_buf(LPPM_PORT, frame, frame_len);
             break;
         case NODE_GS:
-            ax100_transmit_frame(&g_ax100, frame, frame_len);
-            // uart_write_buf(AX100_PORT, frame, frame_len);
+            uart_write_buf(AX100_PORT, frame, frame_len);
             break;
         case NODE_ASTROBOARD:
             uart_write_buf(ASTROBOARD_PORT, frame, frame_len);
