@@ -116,7 +116,7 @@ void mcppkt_dispatch(mcppkt_s* pkt) {
     uint8_t frame[FRAME_MAX_SIZE] = {0};
     int1 csp = (NODE == NODE_UPPM && pkt->dest == NODE_GS);
     kiss_parser_s* p = &pkt->parser;
-    uint16_t frame_len = framer_create(&p->buf[p->i_start], p->buf_len, frame, csp);
+    uint16_t frame_len = framer_create(&p->buf[p->i_start], p->buf_len - p->i_start, frame, csp);
 #if NODE == NODE_LPPM
     switch (pkt->dest) {
         case NODE_FTDI:

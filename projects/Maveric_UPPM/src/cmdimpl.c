@@ -281,7 +281,14 @@ void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
                     g_tlm.ertc_heartbeat = strtoul(p, &p, 10);
                     g_tlm.mtq_heartbeat = strtoul(p, &p, 10);
                     g_tlm.nvg_heartbeat = strtoul(p, &p, 10);
+                    g_tlm.gnc_mode = strtoul(p, &p, 10);
+                    g_tlm.unexpected_safe_count = strtoul(p, &p, 10);
+                    g_tlm.unexpected_detumble_count = strtoul(p, &p, 10);
+                    g_tlm.sunspin_count = strtoul(p, &p, 10);
                     g_tlm.mtq_stat = strtoul(p, &p, 10);
+                    g_tlm.gyro_rate_src = strtoul(p, &p, 10);
+                    g_tlm.attitude_src = strtoul(p, &p, 10);
+                    g_tlm.adcs_temp = strtof(p, &p);
                     g_tlm.gyro_rate[0] = strtof(p, &p);
                     g_tlm.gyro_rate[1] = strtof(p, &p);
                     g_tlm.gyro_rate[2] = strtof(p, &p);
@@ -289,6 +296,12 @@ void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
                     g_tlm.attitude[1] = strtof(p, &p);
                     g_tlm.attitude[2] = strtof(p, &p);
                     g_tlm.attitude[3] = strtof(p, &p);
+                    g_tlm.mtq_dipole[0] = strtof(p, &p);
+                    g_tlm.mtq_dipole[1] = strtof(p, &p);
+                    g_tlm.mtq_dipole[2] = strtof(p, &p);
+                    g_tlm.sv[0] = strtof(p, &p);
+                    g_tlm.sv[1] = strtof(p, &p);
+                    g_tlm.sv[2] = strtof(p, &p);
                     break;
                 case NODE_EPS:
                     break;

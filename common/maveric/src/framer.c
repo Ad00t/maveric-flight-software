@@ -93,18 +93,13 @@ void kiss_apply_byte_check(uint8_t* message, uint16_t messageLength, uint8_t* fr
 	uint16_t i;
 	for (i = 0; i < messageLength; i++) {
 		if (message[i] == FEND) {
-			frame[spot] = FESC;
-			spot++;
-			frame[spot] = TFEND;
-			spot++;
+			frame[spot++] = FESC;
+			frame[spot++] = TFEND;
 		} else if (message[i] == FESC) {
-			frame[spot] = FESC;
-			spot++;
-			frame[spot] = TFESC;
-			spot++;
+			frame[spot++] = FESC;
+			frame[spot++] = TFESC;
 		} else {
-			frame[spot] = message[i];
-			spot++;
+			frame[spot++] = message[i];
 		}
 	}
 

@@ -316,8 +316,19 @@ void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
         case CMD: {
             sprintf(LOGBUF, "cmdimpl_tlm_get_data CMD"); log_info();
             char res[MCP_MAX_ARGS_LEN] = {0};
-            uint16_t j = sprintf(res, "%u %u %u %u %u", 
-                                 g_flashmgr.rbt_cnt, g_rbt_cause, g_ertc.heartbeat, g_mtq.heartbeat, g_nvg.heartbeat);
+
+            uint32_t mtq_stat = 0;
+            mtq_get_data(&g_mtq, MTQ_STAT, &mtq_stat);
+
+            uint16_t j = sprintf(res, "%u %u %u %u %u %u %u %u %u %Lu %u %u ", 
+                                 g_flashmgr.rbt_cnt, g_rbt_cause, g_ertc.heartbeat, g_mtq.heartbeat, g_nvg.heartbeat,
+                                 g_gnc.gnc_mode, g_gnc.unexpected_safe_count, g_gnc.unexpected_detumble_count, g_gnc.sunspin_count,
+                                 mtq_stat, g_flashmgr.config.gyro_rate_src, g_flashmgr.config.attitude_src);
+
+            uint16_t mtq_adcs_tmp[2] = {0};
+            mtq_get_data(&g_mtq, MTQ_ADCS_TMP, &mtq_adcs_tmp);
+            float adcs_temp = (float) mtq_adcs_tmp[0] * 150 / 32768;
+            j += ftoa(adcs_temp, &res[j], 3, 'f');
 
             float gyro_rate_rad[3] = {0};
             switch (g_flashmgr.config.gyro_rate_src) {
@@ -350,6 +361,20 @@ void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
             for (i = 0; i < 4; i++) {
                 j += sprintf(&res[j], " ");
                 j += ftoa(attitude[i], &res[j], 3, 'f');
+            }
+
+            float mtq_dipole[3] = {0};
+            mtq_get_data(&g_mtq, MTQ_MTQ, mtq_dipole);
+            for (i = 0; i < 3; i++) {
+                j += sprintf(&res[j], " ");
+                j += ftoa(mtq_dipole[i], &res[j], 3, 'f');
+            }
+            
+            float mtq_sv[3] = {0};
+            mtq_get_data(&g_mtq, MTQ_SV, mtq_sv);
+            for (i = 0; i < 3; i++) {
+                j += sprintf(&res[j], " ");
+                j += ftoa(mtq_sv[i], &res[j], 3, 'f');
             }
 
             mcp_respond(pkt, RES, res);

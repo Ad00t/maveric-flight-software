@@ -19,7 +19,6 @@
 #define KISS_FOOTER_SIZE        1 
 
 #define FEND                    0xC0
-
 #define DATA_FRAME              0x00
 #define FESC                    0xDB
 #define TFEND                   0xDC

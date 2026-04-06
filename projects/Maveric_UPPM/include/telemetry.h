@@ -13,35 +13,27 @@ typedef struct {
     uint8_t ertc_heartbeat;             // LPPM
     uint8_t mtq_heartbeat;              // LPPM
     uint8_t nvg_heartbeat;              // LPPM
-    uint8_t mtq_stat;                   // LPPM
     // Beacon 1
+    uint8_t gnc_mode;                   // LPPM
+    uint16_t unexpected_safe_count;     // LPPM 
+    uint16_t unexpected_detumble_count; // LPPM 
+    uint16_t sunspin_count;             // LPPM 
+    uint32_t mtq_stat;                  // LPPM
+    uint8_t gyro_rate_src;              // LPPM
+    uint8_t attitude_src;               // LPPM
+    float adcs_temp;                    // LPPM
     float gyro_rate[3];                 // LPPM
     float attitude[4];                  // LPPM
-    float sv[3];                        // LPPM
-    float ss[3];                        // LPPM
-    float mag[3];                       // LPPM
     float mtq_dipole[3];                // LPPM
-    float quat_error[4];                // LPPM
-    float rate_error[4];                // LPPM
-    float mtq_act_error[3];             // LPPM
-    // Beacon 2
+    float sv[3];                        // LPPM
+    // Beacon 2                          
+    uint8_t eps_state;                  // EPS
+    uint8_t eps_pwr_out[4];             // EPS
+    float eps_temp[8];                  // EPS
     float batt_voltage[4];              // EPS
     float batt_current[4];              // EPS
     float solarcell_voltage[5];         // EPS
     float solarcell_current[10];        // EPS
-    float eps_temp[8];                  // EPS
-    float adcs_temp;                    // LPPM
-    uint8_t eps_state;                  // EPS
-    // Beacon 3
-    uint8_t ax100_flash_status[3];      // UPPM
-    float uppm_temp[4];                 // UPPM
-    uint8_t holonav_status;             // HOLONAV 
-    uint8_t astroboard_status;          // ASTROBOARD 
-    float ax100_temp[2];                // UPPM
-    uint64_t next_downlink;             // UPPM             
-    uint8_t dep_mag_status[2];          // UPPM
-    uint16_t ab_seq;                    // ASTROBOARD
-    uint16_t hn_seq;                    // HOLONAV
 } tlm_s;
 
 void tlm_init(tlm_s* tlm);

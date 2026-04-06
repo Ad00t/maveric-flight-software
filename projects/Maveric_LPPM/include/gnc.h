@@ -13,8 +13,8 @@
 #define GNC_MODE_MANUAL             2
 
 typedef struct {
-    uint8_t expected_mode;                  // Tracks expected MTQ mode to catch unexpected transitions
     uint8_t gnc_mode;                       // Determines mode of the GNC Planner
+    uint8_t expected_mode;                  // Tracks expected MTQ mode to catch unexpected transitions
     uint16_t unexpected_safe_count;         // Number of unexpected transitions to SAFE
     uint16_t unexpected_detumble_count;     // Number of unexpected transitions to DETUMBLING
     uint16_t sunspin_count;                 // Number of transitions to SUNSPIN

@@ -37,7 +37,7 @@ void mcpmgr_parse_stream(mcpmgr_s* mcpmgr, ringbuf_s* rcvbuf, mcppkt_s* pkt, int
         if (!rb_pop(rcvbuf, 1, &b)) return;
 
         if (b == FEND) {
-            fprintf(COM_D, "%s%02X ", KRED, b);
+            fprintf(COM_D, "%s%u,%u:%02X ", KRED, rcvbuf->r, rcvbuf->w, b);
         } else {
             fprintf(COM_D, "%s%02X ", KYEL, b);
         }
@@ -78,7 +78,7 @@ void mcpmgr_process_pkt(mcpmgr_s* mcpmgr, mcppkt_s* pkt) {
     if (pkt->ptype == CMD && (pkt->orgn == NODE_GS || pkt->orgn == NODE_FTDI)) {
         sprintf(LOGBUF, "proc_pkt: ack o=%u d=%u e=%u p=%u id='%s' arglen=%u",
                 pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id, pkt->args_len); log_debug();
-        mcp_respond(pkt, ACK, "");
+        mcp_respond(pkt, ACK, pkt->args);
     }
 
     // Forward
