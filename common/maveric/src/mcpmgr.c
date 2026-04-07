@@ -37,9 +37,9 @@ void mcpmgr_parse_stream(mcpmgr_s* mcpmgr, ringbuf_s* rcvbuf, mcppkt_s* pkt, int
         if (!rb_pop(rcvbuf, 1, &b)) return;
 
         if (b == FEND) {
-            fprintf(COM_D, "%s%u,%u:%02X ", KRED, rcvbuf->r, rcvbuf->w, b);
+            fprintf(COM_D, "%s%u:%02X ", KRED, p->buf_len, b);
         } else {
-            fprintf(COM_D, "%s%02X ", KYEL, b);
+            fprintf(COM_D, "%s%u:%02X ", KYEL, p->buf_len, b);
         }
 
         if (kiss_process_byte(p, b)) {
@@ -53,7 +53,7 @@ void mcpmgr_parse_stream(mcpmgr_s* mcpmgr, ringbuf_s* rcvbuf, mcppkt_s* pkt, int
             p->buf_len--;
             if (csp) { // Remove CSP header
                 p->i_start += CSP_HEADER_SIZE;
-                p->buf_len -= CSP_HEADER_SIZE + CRC32_SIZE;
+                p->buf_len -= (CSP_HEADER_SIZE + CRC32_SIZE);
             }
             mcpmgr_process_pkt(mcpmgr, pkt);    
             p->fsm = KISS_IN_FRAME;

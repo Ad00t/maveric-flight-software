@@ -10,7 +10,6 @@
 // MCPPKT PUBLIC API
 
 void mcppkt_init(mcppkt_s* pkt) {
-    memset(&pkt->parser, 0, sizeof(kiss_parser_s));
     mcppkt_clear(pkt);
 }
 
@@ -51,6 +50,7 @@ void mcppkt_create(mcppkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, mcpp
     uint16_t crc = compute_crc16(buf, len); 
     pkt->crc = crc;
     buf[len++] = crc & 0xFF; 
+    // buf[len++] = 0xC0;
     buf[len++] = (crc >> 8) & 0xFF; 
     p->buf_len = len;
     p->i_start = 0;
@@ -62,6 +62,7 @@ void mcppkt_create(mcppkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, mcpp
 
 
 void mcppkt_clear(mcppkt_s* pkt) {
+    memset(&pkt->parser, 0, sizeof(kiss_parser_s));
     memset(pkt, 0, sizeof(mcppkt_s));
 }
 
@@ -116,7 +117,7 @@ void mcppkt_dispatch(mcppkt_s* pkt) {
     uint8_t frame[FRAME_MAX_SIZE] = {0};
     int1 csp = (NODE == NODE_UPPM && pkt->dest == NODE_GS);
     kiss_parser_s* p = &pkt->parser;
-    uint16_t frame_len = framer_create(&p->buf[p->i_start], p->buf_len - p->i_start, frame, csp);
+    uint16_t frame_len = framer_create(&p->buf[p->i_start], p->buf_len, frame, csp);
 #if NODE == NODE_LPPM
     switch (pkt->dest) {
         case NODE_FTDI:
@@ -157,15 +158,13 @@ void mcppkt_dispatch(mcppkt_s* pkt) {
 
 // Nice little wrapper function for sending commands from anywhere
 void mcp_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, mcppkt_type_e ptype, char* id, uint8_t* args, uint8_t args_len) {
-    mcppkt_s pkt;
+    mcppkt_s pkt = {0};
     mcppkt_create(&pkt, orgn, dest, echo, ptype, id, args, args_len);
     mcppkt_dispatch(&pkt);
 }
 
 void mcp_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, mcppkt_type_e ptype, char* id, char* args) {
-    mcppkt_s pkt;
-    mcppkt_create(&pkt, orgn, dest, echo, ptype, id, args);
-    mcppkt_dispatch(&pkt);
+    mcp_dispatch(orgn, dest, echo, ptype, id, args, strlen(args));
 }
 
 // Public helpers 
@@ -175,7 +174,7 @@ void mcp_respond(mcppkt_s* pkt, mcppkt_type_e type, uint8_t* res, uint8_t res_le
 }
 
 void mcp_respond(mcppkt_s* pkt, mcppkt_type_e type, char* res) {
-    mcp_dispatch(NODE, pkt->orgn, pkt->echo, type, pkt->id, res); 
+    mcp_respond(pkt, type, res, strlen(res)); 
 }
 
 
