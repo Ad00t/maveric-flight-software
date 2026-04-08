@@ -3,7 +3,7 @@
 #include "hashtable.h"
 #include "crcnew.h"
 #include "uart.h"
-#include "framer.h"
+#include "frame.h"
 #include "mcppkt.h"
 #include "common.h"
 #include "logger.h"
@@ -32,19 +32,19 @@ void mcpmgr_parse_stream(mcpmgr_s* mcpmgr, ringbuf_s* rcvbuf, mcppkt_s* pkt, int
     uint16_t n_bytes = rb_len(rcvbuf);
 
     uint16_t iter;
-    for (iter = 0; iter < n_bytes; iter++) {
+    for (iter = 0; iter < 2*RINGBUF_MAX_CAPACITY; iter++) {
         uint8_t b = 0;
         if (!rb_pop(rcvbuf, 1, &b)) return;
 
-        char c = (b >= 32 && b <= 126) ? b : '.';
-        if (b == FEND) {
-            fprintf(COM_D, "%s%u:%02X'%c' ", KRED, p->buf_len, b, c);
-        } else {
-            fprintf(COM_D, "%s%u:%02X'%c' ", KYEL, p->buf_len, b, c);
+        // char c = (b >= 32 && b <= 126) ? b : '.';
+        // if (b == FEND) {
+        //     fprintf(LOG_PORT, "%s%u:%02X'%c' ", KMAG, p->buf_len, b, c);
+        // } else {
+        //     fprintf(LOG_PORT, "%s%u:%02X'%c' ", KYEL, p->buf_len, b, c);
         }
 
         if (kiss_process_byte(p, b)) {
-            fprintf(COM_D, "%sFRAME\n", KGRN);
+            // fprintf(LOG_PORT, "%sFRAME\n", KGRN);
             // mcppkt_clear(pkt);
             // p->fsm = KISS_IN_FRAME;
             // continue;
@@ -57,7 +57,6 @@ void mcpmgr_parse_stream(mcpmgr_s* mcpmgr, ringbuf_s* rcvbuf, mcppkt_s* pkt, int
                 p->buf_len -= (CSP_HEADER_SIZE + CRC32_SIZE);
             }
             mcpmgr_process_pkt(mcpmgr, pkt);    
-            p->fsm = KISS_IN_FRAME;
         } 
     }
 }
@@ -110,6 +109,7 @@ void mcpmgr_process_pkt(mcpmgr_s* mcpmgr, mcppkt_s* pkt) {
 
 cleanup:
     mcppkt_clear(pkt);
+    p->fsm = KISS_IN_FRAME;
 }
 
 void mcp_process(mcpmgr_s* mcpmgr, uint8_t orgn, uint8_t dest, uint8_t echo, mcppkt_type_e ptype, char* id, uint8_t* args, uint8_t args_len) {

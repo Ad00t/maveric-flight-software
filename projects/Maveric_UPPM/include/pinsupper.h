@@ -92,3 +92,4 @@
 #define AX100_PORT          COM_B
 #define LPPM_PORT           COM_C
 #define ASTROBOARD_PORT     COM_D
+#define LOG_PORT            LPPM_PORT

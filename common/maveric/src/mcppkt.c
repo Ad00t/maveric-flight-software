@@ -1,6 +1,6 @@
 #include "mcppkt.h"
 #include "logger.h"
-#include "framer.h"
+#include "frame.h"
 #include "crcnew.h"
 #include "common.h"
 #include "i2c.h"
@@ -103,7 +103,7 @@ status_e mcppkt_parse_buf(mcppkt_s* pkt) {
     uint8_t crc_low = buf[len++];
     uint8_t crc_high = buf[len++];
     pkt->crc = make16(crc_high, crc_low);
-    // sprintf(LOGBUF, "crc parsed id='%s' %u %u %u", pkt->id, pkt->crc, len, p->buf_len); log_debug();
+    sprintf(LOGBUF, "crc parsed id='%s' %u %u %u", pkt->id, pkt->crc, len, p->buf_len); log_debug();
     return len == p->buf_len ? SUCCESS : FAILURE;
 }
 
@@ -116,7 +116,7 @@ void mcppkt_dispatch(mcppkt_s* pkt) {
     uint8_t frame[FRAME_MAX_SIZE] = {0};
     int1 csp = (NODE == NODE_UPPM && pkt->dest == NODE_GS);
     kiss_parser_s* p = &pkt->parser;
-    uint16_t frame_len = framer_create(&p->buf[p->i_start], p->buf_len, frame, csp);
+    uint16_t frame_len = frame_create(&p->buf[p->i_start], p->buf_len, frame, csp);
 #if NODE == NODE_LPPM
     switch (pkt->dest) {
         case NODE_FTDI:

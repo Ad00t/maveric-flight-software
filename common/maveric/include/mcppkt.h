@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include "common.h"
-#include "framer.h"
+#include "frame.h"
 #include "crcnew.h"
 
 #define MCP_MAX_LEN             FRAME_MAX_SIZE - KISS_HEADER_SIZE - KISS_FOOTER_SIZE - CSP_HEADER_SIZE - CRC32_SIZE

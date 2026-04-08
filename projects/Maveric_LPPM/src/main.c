@@ -67,7 +67,7 @@
 #include "systime.c"
 #include "at25df641.c"
 #include "flashmgr.c"
-#include "framer.c"
+#include "frame.c"
 #include "mcppkt.c"
 #include "logger.c"
 #include "adcsmtq.c"
