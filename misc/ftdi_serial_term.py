@@ -1,5 +1,6 @@
 import serial
 import time
+from datetime import datetime
 import traceback
 import threading
 import sys
@@ -38,6 +39,8 @@ log_lines = []
 is_manual_scrolling = False
 scroll_top = 0
 is_paused = False
+is_recording = False
+recording_file = None
 pkt_hist = []
 i_ch = 0
 
@@ -60,7 +63,7 @@ def _(event):
     try:
         send_pkt_str(pktstr)
     except Exception as e:
-        log_error(f'invalid pkt "{pkt}": {traceback.format_exc()}')
+        log_error(f'invalid pkt "{pktstr}": {traceback.format_exc()}')
     finally:
         input_box.text = ""
         app.invalidate()
@@ -89,7 +92,7 @@ def _(event):
     scroll_top = max(0, len(log_lines)-os.get_terminal_size().lines + 1)
     is_manual_scrolling = False
     
-@kb.add("c-p") # Pause/resume toggle
+@kb.add("c-p") # Pause/resume logging toggle
 def _(event):
     global is_paused
     if is_paused:
@@ -98,6 +101,21 @@ def _(event):
     else:
         log_info(f"logging paused")
         is_paused = True
+
+@kb.add("c-r") # Start/stop recording toggle
+def _(event):
+    global is_recording, recording_file
+    if is_recording:
+        log_info(f"stopped recording")
+        is_recording = False
+        recording_file.close()
+    else:
+        is_recording = True
+        if not os.path.exists("logs/"):
+            os.mkdir("logs/")
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        recording_file = open(f"logs/log_{timestamp}.txt", "w")
+        log_info(f"started recording")
         
 @kb.add("up") # Backward in command history
 def _(event):
@@ -125,8 +143,17 @@ def _(event):
 def string_to_binary(text):
     return ''.join(format(ord(char), '08b') for char in text)
 
+def bytes_to_mixed_ascii_hex(data):
+    out = []
+    for b in data:
+        if 32 <= b <= 126:  # printable ASCII range
+            out.append(chr(b))
+        else:
+            out.append(f"\\x{b:02x}")
+    return ''.join(out)
+
 def log(text):
-    global log_text, log_lines, scroll_top, is_paused
+    global log_text, log_lines, scroll_top, is_paused, is_recording, recording_file
     if is_paused: return
     # log_lines.append(string_to_binary(text))
     log_lines.append(text)
@@ -135,6 +162,9 @@ def log(text):
     if len(log_lines) > MAX_LOGS:
         del log_lines[:MAX_LOGS//5]
         scroll_top = max(0, scroll_top-MAX_LOGS//5 + 1)
+    if is_recording and recording_file is not None:
+        recording_file.write(text)
+        recording_file.flush()
     app.invalidate()
 
 def epoch_time_ms():
@@ -178,8 +208,11 @@ def read_serial():
 def send_pkt_str(pktstr):
     pktstr = pktstr.strip()
     spl = pktstr.split(' ')
-    ba, cnt = mcpmgr.send_pkt_serial(int(spl[0]), int(spl[1]), int(spl[2]), int(spl[3]), spl[4], ' '.join(spl[5:]))
-    log_info(f"sending pkt: cnt={cnt} {repr(ba.decode('ascii', errors='replace'))}")
+    ba, cnt = mcpmgr.send_pkt_serial(
+            int(spl[0]), int(spl[1]), int(spl[2]), int(spl[3]),
+            spl[4], ' '.join(spl[5:]) if len(spl) > 5 else ''
+    )
+    log_info(f"sending pkt: cnt={cnt} [ {bytes_to_mixed_ascii_hex(ba)} ]")
 
 if __name__ == "__main__":      
     rx_thread = threading.Thread(target=read_serial, daemon=True)

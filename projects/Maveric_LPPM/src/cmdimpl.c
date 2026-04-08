@@ -227,7 +227,7 @@ void cmdimpl_ppm_sched_cmd_in(mcppkt_s* pkt) {
             char res[32] = {0};
             uint8_t j = sprintf(res, "%u %u", s, sched_id);
             if (s == SUCCESS) {
-                j += sprintf(&res[j], " %u", &g_scheduler.id_map[sched_id]->next_release);
+                j += sprintf(&res[j], " %u", g_scheduler.id_map[sched_id]->next_release);
             }
             mcp_respond(pkt, RES, res); 
             break;
@@ -256,12 +256,12 @@ void cmdimpl_ppm_resched_in(mcppkt_s* pkt) {
             char* p = pkt->args;
             uint8_t sched_id = strtoul(p, &p, 10);
             uint32_t start_delay_ms = strtoul(p, &p, 10);
-            sprintf(LOGBUF, "cmdimpl_ppm_resched_in id=%u", sched_id); log_info();
+            sprintf(LOGBUF, "cmdimpl_ppm_resched_in id=%u d=%u", sched_id, start_delay_ms); log_info();
             status_e s = scheduler_reschedule_in(&g_scheduler, sched_id, start_delay_ms);
             char res[32] = {0};
             uint8_t j = sprintf(res, "%u %u", s, sched_id);
             if (s == SUCCESS) {
-                j += sprintf(&res[j], " %u", &g_scheduler.id_map[sched_id]->next_release);
+                j += sprintf(&res[j], " %u", g_scheduler.id_map[sched_id]->next_release);
             }
             mcp_respond(pkt, RES, res);
             break;
@@ -509,9 +509,9 @@ void cmdimpl_mtq_get_1(mcppkt_s* pkt) {
             sprintf(LOGBUF, "cmdimpl_mtq_get_1 midx=%u idx=%u", midx, idx); log_info();
             char res[MCP_MAX_ARGS_LEN] = {0};
             uint16_t j = sprintf(res, "%u %u", midx, idx);
-            uint16_t key = ((uint16_t) midx << 8) | idx;
-            mtq_print_reg_data(&g_mtq, key, res, &j);
-            mcp_respond(pkt, RES, res);
+            uint16_t key = ((uint16_t)midx << 8) | idx;
+            mtq_print_reg_data(&g_mtq, key, (char*)res, &j);
+            mcp_respond(pkt, RES, (char*)res);
             break;
         }
     }
@@ -597,7 +597,7 @@ void cmdimpl_mtq_get_fast(mcppkt_s* pkt) {
             char* p = pkt->args;
             uint8_t page = strtoul(p, &p, 10);
             char res[MCP_MAX_ARGS_LEN] = {0};
-            if (page > MTQ_FAST_FRAME_REGS / MTQ_PAGE_SIZE) {
+            if (page > MTQ_NUM_FAST_REGS / MTQ_PAGE_SIZE) {
                 sprintf(res, "%u %u", FAILURE, page);
                 mcp_respond(pkt, RES, res);
                 break;
@@ -637,7 +637,7 @@ void cmdimpl_mtq_get_ctrl(mcppkt_s* pkt) {
             char* p = pkt->args;
             uint8_t page = strtoul(p, &p, 10);
             char res[MCP_MAX_ARGS_LEN] = {0};
-            if (page > MTQ_CTRL_FRAME_REGS / MTQ_PAGE_SIZE) {
+            if (page > MTQ_NUM_CTRL_REGS / MTQ_PAGE_SIZE) {
                 sprintf(res, "%u %u", FAILURE, page);
                 mcp_respond(pkt, RES, res);
                 break;

@@ -1,6 +1,7 @@
 #include "adcsmtq.h"
 #include "interrupts.h"
 #include "uart.h"
+#include "systime.h"
 #include "common.h"
 #include <stdint.h>
 #include <string.h>
@@ -128,7 +129,7 @@ mtq_reg_s* mtq_get_reg(mtq_s* mtq, uint16_t key) {
     return mtq_get_reg(mtq, key >> 8, key & 0x00FF);
 }
 
-status_e mtq_print_reg_data(mtq_s* mtq, mtq_reg_s* reg, uint8_t* out, uint16_t* j) {
+status_e mtq_print_reg_data(mtq_s* mtq, mtq_reg_s* reg, char* out, uint16_t* j) {
     uint8_t i;
     switch (reg->type) {
         case T_UINT8:
@@ -160,7 +161,7 @@ status_e mtq_print_reg_data(mtq_s* mtq, mtq_reg_s* reg, uint8_t* out, uint16_t* 
     return SUCCESS;
 }
 
-status_e mtq_print_reg_data(mtq_s* mtq, uint16_t key, uint8_t* out, uint16_t* j) {
+status_e mtq_print_reg_data(mtq_s* mtq, uint16_t key, char* out, uint16_t* j) {
     mtq_reg_s* reg = mtq_get_reg(mtq, key);
     if (reg == NULL) return FAILURE;
     return mtq_print_reg_data(mtq, reg, out, j);
@@ -415,15 +416,19 @@ status_e mtq_reboot(mtq_s* mtq) {
 
 status_e mtq_reset(mtq_s* mtq) {
     if (!mtq->is_init) return FAILURE;
+    float paxs[3] = {0};
     char tle[140] = {0};
-    status_e s1 = mtq_get_data(mtq, MTQ_TLE, tle);
-    status_e s2 = mtq_reboot(mtq);
+    status_e s1 = mtq_get_data(mtq, MTQ_POINTING_AXIS, paxs);
+    status_e s2 = mtq_get_data(mtq, MTQ_TLE, tle);
+    status_e s3 = mtq_reboot(mtq);
     rtc_time_t rtc;
     systime_rtc(&rtc);
-    status_e s3 = mtq_set_datetime(mtq, &rtc);
-    status_e s4 = mtq_set_mode(mtq, MTQ_MODE_SAFE);
-    status_e s5 = mtq_write_start(mtq, MTQ_TLE, tle);
-    return (s1 == SUCCESS && s2 == SUCCESS && s3 == SUCCESS && s4 == SUCCESS && s5 == SUCCESS) ? SUCCESS : FAILURE;
+    status_e s4 = mtq_set_datetime(mtq, &rtc);
+    status_e s5 = mtq_set_mode(mtq, MTQ_MODE_SAFE);
+    status_e s6 = mtq_write_start(mtq, MTQ_POINTING_AXIS, paxs);
+    status_e s7 = mtq_write_start(mtq, MTQ_TLE, tle);
+    return (s1 == SUCCESS && s2 == SUCCESS && s3 == SUCCESS && s4 == SUCCESS 
+            && s5 == SUCCESS && s6 == SUCCESS && s7 == SUCCESS) ? SUCCESS : FAILURE;
 }
 
 status_e mtq_read_fast(mtq_s* mtq) {

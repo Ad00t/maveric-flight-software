@@ -1,6 +1,6 @@
+#include "mcppkt.h"
 #include "logger.h"
 #include "framer.h"
-#include "mcppkt.h"
 #include "crcnew.h"
 #include "common.h"
 #include "i2c.h"
@@ -50,7 +50,6 @@ void mcppkt_create(mcppkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, mcpp
     uint16_t crc = compute_crc16(buf, len); 
     pkt->crc = crc;
     buf[len++] = crc & 0xFF; 
-    // buf[len++] = 0xC0;
     buf[len++] = (crc >> 8) & 0xFF; 
     p->buf_len = len;
     p->i_start = 0;
@@ -104,7 +103,7 @@ status_e mcppkt_parse_buf(mcppkt_s* pkt) {
     uint8_t crc_low = buf[len++];
     uint8_t crc_high = buf[len++];
     pkt->crc = make16(crc_high, crc_low);
-    sprintf(LOGBUF, "crc parsed id='%s' %u %u %u", pkt->id, pkt->crc, len, p->buf_len); log_debug();
+    // sprintf(LOGBUF, "crc parsed id='%s' %u %u %u", pkt->id, pkt->crc, len, p->buf_len); log_debug();
     return len == p->buf_len ? SUCCESS : FAILURE;
 }
 

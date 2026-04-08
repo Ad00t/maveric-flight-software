@@ -212,7 +212,7 @@ void cmdimpl_ppm_sched_cmd_in(mcppkt_s* pkt) {
             char res[32] = {0};
             uint8_t j = sprintf(res, "%u %u", s, sched_id);
             if (s == SUCCESS) {
-                j += sprintf(&res[j], " %u", &g_scheduler.id_map[sched_id]->next_release);
+                j += sprintf(&res[j], " %u", g_scheduler.id_map[sched_id]->next_release);
             }
             mcp_respond(pkt, RES, res); 
             break;
@@ -246,7 +246,7 @@ void cmdimpl_ppm_resched_in(mcppkt_s* pkt) {
             char res[32] = {0};
             uint8_t j = sprintf(res, "%u %u", s, sched_id);
             if (s == SUCCESS) {
-                j += sprintf(&res[j], " %u", &g_scheduler.id_map[sched_id]->next_release);
+                j += sprintf(&res[j], " %u", g_scheduler.id_map[sched_id]->next_release);
             }
             mcp_respond(pkt, RES, res);
             break;

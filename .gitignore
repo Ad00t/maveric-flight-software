@@ -4,6 +4,7 @@
 **/nbproject/**
 *.mcs
 *.ccspjt
+**/logs/**
 
 # Build files
 *.cof

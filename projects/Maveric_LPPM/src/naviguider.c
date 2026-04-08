@@ -67,8 +67,8 @@ status_e nvg_init(nvg_s* nvg, uint8_t port) {
         nvg->sensors[NVG_SENSOR_IDS[i]].data = (float*) calloc(nvg->sensors[NVG_SENSOR_IDS[i]].len, sizeof(float));
     }
   
-    status_e s1 = nvg_reset(nvg);
-    status_e s2 = nvg_set_sensor(nvg, NVG_TEMPERATURE, 1);
+    status_e s1 = nvg_power(nvg);
+    status_e s2 = nvg_reset(nvg);
     status_e s3 = nvg_start_all_sensors(nvg);
 
     sprintf(LOGBUF, "nvg_init: port=%u", nvg->port); log_info();

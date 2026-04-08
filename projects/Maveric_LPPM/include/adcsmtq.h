@@ -247,8 +247,8 @@ mtq_reg_s* mtq_get_reg(mtq_s* mtq, uint8_t midx, uint8_t idx);
 mtq_reg_s* mtq_get_reg(mtq_s* mtq, uint16_t key);
 
 // Print out formatted space separated contents of a register to out buffer, updating p
-status_e mtq_print_reg_data(mtq_s* mtq, mtq_reg_s* reg, uint8_t* out, uint16_t* j);
-status_e mtq_print_reg_data(mtq_s* mtq, uint16_t key, uint8_t* out, uint16_t* j);
+status_e mtq_print_reg_data(mtq_s* mtq, mtq_reg_s* reg, char* out, uint16_t* j);
+status_e mtq_print_reg_data(mtq_s* mtq, uint16_t key, char* out, uint16_t* j);
 
 // Send register read command to mtq
 status_e mtq_read_start(mtq_s* mtq, mtq_reg_s* reg);
