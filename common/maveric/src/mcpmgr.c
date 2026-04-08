@@ -29,7 +29,7 @@ void mcpmgr_clear(mcpmgr_s* mcpmgr) {
 void mcpmgr_parse_stream(mcpmgr_s* mcpmgr, ringbuf_s* rcvbuf, mcppkt_s* pkt, int1 csp) {
     if (!mcpmgr->is_init) return;
     kiss_parser_s* p = &pkt->parser;
-    uint16_t n_bytes = rb_len(rcvbuf);
+    // uint16_t n_bytes = rb_len(rcvbuf);
 
     uint16_t iter;
     for (iter = 0; iter < 2*RINGBUF_MAX_CAPACITY; iter++) {
@@ -38,15 +38,15 @@ void mcpmgr_parse_stream(mcpmgr_s* mcpmgr, ringbuf_s* rcvbuf, mcppkt_s* pkt, int
 
         // char c = (b >= 32 && b <= 126) ? b : '.';
         // if (b == FEND) {
-        //     fprintf(LOG_PORT, "%s%u:%02X'%c' ", KMAG, p->buf_len, b, c);
+        //     fprintf(COM_A, "%s%u:%02X'%c' ", KMAG, p->buf_len, b, c);
         // } else {
-        //     fprintf(LOG_PORT, "%s%u:%02X'%c' ", KYEL, p->buf_len, b, c);
-        }
+        //     fprintf(COM_A, "%s%u:%02X'%c' ", KYEL, p->buf_len, b, c);
+        // }
 
         if (kiss_process_byte(p, b)) {
-            // fprintf(LOG_PORT, "%sFRAME\n", KGRN);
+            // fprintf(COM_A, "%sFRAME\r\n\n", KGRN);
             // mcppkt_clear(pkt);
-            // p->fsm = KISS_IN_FRAME;
+            // p->fsm = KISS_WAIT_FEND;
             // continue;
             
             // Full frame received
@@ -68,15 +68,18 @@ void mcpmgr_process_pkt(mcpmgr_s* mcpmgr, mcppkt_s* pkt) {
     // Parse mcppkt buf into fields
     if (mcppkt_parse_buf(pkt) != SUCCESS) {
         sprintf(LOGBUF, "proc_pkt: pkt buf parsing failed: len=%u", p->buf_len); log_error();
+        // fprintf(COM_A, "%sproc_pkt: pkt buf parsing failed: len=%u\r\n\n", KRED, p->buf_len);
         goto cleanup;
     }
 
     sprintf(LOGBUF, "proc_pkt: parsed o=%u d=%u e=%u p=%u id='%s' arglen=%u",
             pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id, pkt->args_len); log_debug();
+    // fprintf(COM_A, "%sproc_pkt: parsed o=%u d=%u e=%u p=%u id='%s' arglen=%u\r\n\n", KGRN,
+    //         pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id, pkt->args_len);
 
     // ACK every CMD packet a node receives from GS or FTDI
     if (pkt->ptype == CMD && (pkt->orgn == NODE_GS || pkt->orgn == NODE_FTDI)) {
-        sprintf(LOGBUF, "proc_pkt: ack o=%u d=%u e=%u p=%u id='%s' arglen=%u",
+        sprintf(LOGBUF, "proc_pkt: acking o=%u d=%u e=%u p=%u id='%s' arglen=%u",
                 pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id, pkt->args_len); log_debug();
         mcp_respond(pkt, ACK, (uint8_t*) pkt->args, pkt->args_len);
     }
@@ -104,12 +107,12 @@ void mcpmgr_process_pkt(mcpmgr_s* mcpmgr, mcppkt_s* pkt) {
         goto cleanup;
     }
     sprintf(LOGBUF, "proc_pkt: executing: o=%u d=%u e=%u p=%u id='%s' arglen=%u", 
-            pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id, pkt->args_len); log_debug();
+            pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id, pkt->args_len); log_info();
     cmdimpl(pkt);
 
 cleanup:
     mcppkt_clear(pkt);
-    p->fsm = KISS_IN_FRAME;
+    p->fsm = KISS_WAIT_FEND;
 }
 
 void mcp_process(mcpmgr_s* mcpmgr, uint8_t orgn, uint8_t dest, uint8_t echo, mcppkt_type_e ptype, char* id, uint8_t* args, uint8_t args_len) {

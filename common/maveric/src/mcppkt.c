@@ -78,24 +78,24 @@ status_e mcppkt_parse_buf(mcppkt_s* pkt) {
     pkt->ptype = buf[len++];
     pkt->id_len = buf[len++];
     pkt->args_len = buf[len++];
-    sprintf(LOGBUF, "header parsed is=%u o=%u d=%u e=%u t=%u idl=%u al=%u", 
-            p->i_start, pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id_len, pkt->args_len); log_debug();
+    // sprintf(LOGBUF, "header parsed is=%u o=%u d=%u e=%u t=%u idl=%u al=%u", 
+    //         p->i_start, pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id_len, pkt->args_len); log_debug();
 
     // Parse id field
     pkt->id = &buf[len];
-    if (len + pkt->id_len >= p->buf_len || buf[len + pkt->id_len] != '\0')
+    if (len + pkt->id_len > p->buf_len || buf[len + pkt->id_len] != '\0')
         return FAILURE;
     len += pkt->id_len + 1;
-    sprintf(LOGBUF, "id parsed '%s'", pkt->id); log_debug();
+    // sprintf(LOGBUF, "id parsed '%s'", pkt->id); log_debug();
    
     // Parse args field
     pkt->args = &buf[len];
     if (pkt->args_len > 0) {
-        if (len + pkt->args_len >= p->buf_len || buf[len + pkt->args_len] != '\0') 
+        if (len + pkt->args_len > p->buf_len || buf[len + pkt->args_len] != '\0') 
             return FAILURE;
-        sprintf(LOGBUF, "args parsed id='%s' end=%u", pkt->id, pkt->args[pkt->args_len-1]); log_debug();
+        // sprintf(LOGBUF, "args parsed id='%s' end=%u", pkt->id, pkt->args[pkt->args_len-1]); log_debug();
     } else {
-        sprintf(LOGBUF, "args empty"); log_debug();
+        // sprintf(LOGBUF, "args empty"); log_debug();
     }
     len += pkt->args_len + 1;
    
@@ -103,7 +103,7 @@ status_e mcppkt_parse_buf(mcppkt_s* pkt) {
     uint8_t crc_low = buf[len++];
     uint8_t crc_high = buf[len++];
     pkt->crc = make16(crc_high, crc_low);
-    sprintf(LOGBUF, "crc parsed id='%s' %u %u %u", pkt->id, pkt->crc, len, p->buf_len); log_debug();
+    // sprintf(LOGBUF, "crc parsed id='%s' %u %u %u", pkt->id, pkt->crc, len, p->buf_len); log_debug();
     return len == p->buf_len ? SUCCESS : FAILURE;
 }
 

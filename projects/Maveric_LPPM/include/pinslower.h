@@ -65,7 +65,6 @@
 #define NVG_PORT    COM_B
 #define UPPM_PORT   COM_C
 #define FTDI_PORT   COM_D
-#define LOG_PORT    FTDI_PORT
 
 //========================================
 //		Master Clear Pin
