@@ -40,6 +40,7 @@ void cmdimpl_init(void) {
     
     ht_set(ht, "gnc_get_mode", (cmdimpl_f) cmdimpl_gnc_get_mode);
     ht_set(ht, "gnc_set_mode", (cmdimpl_f) cmdimpl_gnc_set_mode);
+    ht_set(ht, "gnc_get_cnts", (cmdimpl_f) cmdimpl_gnc_get_cnts);
     
     ht_set(ht, "flash_read", (cmdimpl_f) cmdimpl_flash_read);
     ht_set(ht, "flash_write", (cmdimpl_f) cmdimpl_flash_write);
@@ -305,6 +306,19 @@ void cmdimpl_gnc_set_mode(mcppkt_s* pkt) {
             g_gnc.gnc_mode = mode;
             char res[8] = {0};
             sprintf(res, "%u", (g_gnc.gnc_mode == mode) ? SUCCESS : FAILURE);
+            mcp_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
+void cmdimpl_gnc_get_cnts(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            char* p = pkt->args;
+            sprintf(LOGBUF, "cmdimpl_gnc_get_cnts"); log_info();
+            char res[32] = {0};
+            sprintf(res, "%u %u %u", g_gnc.unexpected_safe_count, g_gnc.unexpected_detumble_count, g_gnc.sunspin_count);
             mcp_respond(pkt, RES, res);
             break;
         }
