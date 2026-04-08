@@ -46,7 +46,7 @@ void mcpmgr_parse_stream(mcpmgr_s* mcpmgr, ringbuf_s* rcvbuf, mcppkt_s* pkt, int
         if (kiss_process_byte(p, b)) {
             // fprintf(COM_A, "%sFRAME\r\n\n", KGRN);
             // mcppkt_clear(pkt);
-            // p->fsm = KISS_WAIT_FEND;
+            // p->fsm = KISS_IN_FRAME;
             // continue;
             
             // Full frame received
@@ -112,7 +112,7 @@ void mcpmgr_process_pkt(mcpmgr_s* mcpmgr, mcppkt_s* pkt) {
 
 cleanup:
     mcppkt_clear(pkt);
-    p->fsm = KISS_WAIT_FEND;
+    p->fsm = KISS_IN_FRAME;
 }
 
 void mcp_process(mcpmgr_s* mcpmgr, uint8_t orgn, uint8_t dest, uint8_t echo, mcppkt_type_e ptype, char* id, uint8_t* args, uint8_t args_len) {
