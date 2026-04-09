@@ -60,7 +60,7 @@ int1 mtq_pkt_verify_csum(mtq_pkt_s* pkt) {
 
 // MTQ API 
 
-status_e mtq_init(mtq_s* mtq, uint8_t port) {
+status_e mtq_init(mtq_s* mtq, uint8_t port, float* paxs, char* tle) {
     mtq->is_init = TRUE;
     mtq->port = port;
     memcpy(mtq->reg_table, MTQ_INIT_REG_TABLE, sizeof(MTQ_INIT_REG_TABLE));
@@ -86,8 +86,10 @@ status_e mtq_init(mtq_s* mtq, uint8_t port) {
     systime_rtc(&rtc);
     status_e s1 = mtq_set_datetime(mtq, &rtc);
     status_e s2 = mtq_set_mode(mtq, MTQ_MODE_SAFE);
+    status_e s3 = mtq_write_start(mtq, MTQ_POINTING_AXIS, paxs);
+    status_e s4 = mtq_write_start(mtq, MTQ_TLE, tle);
     sprintf(LOGBUF, "mtq_init: port=%u", mtq->port); log_info();
-    return (s1 == SUCCESS && s2 == SUCCESS) ? SUCCESS : FAILURE;
+    return (s1 == SUCCESS && s2 == SUCCESS && s3 == SUCCESS && s4 == SUCCESS) ? SUCCESS : FAILURE;
 }
 
 void mtq_destroy(mtq_s* mtq) {

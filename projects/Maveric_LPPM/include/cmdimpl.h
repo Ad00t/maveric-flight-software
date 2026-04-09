@@ -30,8 +30,13 @@ void cmdimpl_gnc_get_cnts(mcppkt_s* pkt);
 void cmdimpl_flash_read(mcppkt_s* pkt);
 void cmdimpl_flash_write(mcppkt_s* pkt);
 void cmdimpl_flash_erase(mcppkt_s* pkt);
-void cmdimpl_flash_get_cfg(mcppkt_s* pkt);
-void cmdimpl_flash_set_cfg(mcppkt_s* pkt);
+void cmdimpl_flash_unprot(mcppkt_s* pkt);
+void cmdimpl_flash_read_prot(mcppkt_s* pkt);
+
+void cmdimpl_cfg_get(mcppkt_s* pkt);
+void cmdimpl_cfg_set(mcppkt_s* pkt);
+void cmdimpl_cfg_set_ll(mcppkt_s* pkt);
+void cmdimpl_cfg_flush(mcppkt_s* pkt);
 
 void cmdimpl_mtq_heartbeat(mcppkt_s* pkt);
 void cmdimpl_mtq_reset(mcppkt_s* pkt);

@@ -140,7 +140,7 @@ void system_init(void) {
     // gyro_init(&g_gyro, GYRO_CS1, GYRO_CS2, GYRO_CS3, GYRO_ON);
     status_e s_flashmgr = flashmgr_init(&g_flashmgr);
     flashmgr_increment_rbt_cnt(&g_flashmgr);
-    status_e s_mtq = mtq_init(&g_mtq, MTQ_PORT);
+    status_e s_mtq = mtq_init(&g_mtq, MTQ_PORT, g_flashmgr.config.paxs, g_flashmgr.config.tle);
     status_e s_nvg = nvg_init(&g_nvg, NVG_PORT);
     mcpmgr_init(&g_mcpmgr);
     scheduler_init(&g_scheduler);

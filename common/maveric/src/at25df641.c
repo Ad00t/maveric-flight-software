@@ -165,7 +165,7 @@ void flashVersion(uint8_t* manufact_id, uint8_t* device_id) {
 void waitForFlash(void) {
 	auto uint16_t n;
 	auto uint8_t stat[3];
-	const uint16_t MAX_SEC = 120; // Sets the maximum time to wait
+	const uint16_t MAX_SEC = 60; // Sets the maximum time to wait
 
 	n = 0;
 	flashStatus(stat); // Checks the flash status bits

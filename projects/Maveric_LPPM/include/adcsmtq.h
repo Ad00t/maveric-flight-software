@@ -234,7 +234,7 @@ typedef struct {
 } mtq_s;
 
 // Initialize mtq object
-status_e mtq_init(mtq_s* mtq, uint8_t port);
+status_e mtq_init(mtq_s* mtq, uint8_t port, float* paxs, char* tle);
 
 // Free heap allocations 
 void mtq_destroy(mtq_s* mtq);
