@@ -30,11 +30,14 @@ void cmdimpl_init(void) {
     ht_set(ht, "ppm_set_time", (cmdimpl_f) cmdimpl_ppm_set_time);
     ht_set(ht, "ppm_delay", (cmdimpl_f) cmdimpl_ppm_delay);
     ht_set(ht, "ppm_clear_bufs", (cmdimpl_f) cmdimpl_ppm_clear_bufs);
-    ht_set(ht, "ppm_get_scheds", (cmdimpl_f) cmdimpl_ppm_get_scheds);
+
+    ht_set(ht, "ppm_get_sched", (cmdimpl_f) cmdimpl_ppm_get_sched);
+    ht_set(ht, "ppm_get_all_scheds", (cmdimpl_f) cmdimpl_ppm_get_all_scheds);
     ht_set(ht, "ppm_sched_cmd_in", (cmdimpl_f) cmdimpl_ppm_sched_cmd_in);
     ht_set(ht, "ppm_desched", (cmdimpl_f) cmdimpl_ppm_desched);
     ht_set(ht, "ppm_resched_in", (cmdimpl_f) cmdimpl_ppm_resched_in);
     ht_set(ht, "ppm_clear_sched", (cmdimpl_f) cmdimpl_ppm_clear_sched);
+    ht_set(ht, "ppm_update_sched", (cmdimpl_f) cmdimpl_ppm_update_sched);
 
     ht_set(ht, "tlm_get_data", (cmdimpl_f) cmdimpl_tlm_get_data);
     
@@ -193,10 +196,30 @@ void cmdimpl_ppm_clear_bufs(mcppkt_s* pkt) {
     }
 }
 
-void cmdimpl_ppm_get_scheds(mcppkt_s* pkt) {
+void cmdimpl_ppm_get_sched(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case CMD: {
-            sprintf(LOGBUF, "cmdimpl_ppm_get_scheds"); log_info();
+            char* p = pkt->args;
+            uint8_t sched_id = strtoul(p, &p, 10);
+            sprintf(LOGBUF, "cmdimpl_ppm_get_sched id=%u", sched_id); log_info();
+            char res[MCP_MAX_ARGS_LEN] = {0};
+            schedtask_s* st = g_scheduler.id_map[sched_id]; 
+            if (st->id == sched_id) {
+                sprintf(res, "%u %u %u %u %u %u %u", 
+                        SUCCESS, st->id, st->active, st->type, st->period_ms, st->remaining_reps, st->next_release);
+            } else {
+                sprintf(res, "%u %u", FAILURE, sched_id);
+            }
+            mcp_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
+void cmdimpl_ppm_get_all_scheds(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            sprintf(LOGBUF, "cmdimpl_ppm_get_all_scheds"); log_info();
             char res[MCP_MAX_ARGS_LEN] = {0}; 
             uint8_t i;
             uint16_t j = 0;
@@ -222,9 +245,8 @@ void cmdimpl_ppm_sched_cmd_in(mcppkt_s* pkt) {
             uint8_t dest = strtoul(p, &p, 10);
             uint8_t echo = strtoul(p, &p, 10);
             uint8_t ptype = strtoul(p, &p, 10);
-            char sep[] = " ";
-            char* mcp_id = strtok(++p, sep);
-            char* args = strtok(0, sep);
+            char* mcp_id = strtok(p+1, " ");
+            char* args = strtok(0, "");
             sprintf(LOGBUF, "cmdimpl_ppm_sched_cmd_in sid=%u del=%u per=%u rep=%u o=%u d=%u e=%u p=%u id='%s' args='%s'",
                     sched_id, start_delay_ms, period_ms, reps, orgn, dest, echo, ptype, mcp_id, args); log_info();
             mcppkt_s schedcmd;
@@ -290,6 +312,29 @@ void cmdimpl_ppm_clear_sched(mcppkt_s* pkt) {
     }
 }
 
+void cmdimpl_ppm_update_sched(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            char* p = pkt->args;
+            uint8_t sched_id = strtoul(p, &p, 10);
+            uint32_t period_ms = strtoul(p, &p, 10);
+            uint16_t remaining_reps = strtoul(p, &p, 10);
+            sprintf(LOGBUF, "cmdimpl_ppm_update_sched id=%u p=%u r=%u", sched_id, period_ms, remaining_reps); log_info();
+            char res[MCP_MAX_ARGS_LEN] = {0};
+            schedtask_s* st = g_scheduler.id_map[sched_id]; 
+            if (st->id == sched_id) {
+                st->period_ms = period_ms;
+                st->remaining_reps = remaining_reps;
+                sprintf(res, "%u %u %Lu %u", SUCCESS, sched_id, period_ms, remaining_reps);
+            } else {
+                sprintf(res, "%u %u %Lu %u", FAILURE, sched_id, period_ms, remaining_reps);
+            }
+            mcp_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
 void cmdimpl_gnc_get_mode(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case CMD: {
@@ -338,47 +383,39 @@ void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
             uint32_t mtq_stat = 0;
             mtq_get_data(&g_mtq, MTQ_STAT, &mtq_stat);
 
+            config_s* cfg = &g_flashmgr.config;
+            uint8_t i;
             uint16_t j = sprintf(res, "%u %u %u %u %u %u %u %u %u %Lu %u %u ", 
                                  g_flashmgr.rbt_cnt, g_rbt_cause, g_ertc.heartbeat, g_mtq.heartbeat, g_nvg.heartbeat,
                                  g_gnc.gnc_mode, g_gnc.unexpected_safe_count, g_gnc.unexpected_detumble_count, g_gnc.sunspin_count,
-                                 mtq_stat, g_flashmgr.config.gyro_rate_src, g_flashmgr.config.attitude_src);
+                                 mtq_stat, cfg->gyro_rate_src, cfg->mag_src);
 
-            uint16_t mtq_adcs_tmp[2] = {0};
-            mtq_get_data(&g_mtq, MTQ_ADCS_TMP, &mtq_adcs_tmp);
-            float adcs_temp = (float) mtq_adcs_tmp[0] * 150 / 32768;
-            j += ftoa(adcs_temp, &res[j], 3, 'f');
-
-            float gyro_rate_rad[3] = {0};
-            switch (g_flashmgr.config.gyro_rate_src) {
+            float gyro_rate[4] = {0}; // Make sure these buffers have enough space for the extra value(s) the nvg reports
+            switch (cfg->gyro_rate_src) {
                 case DATASRC_MTQ:
-                    mtq_get_data(&g_mtq, MTQ_RATE, gyro_rate_rad);
+                    mtq_get_data(&g_mtq, MTQ_RATE, gyro_rate); // rad/s
                     break;
                 case DATASRC_NVG:
-                    nvg_get_sensor_data(&g_nvg, NVG_GYROSCOPE_CAL, gyro_rate_rad);
-                    break;
-                case DATASRC_GYRO:
+                    nvg_get_sensor_data(&g_nvg, NVG_GYROSCOPE_CAL, gyro_rate); // rad/s
                     break;
             }
-            uint8_t i;
             for (i = 0; i < 3; i++) {
                 j += sprintf(&res[j], " ");
-                j += ftoa(gyro_rate_rad[i], &res[j], 3, 'f');
+                j += ftoa(gyro_rate[i], &res[j], 3, 'f');
             }
-            
-            float attitude[5] = {0};
-            switch (g_flashmgr.config.attitude_src) {
+
+            float mag[4] = {0};
+            switch (cfg->mag_src) {
                 case DATASRC_MTQ:
-                    mtq_get_data(&g_mtq, MTQ_Q, attitude);
+                    mtq_get_data(&g_mtq, MTQ_MAG, mag); // nT
                     break;
                 case DATASRC_NVG:
-                    nvg_get_sensor_data(&g_nvg, NVG_QUAT_RV, attitude);
-                    break;
-                case DATASRC_GYRO:
+                    nvg_get_sensor_data(&g_nvg, NVG_MAGNETOMETER_CAL, mag); // uT
                     break;
             }
-            for (i = 0; i < 4; i++) {
+            for (i = 0; i < 3; i++) {
                 j += sprintf(&res[j], " ");
-                j += ftoa(attitude[i], &res[j], 3, 'f');
+                j += ftoa(mag[i], &res[j], 3, 'f');
             }
 
             float mtq_dipole[3] = {0};
@@ -387,13 +424,11 @@ void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
                 j += sprintf(&res[j], " ");
                 j += ftoa(mtq_dipole[i], &res[j], 3, 'f');
             }
-            
-            float mtq_sv[3] = {0};
-            mtq_get_data(&g_mtq, MTQ_SV, mtq_sv);
-            for (i = 0; i < 3; i++) {
-                j += sprintf(&res[j], " ");
-                j += ftoa(mtq_sv[i], &res[j], 3, 'f');
-            }
+
+            uint16_t mtq_adcs_tmp[2] = {0};
+            mtq_get_data(&g_mtq, MTQ_ADCS_TMP, mtq_adcs_tmp);
+            float adcs_temp = (float) mtq_adcs_tmp[0] * 150 / 32768;
+            j += ftoa(adcs_temp, &res[j], 3, 'f');
 
             mcp_respond(pkt, RES, res);
             break;
@@ -493,13 +528,15 @@ void cmdimpl_cfg_get(mcppkt_s* pkt) {
         case CMD: {
             config_s* cfg = &g_flashmgr.config;
             char res[MCP_MAX_ARGS_LEN] = {0};
-            uint16_t j = sprintf(res, "%u %u %u", cfg->log_level, cfg->gyro_rate_src, cfg->attitude_src);
+            uint16_t j = sprintf(res, "%u %u %u", cfg->log_level, cfg->gyro_rate_src, cfg->mag_src);
             uint8_t i;
             for (i = 0; i < 3; i++) {
                 j += sprintf(&res[j], " ");
                 j += ftoa(cfg->paxs[i], &res[j], 3, 'f');
             }
-            j += sprintf(&res[j], " %s", cfg->tle);
+            char tlebuf[140] = {0};
+            memcpy(tlebuf, cfg->tle, sizeof(tlebuf));
+            j += sprintf(&res[j], " %s", tlebuf); // Doesn't compile with just cfg->tle for some reason
             mcp_respond(pkt, RES, res);
             break;
         }
@@ -513,10 +550,12 @@ void cmdimpl_cfg_set(mcppkt_s* pkt) {
             config_s* cfg = &g_flashmgr.config;
             cfg->log_level = strtoul(p, &p, 10);
             cfg->gyro_rate_src = strtoul(p, &p, 10);
-            cfg->attitude_src = strtoul(p, &p, 10);
+            cfg->mag_src = strtoul(p, &p, 10);
             cfg->paxs[0] = strtof(p, &p);
             cfg->paxs[1] = strtof(p, &p);
             cfg->paxs[2] = strtof(p, &p);
+            memset(cfg->tle, 0, sizeof(cfg->tle));
+            memcpy(cfg->tle, p+1, strlen(p+1) + 1);
             char res[8] = {0};
             sprintf(res, "%u", SUCCESS);
             mcp_respond(pkt, RES, res);
@@ -853,7 +892,7 @@ void cmdimpl_nvg_get_1(mcppkt_s* pkt) {
             if (s == SUCCESS) {
                 char res[MCP_MAX_ARGS_LEN] = {0};
                 nvg_sensor_s* sensor = &g_nvg.sensors[sensor_id];
-                uint16_t j = sprintf(&res[j], "%u %u ", s, sensor_id);
+                uint16_t j = sprintf(res, "%u %u ", s, sensor_id);
                 j += ftoa(sensor->ts, &res[j], 6, 'f');
                 uint8_t i;
                 for (i = 0; i < sensor->len; i++) {

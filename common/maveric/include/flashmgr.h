@@ -24,14 +24,13 @@
 typedef enum {
     DATASRC_MTQ = 0,
     DATASRC_NVG = 1,
-    DATASRC_GYRO = 2 // Unused
 } datasrc_e;
 
 typedef struct {
 #if NODE == NODE_LPPM
     log_level_e log_level;
     datasrc_e gyro_rate_src;
-    datasrc_e attitude_src;
+    datasrc_e mag_src;
     float paxs[3];
     char tle[140];
 #elif NODE == NODE_UPPM

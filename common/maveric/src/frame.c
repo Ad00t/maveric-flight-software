@@ -92,7 +92,7 @@ void kiss_apply_byte_check(uint8_t* message, uint16_t messageLength, uint8_t* fr
 
 	uint16_t i;
 	for (i = 0; i < messageLength; i++) {
-        uint8_t b = message[i];
+        uint8_t b = message[i]; // Doesn't work properly unless we assign it first
 		if (b == FEND) {
 			frame[spot++] = FESC;
 			frame[spot++] = TFEND;

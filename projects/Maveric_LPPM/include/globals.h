@@ -6,7 +6,6 @@
 #include "interrupts.h"
 #include "adcsmtq.h"
 #include "m41t81s.h"
-#include "adis16260.h"
 #include "naviguider.h"
 #include "gnc.h"
 #include <stdint.h>
@@ -20,6 +19,5 @@ extern scheduler_s g_scheduler;         // Schedules manager
 extern flashmgr_s g_flashmgr;           // Flash manager
 extern ertc_s g_ertc;                   // External RTC (on motherboard)
 extern mtq_s g_mtq;                     // Magnetorquer
-extern gyro_s g_gyro;                   // Gyroscope (x3)
 extern nvg_s g_nvg;                     // Naviguider
 extern gnc_s g_gnc;                     // GNC script state

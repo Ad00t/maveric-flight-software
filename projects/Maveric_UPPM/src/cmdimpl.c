@@ -26,11 +26,14 @@ void cmdimpl_init() {
     ht_set(ht, "ppm_set_time", (cmdimpl_f) cmdimpl_ppm_set_time);
     ht_set(ht, "ppm_delay", (cmdimpl_f) cmdimpl_ppm_delay);
     ht_set(ht, "ppm_clear_bufs", (cmdimpl_f) cmdimpl_ppm_clear_bufs);
-    ht_set(ht, "ppm_get_scheds", (cmdimpl_f) cmdimpl_ppm_get_scheds);
+    
+    ht_set(ht, "ppm_get_sched", (cmdimpl_f) cmdimpl_ppm_get_sched);
+    ht_set(ht, "ppm_get_all_scheds", (cmdimpl_f) cmdimpl_ppm_get_all_scheds);
     ht_set(ht, "ppm_sched_cmd_in", (cmdimpl_f) cmdimpl_ppm_sched_cmd_in);
     ht_set(ht, "ppm_desched", (cmdimpl_f) cmdimpl_ppm_desched);
     ht_set(ht, "ppm_resched_in", (cmdimpl_f) cmdimpl_ppm_resched_in);
     ht_set(ht, "ppm_clear_sched", (cmdimpl_f) cmdimpl_ppm_clear_sched);
+    ht_set(ht, "ppm_update_sched", (cmdimpl_f) cmdimpl_ppm_update_sched);
     
     ht_set(ht, "tlm_get_data", (cmdimpl_f) cmdimpl_tlm_get_data);
 
@@ -180,10 +183,30 @@ void cmdimpl_ppm_clear_bufs(mcppkt_s* pkt) {
     }
 }
 
-void cmdimpl_ppm_get_scheds(mcppkt_s* pkt) {
+void cmdimpl_ppm_get_sched(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case CMD: {
-            sprintf(LOGBUF, "cmdimpl_ppm_get_scheds"); log_info();
+            char* p = pkt->args;
+            uint8_t sched_id = strtoul(p, &p, 10);
+            sprintf(LOGBUF, "cmdimpl_ppm_get_sched id=%u", sched_id); log_info();
+            char res[MCP_MAX_ARGS_LEN] = {0};
+            schedtask_s* st = g_scheduler.id_map[sched_id]; 
+            if (st->id == sched_id) {
+                sprintf(res, "%u %u %u %u %u %u %u", 
+                        SUCCESS, st->id, st->active, st->type, st->period_ms, st->remaining_reps, st->next_release);
+            } else {
+                sprintf(res, "%u %u", FAILURE, sched_id);
+            }
+            mcp_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
+void cmdimpl_ppm_get_all_scheds(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            sprintf(LOGBUF, "cmdimpl_ppm_get_all_scheds"); log_info();
             char res[MCP_MAX_ARGS_LEN] = {0}; 
             uint8_t i;
             uint16_t j = 0;
@@ -209,13 +232,12 @@ void cmdimpl_ppm_sched_cmd_in(mcppkt_s* pkt) {
             uint8_t dest = strtoul(p, &p, 10);
             uint8_t echo = strtoul(p, &p, 10);
             uint8_t ptype = strtoul(p, &p, 10);
-            char sep[] = " ";
-            char* cmd_id = strtok(++p, sep);
-            char* args = strtok(0, sep);
+            char* mcp_id = strtok(p+1, " ");
+            char* args = strtok(0, "");
             sprintf(LOGBUF, "cmdimpl_ppm_sched_cmd_in sid=%u del=%u per=%u rep=%u o=%u d=%u e=%u p=%u id='%s' args='%s'",
-                    sched_id, start_delay_ms, period_ms, reps, orgn, dest, echo, ptype, cmd_id, args); log_info();
+                    sched_id, start_delay_ms, period_ms, reps, orgn, dest, echo, ptype, mcp_id, args); log_info();
             mcppkt_s schedcmd;
-            mcppkt_create(&schedcmd, orgn, dest, echo, ptype, cmd_id, args);
+            mcppkt_create(&schedcmd, orgn, dest, echo, ptype, mcp_id, args);
             status_e s = scheduler_schedule_cmd_in(&g_scheduler, sched_id, &schedcmd, start_delay_ms, period_ms, reps);
             char res[32] = {0};
             uint8_t j = sprintf(res, "%u %u", s, sched_id);
@@ -277,6 +299,29 @@ void cmdimpl_ppm_clear_sched(mcppkt_s* pkt) {
     }
 }
 
+void cmdimpl_ppm_update_sched(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            char* p = pkt->args;
+            uint8_t sched_id = strtoul(p, &p, 10);
+            uint32_t period_ms = strtoul(p, &p, 10);
+            uint16_t remaining_reps = strtoul(p, &p, 10);
+            sprintf(LOGBUF, "cmdimpl_ppm_update_sched id=%u p=%u r=%u", sched_id, period_ms, remaining_reps); log_info();
+            char res[MCP_MAX_ARGS_LEN] = {0};
+            schedtask_s* st = g_scheduler.id_map[sched_id]; 
+            if (st->id == sched_id) {
+                st->period_ms = period_ms;
+                st->remaining_reps = remaining_reps;
+                sprintf(res, "%u %u %Lu %u", SUCCESS, sched_id, period_ms, remaining_reps);
+            } else {
+                sprintf(res, "%u %u %Lu %u", FAILURE, sched_id, period_ms, remaining_reps);
+            }
+            mcp_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
 void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case RES: {
@@ -295,21 +340,17 @@ void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
                     g_tlm.sunspin_count = strtoul(p, &p, 10);
                     g_tlm.mtq_stat = strtoul(p, &p, 10);
                     g_tlm.gyro_rate_src = strtoul(p, &p, 10);
-                    g_tlm.attitude_src = strtoul(p, &p, 10);
-                    g_tlm.adcs_temp = strtof(p, &p);
+                    g_tlm.mag_src = strtoul(p, &p, 10);
                     g_tlm.gyro_rate[0] = strtof(p, &p);
                     g_tlm.gyro_rate[1] = strtof(p, &p);
                     g_tlm.gyro_rate[2] = strtof(p, &p);
-                    g_tlm.attitude[0] = strtof(p, &p);
-                    g_tlm.attitude[1] = strtof(p, &p);
-                    g_tlm.attitude[2] = strtof(p, &p);
-                    g_tlm.attitude[3] = strtof(p, &p);
+                    g_tlm.mag[0] = strtof(p, &p);
+                    g_tlm.mag[1] = strtof(p, &p);
+                    g_tlm.mag[2] = strtof(p, &p);
                     g_tlm.mtq_dipole[0] = strtof(p, &p);
                     g_tlm.mtq_dipole[1] = strtof(p, &p);
                     g_tlm.mtq_dipole[2] = strtof(p, &p);
-                    g_tlm.sv[0] = strtof(p, &p);
-                    g_tlm.sv[1] = strtof(p, &p);
-                    g_tlm.sv[2] = strtof(p, &p);
+                    g_tlm.adcs_temp = strtof(p, &p);
                     break;
                 case NODE_EPS:
                     break;

@@ -7,6 +7,7 @@
 #define SCHEDULER_MAX_FUNC_TASKS        8 
 #define SCHEDULER_MAX_CMD_TASKS         4
 #define SCHEDULER_MAX_TASKS             SCHEDULER_MAX_CMD_TASKS + SCHEDULER_MAX_FUNC_TASKS
+#define SCHEDULER_MAX_IDS               32
 #define SCHEDULE_REPS_INFINITE          0xFFFF
 
 // Schedtask: provides base management and timing functionality to specialized schedule tasks
@@ -36,7 +37,7 @@ void schedtask_create(schedtask_s* task, uint8_t id, schedtask_type_e type, uint
 
 typedef struct {
     schedtask_s tasks[SCHEDULER_MAX_TASKS]; // Internally segmented between schedtask types
-    schedtask_s* id_map[SCHEDULER_MAX_FUNC_TASKS]; // Contains mapping of task ids to pointer to schedtask in tasks buffer
+    schedtask_s* id_map[SCHEDULER_MAX_IDS]; // Contains mapping of task ids to pointer to schedtask in tasks buffer
     mcppkt_s cmds[SCHEDULER_MAX_CMD_TASKS]; // Buffer of cmds
 } scheduler_s;
 

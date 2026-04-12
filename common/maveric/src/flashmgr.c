@@ -67,7 +67,7 @@ void flashmgr_config_load_defaults(flashmgr_s* self) {
 #if NODE == NODE_LPPM
     self->config.log_level = LL_INFO;
     self->config.gyro_rate_src = 0; 
-    self->config.attitude_src = 0;
+    self->config.mag_src = 0;
     float dfl_paxs[3] = { 0, 0, -1 };
     memcpy(self->config.paxs, dfl_paxs, sizeof(dfl_paxs));
     char dfl_tle[140] = "1 99999U 26001A   26182.53800926  .00000000  00000-0  15000-3 0  99992 99999  97.8250 154.7171 0058009 348.1000 351.9980 14.91466332000019";

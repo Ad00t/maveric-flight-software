@@ -60,20 +60,18 @@ void hk_heartbeats(void) {
 void hk_read_sensors(void) {
     // mtq_read_ctrl(&g_mtq);
     mtq_read_fast(&g_mtq);
-    // gyro_read_all(&g_gyro);
 }
 
 void hk_gnc_step(void) {
-    float gyro_rate_rad[3] = {0};
-    switch (g_flashmgr.config.gyro_rate_src) {
+    float gyro_rate[4] = {0}; // Make sure we have enough space for extra nvg value(s)
+    config_s* cfg = &g_flashmgr.config; 
+    switch (cfg->gyro_rate_src) {
         case DATASRC_MTQ:
-            mtq_get_data(&g_mtq, MTQ_RATE, gyro_rate_rad);
+            mtq_get_data(&g_mtq, MTQ_RATE, gyro_rate); // rad/s
             break;
         case DATASRC_NVG:
-            nvg_get_sensor_data(&g_nvg, NVG_GYROSCOPE_CAL, gyro_rate_rad);
-            break;
-        case DATASRC_GYRO:
+            nvg_get_sensor_data(&g_nvg, NVG_GYROSCOPE_CAL, gyro_rate); // rad/s
             break;
     }
-    gnc_step(&g_gnc, &g_mtq, gyro_rate_rad);
+    gnc_step(&g_gnc, &g_mtq, gyro_rate);
 }

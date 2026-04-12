@@ -71,7 +71,6 @@
 #include "mcppkt.c"
 #include "logger.c"
 #include "adcsmtq.c"
-#include "adis16260.c"
 #include "naviguider.c"
 #include "m41t81s.c"
 #include "mcpmgr.c"
@@ -93,7 +92,6 @@ flashmgr_s g_flashmgr = {0};        // Flash manager. Includes config, rbtcnt.
 scheduler_s g_scheduler = {0};      // Schedules manager
 ertc_s g_ertc = {0};                // External RTC (on motherboard)
 mtq_s g_mtq = {0};                  // Magnetorquer
-gyro_s g_gyro = {0};                // Gyroscope (x3)
 nvg_s g_nvg = {0};                  // Naviguider
 gnc_s g_gnc = {0};                  // GNC script state
 

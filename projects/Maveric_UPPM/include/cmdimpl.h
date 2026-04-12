@@ -15,11 +15,13 @@ void cmdimpl_ppm_get_time(mcppkt_s* pkt);
 void cmdimpl_ppm_set_time(mcppkt_s* pkt);
 void cmdimpl_ppm_delay(mcppkt_s* pkt);
 void cmdimpl_ppm_clear_bufs(mcppkt_s* pkt);
-void cmdimpl_ppm_get_scheds(mcppkt_s* pkt);
+void cmdimpl_ppm_get_sched(mcppkt_s* pkt);
+void cmdimpl_ppm_get_all_scheds(mcppkt_s* pkt);
 void cmdimpl_ppm_sched_cmd_in(mcppkt_s* pkt);
 void cmdimpl_ppm_desched(mcppkt_s* pkt);
 void cmdimpl_ppm_resched_in(mcppkt_s* pkt);
 void cmdimpl_ppm_clear_sched(mcppkt_s* pkt);
+void cmdimpl_ppm_update_sched(mcppkt_s* pkt);
 
 void cmdimpl_tlm_get_data(mcppkt_s* pkt);
 

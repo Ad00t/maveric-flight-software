@@ -6,6 +6,7 @@
 typedef struct {
     // Generic
     uint64_t time;                      // UPPM
+    uint8_t ops_state;                  // UPPM
     uint16_t lppm_rbt_cnt;              // LPPM
     uint8_t lppm_rbt_cause;             // LPPM
     uint16_t uppm_rbt_cnt;              // UPPM
@@ -20,12 +21,11 @@ typedef struct {
     uint16_t sunspin_count;             // LPPM 
     uint32_t mtq_stat;                  // LPPM
     uint8_t gyro_rate_src;              // LPPM
-    uint8_t attitude_src;               // LPPM
-    float adcs_temp;                    // LPPM
+    uint8_t mag_src;                    // LPPM
     float gyro_rate[3];                 // LPPM
-    float attitude[4];                  // LPPM
+    float mag[3];                       // LPPM
     float mtq_dipole[3];                // LPPM
-    float sv[3];                        // LPPM
+    float adcs_temp;                    // LPPM
     // Beacon 2                          
     uint8_t eps_state;                  // EPS
     uint8_t eps_pwr_out[4];             // EPS
