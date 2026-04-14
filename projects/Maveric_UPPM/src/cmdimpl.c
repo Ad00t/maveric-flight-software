@@ -46,6 +46,8 @@ void cmdimpl_init() {
     ht_set(ht, "cfg_get", (cmdimpl_f) cmdimpl_cfg_get);
     ht_set(ht, "cfg_set", (cmdimpl_f) cmdimpl_cfg_set);
     ht_set(ht, "cfg_set_ll", (cmdimpl_f) cmdimpl_cfg_set_ll);
+    ht_set(ht, "cfg_load_dfl", (cmdimpl_f) cmdimpl_cfg_load_dfl);
+    ht_set(ht, "cfg_load_flash", (cmdimpl_f) cmdimpl_cfg_load_flash);
     ht_set(ht, "cfg_flush", (cmdimpl_f) cmdimpl_cfg_flush);
     
     ht_set(ht, "ax100_get_power", (cmdimpl_f) cmdimpl_ax100_get_power);
@@ -405,12 +407,17 @@ void cmdimpl_flash_erase(mcppkt_s* pkt) {
         case CMD: {
             char* p = pkt->args;
             uint32_t addr = strtoul(p, &p, 16);
-            sprintf(LOGBUF, "cmdimpl_flash_erase addr=0x%02X%02X%02X", 
-                    make8(addr, 2), make8(addr, 1), make8(addr, 0)); log_info();
-            flashEraseBlockByAddr(addr); 
+            uint16_t num_blocks = strtoul(p, &p, 10);
+            sprintf(LOGBUF, "cmdimpl_flash_erase addr=0x%02X%02X%02X blocks=%u", 
+                    make8(addr, 2), make8(addr, 1), make8(addr, 0), num_blocks); log_info();
+            uint16_t start_block = FlashAddrToBlock(addr);
+            uint16_t i;
+            for (i = start_block; i < start_block + num_blocks; i++) {
+                flashEraseBlockByNumber(i); 
+            }
             char res[32] = {0};
-            sprintf(res, "%u 0x%02X%02X%02X", 
-                    SUCCESS, make8(addr, 2), make8(addr, 1), make8(addr, 0));
+            sprintf(res, "%u 0x%02X%02X%02X %u %u", 
+                    SUCCESS, make8(addr, 2), make8(addr, 1), make8(addr, 0), start_block, num_blocks);
             mcp_respond(pkt, RES, res);
             break;
         }
@@ -456,7 +463,7 @@ void cmdimpl_cfg_get(mcppkt_s* pkt) {
         case CMD: {
             char res[MCP_MAX_ARGS_LEN] = {0};
             config_s* cfg = &g_flashmgr.config;
-            sprintf(res, "%u", cfg->log_level);
+            sprintf(res, "%u %u", cfg->log_level, cfg->ops_stage);
             mcp_respond(pkt, RES, res);
             break;
         }
@@ -469,6 +476,7 @@ void cmdimpl_cfg_set(mcppkt_s* pkt) {
             char* p = pkt->args;
             config_s* cfg = &g_flashmgr.config;
             cfg->log_level = strtoul(p, &p, 10);
+            cfg->ops_stage = strtoul(p, &p, 10);
             char res[8] = {0};
             sprintf(res, "%u", SUCCESS);
             mcp_respond(pkt, RES, res);
@@ -491,6 +499,43 @@ void cmdimpl_cfg_set_ll(mcppkt_s* pkt) {
     }
 }
 
+void cmdimpl_cfg_set_ops(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            char* p = pkt->args;
+            config_s* cfg = &g_flashmgr.config;
+            cfg->ops_stage = strtoul(p, &p, 10);
+            char res[8] = {0};
+            sprintf(res, "%u", SUCCESS);
+            mcp_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
+void cmdimpl_cfg_load_dfl(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            flashmgr_config_load_defaults(&g_flashmgr);
+            char res[8] = {0};
+            sprintf(res, "%u", SUCCESS);
+            mcp_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
+void cmdimpl_cfg_load_flash(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            status_e s = flashmgr_config_load_flash(&g_flashmgr);
+            char res[8] = {0};
+            sprintf(res, "%u", s);
+            mcp_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
 
 void cmdimpl_cfg_flush(mcppkt_s* pkt) {
     switch (pkt->ptype) {

@@ -116,6 +116,7 @@ void system_init(void) {
 	output_high(FLASH_CHIP_SELECT);
 	output_high(SECOND_FLASH_CS);
 	spi_set_mode(FLASH_SPI_MODE);
+    delay_ms(50);
    
     // Interrupts init 
     irqmgr_init(&g_irqmgr);
@@ -135,15 +136,14 @@ void system_init(void) {
     systime_init(&g_irqmgr.ms, &g_ertc.time);
     
     // Submodules & services init
-    // gyro_init(&g_gyro, GYRO_CS1, GYRO_CS2, GYRO_CS3, GYRO_ON);
     status_e s_flashmgr = flashmgr_init(&g_flashmgr);
-    flashmgr_increment_rbt_cnt(&g_flashmgr);
     status_e s_mtq = mtq_init(&g_mtq, MTQ_PORT, g_flashmgr.config.paxs, g_flashmgr.config.tle);
     status_e s_nvg = nvg_init(&g_nvg, NVG_PORT);
     mcpmgr_init(&g_mcpmgr);
     scheduler_init(&g_scheduler);
     hk_init();
     cmdimpl_init();
+    gnc_init(&g_gnc);
 
     // Push a time update to UPPM 
     char req[32] = {0};

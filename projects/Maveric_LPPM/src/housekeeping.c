@@ -27,6 +27,7 @@ void hk_init(void) {
     scheduler_schedule_func_in(&g_scheduler, 3, hk_heartbeats, 4000, 5000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 4, hk_read_sensors, 3000, 2000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 5, hk_gnc_step, 4000, 10000, SCHEDULE_REPS_INFINITE);
+    // scheduler_schedule_func_in(&g_scheduler, 6, hk_ppm_reset, 2*MS_PER_MIN, 0, 1);
 }
 
 // HOUSEKEEPING FUNCTIONS
@@ -74,4 +75,8 @@ void hk_gnc_step(void) {
             break;
     }
     gnc_step(&g_gnc, &g_mtq, gyro_rate);
+}
+
+void hk_ppm_reset(void) {
+    g_superloop_running = FALSE;
 }

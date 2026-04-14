@@ -21,6 +21,7 @@ void gnc_step(gnc_s* state, mtq_s* mtq, float* gyro_rate_rad) {
 
     sprintf(LOGBUF, "gnc_step: curr_mode=%u expected_mode=%u sun=%u tumb=%u", current_mode, state->expected_mode, sun, tumb); log_info();
 
+
     // Check for unexpected mode transitions
     if (state->expected_mode != current_mode) {
         

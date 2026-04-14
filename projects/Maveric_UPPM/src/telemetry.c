@@ -19,7 +19,7 @@ void tlm_beacon(tlm_s* tlm, uint8_t bcn_num) {
 
     char msg[MCP_MAX_ARGS_LEN] = {0};
     uint16_t j = sprintf(msg, "%u %u %Lu %u %u %u %u %u %u %u ", 
-                 bcn_num, tlm->time, tlm->ops_state, tlm->lppm_rbt_cnt, tlm->lppm_rbt_cause, tlm->uppm_rbt_cnt, tlm->uppm_rbt_cause,
+                 bcn_num, tlm->time, tlm->ops_stage, tlm->lppm_rbt_cnt, tlm->lppm_rbt_cause, tlm->uppm_rbt_cnt, tlm->uppm_rbt_cause,
                  tlm->ertc_heartbeat, tlm->mtq_heartbeat, tlm->nvg_heartbeat);
 
     switch (bcn_num) {

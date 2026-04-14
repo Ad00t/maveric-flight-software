@@ -7,7 +7,7 @@
 status_e ax100_init(ax100_s* a, uint8_t port) {
     a->is_init = TRUE;
     a->port = port;
-    status_e s1 = ax100_set_power(a, TRUE);
+    status_e s1 = ax100_set_power(a, FALSE);
     uint8_t power = 0;
     status_e s2 = ax100_get_power(a, &power);
     sprintf(LOGBUF, "ax100_init: port=%u power=%u", a->port, power); log_info();

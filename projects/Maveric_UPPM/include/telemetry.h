@@ -6,7 +6,7 @@
 typedef struct {
     // Generic
     uint64_t time;                      // UPPM
-    uint8_t ops_state;                  // UPPM
+    uint8_t ops_stage;                  // UPPM
     uint16_t lppm_rbt_cnt;              // LPPM
     uint8_t lppm_rbt_cause;             // LPPM
     uint16_t uppm_rbt_cnt;              // UPPM

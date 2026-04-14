@@ -6,102 +6,96 @@
 
 status_e flashmgr_init(flashmgr_s* self) {
 	memset(self, 0, sizeof(flashmgr_s));
+    status_e s1 = flashmgr_increment_rbt_cnt(self);
     flashmgr_config_load_defaults(self);
-    return flashmgr_config_load_flash(self);
+    status_e s2 = flashmgr_config_load_flash(self);
+    return (s1 == SUCCESS && s2 == SUCCESS) ? SUCCESS : FAILURE;
+}
+
+uint32_t flashmgr_find_last_record(flashmgr_s* self, uint32_t start_addr, uint16_t record_size, uint8_t* out) {
+    uint32_t i;
+    for (i = 0; i <= FLASH_BLOCK_SIZE - record_size; i += record_size) {
+        if (CheckFlashEmpty(start_addr + i, record_size)) {
+            break;
+        }
+    }
+
+    if (i == 0) {
+        // Nothing written yet
+        return start_addr;
+    }
+
+    uint32_t record_addr = start_addr + i - record_size;
+
+    if (out != NULL) {
+        flashRead(record_addr, record_size, out);
+    }
+
+    return record_addr;
+}
+
+status_e flashmgr_append_record(flashmgr_s* self, uint32_t start_addr, uint32_t record_addr, uint8_t* new_record, uint16_t record_size) {
+    flashSectorProtectDisable(start_addr);
+
+    uint32_t new_addr;
+
+    // If nothing has been written yet, write at the start.
+    if (record_addr == start_addr && CheckFlashEmpty(start_addr, record_size)) {
+        new_addr = start_addr;
+    } else {
+        new_addr = record_addr + record_size;
+    }
+
+    if (new_addr > start_addr + FLASH_BLOCK_SIZE - record_size) {
+        uint16_t b = FlashAddrToBlock(start_addr);
+        flashEraseBlockByNumber(b);
+        new_addr = start_addr;
+    }
+
+    return flashWriteSafe(new_addr, record_size, new_record, start_addr,
+                          start_addr + FLASH_BLOCK_SIZE - 1);
 }
 
 status_e flashmgr_increment_rbt_cnt(flashmgr_s* self) {
-	uint32_t i;
-	uint32_t addy;
     uint8_t record_size = sizeof(self->rbt_cnt);
-
-	// This loops over the block, looking for a set of 2 empty bytes.
-	for (i = 0; i < FLASH_BLOCK_SIZE - 1; i += record_size) {
-		//		sprintf(dbgbuf,"\r\n%i",i); sendDBGALL(USER_PORT,dbgbuf);
-		if (CheckFlashEmpty(RBT_CNT_ADDR + i, record_size))
-			break;
-	}
-	// i now contains the location (offset from RBT_CNT_ADDR) of the first empty set of bytes in
-	// flash, or is >= FLASH_BLOCK_SIZE if it could not find an empty spot.
-	addy = RBT_CNT_ADDR + i - record_size;
-
-	// Read the previous value
-	if (i >= record_size)
-		flashRead(addy, record_size, &self->rbt_cnt); // For values of i greater than first iteration
-	else
-		self->rbt_cnt = 0; // For first iteration.
-
-	// Validate no data corruption
-	// if (self->rbt_cnt < 0)
-	// 	self->rbt_cnt = 0;
+    uint32_t curr_record_addr = flashmgr_find_last_record(self, RBT_CNT_ADDR, record_size, (uint8_t*)&self->rbt_cnt);
 
 	// Increment the counter
 	self->rbt_cnt++; // Wraps to 0 automatically
 
 	// Now increment the value in flash
-
-	// First disable protection
-	flashSectorProtectDisable(RBT_CNT_ADDR);
-
-	// Next check if we are at the end of the block, because we'll need to erase the block and start
-	// over in that case
-	if (i >= FLASH_BLOCK_SIZE - 1) {
-		flashEraseBlockByAddr(RBT_CNT_ADDR);
-		i = 0;
-	}
-
-	// Finally, write the new value
-	return flashWriteSafe(RBT_CNT_ADDR + i, record_size, &self->rbt_cnt, RBT_CNT_ADDR,
-						  RBT_CNT_ADDR + FLASH_BLOCK_SIZE - 1);
-}
-
-status_e flashmgr_reset_rbt_cnt(flashmgr_s* self) {
-	self->rbt_cnt = 0;
-	flashSectorProtectDisable(RBT_CNT_ADDR);
-	flashEraseBlockByAddr(RBT_CNT_ADDR);
-	return flashWriteSafe(RBT_CNT_ADDR, sizeof(self->rbt_cnt), &self->rbt_cnt, RBT_CNT_ADDR,
-				          RBT_CNT_ADDR + FLASH_BLOCK_SIZE - 1);
+    return flashmgr_append_record(self, RBT_CNT_ADDR, curr_record_addr, (uint8_t*)&self->rbt_cnt, record_size);
 }
 
 void flashmgr_config_load_defaults(flashmgr_s* self) {
+    config_s* cfg = &self->config;
 #if NODE == NODE_LPPM
-    self->config.log_level = LL_INFO;
-    self->config.gyro_rate_src = 0; 
-    self->config.mag_src = 0;
+    cfg->log_level = LL_INFO;
+    cfg->gyro_rate_src = 0; 
+    cfg->mag_src = 0;
     float dfl_paxs[3] = { 0, 0, -1 };
-    memcpy(self->config.paxs, dfl_paxs, sizeof(dfl_paxs));
+    memcpy(cfg->paxs, dfl_paxs, sizeof(dfl_paxs));
     char dfl_tle[140] = "1 99999U 26001A   26182.53800926  .00000000  00000-0  15000-3 0  99992 99999  97.8250 154.7171 0058009 348.1000 351.9980 14.91466332000019";
-    memcpy(self->config.tle, dfl_tle, sizeof(dfl_tle));
+    memcpy(cfg->tle, dfl_tle, sizeof(dfl_tle));
 #elif NODE == NODE_UPPM
-    self->config.log_level = LL_INFO;
+    cfg->log_level = LL_INFO;
+    cfg->ops_stage = OPS_INIT;
 #endif
+    uint8_t crc_off = offsetof(config_s, crc);
+    cfg->crc = compute_crc16((uint8_t*)cfg, crc_off);
 }
 
 status_e flashmgr_config_load_flash(flashmgr_s* self) {
-    return SUCCESS;
-	uint16_t n = sizeof(config_s);
-	// Setup
-	waitForFlash();
-	// Read and check CRC, exiting successfully if the CRC matches
-    uint16_t i;
-	for (i = 0; i < 10; i++) {
-		flashRead(CONFIG_ADDR, n, (uint8_t*)self->config);
-		if (check_crc16((uint8_t*)self->config, n-2, self->config.crc) == SUCCESS)
-			return SUCCESS;
-	}
-	return FAILURE;
+	uint16_t record_size = sizeof(config_s);
+    uint8_t crc_off = offsetof(config_s, crc);
+    uint32_t curr_record_addr = flashmgr_find_last_record(self, CONFIG_ADDR, record_size, (uint8_t*)&self->config);
+    return check_crc16((uint8_t*)&self->config, crc_off, self->config.crc);
 }
 
 status_e flashmgr_config_flush(flashmgr_s* self) {
-	uint16_t n = sizeof(config_s);
-	self->config.crc = compute_crc16((uint8_t*)self->config, n-2);
-
-    uint16_t m = 0;
-	for (m = 0; m < n; m += FLASH_BLOCK_SIZE){
-		flashEraseBlockByAddr((uint32_t)(CONFIG_ADDR + m)); // Erase the block at Config + m
-		// -------------NOTE THAT A REBOOT HERE WOULD BE REALLY BAD ----------//
-	}
-
-	// Now program the new stuff, handling any errors if they happen
-	return flashWriteSafe(CONFIG_ADDR, n, self->config, CONFIG_ADDR, CONFIG_ADDR + n + 1);
+	uint16_t record_size = sizeof(config_s);
+    uint8_t crc_off = offsetof(config_s, crc);
+	self->config.crc = compute_crc16((uint8_t*)&self->config, crc_off);
+    uint32_t curr_record_addr = flashmgr_find_last_record(self, CONFIG_ADDR, record_size, NULL);
+    return flashmgr_append_record(self, CONFIG_ADDR, curr_record_addr, (uint8_t*)&self->config, record_size);
 }

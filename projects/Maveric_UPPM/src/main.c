@@ -79,6 +79,9 @@
 
 void system_init(void);
 void system_superloop(void);
+void system_ops_transition_init_safe(void);
+void system_ops_transmit_beacon(void);
+void system_ops_enable_gnc(void);
 void system_cleanup(void);
 
 int1 g_superloop_running = TRUE;
@@ -114,6 +117,7 @@ void system_init(void) {
     // SPI init
 	output_high(FLASH_CHIP_SELECT);
 	spi_set_mode(FLASH_SPI_MODE);
+    delay_ms(50);
     
     // Init interrupts 
     irqmgr_init(&g_irqmgr);
@@ -134,7 +138,6 @@ void system_init(void) {
     
     // Submodules & services init
     status_e s_flashmgr = flashmgr_init(&g_flashmgr);
-    flashmgr_increment_rbt_cnt(&g_flashmgr);
     status_e s_ax100 = ax100_init(&g_ax100, AX100_PORT);
     mcpmgr_init(&g_mcpmgr);
     scheduler_init(&g_scheduler);
@@ -148,6 +151,21 @@ void system_init(void) {
 
     // Fetch time from LPPM
     mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "ppm_get_time", "");
+
+    // Check operations stage and schedule tasks accordingly
+    uint8_t ops_stage = g_flashmgr.config.ops_stage;
+    switch (ops_stage) {
+        case OPS_INIT:
+            // scheduler_schedule_func_in(&g_scheduler, 5, system_ops_transition_init_safe, 1*MS_PER_MIN, 0, 1);     // 45 min
+            break;
+        case OPS_SAFE:
+            mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_deploy", "");
+        case OPS_NOMINAL: // Fallthrough
+            ax100_set_power(&g_ax100, TRUE);
+            scheduler_schedule_func_in(&g_scheduler, 6, system_ops_transmit_beacon, 7000, 3*MS_PER_MIN, SCHEDULE_REPS_INFINITE);
+            scheduler_schedule_func_in(&g_scheduler, 7, system_ops_enable_gnc, 1*MS_PER_MIN, 0, 1); // Power check -> GNC
+            break;
+    }
 
     sprintf(LOGBUF, "system initialized rs232_err=%u rbt_cnt=%u s_flashmgr=%u s_ax100=%u", 
             rs232_errors, g_flashmgr.rbt_cnt, s_flashmgr, s_ax100); log_info();
@@ -166,6 +184,22 @@ void system_superloop(void) {
     mcpmgr_parse_stream(&g_mcpmgr, &g_irqmgr.irqbufs[ASTROBOARD_PORT-1], &g_mcpmgr.rcvpkts[4], FALSE); // Handle Astroboard commands
    
     scheduler_run_tasks(&g_scheduler, &g_mcpmgr);
+}
+
+void system_ops_transition_init_safe(void) {
+    g_flashmgr.config.ops_stage = OPS_SAFE;
+    flashmgr_config_flush(&g_flashmgr);
+    g_superloop_running = FALSE;    // Reset so init sees ops_stage=1 and runs deploy
+}
+
+void system_ops_transmit_beacon(void) {
+    tlm_beacon(&g_tlm, 1);
+}
+
+void system_ops_enable_gnc(void) {
+    if (g_tlm.eps_state == 2) {      // Nominal power levels
+        mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "gnc_set_mode", "1");
+    }
 }
 
 // Cleanup routine

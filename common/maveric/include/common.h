@@ -30,6 +30,8 @@ typedef enum  {
 #define KCYN  "\033[36m"
 #define KWHT  "\033[37m"
 
+#define MS_PER_MIN      60*1000
+
 uint8_t bcdtohex(uint8_t bcd);
 uint8_t hextobcd(uint8_t hex);
 

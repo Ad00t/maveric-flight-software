@@ -26,6 +26,12 @@ typedef enum {
     DATASRC_NVG = 1,
 } datasrc_e;
 
+typedef enum {
+    OPS_INIT = 0,
+    OPS_SAFE = 1,         
+    OPS_NOMINAL = 2,
+} ops_stage_e;
+
 typedef struct {
 #if NODE == NODE_LPPM
     log_level_e log_level;
@@ -35,6 +41,7 @@ typedef struct {
     char tle[140];
 #elif NODE == NODE_UPPM
     log_level_e log_level;
+    ops_stage_e ops_stage;
 #endif
     uint16_t crc;
 } config_s;

@@ -8,9 +8,11 @@
 #define GNC_MAX_DETUMBLE_RATE       2*PI
 
 // Modes for GNC Planner set mode
-#define GNC_MODE_SAFE               0
-#define GNC_MODE_AUTO               1
-#define GNC_MODE_MANUAL             2
+typedef enum {
+    GNC_MODE_SAFE = 0,
+    GNC_MODE_AUTO = 1,
+    GNC_MODE_MANUAL = 2
+} gnc_mode_e;
 
 typedef struct {
     uint8_t gnc_mode;                       // Determines mode of the GNC Planner
