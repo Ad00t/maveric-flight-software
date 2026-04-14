@@ -9,7 +9,7 @@
 //========================================
 #define RESERVED_ADDR                   0x000000
 #define RBT_CNT_ADDR                    0x010000
-#define CONFIG_ADDR                     0x034000
+#define CONFIG_ADDR                     0x030000
 #define SWAP_ADDR                       0x7FF000
 #define ADDRESS_OUT_OF_BOUNDS           0x800000
 
@@ -17,8 +17,8 @@
 //    		 	Size Allocations
 //========================================
 #define RESERVED_ALLOC_SIZE             0x010000
-#define RBT_CNT_ALLOC_SIZE              0x024000
-#define CONFIG_ALLOC_SIZE               0x7B1000
+#define RBT_CNT_ALLOC_SIZE              0x020000
+#define CONFIG_ALLOC_SIZE               0x7CF000
 #define SWAP_ALLOC_SIZE                 0x001000
 
 typedef enum {

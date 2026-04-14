@@ -213,7 +213,7 @@ uint8_t flashReadSectorProtection(uint32_t address) {
 
 // Disables sector protection on the ATMEL chip.  Will only work if Writing has been Enabled (0x06)
 // previously The address it takes is BEFORE reversal
-void flashSectorProtectDisable(uint32_t address) {
+void flashSectorProtectDisableAddr(uint32_t address) {
 	uint8_t WriteBuf[4];
 	uint8_t ReadBuf[4];
 
@@ -230,11 +230,11 @@ void flashSectorProtectDisable(uint32_t address) {
 	delay_ms(1); // Hold here to make sure PIC completes the transfer
 }
 
-void flashSectorProtectDisable(uint16_t sector) {
+void flashSectorProtectDisableSector(uint16_t sector) {
 	uint32_t start, end;
 
 	SectorToFlashAddr(sector, &start, &end);
-	flashSectorProtectDisable(start);
+	flashSectorProtectDisableAddr(start);
 	return;
 }
 
@@ -711,10 +711,10 @@ void flashErasePage(uint16_t page) {
 		//  flash() function.
 
 		BlockToFlashAddr(FLASH_SWAP_BLOCK, &start_addr, &end_addr); // Get address of swap
-		flashSectorProtectDisable(start_addr); // unprotect swap
+		flashSectorProtectDisableAddr(start_addr); // unprotect swap
 		flashEraseBlockByNumber(FLASH_SWAP_BLOCK); // erase swap
 		flashCopyBlockExceptPage(FLASH_SWAP_BLOCK, block, page); // copy to swap
-		flashSectorProtectDisable(addr); // unprotect original
+		flashSectorProtectDisableAddr(addr); // unprotect original
 		flashEraseBlockByNumber(block); // erase original
 		flashCopyBlock(block, FLASH_SWAP_BLOCK); // copy to original
 		// flashWriteEnable();											// re-enable writing

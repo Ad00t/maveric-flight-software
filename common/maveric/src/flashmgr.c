@@ -35,7 +35,7 @@ uint32_t flashmgr_find_last_record(flashmgr_s* self, uint32_t start_addr, uint16
 }
 
 status_e flashmgr_append_record(flashmgr_s* self, uint32_t start_addr, uint32_t record_addr, uint8_t* new_record, uint16_t record_size) {
-    flashSectorProtectDisable(start_addr);
+    flashSectorProtectDisableAddr(start_addr); // Should be a sector start addr? (multiple of 65536)
 
     uint32_t new_addr;
 

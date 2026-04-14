@@ -132,8 +132,8 @@ uint16_t getPageSize();
 	
 	// Sector Protection
 	uint8_t flashReadSectorProtection(uint32_t address);
-	void flashSectorProtectDisable(uint32_t address);
-	void flashSectorProtectDisable(uint16_t sector);
+	void flashSectorProtectDisableAddr(uint32_t address);
+	void flashSectorProtectDisableSector(uint16_t sector);
 	void flashGlobalUnprotect();
 
 	// Erasing...

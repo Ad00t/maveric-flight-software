@@ -431,10 +431,11 @@ void cmdimpl_flash_unprot(mcppkt_s* pkt) {
             uint32_t addr = strtoul(p, &p, 16);
             sprintf(LOGBUF, "cmdimpl_flash_unprot addr=0x%02X%02X%02X", 
                     make8(addr, 2), make8(addr, 1), make8(addr, 0)); log_info();
-            flashSectorProtectDisable(addr); 
+            uint16_t sect = FlashAddrToSector(addr);
+            flashSectorProtectDisableSector(sect); 
             char res[32] = {0};
-            sprintf(res, "%u 0x%02X%02X%02X", 
-                    SUCCESS, make8(addr, 2), make8(addr, 1), make8(addr, 0));
+            sprintf(res, "%u 0x%02X%02X%02X %u", 
+                    SUCCESS, make8(addr, 2), make8(addr, 1), make8(addr, 0), sect);
             mcp_respond(pkt, RES, res);
             break;
         }
