@@ -19,11 +19,11 @@
 
 // Modes for set mode
 #define MTQ_MODE_MANUAL             7 
-#define MTQ_MODE_SUN_SPIN           6
-#define MTQ_MODE_TARGET_TRACKING    5
-#define MTQ_MODE_LVLH               4
-#define MTQ_MODE_FINE_POINTING      3
-#define MTQ_MODE_SUN_POINTING       2
+#define MTQ_MODE_TARGET_TRACKING    6
+#define MTQ_MODE_LVLH               5
+#define MTQ_MODE_FINE_POINTING      4
+#define MTQ_MODE_SUN_POINTING       3
+#define MTQ_MODE_SUN_SPIN           2
 #define MTQ_MODE_DETUMBLING         1
 #define MTQ_MODE_SAFE               0
 
