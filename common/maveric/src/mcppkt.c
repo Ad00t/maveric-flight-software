@@ -119,12 +119,6 @@ void mcppkt_dispatch(mcppkt_s* pkt) {
     uint16_t frame_len = frame_create(&p->buf[p->i_start], p->buf_len, frame, csp);
 #if NODE == NODE_LPPM
     switch (pkt->dest) {
-            //i2c_write_buf(I2C_1, 0x15, frame, frame_len);
-            //delay_ms(50);
-            //uint8_t res[FRAME_MAX_SIZE] = {0}; 
-            //i2c_read_buf(I2C_1, 0x15, res, I2C_MAX_SIZE);
-            //rb_push_n(&g_i2cmgr.rxbufs[0], res, I2C_MAX_SIZE);
-            //break;
         case NODE_FTDI:
             uart_write_buf(FTDI_PORT, frame, frame_len);
             break;
@@ -138,13 +132,14 @@ void mcppkt_dispatch(mcppkt_s* pkt) {
     }
 #elif NODE == NODE_UPPM
     switch (pkt->dest) {
-        case NODE_EPS:
+        case NODE_EPS: {
             i2c_write_buf(I2C_1, 0x18, frame, frame_len);
             delay_ms(50);
             uint8_t res[FRAME_MAX_SIZE] = {0}; 
             i2c_read_buf(I2C_1, 0x18, res, I2C_MAX_SIZE-1);
             rb_push_n(&g_i2cmgr.rxbufs[0], res, I2C_MAX_SIZE-1);
             break;
+        }
         case NODE_FTDI:
         case NODE_LPPM:
             uart_write_buf(LPPM_PORT, frame, frame_len);

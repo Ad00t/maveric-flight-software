@@ -35,7 +35,7 @@ void log_flush(log_level_e lvl) {
             LOGBUF[msg_cap - 3] = '.';
         }
         sprintf(&logfmt[j], "%s\n", LOGBUF);
-        mcp_dispatch(NODE, NODE_FTDI, 0, CMD, "ftdi_log", logfmt);
+        mcp_dispatch(NODE, NODE_FTDI, 0, CMD, "ftdi_log", (char*) logfmt);
     }
 
     logger_clear();
