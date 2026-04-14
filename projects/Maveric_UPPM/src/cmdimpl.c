@@ -44,8 +44,8 @@ void cmdimpl_init() {
     ht_set(ht, "flash_read_prot", (cmdimpl_f) cmdimpl_flash_read_prot);
 
     ht_set(ht, "cfg_get", (cmdimpl_f) cmdimpl_cfg_get);
-    ht_set(ht, "cfg_set", (cmdimpl_f) cmdimpl_cfg_set);
     ht_set(ht, "cfg_set_ll", (cmdimpl_f) cmdimpl_cfg_set_ll);
+    ht_set(ht, "cfg_set_ops", (cmdimpl_f) cmdimpl_cfg_set_ops);
     ht_set(ht, "cfg_load_dfl", (cmdimpl_f) cmdimpl_cfg_load_dfl);
     ht_set(ht, "cfg_load_flash", (cmdimpl_f) cmdimpl_cfg_load_flash);
     ht_set(ht, "cfg_flush", (cmdimpl_f) cmdimpl_cfg_flush);

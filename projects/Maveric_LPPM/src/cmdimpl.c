@@ -52,8 +52,10 @@ void cmdimpl_init(void) {
     ht_set(ht, "flash_read_prot", (cmdimpl_f) cmdimpl_flash_read_prot);
     
     ht_set(ht, "cfg_get", (cmdimpl_f) cmdimpl_cfg_get);
-    ht_set(ht, "cfg_set", (cmdimpl_f) cmdimpl_cfg_set);
     ht_set(ht, "cfg_set_ll", (cmdimpl_f) cmdimpl_cfg_set_ll);
+    ht_set(ht, "cfg_set_datasrc", (cmdimpl_f) cmdimpl_cfg_set_datasrc);
+    ht_set(ht, "cfg_set_paxs", (cmdimpl_f) cmdimpl_cfg_set_paxs);
+    ht_set(ht, "cfg_set_tle", (cmdimpl_f) cmdimpl_cfg_set_tle);
     ht_set(ht, "cfg_load_dfl", (cmdimpl_f) cmdimpl_cfg_load_dfl);
     ht_set(ht, "cfg_load_flash", (cmdimpl_f) cmdimpl_cfg_load_flash);
     ht_set(ht, "cfg_flush", (cmdimpl_f) cmdimpl_cfg_flush);
@@ -551,27 +553,6 @@ void cmdimpl_cfg_get(mcppkt_s* pkt) {
     }
 }
 
-void cmdimpl_cfg_set(mcppkt_s* pkt) {
-    switch (pkt->ptype) {
-        case CMD: {
-            char* p = pkt->args;
-            config_s* cfg = &g_flashmgr.config;
-            cfg->log_level = strtoul(p, &p, 10);
-            cfg->gyro_rate_src = strtoul(p, &p, 10);
-            cfg->mag_src = strtoul(p, &p, 10);
-            cfg->paxs[0] = strtof(p, &p);
-            cfg->paxs[1] = strtof(p, &p);
-            cfg->paxs[2] = strtof(p, &p);
-            memset(cfg->tle, 0, sizeof(cfg->tle));
-            memcpy(cfg->tle, p+1, strlen(p+1) + 1);
-            char res[8] = {0};
-            sprintf(res, "%u", SUCCESS);
-            mcp_respond(pkt, RES, res);
-            break;
-        }
-    }
-}
-
 void cmdimpl_cfg_set_ll(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case CMD: {
@@ -580,6 +561,55 @@ void cmdimpl_cfg_set_ll(mcppkt_s* pkt) {
             cfg->log_level = strtoul(p, &p, 10);
             char res[8] = {0};
             sprintf(res, "%u", SUCCESS);
+            mcp_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
+void cmdimpl_cfg_set_datasrc(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            char* p = pkt->args;
+            config_s* cfg = &g_flashmgr.config;
+            cfg->gyro_rate_src = strtoul(p, &p, 10);
+            cfg->mag_src = strtoul(p, &p, 10);
+            char res[8] = {0};
+            sprintf(res, "%u", SUCCESS);
+            mcp_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
+
+void cmdimpl_cfg_set_paxs(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            char* p = pkt->args;
+            config_s* cfg = &g_flashmgr.config;
+            cfg->paxs[0] = strtof(p, &p);
+            cfg->paxs[1] = strtof(p, &p);
+            cfg->paxs[2] = strtof(p, &p);
+            status_e s = mtq_write_start(&g_mtq, MTQ_POINTING_AXIS, cfg->paxs);
+            char res[8] = {0};
+            sprintf(res, "%u", s);
+            mcp_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
+void cmdimpl_cfg_set_tle(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            char* p = pkt->args;
+            config_s* cfg = &g_flashmgr.config;
+            memset(cfg->tle, 0, sizeof(cfg->tle));
+            memcpy(cfg->tle, p, strlen(p));
+            status_e s = mtq_write_start(&g_mtq, MTQ_TLE, cfg->tle);
+            char res[8] = {0};
+            sprintf(res, "%u", s);
             mcp_respond(pkt, RES, res);
             break;
         }
