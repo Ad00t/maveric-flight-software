@@ -119,15 +119,12 @@ void mcppkt_dispatch(mcppkt_s* pkt) {
     uint16_t frame_len = frame_create(&p->buf[p->i_start], p->buf_len, frame, csp);
 #if NODE == NODE_LPPM
     switch (pkt->dest) {
-<<<<<<< HEAD:common/maveric/src/cmdpkt.c
             //i2c_write_buf(I2C_1, 0x15, frame, frame_len);
             //delay_ms(50);
             //uint8_t res[FRAME_MAX_SIZE] = {0}; 
             //i2c_read_buf(I2C_1, 0x15, res, I2C_MAX_SIZE);
             //rb_push_n(&g_i2cmgr.rxbufs[0], res, I2C_MAX_SIZE);
             //break;
-=======
->>>>>>> c0177994e06fc7a974f474affdac18eca752d09d:common/maveric/src/mcppkt.c
         case NODE_FTDI:
             uart_write_buf(FTDI_PORT, frame, frame_len);
             break;
