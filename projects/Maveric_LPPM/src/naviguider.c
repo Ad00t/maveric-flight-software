@@ -256,14 +256,6 @@ void nvg_check_heartbeat(nvg_s* nvg) {
     }
     status_e hb = (nvg->sensors[NVG_TEMPERATURE].ts > 0) ? SUCCESS : FAILURE;
 
-    // if (hb == FAILURE) {
-    //     sprintf(LOGBUF, "nvg_heartbeat: flatlined. resetting..."); log_error();
-    //     uint8_t port = nvg->port;
-    //     nvg_destroy(nvg);
-    //     delay_ms(500);
-    //     nvg_init(nvg, port);
-    // }
-
     nvg->sensors[NVG_TEMPERATURE].ts = 0;
     nvg->heartbeat = hb;
 }

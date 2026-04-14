@@ -392,17 +392,6 @@ void mtq_check_heartbeat(mtq_s* mtq) {
     char* snid = (char*) reg->value;
     status_e hb = (strncmp(snid, "TAD102063", reg->value_len) == 0) ? SUCCESS : FAILURE; 
     
-    // if (hb == FAILURE) {
-    //     sprintf(LOGBUF, "mtq_heartbeat: flatlined. resetting..."); log_error();
-    //     uint8_t port = mtq->port;
-    //     char tle[140] = {0};
-    //     status_e s1 = mtq_get_data(mtq, MTQ_TLE, tle);
-    //     status_e s2 = mtq_reboot(mtq);
-    //     mtq_destroy(mtq);
-    //     status_e s3 = mtq_init(mtq, port);
-    //     status_e s4 = mtq_write_start(mtq, MTQ_TLE, tle);
-    // }
-    
     memset(snid, 0, reg->value_len);
     mtq_read_start(mtq, MTQ_SNID);
     mtq->heartbeat = hb;
