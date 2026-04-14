@@ -76,7 +76,7 @@
 #pin_select U2TX = PIN_F5 
 #pin_select U2RX = PIN_F4 
 #define U2CTS_PIN	AX100_CLEAR_TO_SEND
-#define U2RTS_PIN	AX100_CMDUEST_TO_SEND
+#define U2RTS_PIN	AX100_REQUEST_TO_SEND
 
 #define COM_C       3 // LPPM 
 #define COM_C_BAUD  115200

@@ -82,12 +82,6 @@ void ertc_check_heartbeat(ertc_s* ertc) {
         ertc->heartbeat = FAILURE;
         return;
     }
-    // if (!ertc->is_using_ertc) {
-    //     sprintf(LOGBUF, "ertc_heartbeat: flatlined. resetting..."); log_error();
-    //     rtc_time_t init_time;
-    //     memcpy(&init_time, &ertc->time, sizeof(rtc_time_t));
-    //     ertc_init(ertc, &init_time); 
-    // }
     ertc->heartbeat = ertc->is_using_ertc ? SUCCESS : FAILURE;
 }
 

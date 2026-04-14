@@ -471,21 +471,6 @@ void cmdimpl_cfg_get(mcppkt_s* pkt) {
     }
 }
 
-void cmdimpl_cfg_set(mcppkt_s* pkt) {
-    switch (pkt->ptype) {
-        case CMD: {
-            char* p = pkt->args;
-            config_s* cfg = &g_flashmgr.config;
-            cfg->log_level = strtoul(p, &p, 10);
-            cfg->ops_stage = strtoul(p, &p, 10);
-            char res[8] = {0};
-            sprintf(res, "%u", SUCCESS);
-            mcp_respond(pkt, RES, res);
-            break;
-        }
-    }
-}
-
 void cmdimpl_cfg_set_ll(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case CMD: {

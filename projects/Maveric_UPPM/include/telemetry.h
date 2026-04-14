@@ -28,8 +28,9 @@ typedef struct {
     float adcs_temp;                    // LPPM
     // Beacon 2                          
     uint8_t eps_state;                  // EPS
-    uint8_t eps_pwr_out[4];             // EPS
-    float eps_temp[8];                  // EPS
+    uint8_t eps_pwr_out[2];             // EPS
+    float die_temp;                     // EPS
+    float batt_temp;                    // EPS
     float batt_voltage[4];              // EPS
     float batt_current[4];              // EPS
     float solarcell_voltage[5];         // EPS
