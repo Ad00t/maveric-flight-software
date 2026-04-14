@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define I2C_FRAME_SIZE      127
+
 // I2C Master Read a Byte
 uint8_t i2c_read_8(uint8_t port, uint8_t add, uint8_t reg);
 // I2C Master Write a Byte

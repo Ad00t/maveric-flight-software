@@ -1,7 +1,7 @@
 // UPPER PPM GLOBALS
 
 #include "scheduler.h"
-#include "cmdmgr.h"
+#include "mcpmgr.h"
 #include "flashmgr.h"
 #include "interrupts.h"
 #include "ax100.h"
@@ -13,7 +13,7 @@ extern uint8_t g_rbt_cause;             // restart_cause() in init
 
 extern irqmgr_s g_irqmgr;               // Interrupts manager
 extern i2cmgr_s g_i2cmgr;               // I2C manager
-extern cmdmgr_s g_cmdmgr;               // Commands manager
+extern mcpmgr_s g_mcpmgr;               // MCP comms manager
 extern scheduler_s g_scheduler;         // Schedules manager
 extern flashmgr_s g_flashmgr;           // Flash manager
 extern rtc_time_t g_rtc_time;           // Global RTC time tracking instance (from lower PPM)       

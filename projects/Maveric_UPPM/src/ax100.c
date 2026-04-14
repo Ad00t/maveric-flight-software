@@ -1,17 +1,13 @@
 #include "ax100.h"
-#include "crcnew.h"
 #include "uart.h"
-#include "ringbuf.h"
-#include "cmdpkt.h"
 #include "common.h"
-#include "cmdmgr.h"
 
 // MAIN TRANSCEIVER INTERFACE
 
 status_e ax100_init(ax100_s* a, uint8_t port) {
     a->is_init = TRUE;
     a->port = port;
-    status_e s1 = ax100_set_power(a, TRUE);
+    status_e s1 = ax100_set_power(a, FALSE);
     uint8_t power = 0;
     status_e s2 = ax100_get_power(a, &power);
     sprintf(LOGBUF, "ax100_init: port=%u power=%u", a->port, power); log_info();
@@ -43,10 +39,10 @@ status_e ax100_transmit_frame(ax100_s* a, uint8_t* frame, uint16_t len) {
     uart_write_buf(a->port, frame, len);
     uint16_t p = 0;
     uint16_t i;
-    p += sprintf(LOGBUF, "ax100_transmit_frame: len=%u [", frame); 
+    p += sprintf(LOGBUF, "ax100_tx_frame: len=%u [", frame); 
     for (i = 0; i < len; i++) 
         p += sprintf(&LOGBUF[p], " %02X", frame[i]); 
     p += sprintf(&LOGBUF[p], " ]"); 
-    log_trace();
+    log_info();
     return SUCCESS;
 }

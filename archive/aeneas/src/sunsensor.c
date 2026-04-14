@@ -90,10 +90,10 @@ void testCRC();
 #define START_GO_CODE_REPLY 		3
 #define START_FRAME_CYCLE 			4
 #define START_FRAME_CYCLE_REPLY 	5
-#define GO_CODE_REQUEST				6
+#define GO_CODE_CMDUEST				6
 #define GO_CODE_REPLY				7
-#define CHANNEL_REQUEST				8
-#define CHANNEL_REQUEST_REPLY		9
+#define CHANNEL_CMDUEST				8
+#define CHANNEL_CMDUEST_REPLY		9
 #define DONE						10
 
 //=================================
@@ -1015,9 +1015,9 @@ ReturnErr_t getSunSensorData(int port, unsigned char * requestedChannels,
 			}
 
 			// Update state
-			state = GO_CODE_REQUEST;
+			state = GO_CODE_CMDUEST;
 		}
-		case GO_CODE_REQUEST:
+		case GO_CODE_CMDUEST:
 		{	
 			// Check Start Timer:
 			if(MSEC < goCodeStartTimer)
@@ -1085,14 +1085,14 @@ ReturnErr_t getSunSensorData(int port, unsigned char * requestedChannels,
 				goCodeIntervalTimer = MSEC + GO_CODE_INTERVAL;
 
 				// Return to previous state
-				state = GO_CODE_REQUEST;
+				state = GO_CODE_CMDUEST;
 
 				return BUSY;
 			}
 
-			state = CHANNEL_REQUEST;
+			state = CHANNEL_CMDUEST;
 		}
-		case CHANNEL_REQUEST:
+		case CHANNEL_CMDUEST:
 		{
 			//sendDBGALL(USER_PORT,"\r\nRequesting Channel.");
 	
@@ -1108,9 +1108,9 @@ ReturnErr_t getSunSensorData(int port, unsigned char * requestedChannels,
 			//sprintf(dbgbuf,"\r\nRequested: Index: %u Channel: %u",chanIndex,requestedChannels[chanIndex]);
 			//sendDBGALL(USER_PORT,dbgbuf);
 
-			state = CHANNEL_REQUEST_REPLY;
+			state = CHANNEL_CMDUEST_REPLY;
 		}
-		case CHANNEL_REQUEST_REPLY:
+		case CHANNEL_CMDUEST_REPLY:
 		{
 			// Check for reply for channel
 			response = getSunSensorReply(port,data,MAX_NSP_DATA_FIELD_LENGTH,&length);
@@ -1148,7 +1148,7 @@ ReturnErr_t getSunSensorData(int port, unsigned char * requestedChannels,
 			 	return SUCCESS;
 			}
 
-			state = CHANNEL_REQUEST;
+			state = CHANNEL_CMDUEST;
 
 			return BUSY;
 		}

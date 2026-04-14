@@ -15,8 +15,6 @@ Purpose: Provides a base definition for interfacing with the AX100 transceiver
 
 #include <stdint.h>
 #include "ringbuf.h"
-#include "cmdpkt.h"
-#include "cmdmgr.h"
 #include "common.h"
 
 // kiss header size (2), csp header size (4), crc32 size (4), kiss footer size (1)

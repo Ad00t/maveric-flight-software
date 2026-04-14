@@ -13,21 +13,20 @@ WAIT_FEND = 0
 IN_FRAME = 1
 IN_ESCAPE = 2
 
-class CommandManager():
+class MCPManager():
     
     crcalc = Calculator(Crc16.XMODEM)
     node_lbl_to_id = { 'NONE': 0, 'LPPM': 1, 'EPS': 2, 'UPPM': 3, 'HOLONAV': 4, 'ASTROBOARD': 5, 'GS': 6, 'FTDI': 7 }
     node_id_to_lbl = { v: k for k, v in node_lbl_to_id.items() }
-    ptype_lbl_to_id = { 'NONE': 0, 'REQ': 1, 'RES': 2, 'ACK': 3, 'RES': 4 }
+    ptype_lbl_to_id = { 'NONE': 0, 'CMD': 1, 'RES': 2, 'ACK': 3, 'TLM': 4, 'FILE': 5 }
     ptype_id_to_lbl = { v: k for k, v in ptype_lbl_to_id.items() }
 
-    def __init__(self, node: int, serial):
+    def __init__(self, serial=None):
         self.frame = bytearray()
         self.state = WAIT_FEND
-        self.node = node
         self.serial = serial
 
-    def create_cmd(self, orgn: int, dest: int, echo: int, ptype: int, id: str, args: str):
+    def create_pkt(self, orgn: int, dest: int, echo: int, ptype: int, id: str, args):
         msg_data = [ orgn, dest, echo, ptype, len(id), len(args), id, 0, args, 0 ]
 
         msg_ba = bytearray()
@@ -50,9 +49,9 @@ class CommandManager():
         pkt_ba.extend(b'\xC0')
         return pkt_ba 
 
-    def send_cmd_serial(self, orgn: int, dest: int, echo: int, ptype: int, id: str, args: str):
+    def send_pkt_serial(self, orgn: int, dest: int, echo: int, ptype: int, id: str, args):
         if not (self.serial and self.serial.is_open): return (bytearray(), 0)
-        ba = self.create_cmd(orgn, dest, echo, ptype, id, args)
+        ba = self.create_pkt(orgn, dest, echo, ptype, id, args)
         cnt = self.serial.write(ba)
         time.sleep(0.01)
         return (ba, cnt)
@@ -113,7 +112,11 @@ class CommandManager():
         size += p['id_len'] + 1
         
         if size + p['args_len'] > exp_msg_len: return None
-        p['args'] = buf[size:size+p['args_len']].decode('ascii')
+        p['args_raw'] = buf[size:size+p['args_len']]
+        try:
+            p['args'] = p['args_raw'].decode('ascii')
+        except:
+            pass
         size += p['args_len'] + 1
 
         if size + 2 > exp_msg_len: return None
@@ -127,13 +130,13 @@ class CommandManager():
         self.frame.clear()
         self.state = IN_FRAME
 
-    # Reads a single command frame out of a serial stream if available
+    # Reads a single packet frame out of a serial stream if available
     def parse_stream(self):
         if not (self.serial and self.serial.is_open): return None
         n_bytes = self.serial.in_waiting
 
         for _ in range(n_bytes):
-            b = int.from_bytes(self.serial.read(1))
+            b = int.from_bytes(self.serial.read(1), byteorder='little')
             if self.kiss_process_byte(b):
                 p = self.parse_frame()
 
@@ -141,11 +144,6 @@ class CommandManager():
                     self.cleanup_frame()
                     return None
                 
-                if p['dest'] != self.node:
-                    # print(f'bad dest {p}')
-                    self.cleanup_frame()
-                    return None
-
                 crc_calc = self.crcalc.checksum(self.frame[1:1+p['size']-2])
                 if p['crc'] != crc_calc:
                     self.cleanup_frame()
@@ -167,10 +165,6 @@ class CommandManager():
                     self.cleanup_frame()
                     return None
                
-                if p['dest'] != self.node:
-                    self.cleanup_frame()
-                    return None
-
                 crc_calc = self.crcalc.checksum(self.frame[1:1+p['size']-2])
                 if p['crc'] != crc_calc:
                     self.cleanup_frame()

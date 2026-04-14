@@ -150,7 +150,7 @@ U4TX_PIN::PIN_D4	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\pr
 U4TX_PIN::PIN_D4	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\Maveric_UPPM\scr\pinsupper.h	73;"	d	line:73
 USB_OE::PIN_C1	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\Maveric_UPPM\scr\pinslower.h	132;"	d	line:132
 USB_OE::PIN_C1	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\Maveric_UPPM\scr\pinsupper.h	28;"	d	line:28
-__CMD__	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\Maveric_UPPM\scr\cmd.h	2;"	d	line:2
+__REQ__	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\Maveric_UPPM\scr\cmd.h	2;"	d	line:2
 __I2C__	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\Maveric_UPPM\scr\i2c.h	2;"	d	line:2
 __INTERRUPT__	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\Maveric_UPPM\scr\interrupt.h	2;"	d	line:2
 __RM3100__	C:\Users\Ghost\Documents\MAVERIC\maveric-flight-software-dev\projects\Maveric_UPPM\scr\rm3100.h	2;"	d	line:2

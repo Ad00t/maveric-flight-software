@@ -19,11 +19,11 @@
 
 // Modes for set mode
 #define MTQ_MODE_MANUAL             7 
-#define MTQ_MODE_SUN_SPIN           6
-#define MTQ_MODE_TARGET_TRACKING    5
-#define MTQ_MODE_LVLH               4
-#define MTQ_MODE_FINE_POINTING      3
-#define MTQ_MODE_SUN_POINTING       2
+#define MTQ_MODE_TARGET_TRACKING    6
+#define MTQ_MODE_LVLH               5
+#define MTQ_MODE_FINE_POINTING      4
+#define MTQ_MODE_SUN_POINTING       3
+#define MTQ_MODE_SUN_SPIN           2
 #define MTQ_MODE_DETUMBLING         1
 #define MTQ_MODE_SAFE               0
 
@@ -234,7 +234,7 @@ typedef struct {
 } mtq_s;
 
 // Initialize mtq object
-status_e mtq_init(mtq_s* mtq, uint8_t port);
+status_e mtq_init(mtq_s* mtq, uint8_t port, float* paxs, char* tle);
 
 // Free heap allocations 
 void mtq_destroy(mtq_s* mtq);
@@ -247,8 +247,8 @@ mtq_reg_s* mtq_get_reg(mtq_s* mtq, uint8_t midx, uint8_t idx);
 mtq_reg_s* mtq_get_reg(mtq_s* mtq, uint16_t key);
 
 // Print out formatted space separated contents of a register to out buffer, updating p
-status_e mtq_print_reg_data(mtq_s* mtq, mtq_reg_s* reg, uint8_t* out, uint16_t* j);
-status_e mtq_print_reg_data(mtq_s* mtq, uint16_t key, uint8_t* out, uint16_t* j);
+status_e mtq_print_reg_data(mtq_s* mtq, mtq_reg_s* reg, char* out, uint16_t* j);
+status_e mtq_print_reg_data(mtq_s* mtq, uint16_t key, char* out, uint16_t* j);
 
 // Send register read command to mtq
 status_e mtq_read_start(mtq_s* mtq, mtq_reg_s* reg);

@@ -12,5 +12,6 @@ void hk_heartbeats(void);
 void hk_read_sensors(void);
 void hk_gnc_step(void);
 void hk_test_disable_ertc(void);
+void hk_ppm_reset(void);
 
 #endif // !__HOUSEKEEPING_H__

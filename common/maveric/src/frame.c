@@ -1,10 +1,10 @@
-#include "framer.h"
+#include "frame.h"
 #include "crcnew.h"
 #include <stdint.h>
 
 // FRAMER
 
-uint16_t framer_create(uint8_t* msg, uint16_t msg_len, uint8_t* frame, int1 csp) {
+uint16_t frame_create(uint8_t* msg, uint16_t msg_len, uint8_t* frame, int1 csp) {
     if (msg_len + KISS_HEADER_SIZE + KISS_FOOTER_SIZE + (csp ? CSP_HEADER_SIZE + CRC32_SIZE : 0) > FRAME_MAX_SIZE) 
         return 0;
     uint16_t len = 0;
@@ -92,19 +92,15 @@ void kiss_apply_byte_check(uint8_t* message, uint16_t messageLength, uint8_t* fr
 
 	uint16_t i;
 	for (i = 0; i < messageLength; i++) {
-		if (message[i] == FEND) {
-			frame[spot] = FESC;
-			spot++;
-			frame[spot] = TFEND;
-			spot++;
-		} else if (message[i] == FESC) {
-			frame[spot] = FESC;
-			spot++;
-			frame[spot] = TFESC;
-			spot++;
+        uint8_t b = message[i]; // Doesn't work properly unless we assign it first
+		if (b == FEND) {
+			frame[spot++] = FESC;
+			frame[spot++] = TFEND;
+		} else if (b == FESC) {
+			frame[spot++] = FESC;
+			frame[spot++] = TFESC;
 		} else {
-			frame[spot] = message[i];
-			spot++;
+			frame[spot++] = b;
 		}
 	}
 
@@ -117,19 +113,20 @@ void kiss_remove_byte_check(uint8_t* buf, uint16_t frameLength, uint8_t* msg, ui
 
 	uint16_t i;
 	for (i = frameStartIdx; i < frameLength; i++) {
-		if (buf[i] == FESC) {
+        uint8_t b = buf[i];
+		if (b == FESC) {
 			len--;
 			i++;
 
-			if (buf[i] == TFESC) {
+			if (b == TFESC) {
 				msg[spot] = FESC;
-			} else if (buf[i] == TFEND) {
+			} else if (b == TFEND) {
 				msg[spot] = FEND;
 			} else {
-				msg[spot] = buf[i];
+				msg[spot] = b;
 			}
 		} else {
-			msg[spot] = buf[i];
+			msg[spot] = b;
 		}
 
 		spot++;
@@ -141,33 +138,31 @@ void kiss_remove_byte_check(uint8_t* buf, uint16_t frameLength, uint8_t* msg, ui
 // CSPHEADER
 
 void addCspHeader(uint8_t* msg, uint16_t* msgLength, uint16_t startLocation) {
-	CSPHeader header;
-	memset(&header, 0, sizeof(CSPHeader));
+    uint32_t header = 0;
 
-	header.value |= (CSP_NORMAL_PRIORITY << 30);
-	header.value |= (FSW_NODE << 25);
-	header.value |= (TX_NODE << 20);
-	header.value |= (MIN_PING_SRC_PORT << 14);
+	header |= (CSP_NORMAL_PRIORITY << 30);
+	header |= (FSW_NODE << 25);
+	header |= (TX_NODE << 20);
+	header |= (MIN_PING_SRC_PORT << 14);
 
-	header.value = htonl(header.value);
+	header = htonl(header);
 
-	memcpy(&(msg[startLocation]), (uint8_t*)&header.value, sizeof(header.value));
-	*msgLength += sizeof(header.value);
+	memcpy(&(msg[startLocation]), (uint8_t*)&header, sizeof(header));
+	*msgLength += sizeof(header);
 }
 
 void addCspHeaderWdtReset(uint8_t* msg, uint16_t* msgLength, uint16_t startLocation) {
-	CSPHeader header;
-	memset(&header, 0, sizeof(CSPHeader));
+    uint32_t header = 0;
 
-	header.value |= (GND_WDT_RESET_PORT << 12);
-	header.value |= (GOMSPACE_NODE << 7);
-	header.value |= (FSW_NODE << 2);
-	header.value |= (CSP_NORMAL_PRIORITY);
+	header |= (GND_WDT_RESET_PORT << 12);
+	header |= (GOMSPACE_NODE << 7);
+	header |= (FSW_NODE << 2);
+	header |= (CSP_NORMAL_PRIORITY);
 
-	header.value = htonl(header.value);
+	header = htonl(header);
 
-	memcpy(&(msg[startLocation]), (uint8_t*)&header.value, sizeof(header.value));
-	*msgLength += sizeof(header.value);
+	memcpy(&(msg[startLocation]), (uint8_t*)&header, sizeof(header));
+	*msgLength += sizeof(header);
 }
 
 void setupWdtReset(uint8_t* msg, uint16_t* msgLength) {
@@ -191,31 +186,26 @@ void setupWdtReset(uint8_t* msg, uint16_t* msgLength) {
 
 uint32_t htonl(uint32_t hostLong) {
 	uint8_t data[4] = {0};
-	memcpy(&data, &hostLong, sizeof(data));
-
+	memcpy(data, &hostLong, sizeof(data));
 	return ((uint32_t)data[3] << 0) | ((uint32_t)data[2] << 8) | ((uint32_t)data[1] << 16) |
 		   ((uint32_t)data[0] << 24);
 }
 
 uint16_t htons(uint16_t hostShort) {
 	uint8_t data[2] = {0};
-
-	memcpy(&data, &hostShort, sizeof(data));
-
+	memcpy(data, &hostShort, sizeof(data));
 	return ((uint16_t)data[1] << 0) | ((uint16_t)data[0] << 8);
 }
 
 uint32_t ntohl(uint32_t netLong) {
 	uint8_t data[4] = {0};
-	memcpy(&data, &netLong, sizeof(data));
-
+	memcpy(data, &netLong, sizeof(data));
 	return ((uint32_t)data[3] << 0) | ((uint32_t)data[2] << 8) | ((uint32_t)data[1] << 16) |
 		   ((uint32_t)data[0] << 24);
 }
 
 uint16_t ntohs(uint16_t netShort) {
 	uint8_t data[2] = {0};
-	memcpy(&data, &netShort, sizeof(data));
-
+	memcpy(data, &netShort, sizeof(data));
 	return ((uint16_t)data[1] << 0) | ((uint16_t)data[0] << 8);
 }
