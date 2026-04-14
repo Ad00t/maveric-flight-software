@@ -388,12 +388,7 @@ void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
             mtq_get_data(&g_mtq, MTQ_STAT, &mtq_stat);
 
             config_s* cfg = &g_flashmgr.config;
-            uint8_t i;
-            uint16_t j = sprintf(res, "%u %u %u %u %u %u %u %u %u %Lu %u %u ", 
-                                 g_flashmgr.rbt_cnt, g_rbt_cause, g_ertc.heartbeat, g_mtq.heartbeat, g_nvg.heartbeat,
-                                 g_gnc.gnc_mode, g_gnc.unexpected_safe_count, g_gnc.unexpected_detumble_count, g_gnc.sunspin_count,
-                                 mtq_stat, cfg->gyro_rate_src, cfg->mag_src);
-
+                                 
             float gyro_rate[4] = {0}; // Make sure these buffers have enough space for the extra value(s) the nvg reports
             switch (cfg->gyro_rate_src) {
                 case DATASRC_MTQ:
@@ -402,10 +397,6 @@ void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
                 case DATASRC_NVG:
                     nvg_get_sensor_data(&g_nvg, NVG_GYROSCOPE_CAL, gyro_rate); // rad/s
                     break;
-            }
-            for (i = 0; i < 3; i++) {
-                j += sprintf(&res[j], " ");
-                j += ftoa(gyro_rate[i], &res[j], 3, 'f');
             }
 
             float mag[4] = {0};
@@ -417,24 +408,33 @@ void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
                     nvg_get_sensor_data(&g_nvg, NVG_MAGNETOMETER_CAL, mag); // uT
                     break;
             }
-            for (i = 0; i < 3; i++) {
-                j += sprintf(&res[j], " ");
-                j += ftoa(mag[i], &res[j], 3, 'f');
-            }
 
             float mtq_dipole[3] = {0};
             mtq_get_data(&g_mtq, MTQ_MTQ, mtq_dipole);
-            for (i = 0; i < 3; i++) {
-                j += sprintf(&res[j], " ");
-                j += ftoa(mtq_dipole[i], &res[j], 3, 'f');
-            }
 
             uint16_t mtq_adcs_tmp[2] = {0};
             mtq_get_data(&g_mtq, MTQ_ADCS_TMP, mtq_adcs_tmp);
             float adcs_temp = (float) mtq_adcs_tmp[0] * 150 / 32768;
-            j += ftoa(adcs_temp, &res[j], 3, 'f');
 
-            mcp_respond(pkt, RES, res);
+            uint8_t len = 0;
+            memcpy(&res[len], &g_flashmgr.rbt_cnt, sizeof(uint16_t)); len += sizeof(uint16_t);
+            res[len++] = g_rbt_cause;
+            res[len++] = g_ertc.heartbeat;
+            res[len++] = g_mtq.heartbeat;
+            res[len++] = g_nvg.heartbeat;
+            res[len++] = g_gnc.gnc_mode;
+            memcpy(&res[len], &g_gnc.unexpected_safe_count, sizeof(uint16_t)); len += sizeof(uint16_t);
+            memcpy(&res[len], &g_gnc.unexpected_detumble_count, sizeof(uint16_t)); len += sizeof(uint16_t);
+            memcpy(&res[len], &g_gnc.sunspin_count, sizeof(uint16_t)); len += sizeof(uint16_t);
+            memcpy(&res[len], &mtq_stat, sizeof(uint32_t)); len += sizeof(uint32_t);
+            res[len++] = cfg->gyro_rate_src;
+            res[len++] = cfg->mag_src;
+            memcpy(&res[len], gyro_rate, sizeof(gyro_rate)); len += sizeof(gyro_rate);
+            memcpy(&res[len], mag, sizeof(mag)); len += sizeof(mag);
+            memcpy(&res[len], mtq_dipole, sizeof(mtq_dipole)); len += sizeof(mtq_dipole);
+            memcpy(&res[len], &adcs_temp, sizeof(float)); len += sizeof(float);
+
+            mcp_respond(pkt, RES, res, len);
             break;
         }
     }

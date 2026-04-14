@@ -26,7 +26,9 @@ void log_flush(log_level_e lvl) {
 
     if (lvl >= g_flashmgr.config.log_level) {
         char logfmt[MCP_MAX_ARGS_LEN] = {0};
-        uint16_t j = sprintf(logfmt, "%s%Lu [%s] [%s] ", ll_to_color[lvl], systime_epoch_ms(), ll_to_text[lvl], node_id_to_lbl[NODE]);
+        char timebuf[32] = {0};
+        sprintf(timebuf, "%Lu", systime_epoch_ms());
+        uint16_t j = sprintf(logfmt, "%s%s [%s] [%s] ", ll_to_color[lvl], timebuf, ll_to_text[lvl], node_id_to_lbl[NODE]);
         uint16_t msg_cap = MCP_MAX_ARGS_LEN - j - 3;
         if (strlen(LOGBUF) >= msg_cap) {
             LOGBUF[msg_cap] = '\0';

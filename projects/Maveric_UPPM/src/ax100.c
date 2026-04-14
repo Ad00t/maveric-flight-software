@@ -11,7 +11,7 @@ status_e ax100_init(ax100_s* a, uint8_t port) {
     uint8_t power = 0;
     status_e s2 = ax100_get_power(a, &power);
     sprintf(LOGBUF, "ax100_init: port=%u power=%u", a->port, power); log_info();
-    return (s1 == SUCCESS && s2 == SUCCESS && power == 1) ? SUCCESS : FAILURE;
+    return (s1 == SUCCESS && s2 == SUCCESS) ? SUCCESS : FAILURE;
 }
 
 status_e ax100_get_power(ax100_s* a, uint8_t* power) {

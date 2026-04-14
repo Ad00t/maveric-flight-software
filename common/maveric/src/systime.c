@@ -51,8 +51,9 @@ void epoch_ms_to_rtc(uint64_t epoch_ms, rtc_time_t* rtc) {
     cp_stm_to_rtc(rtc, &stm);
 }
 
-void rtc_to_str(rtc_time_t* rtc, char* out) {
-    sprintf(out, "%u %u %u %u %u %u %u", rtc->tm_wday, rtc->tm_mon, rtc->tm_mday, rtc->tm_year, rtc->tm_hour, rtc->tm_min, rtc->tm_sec);
+uint8_t rtc_to_str(rtc_time_t* rtc, char* out) {
+    return sprintf(out, "%u %u %u %u %u %u %u", 
+                rtc->tm_wday, rtc->tm_mon, rtc->tm_mday, rtc->tm_year, rtc->tm_hour, rtc->tm_min, rtc->tm_sec);
 }
 
 // SYSTIME API
@@ -88,9 +89,9 @@ void systime_rtc(rtc_time_t* out) {
     epoch_ms_to_rtc(systime_epoch_ms(), out);  
 }
 
-void systime_str(char* out) {
+uint8_t systime_str(char* out) {
     rtc_time_t rtc;
     systime_rtc(&rtc);
-    rtc_to_str(&rtc, out);
+    return rtc_to_str(&rtc, out);
 }
 

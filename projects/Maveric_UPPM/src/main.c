@@ -145,30 +145,29 @@ void system_init(void) {
     cmdimpl_init();
     hk_init();
 
-    // Update UPPM telemetry
-    g_tlm.uppm_rbt_cnt = g_flashmgr.rbt_cnt;
-    g_tlm.uppm_rbt_cause = g_rbt_cause;
-
     // Fetch time from LPPM
     mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "ppm_get_time", "");
 
     // Check operations stage and schedule tasks accordingly
-    uint8_t ops_stage = g_flashmgr.config.ops_stage;
+    uint8_t* ops_stage = &g_flashmgr.config.ops_stage;
+    if (g_flashmgr.rbt_cnt > 100 && *ops_stage != OPS_SAFE && *ops_stage != OPS_NOMINAL) {
+        *ops_stage = OPS_SAFE;
+    }
     switch (ops_stage) {
         case OPS_INIT:
-            // scheduler_schedule_func_in(&g_scheduler, 5, system_ops_transition_init_safe, 1*MS_PER_MIN, 0, 1);     // 45 min
+            scheduler_schedule_func_in(&g_scheduler, 5, system_ops_transition_init_safe, 1*MS_PER_MIN, 0, 1);     // 45 min
             break;
         case OPS_SAFE:
-            mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_deploy", "");
+            mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_burn", "5");
         case OPS_NOMINAL: // Fallthrough
             ax100_set_power(&g_ax100, TRUE);
-            scheduler_schedule_func_in(&g_scheduler, 6, system_ops_transmit_beacon, 7000, 3*MS_PER_MIN, SCHEDULE_REPS_INFINITE);
-            scheduler_schedule_func_in(&g_scheduler, 7, system_ops_enable_gnc, 1*MS_PER_MIN, 0, 1); // Power check -> GNC
+            scheduler_schedule_func_in(&g_scheduler, 6, system_ops_transmit_beacon, 30000, 3*MS_PER_MIN, SCHEDULE_REPS_INFINITE);
+            scheduler_schedule_func_in(&g_scheduler, 7, system_ops_enable_gnc, 5000, 1*MS_PER_MIN, 3); // Power check -> GNC
             break;
     }
 
-    sprintf(LOGBUF, "system initialized rs232_err=%u rbt_cnt=%u s_flashmgr=%u s_ax100=%u", 
-            rs232_errors, g_flashmgr.rbt_cnt, s_flashmgr, s_ax100); log_info();
+    sprintf(LOGBUF, "system initialized rs232_err=%u rbt_cnt=%u s_flashmgr=%u s_ax100=%u ops=%u", 
+            rs232_errors, g_flashmgr.rbt_cnt, s_flashmgr, s_ax100, *ops_stage); log_info();
 }
 
 // Main master routine run in superloop
@@ -187,18 +186,29 @@ void system_superloop(void) {
 }
 
 void system_ops_transition_init_safe(void) {
-    g_flashmgr.config.ops_stage = OPS_SAFE;
-    flashmgr_config_flush(&g_flashmgr);
+    uint8_t i;
+    for (i = 0; i < 5; i++) {
+        g_flashmgr.config.ops_stage = OPS_SAFE;
+        flashmgr_config_flush(&g_flashmgr);
+        delay_ms(50);
+        flashmgr_config_load_flash(&g_flashmgr);
+        delay_ms(50);
+        if (g_flashmgr.config.ops_stage == OPS_SAFE)
+            break;
+    }
     g_superloop_running = FALSE;    // Reset so init sees ops_stage=1 and runs deploy
 }
 
 void system_ops_transmit_beacon(void) {
     tlm_beacon(&g_tlm, 1);
+    delay_ms(1000);
+    tlm_beacon(&g_tlm, 2);
 }
 
 void system_ops_enable_gnc(void) {
     if (g_tlm.eps_state == 2) {      // Nominal power levels
         mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "gnc_set_mode", "1");
+        scheduler_deschedule(&g_scheduler, 7);
     }
 }
 

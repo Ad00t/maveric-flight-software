@@ -331,28 +331,22 @@ void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
             char* p = pkt->args;
             switch (pkt->orgn) {
                 case NODE_LPPM:
-                    g_tlm.lppm_rbt_cnt = strtoul(p, &p, 10);  
-                    g_tlm.lppm_rbt_cause = strtoul(p, &p, 10);  
-                    g_tlm.ertc_heartbeat = strtoul(p, &p, 10);
-                    g_tlm.mtq_heartbeat = strtoul(p, &p, 10);
-                    g_tlm.nvg_heartbeat = strtoul(p, &p, 10);
-                    g_tlm.gnc_mode = strtoul(p, &p, 10);
-                    g_tlm.unexpected_safe_count = strtoul(p, &p, 10);
-                    g_tlm.unexpected_detumble_count = strtoul(p, &p, 10);
-                    g_tlm.sunspin_count = strtoul(p, &p, 10);
-                    g_tlm.mtq_stat = strtoul(p, &p, 10);
-                    g_tlm.gyro_rate_src = strtoul(p, &p, 10);
-                    g_tlm.mag_src = strtoul(p, &p, 10);
-                    g_tlm.gyro_rate[0] = strtof(p, &p);
-                    g_tlm.gyro_rate[1] = strtof(p, &p);
-                    g_tlm.gyro_rate[2] = strtof(p, &p);
-                    g_tlm.mag[0] = strtof(p, &p);
-                    g_tlm.mag[1] = strtof(p, &p);
-                    g_tlm.mag[2] = strtof(p, &p);
-                    g_tlm.mtq_dipole[0] = strtof(p, &p);
-                    g_tlm.mtq_dipole[1] = strtof(p, &p);
-                    g_tlm.mtq_dipole[2] = strtof(p, &p);
-                    g_tlm.adcs_temp = strtof(p, &p);
+                    memcpy(&g_tlm.lppm_rbt_cnt, p, sizeof(uint16_t)); p += sizeof(uint16_t);
+                    g_tlm.lppm_rbt_cause = *(p++);  
+                    g_tlm.ertc_heartbeat = *(p++);
+                    g_tlm.mtq_heartbeat = *(p++);
+                    g_tlm.nvg_heartbeat = *(p++);
+                    g_tlm.gnc_mode = *(p++);
+                    memcpy(&g_tlm.unexpected_safe_count, p, sizeof(uint16_t)); p += sizeof(uint16_t);
+                    memcpy(&g_tlm.unexpected_detumble_count, p, sizeof(uint16_t)); p += sizeof(uint16_t);
+                    memcpy(&g_tlm.sunspin_count, p, sizeof(uint16_t)); p += sizeof(uint16_t);
+                    memcpy(&g_tlm.mtq_stat, p, sizeof(uint32_t)); p += sizeof(uint32_t);
+                    g_tlm.gyro_rate_src = *(p++);
+                    g_tlm.mag_src = *(p++);
+                    memcpy(g_tlm.gyro_rate, p, sizeof(g_tlm.gyro_rate)); p += sizeof(g_tlm.gyro_rate);
+                    memcpy(g_tlm.mag, p, sizeof(g_tlm.mag)); p += sizeof(g_tlm.mag);
+                    memcpy(g_tlm.mtq_dipole, p, sizeof(g_tlm.mtq_dipole)); p += sizeof(g_tlm.mtq_dipole);
+                    memcpy(&g_tlm.adcs_temp, p, sizeof(float)); p += sizeof(float);
                     break;
                 case NODE_EPS:
                     break;

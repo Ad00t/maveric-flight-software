@@ -93,10 +93,10 @@ static const mtq_reg_s MTQ_INIT_REG_TABLE[] = {
     /* ATT_ERROR */        { 142, 3, 0, T_FLOAT, NULL, 0 },
     /* ATT_ERROR_RATE */   { 145, 3, 0, T_FLOAT, NULL, 0 },
     /* ADCS_TMP */         { 148, 1, 0, T_INT16, NULL, 0 },
-    // /* CMG0_TMP */         { 149, 1, 0, T_INT16, NULL, 0 },
-    // /* CMG1_TMP */         { 150, 1, 0, T_INT16, NULL, 0 },
-    // /* CMG2_TMP */         { 151, 1, 0, T_INT16, NULL, 0 },
-    // /* CMG3_TMP */         { 152, 1, 0, T_INT16, NULL, 0 },
+    // /* PWR_VOL_5V */       { 149, 1, 0, T_FLOAT, NULL, 0 },
+    // /* PWR_CUR_5V */         { 150, 1, 0, T_FLOAT, NULL, 0 },
+    // /* PWR_VOL_3V */         { 151, 1, 0, T_FLOAT, NULL, 0 },
+    // /* PWR_CUR_3V  */         { 152, 1, 0, T_FLOAT, NULL, 0 },
     /* FSS_TMP1 */         { 153, 1, 0, T_INT16, NULL, 0 },
     // /* FSS_TMP2 */         { 154, 1, 0, T_INT16, NULL, 0 },
     // /* FSS_TMP3 */         { 155, 1, 0, T_INT16, NULL, 0 },
@@ -115,16 +115,16 @@ static const mtq_reg_s MTQ_INIT_REG_TABLE[] = {
     /* FSS_STAT */         { 31, 1, 1, T_UINT8, NULL, 0 },
     /* FSS0_SV */          { 32, 1, 1, T_UINT16, NULL, 0 },
     /* FSS0_PDSUM */       { 33, 1, 1, T_UINT16, NULL, 0 },
-    // /* FSS1_SV */          { 34, 1, 1, T_UINT16, NULL, 0 },
-    // /* FSS1_PDSUM */       { 35, 1, 1, T_UINT16, NULL, 0 },
-    // /* FSS2_SV */          { 36, 1, 1, T_UINT16, NULL, 0 },
-    // /* FSS2_PDSUM */       { 37, 1, 1, T_UINT16, NULL, 0 },
-    // /* FSS3_SV */          { 38, 1, 1, T_UINT16, NULL, 0 },
-    // /* FSS3_PDSUM */       { 39, 1, 1, T_UINT16, NULL, 0 },
-    // /* FSS4_SV */          { 40, 1, 1, T_UINT16, NULL, 0 },
-    // /* FSS4_PDSUM */       { 41, 1, 1, T_UINT16, NULL, 0 },
-    // /* FSS5_SV */          { 42, 1, 1, T_UINT16, NULL, 0 },
-    // /* FSS5_PDSUM */       { 43, 1, 1, T_UINT16, NULL, 0 },
+    // /* FSS1_SV */          { 34, 1, 1, T_INT16, NULL, 0 },
+    // /* FSS1_PDSUM */       { 35, 1, 1, T_UINT32, NULL, 0 },
+    // /* FSS2_SV */          { 36, 1, 1, T_INT16, NULL, 0 },
+    // /* FSS2_PDSUM */       { 37, 1, 1, T_UINT32, NULL, 0 },
+    // /* FSS3_SV */          { 38, 1, 1, T_INT16, NULL, 0 },
+    // /* FSS3_PDSUM */       { 39, 1, 1, T_UINT32, NULL, 0 },
+    // /* FSS4_SV */          { 40, 1, 1, T_INT16, NULL, 0 },
+    // /* FSS4_PDSUM */       { 41, 1, 1, T_UINT32, NULL, 0 },
+    // /* FSS5_SV */          { 42, 1, 1, T_INT16, NULL, 0 },
+    // /* FSS5_PDSUM */       { 43, 1, 1, T_UINT32, NULL, 0 },
     /* IMU_STAT */         { 44, 1, 1, T_UINT8, NULL, 0 },
     /* IMU0_S */           { 45, 3, 1, T_FLOAT, NULL, 0 },
     /* IMU1_S */           { 48, 3, 1, T_FLOAT, NULL, 0 },
@@ -134,24 +134,13 @@ static const mtq_reg_s MTQ_INIT_REG_TABLE[] = {
     // /* STR0_S */           { 58, 4, 1, T_FLOAT, NULL, 0 },
     // /* STR1_S */           { 62, 4, 1, T_FLOAT, NULL, 0 },
     /* CSS */              { 66, 12,1, T_FLOAT, NULL, 0 },
-    // /* CMG_STAT */         { 78, 1, 1, T_UINT8, NULL, 0 },
-    // /* CMG0_G_ANGLE */     { 79, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG0_W_RATE */      { 80, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG1_G_ANGLE */     { 81, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG1_W_RATE */      { 82, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG2_G_ANGLE */     { 83, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG2_W_RATE */      { 84, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG3_G_ANGLE */     { 85, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG3_W_RATE */      { 86, 1, 1, T_FLOAT, NULL, 0 },
-    /* MTQ */              { 87, 3, 1, T_FLOAT, NULL, 0 },
-    // /* CMG0_G_RATE */      { 90, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG0_W_ACC */       { 91, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG1_G_RATE */      { 92, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG1_W_ACC */       { 93, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG2_G_RATE */      { 94, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG2_W_ACC */       { 95, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG3_G_RATE */      { 96, 1, 1, T_FLOAT, NULL, 0 },
-    // /* CMG3_W_ACC */       { 97, 1, 1, T_FLOAT, NULL, 0 },
+    /* MTQ */              { 78, 3, 1, T_FLOAT, NULL, 0 },
+    // /* CMG_STAT */         { 81, 1, 1, T_UINT8, NULL, 0 },
+    // Omitting CMG registers
+    /* MEAS_MAG_B */       { 130, 3, 1, T_FLOAT, NULL, 0 },
+    /* CAL_MAG_B */        { 133, 3, 1, T_FLOAT, NULL, 0 },
+    /* MEAS_IMU_B */       { 136, 3, 1, T_FLOAT, NULL, 0 },
+    /* CAL_IMU_B */        { 139, 3, 1, T_FLOAT, NULL, 0 },
     // Table 6-4. Parameter Register (2)
     /* MASS */             { 0, 1, 2, T_FLOAT, NULL, 0 },
     /* INE_TEN */          { 1, 9, 2, T_FLOAT, NULL, 0 },
@@ -179,6 +168,8 @@ static const mtq_reg_s MTQ_INIT_REG_TABLE[] = {
     // /* STR_INFO */         { 84, 1, 2, T_UINT8, NULL, 0 },
     // /* STR0_ORIEN_BS */    { 85, 4, 2, T_FLOAT, NULL, 0 },
     // /* STR1_ORIEN_BS */    { 89, 4, 2, T_FLOAT, NULL, 0 },
+    /* GNSS */             { 93, 1, 2, T_UINT8, NULL, 0 },
+    /* IMU_BIAS */         { 94, 3, 2, T_FLOAT, NULL, 0 },
     /* NVM */              { 255, 1, 2, T_UINT8, NULL, 0 }
 };
 
@@ -334,10 +325,10 @@ int1 mtq_stat_parse_tumb(uint32_t stat);
 #define MTQ_ATT_ERROR           (0 << 8) | 142
 #define MTQ_ATT_ERROR_RATE      (0 << 8) | 145
 #define MTQ_ADCS_TMP            (0 << 8) | 148
-#define MTQ_CMG0_TMP            (0 << 8) | 149
-#define MTQ_CMG1_TMP            (0 << 8) | 150
-#define MTQ_CMG2_TMP            (0 << 8) | 151
-#define MTQ_CMG3_TMP            (0 << 8) | 152
+#define MTQ_PWR_VOL_5V          (0 << 8) | 149
+#define MTQ_PWR_CUR_5V          (0 << 8) | 150
+#define MTQ_PWR_VOL_3V          (0 << 8) | 151
+#define MTQ_PWR_CUR_3V          (0 << 8) | 152
 #define MTQ_FSS_TMP1            (0 << 8) | 153
 #define MTQ_FSS_TMP2            (0 << 8) | 154
 #define MTQ_FSS_TMP3            (0 << 8) | 155
@@ -374,24 +365,12 @@ int1 mtq_stat_parse_tumb(uint32_t stat);
 #define MTQ_STR0_S              (1 << 8) | 58
 #define MTQ_STR1_S              (1 << 8) | 62
 #define MTQ_CSS                 (1 << 8) | 66
-#define MTQ_CMG_STAT            (1 << 8) | 78
-#define MTQ_CMG0_G_ANGLE        (1 << 8) | 79
-#define MTQ_CMG0_W_RATE         (1 << 8) | 80
-#define MTQ_CMG1_G_ANGLE        (1 << 8) | 81
-#define MTQ_CMG1_W_RATE         (1 << 8) | 82
-#define MTQ_CMG2_G_ANGLE        (1 << 8) | 83
-#define MTQ_CMG2_W_RATE         (1 << 8) | 84
-#define MTQ_CMG3_G_ANGLE        (1 << 8) | 85
-#define MTQ_CMG3_W_RATE         (1 << 8) | 86
-#define MTQ_MTQ                 (1 << 8) | 87
-#define MTQ_CMG0_G_RATE         (1 << 8) | 90
-#define MTQ_CMG0_W_ACC          (1 << 8) | 91
-#define MTQ_CMG1_G_RATE         (1 << 8) | 92
-#define MTQ_CMG1_W_ACC          (1 << 8) | 93
-#define MTQ_CMG2_G_RATE         (1 << 8) | 94
-#define MTQ_CMG2_W_ACC          (1 << 8) | 95
-#define MTQ_CMG3_G_RATE         (1 << 8) | 96
-#define MTQ_CMG3_W_ACC          (1 << 8) | 97
+#define MTQ_MTQ                 (1 << 8) | 78
+#define MTQ_CMG_STAT            (1 << 8) | 81
+#define MTQ_MEAS_MAG_B          (1 << 8) | 130 
+#define MTQ_CAL_MAG_B           (1 << 8) | 133 
+#define MTQ_MEAS_IMU_B          (1 << 8) | 136 
+#define MTQ_CAL_IMU_B           (1 << 8) | 139 
 #define MTQ_MASS                (2 << 8) | 0
 #define MTQ_INE_TEN             (2 << 8) | 1
 #define MTQ_POS_HB_B            (2 << 8) | 10
@@ -418,6 +397,8 @@ int1 mtq_stat_parse_tumb(uint32_t stat);
 #define MTQ_STR_INFO            (2 << 8) | 84
 #define MTQ_STR0_ORIEN_BS       (2 << 8) | 85
 #define MTQ_STR1_ORIEN_BS       (2 << 8) | 89
+#define MTQ_GNSS                (2 << 8) | 93
+#define MTQ_IMU_BIAS            (2 << 8) | 94
 #define MTQ_NVM                 (2 << 8) | 255
 
 static const uint16_t MTQ_FAST_FRAME_REGS[] = {

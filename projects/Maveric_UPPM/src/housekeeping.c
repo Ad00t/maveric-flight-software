@@ -22,7 +22,7 @@ void hk_init(void) {
     scheduler_schedule_func_in(&g_scheduler, 1, hk_log, 2500, 1000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 2, hk_update_tlm, 5000, 10000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 3, hk_heartbeats, 4000, 3000, SCHEDULE_REPS_INFINITE);
-    // scheduler_schedule_func_in(&g_scheduler, 4, hk_ppm_reset, 2*MS_PER_MIN, 0, 1);     // 120 min
+    scheduler_schedule_func_in(&g_scheduler, 4, hk_ppm_reset, 4*MS_PER_MIN, 0, 1);     // 120 min
 }
 
 // HOUSEKEEPING FUNCTIONS
@@ -42,14 +42,13 @@ void hk_log(void) {
 
 void hk_update_tlm(void) {
     g_tlm.ops_stage = g_flashmgr.config.ops_stage;
+    g_tlm.uppm_rbt_cnt = g_flashmgr.rbt_cnt;
+    g_tlm.uppm_rbt_cause = g_rbt_cause;
 
     mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "tlm_get_data", "");
     mcp_dispatch(NODE, NODE_EPS, 0, CMD, "tlm_get_data", "");
     mcp_dispatch(NODE, NODE_HOLONAV, 0, CMD, "tlm_get_data", "");
     mcp_dispatch(NODE, NODE_ASTROBOARD, 0, CMD, "tlm_get_data", "");
-}
-
-void hk_tlm_beacon(void) {
 }
 
 void hk_heartbeats(void) {

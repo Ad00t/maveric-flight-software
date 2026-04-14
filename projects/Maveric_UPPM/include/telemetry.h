@@ -15,11 +15,11 @@ typedef struct {
     uint8_t mtq_heartbeat;              // LPPM
     uint8_t nvg_heartbeat;              // LPPM
     // Beacon 1
+    uint32_t mtq_stat;                  // LPPM
     uint8_t gnc_mode;                   // LPPM
     uint16_t unexpected_safe_count;     // LPPM 
     uint16_t unexpected_detumble_count; // LPPM 
     uint16_t sunspin_count;             // LPPM 
-    uint32_t mtq_stat;                  // LPPM
     uint8_t gyro_rate_src;              // LPPM
     uint8_t mag_src;                    // LPPM
     float gyro_rate[3];                 // LPPM
