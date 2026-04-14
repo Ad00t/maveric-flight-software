@@ -1,20 +1,21 @@
-#include "mcppkt.h"
 #include "logger.h"
-#include "frame.h"
+#include "framer.h"
+#include "cmdpkt.h"
 #include "crcnew.h"
 #include "common.h"
 #include "i2c.h"
 
 #module
 
-// MCPPKT PUBLIC API
+// CMDPKT PUBLIC API
 
-void mcppkt_init(mcppkt_s* pkt) {
-    mcppkt_clear(pkt);
+void cmdpkt_init(cmdpkt_s* pkt) {
+    memset(&pkt->parser, 0, sizeof(kiss_parser_s));
+    cmdpkt_clear(pkt);
 }
 
-void mcppkt_create(mcppkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, mcppkt_type_e ptype, char* id, uint8_t* args, uint8_t args_len) {
-    mcppkt_init(pkt);
+void cmdpkt_create(cmdpkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, uint8_t* args, uint8_t args_len) {
+    cmdpkt_init(pkt);
 
     uint16_t len = 0;
     kiss_parser_s* p = &pkt->parser;
@@ -55,17 +56,16 @@ void mcppkt_create(mcppkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, mcpp
     p->i_start = 0;
 }
 
-void mcppkt_create(mcppkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, mcppkt_type_e ptype, char* id, char* args) {
-    mcppkt_create(pkt, orgn, dest, echo, ptype, id, args, strlen(args));
+void cmdpkt_create(cmdpkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args) {
+    cmdpkt_create(pkt, orgn, dest, echo, ptype, id, args, strlen(args));
 }
 
 
-void mcppkt_clear(mcppkt_s* pkt) {
-    memset(&pkt->parser, 0, sizeof(kiss_parser_s));
-    memset(pkt, 0, sizeof(mcppkt_s));
+void cmdpkt_clear(cmdpkt_s* pkt) {
+    memset(pkt, 0, sizeof(cmdpkt_s));
 }
 
-status_e mcppkt_parse_buf(mcppkt_s* pkt) {
+status_e cmdpkt_parse_buf(cmdpkt_s* pkt) {
     kiss_parser_s* p = &pkt->parser;
     if (p->buf_len < 10) return FAILURE;
     uint16_t len = 0;
@@ -78,24 +78,24 @@ status_e mcppkt_parse_buf(mcppkt_s* pkt) {
     pkt->ptype = buf[len++];
     pkt->id_len = buf[len++];
     pkt->args_len = buf[len++];
-    // sprintf(LOGBUF, "header parsed is=%u o=%u d=%u e=%u t=%u idl=%u al=%u", 
-    //         p->i_start, pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id_len, pkt->args_len); log_debug();
+    sprintf(LOGBUF, "header parsed is=%u o=%u d=%u e=%u t=%u idl=%u al=%u", 
+            p->i_start, pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id_len, pkt->args_len); log_debug();
 
     // Parse id field
     pkt->id = &buf[len];
-    if (len + pkt->id_len > p->buf_len || buf[len + pkt->id_len] != '\0')
+    if (len + pkt->id_len >= p->buf_len || buf[len + pkt->id_len] != '\0')
         return FAILURE;
     len += pkt->id_len + 1;
-    // sprintf(LOGBUF, "id parsed '%s'", pkt->id); log_debug();
+    sprintf(LOGBUF, "id parsed '%s'", pkt->id); log_debug();
    
     // Parse args field
     pkt->args = &buf[len];
     if (pkt->args_len > 0) {
-        if (len + pkt->args_len > p->buf_len || buf[len + pkt->args_len] != '\0') 
+        if (len + pkt->args_len >= p->buf_len || buf[len + pkt->args_len] != '\0') 
             return FAILURE;
-        // sprintf(LOGBUF, "args parsed id='%s' end=%u", pkt->id, pkt->args[pkt->args_len-1]); log_debug();
+        sprintf(LOGBUF, "args parsed end=%u", pkt->args[pkt->args_len-1]); log_debug();
     } else {
-        // sprintf(LOGBUF, "args empty"); log_debug();
+        sprintf(LOGBUF, "args empty"); log_debug();
     }
     len += pkt->args_len + 1;
    
@@ -103,20 +103,18 @@ status_e mcppkt_parse_buf(mcppkt_s* pkt) {
     uint8_t crc_low = buf[len++];
     uint8_t crc_high = buf[len++];
     pkt->crc = make16(crc_high, crc_low);
-    // sprintf(LOGBUF, "crc parsed id='%s' %u %u %u", pkt->id, pkt->crc, len, p->buf_len); log_debug();
+    sprintf(LOGBUF, "crc parsed %u %u %u", pkt->crc, len, p->buf_len); log_debug();
     return len == p->buf_len ? SUCCESS : FAILURE;
 }
 
-#if NODE == NODE_UPPM
 extern i2cmgr_s g_i2cmgr;
-#endif
 
 // Handles all packet routing
-void mcppkt_dispatch(mcppkt_s* pkt) {
+void cmdpkt_dispatch(cmdpkt_s* pkt) {
     uint8_t frame[FRAME_MAX_SIZE] = {0};
     int1 csp = (NODE == NODE_UPPM && pkt->dest == NODE_GS);
     kiss_parser_s* p = &pkt->parser;
-    uint16_t frame_len = frame_create(&p->buf[p->i_start], p->buf_len, frame, csp);
+    uint16_t frame_len = framer_create(&p->buf[p->i_start], p->buf_len, frame, csp);
 #if NODE == NODE_LPPM
     switch (pkt->dest) {
             //i2c_write_buf(I2C_1, 0x15, frame, frame_len);
@@ -163,24 +161,26 @@ void mcppkt_dispatch(mcppkt_s* pkt) {
 }
 
 // Nice little wrapper function for sending commands from anywhere
-void mcp_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, mcppkt_type_e ptype, char* id, uint8_t* args, uint8_t args_len) {
-    mcppkt_s pkt = {0};
-    mcppkt_create(&pkt, orgn, dest, echo, ptype, id, args, args_len);
-    mcppkt_dispatch(&pkt);
+void cmd_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, uint8_t* args, uint8_t args_len) {
+    cmdpkt_s pkt;
+    cmdpkt_create(&pkt, orgn, dest, echo, ptype, id, args, args_len);
+    cmdpkt_dispatch(&pkt);
 }
 
-void mcp_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, mcppkt_type_e ptype, char* id, char* args) {
-    mcp_dispatch(orgn, dest, echo, ptype, id, args, strlen(args));
+void cmd_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args) {
+    cmdpkt_s pkt;
+    cmdpkt_create(&pkt, orgn, dest, echo, ptype, id, args);
+    cmdpkt_dispatch(&pkt);
 }
 
 // Public helpers 
 
-void mcp_respond(mcppkt_s* pkt, mcppkt_type_e type, uint8_t* res, uint8_t res_len) {
-    mcp_dispatch(NODE, pkt->orgn, pkt->echo, type, pkt->id, res, res_len); 
+void cmd_respond(cmdpkt_s* pkt, cmdpkt_type_e type, uint8_t* res, uint8_t res_len) {
+    cmd_dispatch(NODE, pkt->orgn, pkt->echo, type, pkt->id, res, res_len); 
 }
 
-void mcp_respond(mcppkt_s* pkt, mcppkt_type_e type, char* res) {
-    mcp_respond(pkt, type, res, strlen(res)); 
+void cmd_respond(cmdpkt_s* pkt, cmdpkt_type_e type, char* res) {
+    cmd_dispatch(NODE, pkt->orgn, pkt->echo, type, pkt->id, res); 
 }
 
 

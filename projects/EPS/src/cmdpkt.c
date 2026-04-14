@@ -7,9 +7,9 @@
 #module
 
 // CMDPKT PUBLIC API
+extern uint8_t i2c_frame[];
 
 void cmdpkt_init(cmdpkt_s* pkt) {
-    memset(&pkt->parser, 0, sizeof(kiss_parser_s));
     cmdpkt_clear(pkt);
 }
 
@@ -61,6 +61,7 @@ void cmdpkt_create(cmdpkt_s* pkt, uint8_t orgn, uint8_t dest, uint8_t echo, cmdp
 
 
 void cmdpkt_clear(cmdpkt_s* pkt) {
+    memset(&pkt->parser, 0, sizeof(kiss_parser_s));
     memset(pkt, 0, sizeof(cmdpkt_s));
 }
 
@@ -109,8 +110,12 @@ status_e cmdpkt_parse_buf(cmdpkt_s* pkt) {
 extern i2cmgr_s g_i2cmgr;
 // Handles all packet routing
 void cmdpkt_dispatch(cmdpkt_s* pkt) {
+    fprintf(COM_A, "[EPS] %s %u %u \n\r", pkt->id, pkt->orgn, pkt->dest);
+    
+    uint8_t send_byte = 0;
     uint8_t frame[FRAME_MAX_SIZE] = {0};
     int1 csp = (NODE == NODE_UPPM && pkt->dest == NODE_GS);
+
     kiss_parser_s* p = &pkt->parser;
     uint16_t frame_len = framer_create(&p->buf[p->i_start], p->buf_len, frame, csp);
 #if NODE == NODE_LPPM
@@ -146,31 +151,61 @@ void cmdpkt_dispatch(cmdpkt_s* pkt) {
             break;
     }
 #elif NODE == NODE_EPS
-    uart_write_buf(EPS_PORT, frame, frame_len);
+    // uart_write_buf(EPS_PORT, frame, frame_len);
+    fprintf(COM_A, "[EPS] eps route \n\r");
     switch (pkt->dest) {
         case NODE_FTDI:
-            rb_push_n(&g_i2cmgr.i2cbufs[2], frame, frame_len);
-            break;
+            //rb_push_n(&g_i2cmgr.i2cbufs[2], frame, frame_len);
+            //break;
         case NODE_UPPM:
+        case NODE_LPPM:
         case NODE_GS:
         case NODE_ASTROBOARD:
-        case NODE_HOLONAV:
-            rb_push_n(&g_i2cmgr.i2cbufs[3], frame, frame_len);
+        case NODE_HOLONAV: {
+            uint8_t i;
+
+            //memset(i2c_frame, 0, sizeof(i2c_frame));
+            rb_clear(&g_i2cmgr.i2cbufs[1]);
+            for (i = 0; i < I2C_MAX_SIZE; i++) {
+                rb_push(&g_i2cmgr.i2cbufs[2], frame[i]);
+                rb_push(&g_i2cmgr.i2cbufs[3], frame[i]);
+                i2c_frame[i]=0;
+            }
+            
+            //for (i = 0; i < frame_len; i++) {
+            //    fprintf(COM_A, "%02X ",frame[i]);
+            //}
+            //fprintf(COM_A, "\n\r");
+            
+            for (i = 0; i < I2C_MAX_SIZE; i++) {
+            //for (i = 0; i < frame_len; i++) {
+                rb_pop(&g_i2cmgr.i2cbufs[3], 1,  &send_byte);
+                i2c_frame[i]=send_byte;
+                fprintf(COM_A, "%02X ",send_byte);
+            }
+            fprintf(COM_A, "\n\r");
+            // rb_push_n(&g_i2cmgr.i2cbufs[3], frame, I2C_MAX_SIZE);
+            //rb_clear(&g_i2cmgr.i2cbufs[1]);
+            //rb_clear(&g_i2cmgr.i2cbufs[3]);
+            fprintf(COM_A, "%s\n\r",frame);
             break;
+        }
     }
 #endif    
 }
 
 // Nice little wrapper function for sending commands from anywhere
 void cmd_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, uint8_t* args, uint8_t args_len) {
-    cmdpkt_s pkt;
+    cmdpkt_s pkt = {0};
     cmdpkt_create(&pkt, orgn, dest, echo, ptype, id, args, args_len);
+    fprintf(COM_A, "package created 1\n\r");
     cmdpkt_dispatch(&pkt);
 }
 
 void cmd_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args) {
-    cmdpkt_s pkt;
+    cmdpkt_s pkt = {0};
     cmdpkt_create(&pkt, orgn, dest, echo, ptype, id, args);
+    fprintf(COM_A, "package created 2\n\r");
     cmdpkt_dispatch(&pkt);
 }
 
@@ -181,6 +216,6 @@ cmdpkt_type_e stat2ack(status_e s) {
 }
 
 void cmd_respond(cmdpkt_s* pkt, cmdpkt_type_e type, char* res) {
-    cmd_dispatch(pkt->dest, pkt->orgn, pkt->echo, type, pkt->id, res); 
+    cmd_dispatch(&pkt->dest, pkt->orgn, pkt->echo, type, pkt->id, res); 
 }
 

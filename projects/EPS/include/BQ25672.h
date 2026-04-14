@@ -66,6 +66,7 @@
 extern bq25672_init(unsigned int8 add = BQ_ADDR);
 //extern void bq25672_state(unsigned int8 add = BQ_ADDR, unsigned int16 reg = 0x00, unsigned int1 text = 0);
 extern void bq25672_state(unsigned int8 add = BQ_ADDR,unsigned char *output, unsigned int16 reg = 0x00, unsigned int1 text = 0);
+extern void bq25672_get(unsigned int8 add = BQ_ADDR, unsigned int16 reg = 0x00, int16* output);
 extern void bq25672_update(unsigned int8 add = BQ_ADDR);
 #endif
 

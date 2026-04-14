@@ -63,6 +63,17 @@
 //========================================
 #define RESET_PPM					PIN_G8
 
+//========================================
+//				EPS Pins
+//========================================
+#define EPS_SW1					PIN_D1
+#define EPS_SW2					PIN_D2
+#define EPS_SW3					PIN_D3
+#define EPS_SW4					PIN_D4
+#define EPS_SW5					PIN_D5
+#define EPS_SW6					PIN_D6
+#define EPS_BR1					PIN_E8
+#define EPS_BR2					PIN_E9
 
 //========================================
 //				Magnetometer Pins

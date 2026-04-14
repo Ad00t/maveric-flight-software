@@ -775,6 +775,362 @@ void bq25672_state(unsigned int8 add = BQ_ADDR, unsigned char *output, unsigned 
 	//fprintf(COM_A, output);
 }
 
+void bq25672_get(unsigned int8 add = BQ_ADDR, unsigned int16 reg = 0x00, int16* output)
+{
+   switch (reg)
+   {
+      case 0x00:
+      {
+         *output = 2500 + 250 * i2c_read_8(add, REG00_Minimal_System_Voltage);
+         break;
+      }
+
+      case 0x01:
+      {
+         *output = 10 * i2c_read_16(add, REG01_Charge_Voltage_Limit);
+         break;
+      }
+
+      case 0x03:
+      {
+         *output = 10 * i2c_read_16(add, REG03_Charge_Current_Limit);
+         break;
+      }
+
+      case 0x05:
+      {
+         *output = 100 * i2c_read_8(add, REG05_Input_Voltage_Limit);
+         break;
+      }
+
+      case 0x06:
+      {
+         *output = 10 * i2c_read_16(add, REG06_Input_Current_Limit);
+         break;
+      }
+
+      case 0x08:
+      {
+         *output = i2c_read_8(add, REG08_Precharge_Control);
+         break;
+      }
+
+      case 0x09:
+      {
+         *output = 40 * i2c_read_8(add, REG09_Termination_Control);
+         break;
+      }
+
+      case 0x0A:
+      {
+         *output = i2c_read_8(add, REG0A_Recharge_Control);
+         break;
+      }
+
+      case 0x0B:
+      {
+         *output = 2800 + 10 * i2c_read_16(add, REG0B_VOTG_regulation);
+         break;
+      }
+
+      case 0x0D:
+      {
+         *output = 40 * i2c_read_8(add, REG0D_IOTG_regulation);
+         break;
+      }
+
+      case 0x0E:
+      {
+         *output = i2c_read_8(add, REG0E_Timer_Control);
+         break;
+      }
+
+      case 0x0F:
+      {
+         *output = i2c_read_8(add, REG0F_Charger_Control_0);
+         break;
+      }
+
+      case 0x10:
+      {
+         *output = i2c_read_8(add, REG10_Charger_Control_1);
+         break;
+      }
+
+      case 0x11:
+      {
+         *output = i2c_read_8(add, REG11_Charger_Control_2);
+         break;
+      }
+
+      case 0x12:
+      {
+         *output = i2c_read_8(add, REG12_Charger_Control_3);
+         break;
+      }
+
+      case 0x13:
+      {
+         *output = i2c_read_8(add, REG13_Charger_Control_4);
+         break;
+      }
+
+      case 0x14:
+      {
+         *output = i2c_read_8(add, REG14_Charger_Control_5);
+         break;
+      }
+
+      case 0x15:
+      {
+         *output = i2c_read_8(add, REG15_MPPT_Control);
+         break;
+      }
+
+      case 0x16:
+      {
+         *output = i2c_read_8(add, REG16_Temperature_Control);
+         break;
+      }
+
+      case 0x17:
+      {
+         *output = i2c_read_8(add, REG17_NTC_Control_0);
+         break;
+      }
+
+      case 0x18:
+      {
+         *output = i2c_read_8(add, REG18_NTC_Control_1);
+         break;
+      }
+
+      case 0x19:
+      {
+         *output = 10 * i2c_read_8(add, REG19_ICO_Current_Limit);
+         break;
+      }
+
+      case 0x1B:
+      {
+         *output = i2c_read_8(add, REG1B_Charger_Status_0);
+         break;
+      }
+
+      case 0x1C:
+      {
+         *output = i2c_read_8(add, REG1C_Charger_Status_1);
+         break;
+      }
+
+      case 0x1D:
+      {
+         *output = i2c_read_8(add, REG1D_Charger_Status_2);
+         break;
+      }
+
+      case 0x1E:
+      {
+         *output = i2c_read_8(add, REG1E_Charger_Status_3);
+         break;
+      }
+
+      case 0x1F:
+      {
+         *output = i2c_read_8(add, REG1F_Charger_Status_4);
+         break;
+      }
+
+      case 0x20:
+      {
+         *output = i2c_read_8(add, REG20_FAULT_Status_0);
+         break;
+      }
+
+      case 0x21:
+      {
+         *output = i2c_read_8(add, REG21_FAULT_Status_1);
+         break;
+      }
+
+      case 0x22:
+      {
+         *output = i2c_read_8(add, REG22_Charger_Flag_0);
+         break;
+      }
+
+      case 0x23:
+      {
+         *output = i2c_read_8(add, REG23_Charger_Flag_1);
+         break;
+      }
+
+      case 0x24:
+      {
+         *output = i2c_read_8(add, REG24_Charger_Flag_2);
+         break;
+      }
+
+      case 0x25:
+      {
+         *output = i2c_read_8(add, REG25_Charger_Flag_3);
+         break;
+      }
+
+      case 0x26:
+      {
+         *output = i2c_read_8(add, REG26_FAULT_Flag_0);
+         break;
+      }
+
+      case 0x27:
+      {
+         *output = i2c_read_8(add, REG27_FAULT_Flag_1);
+         break;
+      }
+
+      case 0x28:
+      {
+         *output = i2c_read_8(add, REG28_Charger_Mask_0);
+         break;
+      }
+
+      case 0x29:
+      {
+         *output = i2c_read_8(add, REG29_Charger_Mask_1);
+         break;
+      }
+
+      case 0x2A:
+      {
+         *output = i2c_read_8(add, REG2A_Charger_Mask_2);
+         break;
+      }
+
+      case 0x2B:
+      {
+         *output = i2c_read_8(add, REG2B_Charger_Mask_3);
+         break;
+      }
+
+      case 0x2C:
+      {
+         *output = i2c_read_8(add, REG2C_FAULT_Mask_0);
+         break;
+      }
+
+      case 0x2D:
+      {
+         *output = i2c_read_8(add, REG2D_FAULT_Mask_1);
+         break;
+      }
+
+      case 0x2E:
+      {
+         *output = i2c_read_8(add, REG2E_ADC_Control);
+         break;
+      }
+
+      case 0x2F:
+      {
+         *output = i2c_read_8(add, REG2F_ADC_Function_Disable_0);
+         break;
+      }
+
+      case 0x30:
+      {
+         *output = i2c_read_8(add, REG30_ADC_Function_Disable_1);
+         break;
+      }
+
+      case 0x31:
+      {
+         *output = i2c_read_16(add, REG31_IBUS_ADC);
+         break;
+      }
+
+      case 0x33:
+      {
+         *output = i2c_read_16(add, REG33_IBAT_ADC);
+         break;
+      }
+
+      case 0x35:
+      {
+         *output = i2c_read_16(add, REG35_VBUS_ADC);
+         break;
+      }
+
+      case 0x37:
+      {
+         *output = i2c_read_16(add, REG37_VAC1_ADC);
+         break;
+      }
+
+      case 0x39:
+      {
+         *output = i2c_read_16(add, REG39_VAC2_ADC);
+         break;
+      }
+
+      case 0x3B:
+      {
+         *output = i2c_read_16(add, REG3B_VBAT_ADC);
+         break;
+      }
+
+      case 0x3D:
+      {
+         *output = i2c_read_16(add, REG3D_VSYS_ADC);
+         break;
+      }
+
+      case 0x3F:
+      {
+         //*output = (unsigned int16)(0.0976563 * i2c_read_16(add, REG3F_TS_ADC));
+         *output = i2c_read_16(add, REG3F_TS_ADC);
+         break;
+      }
+
+      case 0x41:
+      {
+         //*output = (unsigned int16)(0.5 * i2c_read_16(add, REG41_TDIE_ADC));
+         *output = i2c_read_16(add, REG41_TDIE_ADC);
+         break;
+      }
+
+      case 0x43:
+      {
+         *output = i2c_read_16(add, REG43_Dp_ADC);
+         break;
+      }
+
+      case 0x45:
+      {
+         *output = i2c_read_16(add, REG45_Dm_ADC);
+         break;
+      }
+
+      case 0x47:
+      {
+         *output = i2c_read_8(add, REG47_DPDM_Driver);
+         break;
+      }
+
+      case 0x48:
+      {
+         *output = i2c_read_8(add, REG48_Part_Infotmation);
+         break;
+      }
+
+      default:
+      {
+         *output = 0;
+         break;
+      }
+   }
+}
+
 void bq25672_update(unsigned int8 add = BQ_ADDR)
 {
 	i2c_write_8(add, REG2E_ADC_Control, 0xB0);

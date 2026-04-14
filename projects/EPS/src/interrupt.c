@@ -2,6 +2,9 @@
 #include "ringbuf.h"
 #include "uart.h"
 #include "i2c.h"
+
+//#include "cmdmgr.h"
+
 #include <stdint.h>
 #include <stdio.h>
 
@@ -25,7 +28,6 @@ void irqmgr_clear(irqmgr_s* irqmgr) {
 
 void i2cmgr_init(i2cmgr_s* i2cmgr) {
     i2cmgr->started = FALSE;
-    i2cmgr->ms = 0;
     i2cmgr_clear(i2cmgr);
     isr_disable_all();
 }
@@ -40,7 +42,7 @@ void i2cmgr_clear(i2cmgr_s* i2cmgr) {
 void isr_enable_all(void)
 {
 	enable_interrupts(INT_RDA);
-	enable_interrupts(INT_SI2C2);	
+	//enable_interrupts(INT_SI2C2);	
     enable_interrupts(INT_SI2C3);	
 	//enable_interrupts(INT_RDA2);
 	//enable_interrupts(INT_RDA3);
@@ -59,6 +61,8 @@ void isr_disable_all(void)
 // Interrupt Service Routines 
 extern irqmgr_s g_irqmgr;
 extern i2cmgr_s g_i2cmgr;
+extern uint8_t i2c_frame[];
+//extern cmdmgr_s g_cmdmgr;
 
 #INT_RDA
 void RDA_isr(void) {
@@ -118,47 +122,75 @@ void RDA_isr(void)
 	//enable_all_interrupts();
 }
 */
-//#bit CKP = getenv("BIT:CKP")
+
 
 #INT_SI2C2
 void i2c2_isr(void) {
+    /*
     BYTE state;
     uint8_t send_byte = 0;
     
     state = i2c_isr_state(I2C_2);
     
-    if (!g_i2cmgr.started || !state) return;
+    //if (!g_i2cmgr.started || !state) return;
+    if (!g_i2cmgr.started) return;
     
     if((state == 0 ) || (state == 0x80))
         i2c_read_byte(I2C_2);
     if(state >= 0x80){ 
         rb_pop(&g_i2cmgr.i2cbufs[2], 1,  &send_byte);
+        if (send_byte !=0xFF){
         i2c_write_byte(I2C_2, send_byte);
+        }
+        else{
+            i2c_write_byte(I2C_2, 0xc0);
+        }
         //i2c_write(send_buffer[state - 0x80]);
     }
     else if(state > 0)
         rb_push(&g_i2cmgr.i2cbufs[0], i2c_read_byte(I2C_2));
+    */
 }
 
 #INT_SI2C3
 void i2c3_isr(void) {
-    BYTE state;
-    uint8_t send_byte = 0;
+    //#bit CKP = getenv("BIT:CKP")
+    BYTE incoming, state;//, send_byte;
+    //uint8_t send_byte = 0;
     
     state = i2c_isr_state(I2C_3);
+    //fprintf(COM_A,"State %x \n\r", state);
+    //if (!g_i2cmgr.started || !state) return;
+    if (!g_i2cmgr.started) return;
     
-    if (!g_i2cmgr.started || !state) return;
-    
-    if((state == 0 ) || (state == 0x80))
-        i2c_read_byte(I2C_3);
-    if(state >= 0x80){ 
-        rb_pop(&g_i2cmgr.i2cbufs[3], 1,  &send_byte);
-        i2c_write_byte(I2C_3, send_byte);
-        //i2c_write(send_buffer[state - 0x80]);
+    if(state == 0 ){
+        i2c_read(I2C_3);
+        //memset(i2c_frame, 0, sizeof(i2c_frame)); 
+        //i2c_frame = {0};
+        //rb_clear(&g_i2cmgr.i2cbufs[1]);
+        //rb_clear(&g_i2cmgr.i2cbufs[2]);
     }
-    else if(state > 0)
-        rb_push(&g_i2cmgr.i2cbufs[1], i2c_read_byte(I2C_3));
-   
+    else if (state == 0x80){
+        i2c_read(I2C_3);
+    }
+    
+    if(state >= 0x80){ 
+        //send_byte = 0;
+        
+        i2c_write(I2C_3, i2c_frame[state - 0x80]);
+        i2c_frame[state - 0x80]=0;
+        //rb_pop(&g_i2cmgr.i2cbufs[2], 1,  &send_byte);
+        //i2c_write(I2C_3, send_byte);
+       
+        //CKP = TRUE;
+        //i2c_write(&g_i2cmgr.i2cbufs[2][state - 0x80]);
+    }
+    else if(state > 0){
+        incoming = i2c_read_byte(I2C_3);
+        rb_push(&g_i2cmgr.i2cbufs[1], incoming);
+        //cmdmgr_parse_stream(&g_cmdmgr, &g_i2cmgr.i2cbufs[UPPM_PORT-2], &g_cmdmgr.rcvpkts[2], FALSE); // Handle UPPM commands 
+    }
+    
 }
 /*
 #INT_SI2C3
