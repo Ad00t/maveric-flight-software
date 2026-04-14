@@ -32,6 +32,7 @@ void cmdmgr_parse_stream(cmdmgr_s* cmdmgr, ringbuf_s* rcvbuf, cmdpkt_s* pkt, int
     uint16_t n_bytes = rb_len(rcvbuf);
 
     uint16_t iter;
+
     for (iter = 0; iter < n_bytes; iter++) {
         uint8_t b = 0;
         if (!rb_pop(rcvbuf, 1, &b)) return;
@@ -62,18 +63,19 @@ void cmdmgr_parse_stream(cmdmgr_s* cmdmgr, ringbuf_s* rcvbuf, cmdpkt_s* pkt, int
 }
 
 void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
+    fprintf(COM_A,"2\n\r");
     if (!cmdmgr->is_init) return;
     kiss_parser_s* p = &pkt->parser;
 
     // Parse cmdpkt buf into fields
     if (cmdpkt_parse_buf(pkt) != SUCCESS) {
-        sprintf(LOGBUF, "cmdmgr_process_cmd: pkt buf parsing failed: len=%u", p->buf_len); log_error();
+        fprintf(COM_A, "cmdmgr_process_cmd: pkt buf parsing failed: len=%u\r\n", p->buf_len);
         goto cleanup;
     }
 
     // Forward
     if (pkt->dest != NODE) {
-        sprintf(LOGBUF, "cmdmgr_process_cmd: forwarding cmd: o=%u d=%u e=%u p=%u id='%s'", 
+        fprintf(COM_A, "cmdmgr_process_cmd: forwarding cmd: o=%u d=%u e=%u p=%u id='%s'", 
                 pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id); log_trace();
         cmdpkt_dispatch(pkt);
         goto cleanup;
@@ -82,15 +84,15 @@ void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
     // CRC check
     uint16_t calc_crc = compute_crc16(&p->buf[p->i_start], p->buf_len - 2);
     if (pkt->crc != calc_crc) {
-        sprintf(LOGBUF, "cmdmgr_process_cmd: crc check failed on cmd: '%s' crc=%u calculated=%u",
-                pkt->id, pkt->crc, calc_crc); log_error();
+        fprintf(COM_A, "cmdmgr_process_cmd: crc check failed on cmd: '%s' crc=%u calculated=%u",
+                pkt->id, pkt->crc, calc_crc);
         goto cleanup;
     } 
     
     // Find and execute cmd implementation
     cmdimpl_f cmdimpl = ht_get(&cmdmgr->cmdimpls, pkt->id);
     if (cmdimpl == NULL) {
-        sprintf(LOGBUF, "cmdmgr_process_cmd: cmd not recognized: '%s'", pkt->id); log_error();
+        fprintf(COM_A, "cmdmgr_process_cmd: cmd not recognized: '%s'", pkt->id);
         goto cleanup;
     }
     cmdimpl(pkt);

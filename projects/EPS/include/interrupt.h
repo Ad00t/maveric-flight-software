@@ -7,6 +7,7 @@
 
 #define IRQ_NUM_PORTS   4
 #define I2C_NUM_PORTS   4
+#define I2C_MAX_SIZE    128
 
 // Interrupt request manager
 
@@ -39,7 +40,8 @@ void i2cmgr_clear(i2cmgr_s* i2cmgr);
 void isr_enable_all(void);
 void isr_disable_all(void);
 void RDA_isr(void);
-void i2c2_isr(void);
 void i2c3_isr(void);
+void i2c2_isr(void);
+
 
 #endif

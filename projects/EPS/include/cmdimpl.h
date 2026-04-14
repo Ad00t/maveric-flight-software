@@ -10,10 +10,15 @@ void cmdimpl_init(void);
 
 void cmdimpl_ppm_set_time(cmdpkt_s* pkt);
 void cmdimpl_ppm_get_time(cmdpkt_s* pkt);
-void cmdimpl_ppm_ping(cmdpkt_s* pkt);
+void cmdimpl_com_ping(cmdpkt_s* pkt);
 void cmdimpl_ppm_delay(cmdpkt_s* pkt);
 void cmdimpl_ppm_clear_bufs(cmdpkt_s* pkt);
 
+void cmdimpl_eps_housekeeping(cmdpkt_s* pkt);
+void cmdimpl_eps_switch(cmdpkt_s* pkt);
+void cmdimpl_eps_cut(cmdpkt_s* pkt);
+void cmdimpl_eps_state(cmdpkt_s* pkt);
+void cmdimpl_eps_mode(cmdpkt_s* pkt);
 //void cmdimpl_tlm_get_data(cmdpkt_s* pkt);
 
 //void cmdimpl_mtq_get_conf(cmdpkt_s* pkt);

@@ -48,8 +48,9 @@
 //===================================================================
 #use i2c(master, sda=Device_SDA, scl=Device_SCL, STREAM=I2C_1)
 // Slave addresses are shifted by one bit: ex b11111111->b01111111
-#use i2c(slave, sda=PIN_A3, scl=PIN_A2, address=0x15, FORCE_HW, STREAM=I2C_2)
-#use i2c(slave, sda=PIN_E7, scl=PIN_E6, address=0x12, FORCE_HW, STREAM=I2C_3)
+#use i2c(slave, sda=PIN_A3, scl=PIN_A2, address=0x33, RESTART_WDT, FORCE_HW, STREAM=I2C_2)
+#use i2c(slave, sda=PIN_E7, scl=PIN_E6, address=0x31, RESTART_WDT, FORCE_HW, SMBUS, STREAM=I2C_3)
+//#use i2c(slave, sda=PIN_E7, scl=PIN_E6, address=0x31, SMBUS, STREAM=I2C_3)
 
 // Port 0
 #pin_select U1TX = U1TX_PIN
@@ -88,6 +89,11 @@
 //#use rs232(baud = COM_D_BAUD, UART4, bits = 8, STREAM = COM_D, ERRORS, PARITY = N, TIMEOUT=1000)
 
 // Global defines
+
+//==================================================================
+//  		Timer Port Initialization
+//===================================================================
+#USE TIMER(TIMER=1,TICK=500ms,BITS=16,NOISR)
 
 #include "nodes.h"                                                               // C standard time library header
 
@@ -134,10 +140,12 @@ void eps_superloop(void);
 //void eps_cleanup(void);
 
 //The Functions here shall be part of the commands
+unsigned int16 tick_difference(unsigned int16 current, unsigned int16 previous);
 void power_set_test(int pin, unsigned int8 add);
-void power_io(unsigned int8 eps_output, unsigned int8 eps_state);
+//void power_io(unsigned int8 eps_output, unsigned int8 eps_state);
 void cut_wire(unsigned int8 cut_output, unsigned int8 cut_state, unsigned int8 cut_time);
-void eps_housekeeping(unsigned char *hk_bbq,unsigned char *hk_ina);
+void eps_housekeeping(void);
+//void eps_housekeeping(unsigned char *hk_bbq,unsigned char *hk_ina);
 int8 pass_command(char* cmd);
 
 int1 g_superloop_running = TRUE;
@@ -146,6 +154,63 @@ uint8_t g_rbt_cause = 0;
 irqmgr_s g_irqmgr = {0};            // Interrupts manager
 i2cmgr_s g_i2cmgr = {0};            // Interrupts manager
 cmdmgr_s g_cmdmgr = {0};            // Commands manager
+uint8_t i2c_frame[FRAME_MAX_SIZE] = {0};
+
+uint8_t eps_state = 0;
+uint8_t eps_mode = 0;
+
+unsigned int16 current_tick, previous_tick, counter_reset;
+
+int16 I_BUS;
+int16 I_BAT;
+int16 V_BUS;
+int16 V_AC1;
+int16 V_AC2;
+int16 V_BAT;
+int16 V_SYS;
+int16 TS_ADC;
+int16 T_DIE;
+//int16 D_P;
+//int16 D_M;
+int16 V3V3;
+int16 I3V3;
+int16 P3V3;
+int16 V5V0;
+int16 I5V0;
+int16 P5V0;
+int16 VOUT1;
+int16 IOUT1;
+int16 POUT1;
+int16 VOUT2;
+int16 IOUT2;
+int16 POUT2;
+int16 VOUT3;
+int16 IOUT3;
+int16 POUT3;
+int16 VOUT4;
+int16 IOUT4;
+int16 POUT4;
+int16 VOUT5;
+int16 IOUT5;
+int16 POUT5;
+int16 VOUT6;
+int16 IOUT6;
+int16 POUT6;
+int16 VBRN1;
+int16 IBRN1;
+int16 PBRN1;
+int16 VBRN2;
+int16 IBRN2;
+int16 PBRN2;
+int16 VSIN1;
+int16 ISIN1;
+int16 PSIN1;
+int16 VSIN2;
+int16 ISIN2;
+int16 PSIN2;
+int16 VSIN3;
+int16 ISIN3;
+int16 PSIN3;
 
 void main(void)
 {	
@@ -171,8 +236,8 @@ void main(void)
 	//start_flag = TRUE;
 	//delay_ms(1000);
     
-    fprintf(COM_A,"EPS_USC_SERC\n\r");	
-	delay_ms(1000);
+    //fprintf(COM_A,"EPS_USC_SERC\n\r");	
+	//delay_ms(1000);
     
     eps_init();
     while (g_superloop_running) {
@@ -250,8 +315,7 @@ void main(void)
 			//Get the cmd components
 			cmd_get_command(rcv_cmd,&orgn,&dest,&ech, cmd, prms);			
 			fprintf(COM_A,"[SYS] origin: %u; destination: %u; echo: %u\n\r",orgn,dest,ech);
-			fprintf(COM_A,"[SYS] command: %s; params: %s\n\r",cmd,prms);
-
+			
 			delay_ms(10);
 			//eps_get_command(rcv_cmd, cmd, prms);
 		
@@ -317,9 +381,9 @@ void main(void)
 
 void eps_init(void) {
     // Watchdog, millisecond timer, logger, rbt_cause init
-    //setup_wdt(WDT_ON);
-	//setup_timer1(TMR_INTERNAL | TMR_DIV_BY_64, 0x00FA); 
-    logger_init();
+    setup_wdt(WDT_ON);
+	setup_timer1(TMR_INTERNAL | TMR_DIV_BY_64, 0x00FA); 
+    //logger_init();
     g_rbt_cause = restart_cause();
     	
     // Interrupts init 
@@ -332,7 +396,7 @@ void eps_init(void) {
     cmdimpl_init();	
     
     //Start EPS Manager
-    sprintf(LOGBUF, "system initialized"); log_info();
+    //sprintf(LOGBUF, "system initialized"); log_info();
     delay_ms(1000);
 	
     int1 bq_bit = bq25672_init();
@@ -348,6 +412,10 @@ void eps_init(void) {
 	i2c_write_16(INA226_ADDRESS_1, INA226_REG_CALIBRATION, 0x1400);
 	i2c_write_16(INA226_ADDRESS_12, INA226_REG_CALIBRATION, 0x1400);
 	i2c_write_16(INA226_ADDRESS_13, INA226_REG_CALIBRATION, 0x1400);
+    i2c_write_16(INA226_ADDRESS_9, INA226_REG_CALIBRATION, 0x1400);
+	i2c_write_16(INA226_ADDRESS_10, INA226_REG_CALIBRATION, 0x1400);
+    i2c_write_16(INA226_ADDRESS_11, INA226_REG_CALIBRATION, 0x1400);
+	
 	
     //Turning off the switchable Power supply
     //3.3V Bus
@@ -356,51 +424,72 @@ void eps_init(void) {
 	//N/A
 	//5V Input 6
 	//output_low(PIN_D6);
-    output_high(PIN_D6);
+    output_low(EPS_SW6);
 	//5V Input 5
-	output_low(PIN_D5);
+	output_low(EPS_SW5);
 	//5V Input 4
-	output_low(PIN_D4);
+	output_low(EPS_SW4);
 	//3.3V Input 3
-	output_low(PIN_D3);
+	output_low(EPS_SW3);
 	//3.3V Input 2
-	output_low(PIN_D2);
+	output_low(EPS_SW2);
 	//3.3V Input 1
-	output_low(PIN_D1);
+	output_low(EPS_SW1);
 	// 5V Burn circuit 1
-	output_low(PIN_E8);
+	output_low(EPS_BR1);
 	// 5V Burn circuit 2
-	output_low(PIN_E9);
+	output_low(EPS_BR2);
+    
     
     //Sending Starting Message to UART port
-    fprintf(COM_A,"EPS_USC_SERC\n\r");	
+    fprintf(COM_A,"EPS_USC_SERC %X\n\r", bq_bit);	
 	delay_ms(1000);
+    
+    //time conditions for the eps.
+    counter_reset = 0;
+    current_tick = previous_tick = get_ticks();
 }
 
 
 // Master code of what runs every superloop iteration
 void eps_superloop(void) {
+    
     //Kick the dog
-    //restart_wdt();
-    fprintf(COM_A,"Waiting for Commands\n\r");	
+    restart_wdt();
+    //fprintf(COM_A,".\r");	
+    
+    //delay_ms(1000);
     // Handle received byte interrupts
     // Do driver handling before commands so data is up to date
     // HERE IT SHOULD BE THE HOUSE KEEPING VARIABLES BEFORE 
     // CHECKING THE COMMANDS
     // nvg_parse_stream(&g_nvg, &g_irqmgr.irqbufs[NVG_PORT-1]); // Handle naviguider data
     cmdmgr_parse_stream(&g_cmdmgr, &g_irqmgr.irqbufs[EPS_PORT-1], &g_cmdmgr.rcvpkts[0], FALSE); // Handle UART commands 
-    cmdmgr_parse_stream(&g_cmdmgr, &g_i2cmgr.i2cbufs[LPPM_PORT-2], &g_cmdmgr.rcvpkts[1], FALSE); // Handle LPPM commands 
+    //cmdmgr_parse_stream(&g_cmdmgr, &g_i2cmgr.i2cbufs[LPPM_PORT-2], &g_cmdmgr.rcvpkts[1], FALSE); // Handle LPPM commands 
     cmdmgr_parse_stream(&g_cmdmgr, &g_i2cmgr.i2cbufs[UPPM_PORT-2], &g_cmdmgr.rcvpkts[2], FALSE); // Handle UPPM commands 
+    
+    current_tick = get_ticks();
+    if(previous_tick > current_tick){
+        previous_tick = current_tick;
+    }
+    if(tick_difference(current_tick, previous_tick) > 1500) {
+        previous_tick = current_tick;
+        eps_housekeeping();
+        counter_reset += 1;
+        fprintf(COM_A,"Current tick %Lu\n\r", counter_reset);
+        //the number is to match the tick counter to around 2 hours
+        if (counter_reset == 10986){
+            //placeholder for a reset
+            fprintf(COM_A,"EPS_USC_SERC Reset\n\r");	
+            counter_reset = 0;
+        }
+        
+    }
 }
 
-/*
-// Cleanup routine
-void eps_cleanup(void) {
-    mtq_destroy(&g_mtq);
-    // nvg_destroy(&g_nvg);
+unsigned int16 tick_difference(unsigned int16 current, unsigned int16 previous) {
+    return (current - previous);
 }
- */
-
 
 void power_set_test(int pin, unsigned int8 add)
 {
@@ -463,7 +552,7 @@ void power_set_test(int pin, unsigned int8 add)
 	delay_ms(100);
 	printf("Done!\n\r");
 }
-
+/*
 void power_io(unsigned int8 eps_output, unsigned int8 eps_state)
 {
 
@@ -537,6 +626,7 @@ void power_io(unsigned int8 eps_output, unsigned int8 eps_state)
 #endif
 	}
 }
+*/
 
 void cut_wire(unsigned int8 cut_output, unsigned int8 cut_state, unsigned int8 cut_time)
 {
@@ -620,6 +710,88 @@ void cut_wire(unsigned int8 cut_output, unsigned int8 cut_state, unsigned int8 c
 	}
 }
 
+void eps_housekeeping(void)
+{
+    int16 shunt_voltage;
+    extern int16 I_BUS;
+    extern int16 I_BAT;
+    extern int16 V_BUS;
+    extern int16 V_AC1;
+    extern int16 V_AC2;
+    extern int16 V_BAT;
+    extern int16 V_SYS;
+    extern int16 TS_ADC;
+    extern int16 T_DIE;
+    //int16 D_P;
+    //int16 D_M;
+    extern int16 V3V3;
+    extern int16 I3V3;
+    extern int16 P3V3;
+    extern int16 V5V0;
+    extern int16 I5V0;
+    extern int16 P5V0;
+    extern int16 VOUT1;
+    extern int16 IOUT1;
+    extern int16 POUT1;
+    extern int16 VOUT2;
+    extern int16 IOUT2;
+    extern int16 POUT2;
+    extern int16 VOUT3;
+    extern int16 IOUT3;
+    extern int16 POUT3;
+    extern int16 VOUT4;
+    extern int16 IOUT4;
+    extern int16 POUT4;
+    extern int16 VOUT5;
+    extern int16 IOUT5;
+    extern int16 POUT5;
+    extern int16 VOUT6;
+    extern int16 IOUT6;
+    extern int16 POUT6;
+    extern int16 VBRN1;
+    extern int16 IBRN1;
+    extern int16 PBRN1;
+    extern int16 VBRN2;
+    extern int16 IBRN2;
+    extern int16 PBRN2;
+    extern int16 VSIN1;
+    extern int16 ISIN1;
+    extern int16 PSIN1;
+    extern int16 VSIN2;
+    extern int16 ISIN2;
+    extern int16 PSIN2;
+    extern int16 VSIN3;
+    extern int16 ISIN3;
+    extern int16 PSIN3;
+    
+    bq25672_get(BQ_ADDR,0x31,&I_BUS);
+    bq25672_get(BQ_ADDR,0x33,&I_BAT);
+    bq25672_get(BQ_ADDR,0x35,&V_BUS);
+    bq25672_get(BQ_ADDR,0x37,&V_AC1);
+    bq25672_get(BQ_ADDR,0x39,&V_AC2);
+    bq25672_get(BQ_ADDR,0x3B,&V_BAT);
+    bq25672_get(BQ_ADDR,0x3D,&V_SYS);
+    bq25672_get(BQ_ADDR,0x3F,&TS_ADC); //Recall multiply by 0.0976563
+    bq25672_get(BQ_ADDR,0x41,&T_DIE); //Recall multiply by 0.5
+    
+    ina226_read_data(INA226_ADDRESS_8, &shunt_voltage, &V3V3, &P3V3, &I3V3);
+    ina226_read_data(INA226_ADDRESS_7, &shunt_voltage, &V5V0, &P5V0, &I5V0);
+    
+    ina226_read_data(INA226_ADDRESS_1, &shunt_voltage, &VOUT1, &POUT1, &IOUT1);
+    ina226_read_data(INA226_ADDRESS_2, &shunt_voltage, &VOUT2, &POUT2, &IOUT2);
+    ina226_read_data(INA226_ADDRESS_3, &shunt_voltage, &VOUT3, &POUT3, &IOUT3);
+    ina226_read_data(INA226_ADDRESS_4, &shunt_voltage, &VOUT4, &POUT4, &IOUT4);
+    ina226_read_data(INA226_ADDRESS_5, &shunt_voltage, &VOUT5, &POUT5, &IOUT5);
+    ina226_read_data(INA226_ADDRESS_6, &shunt_voltage, &VOUT6, &POUT6, &IOUT6);
+    
+    ina226_read_data(INA226_ADDRESS_12, &shunt_voltage, &VBRN1, &PBRN1, &IBRN1);
+    ina226_read_data(INA226_ADDRESS_13, &shunt_voltage, &VBRN2, &PBRN2, &IBRN2);
+    
+    ina226_read_data(INA226_ADDRESS_9, &shunt_voltage, &VSIN1, &PSIN1, &ISIN1);
+    ina226_read_data(INA226_ADDRESS_10, &shunt_voltage, &VSIN2, &PSIN2, &ISIN2);
+    ina226_read_data(INA226_ADDRESS_11, &shunt_voltage, &VSIN3, &PSIN3, &ISIN3);
+}
+/*
 void eps_housekeeping(unsigned char *hk_bbq,unsigned char *hk_ina)
 {
 	unsigned char hk_bbq_in[128];
@@ -701,7 +873,7 @@ void eps_housekeeping(unsigned char *hk_bbq,unsigned char *hk_ina)
 	strcpy(hk_ina,hk_ina_in);
 	
 }
-
+*/
 /*
  * Interface function, reads an incoming command.  If the command is for this
  * component (the EPS subsystem), it runs the command (somehow), after performing

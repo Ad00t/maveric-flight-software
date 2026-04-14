@@ -34,7 +34,7 @@ void log_flush(log_level_e lvl) {
         }
         sprintf(&logfmt[j], "%s\n", LOGBUF);
         char cmd_id[] = "ftdi_log";
-        cmd_dispatch(NODE, NODE_FTDI, 0, REQ, cmd_id, logfmt);
+        //cmd_dispatch(NODE, NODE_FTDI, 0, REQ, cmd_id, logfmt);
     }
 
     logger_clear();

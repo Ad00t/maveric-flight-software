@@ -88,21 +88,23 @@ void kiss_append_footer(uint8_t* msg, uint16_t* msgLength) {
 
 void kiss_apply_byte_check(uint8_t* message, uint16_t messageLength, uint8_t* frame, uint16_t* frameLength, uint16_t msgStartIdx) {
 	uint16_t spot = msgStartIdx;
-
+    uint8_t  b;
 	uint16_t i;
+    
 	for (i = 0; i < messageLength; i++) {
-		if (message[i] == FEND) {
+        b = message[i];
+		if (b == FEND) {
 			frame[spot] = FESC;
 			spot++;
 			frame[spot] = TFEND;
 			spot++;
-		} else if (message[i] == FESC) {
+		} else if (b == FESC) {
 			frame[spot] = FESC;
 			spot++;
 			frame[spot] = TFESC;
 			spot++;
 		} else {
-			frame[spot] = message[i];
+			frame[spot] = b;
 			spot++;
 		}
 	}
