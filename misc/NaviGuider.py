@@ -3,7 +3,7 @@ import time
 import datetime
 
 class NaviGuider:
-    def __init__(self, port, baudrate=115200):
+    def __init__(self, port='COM4', baudrate=115200):
         """
         Initializes the NaviGuider object and establishes serial communication.
 

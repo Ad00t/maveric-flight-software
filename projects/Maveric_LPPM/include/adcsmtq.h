@@ -93,10 +93,10 @@ static const mtq_reg_s MTQ_INIT_REG_TABLE[] = {
     /* ATT_ERROR */        { 142, 3, 0, T_FLOAT, NULL, 0 },
     /* ATT_ERROR_RATE */   { 145, 3, 0, T_FLOAT, NULL, 0 },
     /* ADCS_TMP */         { 148, 1, 0, T_INT16, NULL, 0 },
-    // /* PWR_VOL_5V */       { 149, 1, 0, T_FLOAT, NULL, 0 },
-    // /* PWR_CUR_5V */         { 150, 1, 0, T_FLOAT, NULL, 0 },
-    // /* PWR_VOL_3V */         { 151, 1, 0, T_FLOAT, NULL, 0 },
-    // /* PWR_CUR_3V  */         { 152, 1, 0, T_FLOAT, NULL, 0 },
+    /* PWR_VOL_5V */       { 149, 1, 0, T_FLOAT, NULL, 0 },
+    /* PWR_CUR_5V */         { 150, 1, 0, T_FLOAT, NULL, 0 },
+    /* PWR_VOL_3V */         { 151, 1, 0, T_FLOAT, NULL, 0 },
+    /* PWR_CUR_3V  */         { 152, 1, 0, T_FLOAT, NULL, 0 },
     /* FSS_TMP1 */         { 153, 1, 0, T_INT16, NULL, 0 },
     // /* FSS_TMP2 */         { 154, 1, 0, T_INT16, NULL, 0 },
     // /* FSS_TMP3 */         { 155, 1, 0, T_INT16, NULL, 0 },
@@ -107,14 +107,14 @@ static const mtq_reg_s MTQ_INIT_REG_TABLE[] = {
     /* MAG_VEC */          { 9, 3, 1, T_FLOAT, NULL, 0 },
     /* MAG_STAT */         { 12, 1, 1, T_UINT8, NULL, 0 },
     /* MAG0_S */           { 13, 3, 1, T_FLOAT, NULL, 0 },
-    /* MAG1_S */           { 16, 3, 1, T_FLOAT, NULL, 0 },
-    /* MAG2_S */           { 19, 3, 1, T_FLOAT, NULL, 0 },
-    /* MAG3_S */           { 22, 3, 1, T_FLOAT, NULL, 0 },
-    /* MAG4_S */           { 25, 3, 1, T_FLOAT, NULL, 0 },
-    /* MAG5_S */           { 28, 3, 1, T_FLOAT, NULL, 0 },
+    // /* MAG1_S */           { 16, 3, 1, T_FLOAT, NULL, 0 },
+    // /* MAG2_S */           { 19, 3, 1, T_FLOAT, NULL, 0 },
+    // /* MAG3_S */           { 22, 3, 1, T_FLOAT, NULL, 0 },
+    // /* MAG4_S */           { 25, 3, 1, T_FLOAT, NULL, 0 },
+    // /* MAG5_S */           { 28, 3, 1, T_FLOAT, NULL, 0 },
     /* FSS_STAT */         { 31, 1, 1, T_UINT8, NULL, 0 },
-    /* FSS0_SV */          { 32, 1, 1, T_UINT16, NULL, 0 },
-    /* FSS0_PDSUM */       { 33, 1, 1, T_UINT16, NULL, 0 },
+    /* FSS0_SV */          { 32, 1, 1, T_INT16, NULL, 0 },
+    /* FSS0_PDSUM */       { 33, 1, 1, T_UINT32, NULL, 0 },
     // /* FSS1_SV */          { 34, 1, 1, T_INT16, NULL, 0 },
     // /* FSS1_PDSUM */       { 35, 1, 1, T_UINT32, NULL, 0 },
     // /* FSS2_SV */          { 36, 1, 1, T_INT16, NULL, 0 },
@@ -128,8 +128,8 @@ static const mtq_reg_s MTQ_INIT_REG_TABLE[] = {
     /* IMU_STAT */         { 44, 1, 1, T_UINT8, NULL, 0 },
     /* IMU0_S */           { 45, 3, 1, T_FLOAT, NULL, 0 },
     /* IMU1_S */           { 48, 3, 1, T_FLOAT, NULL, 0 },
-    /* IMU2_S */           { 51, 3, 1, T_FLOAT, NULL, 0 },
-    /* IMU3_S */           { 54, 3, 1, T_FLOAT, NULL, 0 },
+    // /* IMU2_S */           { 51, 3, 1, T_FLOAT, NULL, 0 },
+    // /* IMU3_S */           { 54, 3, 1, T_FLOAT, NULL, 0 },
     // /* STR_STAT */         { 57, 1, 1, T_UINT8, NULL, 0 },
     // /* STR0_S */           { 58, 4, 1, T_FLOAT, NULL, 0 },
     // /* STR1_S */           { 62, 4, 1, T_FLOAT, NULL, 0 },
@@ -148,7 +148,7 @@ static const mtq_reg_s MTQ_INIT_REG_TABLE[] = {
     /* ORIEN_HB */         { 13, 4, 2, T_FLOAT, NULL, 0 },
     /* MAG_INFO */         { 17, 1, 2, T_UINT8, NULL, 0 },
     /* MAG0_ORIEN_BS */    { 18, 4, 2, T_FLOAT, NULL, 0 },
-    /* MAG1_ORIEN_BS */    { 22, 4, 2, T_FLOAT, NULL, 0 },
+    // /* MAG1_ORIEN_BS */    { 22, 4, 2, T_FLOAT, NULL, 0 },
     // /* MAG2_ORIEN_BS */    { 26, 4, 2, T_FLOAT, NULL, 0 },
     // /* MAG3_ORIEN_BS */    { 30, 4, 2, T_FLOAT, NULL, 0 },
     // /* MAG4_ORIEN_BS */    { 34, 4, 2, T_FLOAT, NULL, 0 },
@@ -163,12 +163,12 @@ static const mtq_reg_s MTQ_INIT_REG_TABLE[] = {
     /* IMU_INFO */         { 67, 1, 2, T_UINT8, NULL, 0 },
     /* IMU0_ORIEN_BS */    { 68, 4, 2, T_FLOAT, NULL, 0 },
     /* IMU1_ORIEN_BS */    { 72, 4, 2, T_FLOAT, NULL, 0 },
-    /* IMU2_ORIEN_BS */    { 76, 4, 2, T_FLOAT, NULL, 0 },
-    /* IMU3_ORIEN_BS */    { 80, 4, 2, T_FLOAT, NULL, 0 },
+    // /* IMU2_ORIEN_BS */    { 76, 4, 2, T_FLOAT, NULL, 0 },
+    // /* IMU3_ORIEN_BS */    { 80, 4, 2, T_FLOAT, NULL, 0 },
     // /* STR_INFO */         { 84, 1, 2, T_UINT8, NULL, 0 },
     // /* STR0_ORIEN_BS */    { 85, 4, 2, T_FLOAT, NULL, 0 },
     // /* STR1_ORIEN_BS */    { 89, 4, 2, T_FLOAT, NULL, 0 },
-    /* GNSS */             { 93, 1, 2, T_UINT8, NULL, 0 },
+    // /* GNSS */             { 93, 1, 2, T_UINT8, NULL, 0 },
     /* IMU_BIAS */         { 94, 3, 2, T_FLOAT, NULL, 0 },
     /* NVM */              { 255, 1, 2, T_UINT8, NULL, 0 }
 };
@@ -403,12 +403,12 @@ int1 mtq_stat_parse_tumb(uint32_t stat);
 
 static const uint16_t MTQ_FAST_FRAME_REGS[] = {
     MTQ_CONF, MTQ_TIME, MTQ_DATE, MTQ_MTQ_USER, MTQ_STAT, MTQ_ACT_ERR, MTQ_SEN_ERR,
-    MTQ_CSS_ERR, MTQ_Q, MTQ_RATE, MTQ_LLA, MTQ_ATT_ERROR, MTQ_ATT_ERROR_RATE, MTQ_SV, MTQ_MAG, MTQ_MTQ, MTQ_MTQ_USER
+    MTQ_Q, MTQ_RATE, MTQ_LLA, MTQ_ATT_ERROR, MTQ_ATT_ERROR_RATE, MTQ_SV, MTQ_MAG, MTQ_MTQ, MTQ_MTQ_USER
 };
 #define MTQ_NUM_FAST_REGS       sizeof(MTQ_FAST_FRAME_REGS) / sizeof(uint16_t)   
 
 static const uint16_t MTQ_CTRL_FRAME_REGS[] = {
-    MTQ_Q, MTQ_RATE, MTQ_LLA, MTQ_MAG, MTQ_IMU0_S, MTQ_IMU1_S, MTQ_IMU2_S, MTQ_IMU3_S, MTQ_MTQ, MTQ_MTQ_USER
+    MTQ_Q, MTQ_RATE, MTQ_LLA, MTQ_MAG, MTQ_IMU0_S, MTQ_IMU1_S, MTQ_MTQ, MTQ_MTQ_USER
 };
 #define MTQ_NUM_CTRL_REGS       sizeof(MTQ_CTRL_FRAME_REGS) / sizeof(uint16_t)   
 
