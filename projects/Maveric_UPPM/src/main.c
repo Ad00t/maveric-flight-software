@@ -153,7 +153,7 @@ void system_init(void) {
     if (g_flashmgr.rbt_cnt > 100 && *ops_stage != OPS_SAFE && *ops_stage != OPS_NOMINAL) {
         *ops_stage = OPS_SAFE;
     }
-    switch (ops_stage) {
+    switch (*ops_stage) {
         case OPS_INIT:
             scheduler_schedule_func_in(&g_scheduler, 5, system_ops_transition_init_safe, 1*MS_PER_MIN, 0, 1);     // 45 min
             break;
@@ -186,6 +186,7 @@ void system_superloop(void) {
 }
 
 void system_ops_transition_init_safe(void) {
+    sprintf(LOGBUF, "system_ops_transition_init_safe"); log_info();
     uint8_t i;
     for (i = 0; i < 5; i++) {
         g_flashmgr.config.ops_stage = OPS_SAFE;
@@ -206,6 +207,7 @@ void system_ops_transmit_beacon(void) {
 }
 
 void system_ops_enable_gnc(void) {
+    sprintf(LOGBUF, "system_ops_enable_gnc eps=%u", g_tlm.eps_state); log_info();
     if (g_tlm.eps_state == 2) {      // Nominal power levels
         mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "gnc_set_mode", "1");
         scheduler_deschedule(&g_scheduler, 7);

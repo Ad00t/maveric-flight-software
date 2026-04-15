@@ -22,7 +22,7 @@ void hk_init(void) {
     scheduler_schedule_func_in(&g_scheduler, 1, hk_log, 2500, 1000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 2, hk_update_tlm, 5000, 10000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 3, hk_heartbeats, 4000, 3000, SCHEDULE_REPS_INFINITE);
-    scheduler_schedule_func_in(&g_scheduler, 4, hk_ppm_reset, 4*MS_PER_MIN, 0, 1);     // 120 min
+    // scheduler_schedule_func_in(&g_scheduler, 4, hk_ppm_reset, 4*MS_PER_MIN, 0, 1);     // 120 min
 }
 
 // HOUSEKEEPING FUNCTIONS

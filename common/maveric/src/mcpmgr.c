@@ -81,6 +81,8 @@ void mcpmgr_process_pkt(mcpmgr_s* mcpmgr, mcppkt_s* pkt) {
     if (pkt->ptype == CMD && (pkt->orgn == NODE_GS || pkt->orgn == NODE_FTDI)) {
         sprintf(LOGBUF, "proc_pkt: acking o=%u d=%u e=%u p=%u id='%s' arglen=%u",
                 pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id, pkt->args_len); log_debug();
+        // Delay immediately after receiving GS command to allow GS to switch to RX mode
+        if (NODE == NODE_UPPM && pkt->orgn == NODE_GS) delay_ms(1000);
         mcp_respond(pkt, ACK, (uint8_t*) pkt->args, pkt->args_len);
     }
 
