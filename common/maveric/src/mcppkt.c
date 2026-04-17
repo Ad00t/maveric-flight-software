@@ -171,7 +171,10 @@ void mcp_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, mcppkt_type_e ptype,
 // Public helpers 
 
 void mcp_respond(mcppkt_s* pkt, mcppkt_type_e type, uint8_t* res, uint8_t res_len) {
-    mcp_dispatch(NODE, pkt->orgn, pkt->echo, type, pkt->id, res, res_len); 
+    mcp_dispatch(NODE, pkt->orgn, 0, type, pkt->id, res, res_len); 
+    if (pkt->echo != 0) {
+        mcp_dispatch(NODE, pkt->echo, 0, type, pkt->id, res, res_len); 
+    }
 }
 
 void mcp_respond(mcppkt_s* pkt, mcppkt_type_e type, char* res) {
