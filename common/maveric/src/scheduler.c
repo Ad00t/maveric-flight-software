@@ -100,7 +100,7 @@ status_e scheduler_reschedule_in(scheduler_s* s, uint8_t id, uint32_t start_dela
 status_e scheduler_clear_task(scheduler_s* s, uint8_t id) {
     schedtask_s* task_ptr = s->id_map[id];
     if (task_ptr == NULL) return FAILURE;
-    if (task_ptr->type == CMD) memset(task_ptr->cmd_ptr, 0, MCP_MAX_LEN);
+    if (task_ptr->type == ST_TYPE_CMD) memset(task_ptr->cmd_ptr, 0, MCP_MAX_LEN);
     memset(task_ptr, 0, sizeof(schedtask_s));
     s->id_map[id] = NULL;
     return SUCCESS;
