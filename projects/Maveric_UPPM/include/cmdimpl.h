@@ -8,8 +8,6 @@ void cmdimpl_init();
 
 // COMMAND IMPLEMENTATIONS 
 
-void cmdimpl_com_ping(mcppkt_s* pkt);
-
 void cmdimpl_ppm_reset(mcppkt_s* pkt);
 void cmdimpl_ppm_get_time(mcppkt_s* pkt);
 void cmdimpl_ppm_set_time(mcppkt_s* pkt);
@@ -40,5 +38,12 @@ void cmdimpl_cfg_flush(mcppkt_s* pkt);
 
 void cmdimpl_ax100_get_power(mcppkt_s* pkt);
 void cmdimpl_ax100_set_power(mcppkt_s* pkt);
+
+void cmdimpl_rpi_disp_cap(mcppkt_s* pkt);
+void cmdimpl_com_ping(mcppkt_s* pkt);
+void cmdimpl_lcd_display_img(mcppkt_s* pkt);
+void cmdimpl_cam_capture_img(mcppkt_s* pkt);
+void cmdimpl_lcd_off(mcppkt_s* pkt);
+void cmdimpl_cam_off(mcppkt_s* pkt);
 
 #endif 

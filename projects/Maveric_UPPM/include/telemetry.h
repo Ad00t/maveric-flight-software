@@ -14,6 +14,8 @@ typedef struct {
     uint8_t ertc_heartbeat;             // LPPM
     uint8_t mtq_heartbeat;              // LPPM
     uint8_t nvg_heartbeat;              // LPPM
+    uint8_t hn_state;                   // UPPM
+    uint8_t ab_state;                   // UPPM
     // Beacon 1
     uint32_t mtq_stat;                  // LPPM
     uint8_t gnc_mode;                   // LPPM

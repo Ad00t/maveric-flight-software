@@ -62,13 +62,13 @@ void scheduler_run_tasks(scheduler_s* s, mcpmgr_s* mcpmgr) {
                 mcpmgr_process_pkt(mcpmgr, s->tasks[i].cmd_ptr);
                 break;
         }
-        if (s->tasks[i].remaining_reps != SCHEDULE_REPS_INFINITE) {
+        if (s->tasks[i].remaining_reps > 0 && s->tasks[i].remaining_reps != SCHEDULE_REPS_INFINITE) {
             s->tasks[i].remaining_reps--;
         }
         if (s->tasks[i].remaining_reps > 0) {
             uint64_t newnext = now + s->tasks[i].period_ms;
             s->tasks[i].next_release = newnext; 
-        } else {
+        } else if (s->tasks[i].type != ST_TYPE_NONE) { // Check if schedule has not already been cleared
             scheduler_clear_task(s, s->tasks[i].id);
         }
     }

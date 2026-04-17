@@ -753,6 +753,12 @@ void cmdimpl_mtq_set_1(mcppkt_s* pkt) {
                         memcpy(&data[i*l], &val, l);
                     }
                     break;
+                case T_UINT32:
+                    for (i = 0; i < reg->value_len; i++) {
+                        uint32_t val = strtoul(p, &p, 10);
+                        memcpy(&data[i*l], &val, l);
+                    }
+                    break;
                 case T_FLOAT:
                     for (i = 0; i < reg->value_len; i++) {
                         float val = strtof(p, &p);

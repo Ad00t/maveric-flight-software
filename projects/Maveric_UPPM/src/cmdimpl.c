@@ -4,7 +4,6 @@
 #include "mcpmgr.h"
 #include "common.h"
 #include "systime.h"
-#include "ax100.h"
 #include "telemetry.h"
 #include "hashtable.h"
 #include "interrupts.h"
@@ -18,8 +17,6 @@
 
 void cmdimpl_init() {
     hashtable_s* ht = &g_mcpmgr.cmdimpls;
-    
-    ht_set(ht, "com_ping", (cmdimpl_f) cmdimpl_com_ping);
     
     ht_set(ht, "ppm_reset", (cmdimpl_f) cmdimpl_ppm_reset);
     ht_set(ht, "ppm_get_time", (cmdimpl_f) cmdimpl_ppm_get_time);
@@ -52,6 +49,14 @@ void cmdimpl_init() {
     
     ht_set(ht, "ax100_get_power", (cmdimpl_f) cmdimpl_ax100_get_power);
     ht_set(ht, "ax100_set_power", (cmdimpl_f) cmdimpl_ax100_set_power);
+
+    ht_set(ht, "rpi_disp_cap", (cmdimpl_f) cmdimpl_rpi_disp_cap);
+    ht_set(ht, "com_ping", (cmdimpl_f) cmdimpl_com_ping);
+    ht_set(ht, "lcd_display_img", (cmdimpl_f) cmdimpl_lcd_display_img);
+    ht_set(ht, "cam_capture_img", (cmdimpl_f) cmdimpl_cam_capture_img);
+    ht_set(ht, "lcd_off", (cmdimpl_f) cmdimpl_lcd_off);
+    ht_set(ht, "cam_off", (cmdimpl_f) cmdimpl_cam_off);
+    
 }
 
 // HELPERS
@@ -74,16 +79,6 @@ void ppm_set_time_from_str(char* args) {
 }
 
 // COMMAND IMPLEMENTATIONS
-
-void cmdimpl_com_ping(mcppkt_s* pkt) {
-    switch (pkt->ptype) {
-        case CMD: {
-            sprintf(LOGBUF, "cmdimpl_com_ping '%s'", pkt->args); log_info();
-            mcp_respond(pkt, RES, "pong");
-            break;
-        }
-    }
-}
 
 void cmdimpl_ppm_reset(mcppkt_s* pkt) {
     switch (pkt->ptype) {
@@ -447,7 +442,7 @@ void cmdimpl_flash_read_prot(mcppkt_s* pkt) {
             char res[32] = {0};
             sprintf(res, "%u 0x%02X%02X%02X %u", 
                     SUCCESS, make8(addr, 2), make8(addr, 1), make8(addr, 0), sp);
-            mcp_respond(pkt, RES, res);
+            mcp_respond(pkt, RES, (char*) res);
             break;
         }
     }
@@ -551,6 +546,142 @@ void cmdimpl_ax100_set_power(mcppkt_s* pkt) {
             char res[8] = {0};
             sprintf(res, "%u", s);
             mcp_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
+void cmdimpl_rpi_disp_cap(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            char* p = pkt->args;
+            char* t;
+
+            t = strtok(p, " ");
+            if (!t) { mcp_respond(pkt, RES, "0"); break; }
+            uint8_t rpi_id = (uint8_t)strtoul(t, NULL, 10);
+
+            char* lcd_fn = strtok(NULL, " ");
+            if (!lcd_fn) { mcp_respond(pkt, RES, "0"); break; }
+
+            char* cam_fn = strtok(NULL, " ");
+            if (!cam_fn) { mcp_respond(pkt, RES, "0"); break; }
+
+            t = strtok(NULL, " ");
+            if (!t) { mcp_respond(pkt, RES, "0"); break; }
+            uint8_t quantity = (uint8_t) strtoul(t, NULL, 10);
+
+            t = strtok(NULL, " ");
+            if (!t) { mcp_respond(pkt, RES, "0"); break; }
+            float focus = strtof(t, NULL);
+
+            t = strtok(NULL, " ");
+            if (!t) { mcp_respond(pkt, RES, "0"); break; }
+            uint32_t exposure_us = (uint32_t) strtoul(t, NULL, 10);
+
+            status_e s_fsm = pldmgr_fsm_init(&g_pldmgr, rpi_id, lcd_fn, cam_fn, quantity, focus, exposure_us); 
+            if (s_fsm == FAILURE) { mcp_respond(pkt, RES, "0"); break; }
+            
+            char eps_sw_args[8] = {0};
+            uint8_t eps_id = (rpi_id == 5 ? NODE_HOLONAV : (rpi_id == 6 ? NODE_ASTROBOARD : 0));
+            if (eps_id == 0) { mcp_respond(pkt, RES, "0"); break; }
+            sprintf(eps_sw_args, "%u %u", rpi_id, 1);
+            mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_sw", eps_sw_args); 
+
+            mcppkt_s cmd_com_ping;
+            mcppkt_create(&cmd_com_ping, NODE, rpi_id, 0, CMD, "com_ping", "");
+            status_e s_sched = scheduler_schedule_cmd_in(&g_scheduler, 10+rpi_id, &cmd_com_ping, 60*MS_PER_MIN, 30*MS_PER_MIN, 3);
+
+            char res[8] = {0};
+            sprintf(res, "%u", s_sched);
+            mcp_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
+void cmdimpl_com_ping(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            sprintf(LOGBUF, "cmdimpl_com_ping '%s'", pkt->args); log_info();
+            mcp_respond(pkt, RES, "pong");
+            break;
+        }
+        case RES: {
+            pld_state_e plds = g_pldmgr.state_map[pkt->orgn];
+            // if (*plds != PLDS_OFF) break;
+            *plds = PLDS_STARTED;
+            scheduler_clear_task(&g_scheduler, 10+pkt->orgn); 
+            char disp_args[MCP_MAX_ARGS_LEN] = {0};
+            sprintf(disp_args, "%s %u", g_pldmgr.lcd_fn_map[pkt->orgn], 0);
+            mcp_dispatch(NODE, pkt->orgn, 0, CMD, "lcd_display_img", disp_args);
+        }
+    }
+}
+
+void cmdimpl_lcd_display_img(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case RES: {
+            char* p = pkt->args;
+            uint8_t s = strtoul(p, &p, 10);
+            if (s != 1) {
+                // TODO: cam failure handling?
+            }
+            *(g_pldmgr.state_map[pkt->orgn]) = PLDS_DISPLAYED;
+            char cap_args[MCP_MAX_ARGS_LEN] = {0};
+            uint8_t j = sprintf(cap_args, "%s %u ", g_pldmgr.cam_fn_map[pkt->orgn], *(g_pldmgr.quantity_map[pkt->orgn]));
+            j += ftoa(*(g_pldmgr.focus_map[pkt->orgn]), &cap_args[j], 3, 'f');
+            j += sprintf(&cap_args[j], " %u", *(g_pldmgr.exposure_us_map[pkt->orgn]));
+            mcp_dispatch(NODE, pkt->orgn, 0, CMD, "cam_capture_imgs", cap_args);
+            break;
+        }
+    }
+}
+
+void cmdimpl_cam_capture_img(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case RES: {
+            char* p = pkt->args;
+            uint8_t s = strtoul(p, &p, 10);
+            if (s != 1) {
+                // TODO: failure handling?
+            }
+            *(g_pldmgr.state_map[pkt->orgn]) = PLDS_CAPTURED;
+            mcp_dispatch(NODE, pkt->orgn, 0, CMD, "lcd_off", "");
+            break;
+        }
+    }
+}
+
+void cmdimpl_lcd_off(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case RES: {
+            char* p = pkt->args;
+            uint8_t s = strtoul(p, &p, 10);
+            if (s != 1) {
+                // TODO: failure handling?
+            }
+            mcp_dispatch(NODE, pkt->orgn, 0, CMD, "cam_off", "");
+            break;
+        }
+    }
+}
+
+void cmdimpl_cam_off(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case RES: {
+            char* p = pkt->args;
+            uint8_t s = strtoul(p, &p, 10);
+            if (s != 1) {
+                // TODO: failure handling?
+            }
+            mcp_dispatch(NODE, pkt->orgn, 0, CMD, "rpi_shutdown", "");
+            char eps_sw_args[8] = {0};
+            sprintf(eps_sw_args, "%u %u", pkt->orgn, 0);
+            mcppkt_s cmd_eps_sw;
+            mcppkt_create(&cmd_eps_sw, NODE, NODE_EPS, 0, CMD, "eps_sw", eps_sw_args);
+            scheduler_schedule_cmd_in(&g_scheduler, 10+pkt->orgn, &cmd_eps_sw, 60*MS_PER_MIN, 0, 1);
+            *(g_pldmgr.state_map[pkt->orgn]) = PLDS_OFF;
             break;
         }
     }

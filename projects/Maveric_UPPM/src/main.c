@@ -71,6 +71,7 @@
 #include "mcppkt.c"
 #include "logger.c"
 #include "ax100.c"
+#include "pldmgr.c"
 #include "telemetry.c"
 #include "mcpmgr.c"
 #include "scheduler.c"
@@ -94,6 +95,7 @@ scheduler_s g_scheduler = {0};      // Schedules manager
 flashmgr_s g_flashmgr = {0};        // Flash manager
 rtc_time_t g_rtc_time = {0};        // Global RTC time tracking instance (from lower PPM)      
 ax100_s g_ax100 = {0};              // AX100 transceiver driver
+pldmgr_s g_pldmgr = {0};            // Payloads manager
 tlm_s g_tlm = {0};                  // Global telemetry state / data store
 
 void main(void) {	
@@ -139,6 +141,7 @@ void system_init(void) {
     // Submodules & services init
     status_e s_flashmgr = flashmgr_init(&g_flashmgr);
     status_e s_ax100 = ax100_init(&g_ax100, AX100_PORT);
+    status_e s_pldmgr = pldmgr_init(&g_pldmgr);
     mcpmgr_init(&g_mcpmgr);
     scheduler_init(&g_scheduler);
     tlm_init(&g_tlm);
@@ -166,8 +169,8 @@ void system_init(void) {
             break;
     }
 
-    sprintf(LOGBUF, "system initialized rs232_err=%u rbt_cnt=%u s_flashmgr=%u s_ax100=%u ops=%u", 
-            rs232_errors, g_flashmgr.rbt_cnt, s_flashmgr, s_ax100, *ops_stage); log_info();
+    sprintf(LOGBUF, "system initialized rs232_err=%u rbt_cnt=%u s_flashmgr=%u s_ax100=%u s_pldmgr=%u ops=%u", 
+            rs232_errors, g_flashmgr.rbt_cnt, s_flashmgr, s_ax100, s_pldmgr, *ops_stage); log_info();
 }
 
 // Main master routine run in superloop

@@ -150,6 +150,10 @@ status_e mtq_print_reg_data(mtq_s* mtq, mtq_reg_s* reg, char* out, uint16_t* j) 
             for (i = 0; i < reg->value_len; i++) 
                 *j += sprintf(&out[*j], " %d", ((int16_t*)reg->value)[i]);
             break;
+        case T_UINT32:
+            for (i = 0; i < reg->value_len; i++) 
+                *j += sprintf(&out[*j], " %u", ((uint32_t*)reg->value)[i]);
+            break;
         case T_FLOAT:
             for (i = 0; i < reg->value_len; i++) {
                 *j += sprintf(&out[*j], " ");

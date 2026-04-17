@@ -18,7 +18,7 @@ class MCPManager():
     crcalc = Calculator(Crc16.XMODEM)
     node_lbl_to_id = { 'NONE': 0, 'LPPM': 1, 'EPS': 2, 'UPPM': 3, 'HOLONAV': 4, 'ASTROBOARD': 5, 'GS': 6, 'FTDI': 7 }
     node_id_to_lbl = { v: k for k, v in node_lbl_to_id.items() }
-    ptype_lbl_to_id = { 'NONE': 0, 'CMD': 1, 'RES': 2, 'ACK': 3, 'TLM': 4, 'FILE': 5 }
+    ptype_lbl_to_id = { 'NONE': 0, 'CMD': 1, 'RES': 2, 'ACK': 3, 'NACK': 4, 'TLM': 5, 'FILE': 6 }
     ptype_id_to_lbl = { v: k for k, v in ptype_lbl_to_id.items() }
 
     def __init__(self, serial=None):

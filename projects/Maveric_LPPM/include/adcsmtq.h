@@ -34,11 +34,12 @@ typedef enum {
     T_INT8,
     T_UINT16,
     T_INT16,
+    T_UINT32,
     T_FLOAT,
     T_CHAR
 } mtq_reg_type_e;
 
-static uint8_t MTQ_REG_TYPE_SIZES[] = { 1, 1, 2, 2, 4, 1 };
+static uint8_t MTQ_REG_TYPE_SIZES[] = { 1, 1, 2, 2, 4, 4, 1 };
 
 // MTQ register struct
 

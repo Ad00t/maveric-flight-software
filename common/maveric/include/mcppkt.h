@@ -18,8 +18,9 @@ typedef enum {
     CMD = 1,
     RES = 2,
     ACK = 3,
-    TLM = 4,
-    FILE = 5
+    NACK = 4,
+    TLM = 5,
+    FILE = 6
 } mcppkt_type_e;
 
 typedef struct {

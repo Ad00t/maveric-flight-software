@@ -9,6 +9,7 @@
 #include "mcppkt.h"
 #include "mcpmgr.h"
 #include "ax100.h"
+#include "pldmgr.h"
 #include "globals.h"
 #include <stdint.h>
 #include <time.h>
@@ -44,6 +45,8 @@ void hk_update_tlm(void) {
     g_tlm.ops_stage = g_flashmgr.config.ops_stage;
     g_tlm.uppm_rbt_cnt = g_flashmgr.rbt_cnt;
     g_tlm.uppm_rbt_cause = g_rbt_cause;
+    g_tlm.hn_state = g_pldmgr.hn_state;
+    g_tlm.ab_state = g_pldmgr.ab_state;
 
     mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "tlm_get_data", "");
     mcp_dispatch(NODE, NODE_EPS, 0, CMD, "tlm_get_data", "");

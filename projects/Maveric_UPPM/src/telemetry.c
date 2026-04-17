@@ -22,10 +22,10 @@ void tlm_beacon(tlm_s* tlm, uint8_t bcn_num) {
     char msg[MCP_MAX_ARGS_LEN] = {0};
     char timebuf[32] = {0};
     sprintf(timebuf, "%Lu", tlm->time);
-    uint16_t j = sprintf(msg, "%u %s %u %u %u %u %u %u %u %u ", 
+    uint16_t j = sprintf(msg, "%u %s %u %u %u %u %u %u %u %u %u %u ", 
                  bcn_num, timebuf, tlm->ops_stage, 
                  tlm->lppm_rbt_cnt, tlm->lppm_rbt_cause, tlm->uppm_rbt_cnt, tlm->uppm_rbt_cause,
-                 tlm->ertc_heartbeat, tlm->mtq_heartbeat, tlm->nvg_heartbeat);
+                 tlm->ertc_heartbeat, tlm->mtq_heartbeat, tlm->nvg_heartbeat, tlm->hn_state, tlm->ab_state);
 
     switch (bcn_num) {
         case 1: {
