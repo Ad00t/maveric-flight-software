@@ -28,9 +28,7 @@ void gnc_step(gnc_s* state, mtq_s* mtq, float* gyro_rate_rad) {
         // Track the unexpected transition
         if (current_mode == MTQ_MODE_SAFE) {
             state->unexpected_safe_count++;
-            
-            // If the MTQ unexpectedly drops into SAFE mode, immediately re-enable auto mode so the transition logic can recover the vehicle.
-            state->gnc_mode = GNC_MODE_AUTO;
+            mtq_reset(mtq);
             
         } else if (current_mode == MTQ_MODE_DETUMBLING) {
             state->unexpected_detumble_count++;
