@@ -80,12 +80,14 @@ void flashmgr_config_load_defaults(flashmgr_s* self) {
 #elif NODE == NODE_UPPM
     cfg->log_level = LL_INFO;
     cfg->ops_stage = OPS_INIT;
+    cfg->gsdelay = 1000;
 #endif
     uint8_t crc_off = offsetof(config_s, crc);
     cfg->crc = compute_crc16((uint8_t*)cfg, crc_off);
 }
 
 status_e flashmgr_config_load_flash(flashmgr_s* self) {
+    // return SUCCESS;
 	uint16_t record_size = sizeof(config_s);
     uint8_t crc_off = offsetof(config_s, crc);
     uint32_t curr_record_addr = flashmgr_find_last_record(self, CONFIG_ADDR, record_size, (uint8_t*)&self->config);

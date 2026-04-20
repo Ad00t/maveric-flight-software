@@ -19,7 +19,8 @@ void gnc_step(gnc_s* state, mtq_s* mtq, float* gyro_rate_rad) {
     int1 sun = mtq_stat_parse_sun(stat);
     int1 tumb = mtq_stat_parse_tumb(stat);
 
-    sprintf(LOGBUF, "gnc_step: curr_mode=%u expected_mode=%u sun=%u tumb=%u", current_mode, state->expected_mode, sun, tumb); log_info();
+    sprintf(LOGBUF, "gnc_step: gnc_mode=%u curr_mode=%u exp_mode=%u sun=%u tumb=%u",
+            state->gnc_mode, current_mode, state->expected_mode, sun, tumb); log_info();
 
 
     // Check for unexpected mode transitions
@@ -28,8 +29,6 @@ void gnc_step(gnc_s* state, mtq_s* mtq, float* gyro_rate_rad) {
         // Track the unexpected transition
         if (current_mode == MTQ_MODE_SAFE) {
             state->unexpected_safe_count++;
-            mtq_reset(mtq);
-            
         } else if (current_mode == MTQ_MODE_DETUMBLING) {
             state->unexpected_detumble_count++;
         }

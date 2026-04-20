@@ -10,7 +10,6 @@ void hk_get_rtc_time(void);
 void hk_log(void);
 void hk_update_tlm(void);
 void hk_tlm_beacon(void);
-void hk_heartbeats(void);
 void hk_ppm_reset(void);
 
 #endif // !__HOUSEKEEPING_H__

@@ -33,9 +33,9 @@ void cmdimpl_init(void) {
 
     ht_set(ht, "ppm_get_sched", (cmdimpl_f) cmdimpl_ppm_get_sched);
     ht_set(ht, "ppm_get_all_scheds", (cmdimpl_f) cmdimpl_ppm_get_all_scheds);
-    ht_set(ht, "ppm_sched_cmd_in", (cmdimpl_f) cmdimpl_ppm_sched_cmd_in);
+    ht_set(ht, "ppm_sched_cmd", (cmdimpl_f) cmdimpl_ppm_sched_cmd);
     ht_set(ht, "ppm_desched", (cmdimpl_f) cmdimpl_ppm_desched);
-    ht_set(ht, "ppm_resched_in", (cmdimpl_f) cmdimpl_ppm_resched_in);
+    ht_set(ht, "ppm_resched", (cmdimpl_f) cmdimpl_ppm_resched);
     ht_set(ht, "ppm_clear_sched", (cmdimpl_f) cmdimpl_ppm_clear_sched);
     ht_set(ht, "ppm_update_sched", (cmdimpl_f) cmdimpl_ppm_update_sched);
 
@@ -237,7 +237,7 @@ void cmdimpl_ppm_get_all_scheds(mcppkt_s* pkt) {
     }
 }
 
-void cmdimpl_ppm_sched_cmd_in(mcppkt_s* pkt) {
+void cmdimpl_ppm_sched_cmd(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case CMD: {
             char* p = pkt->args;
@@ -251,7 +251,7 @@ void cmdimpl_ppm_sched_cmd_in(mcppkt_s* pkt) {
             uint8_t ptype = strtoul(p, &p, 10);
             char* mcp_id = strtok(p+1, " ");
             char* args = strtok(0, "");
-            sprintf(LOGBUF, "cmdimpl_ppm_sched_cmd_in sid=%u del=%u per=%u rep=%u o=%u d=%u e=%u p=%u id='%s' args='%s'",
+            sprintf(LOGBUF, "cmdimpl_ppm_sched_cmd sid=%u del=%u per=%u rep=%u o=%u d=%u e=%u p=%u id='%s' args='%s'",
                     sched_id, start_delay_ms, period_ms, reps, orgn, dest, echo, ptype, mcp_id, args); log_info();
             mcppkt_s schedcmd;
             mcppkt_create(&schedcmd, orgn, dest, echo, ptype, mcp_id, args);
@@ -282,13 +282,13 @@ void cmdimpl_ppm_desched(mcppkt_s* pkt) {
     }
 }
 
-void cmdimpl_ppm_resched_in(mcppkt_s* pkt) {
+void cmdimpl_ppm_resched(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case CMD: {
             char* p = pkt->args;
             uint8_t sched_id = strtoul(p, &p, 10);
             uint32_t start_delay_ms = strtoul(p, &p, 10);
-            sprintf(LOGBUF, "cmdimpl_ppm_resched_in id=%u d=%u", sched_id, start_delay_ms); log_info();
+            sprintf(LOGBUF, "cmdimpl_ppm_resched id=%u d=%u", sched_id, start_delay_ms); log_info();
             status_e s = scheduler_reschedule_in(&g_scheduler, sched_id, start_delay_ms);
             char res[32] = {0};
             uint8_t j = sprintf(res, "%u %u", s, sched_id);

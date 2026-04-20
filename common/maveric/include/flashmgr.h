@@ -42,6 +42,7 @@ typedef struct {
 #elif NODE == NODE_UPPM
     log_level_e log_level;
     ops_stage_e ops_stage;
+    uint16_t gsdelay;
 #endif
     uint16_t crc;
 } config_s;

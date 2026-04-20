@@ -26,9 +26,9 @@ void cmdimpl_init() {
     
     ht_set(ht, "ppm_get_sched", (cmdimpl_f) cmdimpl_ppm_get_sched);
     ht_set(ht, "ppm_get_all_scheds", (cmdimpl_f) cmdimpl_ppm_get_all_scheds);
-    ht_set(ht, "ppm_sched_cmd_in", (cmdimpl_f) cmdimpl_ppm_sched_cmd_in);
+    ht_set(ht, "ppm_sched_cmd", (cmdimpl_f) cmdimpl_ppm_sched_cmd);
     ht_set(ht, "ppm_desched", (cmdimpl_f) cmdimpl_ppm_desched);
-    ht_set(ht, "ppm_resched_in", (cmdimpl_f) cmdimpl_ppm_resched_in);
+    ht_set(ht, "ppm_resched", (cmdimpl_f) cmdimpl_ppm_resched);
     ht_set(ht, "ppm_clear_sched", (cmdimpl_f) cmdimpl_ppm_clear_sched);
     ht_set(ht, "ppm_update_sched", (cmdimpl_f) cmdimpl_ppm_update_sched);
     
@@ -43,6 +43,7 @@ void cmdimpl_init() {
     ht_set(ht, "cfg_get", (cmdimpl_f) cmdimpl_cfg_get);
     ht_set(ht, "cfg_set_ll", (cmdimpl_f) cmdimpl_cfg_set_ll);
     ht_set(ht, "cfg_set_ops", (cmdimpl_f) cmdimpl_cfg_set_ops);
+    ht_set(ht, "cfg_set_gsdelay", (cmdimpl_f) cmdimpl_cfg_set_gsdelay);
     ht_set(ht, "cfg_load_dfl", (cmdimpl_f) cmdimpl_cfg_load_dfl);
     ht_set(ht, "cfg_load_flash", (cmdimpl_f) cmdimpl_cfg_load_flash);
     ht_set(ht, "cfg_flush", (cmdimpl_f) cmdimpl_cfg_flush);
@@ -52,8 +53,8 @@ void cmdimpl_init() {
 
     ht_set(ht, "rpi_disp_cap", (cmdimpl_f) cmdimpl_rpi_disp_cap);
     ht_set(ht, "com_ping", (cmdimpl_f) cmdimpl_com_ping);
-    ht_set(ht, "lcd_display_img", (cmdimpl_f) cmdimpl_lcd_display_img);
-    ht_set(ht, "cam_capture_img", (cmdimpl_f) cmdimpl_cam_capture_img);
+    ht_set(ht, "lcd_display", (cmdimpl_f) cmdimpl_lcd_display);
+    ht_set(ht, "cam_capture", (cmdimpl_f) cmdimpl_cam_capture);
     ht_set(ht, "lcd_off", (cmdimpl_f) cmdimpl_lcd_off);
     ht_set(ht, "cam_off", (cmdimpl_f) cmdimpl_cam_off);
     
@@ -217,7 +218,7 @@ void cmdimpl_ppm_get_all_scheds(mcppkt_s* pkt) {
     }
 }
 
-void cmdimpl_ppm_sched_cmd_in(mcppkt_s* pkt) {
+void cmdimpl_ppm_sched_cmd(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case CMD: {
             char* p = pkt->args;
@@ -230,8 +231,8 @@ void cmdimpl_ppm_sched_cmd_in(mcppkt_s* pkt) {
             uint8_t echo = strtoul(p, &p, 10);
             uint8_t ptype = strtoul(p, &p, 10);
             char* mcp_id = strtok(p+1, " ");
-            char* args = strtok(0, "");
-            sprintf(LOGBUF, "cmdimpl_ppm_sched_cmd_in sid=%u del=%u per=%u rep=%u o=%u d=%u e=%u p=%u id='%s' args='%s'",
+            char* args = strtok(NULL, "");
+            sprintf(LOGBUF, "cmdimpl_ppm_sched_cmd sid=%u del=%u per=%u rep=%u o=%u d=%u e=%u p=%u id='%s' args='%s'",
                     sched_id, start_delay_ms, period_ms, reps, orgn, dest, echo, ptype, mcp_id, args); log_info();
             mcppkt_s schedcmd;
             mcppkt_create(&schedcmd, orgn, dest, echo, ptype, mcp_id, args);
@@ -262,13 +263,13 @@ void cmdimpl_ppm_desched(mcppkt_s* pkt) {
     }
 }
 
-void cmdimpl_ppm_resched_in(mcppkt_s* pkt) {
+void cmdimpl_ppm_resched(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case CMD: {
             char* p = pkt->args;
             uint8_t sched_id = strtoul(p, &p, 10);
             uint32_t start_delay_ms = strtoul(p, &p, 10);
-            sprintf(LOGBUF, "cmdimpl_ppm_resched_in id=%u", sched_id); log_info();
+            sprintf(LOGBUF, "cmdimpl_ppm_resched id=%u", sched_id); log_info();
             status_e s = scheduler_reschedule_in(&g_scheduler, sched_id, start_delay_ms);
             char res[32] = {0};
             uint8_t j = sprintf(res, "%u %u", s, sched_id);
@@ -323,27 +324,39 @@ void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case RES: {
             sprintf(LOGBUF, "cmdimpl_tlm_get_data RES o=%u al=%u", pkt->orgn, pkt->args_len); log_info();
-            char* p = pkt->args;
+            uint8_t* p = pkt->args;
+            static uint8_t sz_u16 = sizeof(uint16_t);
+            static uint8_t sz_u32 = sizeof(uint32_t);
+            static uint8_t sz_flt = sizeof(float);
             switch (pkt->orgn) {
                 case NODE_LPPM:
-                    memcpy(&g_tlm.lppm_rbt_cnt, p, sizeof(uint16_t)); p += sizeof(uint16_t);
+                    memcpy(&g_tlm.lppm_rbt_cnt, p, sz_u16); p += sz_u16;
                     g_tlm.lppm_rbt_cause = *(p++);  
                     g_tlm.ertc_heartbeat = *(p++);
                     g_tlm.mtq_heartbeat = *(p++);
                     g_tlm.nvg_heartbeat = *(p++);
                     g_tlm.gnc_mode = *(p++);
-                    memcpy(&g_tlm.unexpected_safe_count, p, sizeof(uint16_t)); p += sizeof(uint16_t);
-                    memcpy(&g_tlm.unexpected_detumble_count, p, sizeof(uint16_t)); p += sizeof(uint16_t);
-                    memcpy(&g_tlm.sunspin_count, p, sizeof(uint16_t)); p += sizeof(uint16_t);
-                    memcpy(&g_tlm.mtq_stat, p, sizeof(uint32_t)); p += sizeof(uint32_t);
+                    memcpy(&g_tlm.unexpected_safe_count, p, sz_u16); p += sz_u16;
+                    memcpy(&g_tlm.unexpected_detumble_count, p, sz_u16); p += sz_u16;
+                    memcpy(&g_tlm.sunspin_count, p, sz_u16); p += sz_u16;
+                    memcpy(&g_tlm.mtq_stat, p, sz_u32); p += sz_u32;
                     g_tlm.gyro_rate_src = *(p++);
                     g_tlm.mag_src = *(p++);
                     memcpy(g_tlm.gyro_rate, p, sizeof(g_tlm.gyro_rate)); p += sizeof(g_tlm.gyro_rate);
                     memcpy(g_tlm.mag, p, sizeof(g_tlm.mag)); p += sizeof(g_tlm.mag);
                     memcpy(g_tlm.mtq_dipole, p, sizeof(g_tlm.mtq_dipole)); p += sizeof(g_tlm.mtq_dipole);
-                    memcpy(&g_tlm.adcs_temp, p, sizeof(float)); p += sizeof(float);
+                    memcpy(&g_tlm.temp_adcs, p, sz_flt); p += sz_flt;
                     break;
                 case NODE_EPS:
+                    memcpy(&g_tlm.i_bus, p, sz_u16); p += sz_u16;
+                    memcpy(&g_tlm.i_batt, p, sz_u16); p += sz_u16;
+                    memcpy(&g_tlm.v_bus, p, sz_u16); p += sz_u16;
+                    memcpy(&g_tlm.v_batt, p, sz_u16); p += sz_u16;
+                    memcpy(&g_tlm.v_sys, p, sz_u16); p += sz_u16;
+                    memcpy(&g_tlm.temp_adc, p, sz_u16); p += sz_u16;
+                    memcpy(&g_tlm.temp_die, p, sz_u16); p += sz_u16;
+                    memcpy(&g_tlm.eps_mode, p, sz_u16); p += sz_u16;
+                    g_tlm.eps_heartbeat_time = systime_epoch_ms();
                     break;
                 case NODE_HOLONAV: 
                     break;
@@ -453,7 +466,7 @@ void cmdimpl_cfg_get(mcppkt_s* pkt) {
         case CMD: {
             char res[MCP_MAX_ARGS_LEN] = {0};
             config_s* cfg = &g_flashmgr.config;
-            sprintf(res, "%u %u", cfg->log_level, cfg->ops_stage);
+            sprintf(res, "%u %u %u", cfg->log_level, cfg->ops_stage, cfg->gsdelay);
             mcp_respond(pkt, RES, res);
             break;
         }
@@ -480,6 +493,20 @@ void cmdimpl_cfg_set_ops(mcppkt_s* pkt) {
             char* p = pkt->args;
             config_s* cfg = &g_flashmgr.config;
             cfg->ops_stage = strtoul(p, &p, 10);
+            char res[8] = {0};
+            sprintf(res, "%u", SUCCESS);
+            mcp_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
+void cmdimpl_cfg_set_gsdelay(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            char* p = pkt->args;
+            config_s* cfg = &g_flashmgr.config;
+            cfg->gsdelay = strtoul(p, &p, 10);
             char res[8] = {0};
             sprintf(res, "%u", SUCCESS);
             mcp_respond(pkt, RES, res);
@@ -581,6 +608,9 @@ void cmdimpl_rpi_disp_cap(mcppkt_s* pkt) {
 
             status_e s_fsm = pldmgr_fsm_init(&g_pldmgr, rpi_id, lcd_fn, cam_fn, quantity, focus, exposure_us); 
             if (s_fsm == FAILURE) { mcp_respond(pkt, RES, "0"); break; }
+
+            sprintf(LOGBUF, "rpi_disp_cap: %u '%s' '%s' %u %f %Lu",
+                    rpi_id, lcd_fn, cam_fn, quantity, focus, exposure_us); log_info();
             
             char eps_sw_args[8] = {0};
             uint8_t eps_id = (rpi_id == 5 ? NODE_HOLONAV : (rpi_id == 6 ? NODE_ASTROBOARD : 0));
@@ -590,7 +620,7 @@ void cmdimpl_rpi_disp_cap(mcppkt_s* pkt) {
 
             mcppkt_s cmd_com_ping;
             mcppkt_create(&cmd_com_ping, NODE, rpi_id, 0, CMD, "com_ping", "");
-            status_e s_sched = scheduler_schedule_cmd_in(&g_scheduler, 10+rpi_id, &cmd_com_ping, 60*MS_PER_MIN, 30*MS_PER_MIN, 3);
+            status_e s_sched = scheduler_schedule_cmd_in(&g_scheduler, 10+rpi_id, &cmd_com_ping, 1*MS_PER_MIN, 30000, 3);
 
             char res[8] = {0};
             sprintf(res, "%u", s_sched);
@@ -608,43 +638,52 @@ void cmdimpl_com_ping(mcppkt_s* pkt) {
             break;
         }
         case RES: {
-            pld_state_e plds = g_pldmgr.state_map[pkt->orgn];
-            // if (*plds != PLDS_OFF) break;
-            *plds = PLDS_STARTED;
-            scheduler_clear_task(&g_scheduler, 10+pkt->orgn); 
-            char disp_args[MCP_MAX_ARGS_LEN] = {0};
-            sprintf(disp_args, "%s %u", g_pldmgr.lcd_fn_map[pkt->orgn], 0);
-            mcp_dispatch(NODE, pkt->orgn, 0, CMD, "lcd_display_img", disp_args);
-        }
-    }
-}
-
-void cmdimpl_lcd_display_img(mcppkt_s* pkt) {
-    switch (pkt->ptype) {
-        case RES: {
-            char* p = pkt->args;
-            uint8_t s = strtoul(p, &p, 10);
-            if (s != 1) {
-                // TODO: cam failure handling?
+            if (pkt->orgn == NODE_HOLONAV || pkt->orgn == NODE_ASTROBOARD) {
+                pld_state_e plds = g_pldmgr.state_map[pkt->orgn];
+                // if (*plds != PLDS_OFF) break;
+                *plds = PLDS_STARTED;
+                scheduler_clear_task(&g_scheduler, 10+pkt->orgn); 
+                char disp_args[MCP_MAX_ARGS_LEN] = {0};
+                sprintf(disp_args, "%s %u", g_pldmgr.lcd_fn_map[pkt->orgn], 0);
+                mcp_dispatch(NODE, pkt->orgn, 0, CMD, "lcd_display", disp_args);
             }
-            *(g_pldmgr.state_map[pkt->orgn]) = PLDS_DISPLAYED;
-            char cap_args[MCP_MAX_ARGS_LEN] = {0};
-            uint8_t j = sprintf(cap_args, "%s %u ", g_pldmgr.cam_fn_map[pkt->orgn], *(g_pldmgr.quantity_map[pkt->orgn]));
-            j += ftoa(*(g_pldmgr.focus_map[pkt->orgn]), &cap_args[j], 3, 'f');
-            j += sprintf(&cap_args[j], " %u", *(g_pldmgr.exposure_us_map[pkt->orgn]));
-            mcp_dispatch(NODE, pkt->orgn, 0, CMD, "cam_capture_imgs", cap_args);
             break;
         }
     }
 }
 
-void cmdimpl_cam_capture_img(mcppkt_s* pkt) {
+void cmdimpl_lcd_display(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case RES: {
             char* p = pkt->args;
             uint8_t s = strtoul(p, &p, 10);
             if (s != 1) {
-                // TODO: failure handling?
+                pldmgr_clear_node(&g_pldmgr, pkt->orgn);
+                break;
+            }
+            *(g_pldmgr.state_map[pkt->orgn]) = PLDS_DISPLAYED;
+            char cap_args[MCP_MAX_ARGS_LEN] = {0};
+            uint8_t j = sprintf(cap_args, "%s %u ", g_pldmgr.cam_fn_map[pkt->orgn], *(g_pldmgr.quantity_map[pkt->orgn]));
+            j += ftoa(0.2, &cap_args[j], 3, 'f');
+            j += sprintf(&cap_args[j], " ");
+            j += ftoa(*(g_pldmgr.focus_map[pkt->orgn]), &cap_args[j], 3, 'f');
+            j += sprintf(&cap_args[j], " %u ", *(g_pldmgr.exposure_us_map[pkt->orgn]));
+            j += ftoa(1, &cap_args[j], 3, 'f');
+            j += sprintf(&cap_args[j], " %u", 10);
+            mcp_dispatch(NODE, pkt->orgn, 0, CMD, "cam_capture", cap_args);
+            break;
+        }
+    }
+}
+
+void cmdimpl_cam_capture(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case RES: {
+            char* p = pkt->args;
+            uint8_t s = strtoul(p, &p, 10);
+            if (s != 1) {
+                pldmgr_clear_node(&g_pldmgr, pkt->orgn);
+                break;
             }
             *(g_pldmgr.state_map[pkt->orgn]) = PLDS_CAPTURED;
             mcp_dispatch(NODE, pkt->orgn, 0, CMD, "lcd_off", "");
@@ -659,7 +698,8 @@ void cmdimpl_lcd_off(mcppkt_s* pkt) {
             char* p = pkt->args;
             uint8_t s = strtoul(p, &p, 10);
             if (s != 1) {
-                // TODO: failure handling?
+                pldmgr_clear_node(&g_pldmgr, pkt->orgn);
+                break;
             }
             mcp_dispatch(NODE, pkt->orgn, 0, CMD, "cam_off", "");
             break;
@@ -673,7 +713,8 @@ void cmdimpl_cam_off(mcppkt_s* pkt) {
             char* p = pkt->args;
             uint8_t s = strtoul(p, &p, 10);
             if (s != 1) {
-                // TODO: failure handling?
+                pldmgr_clear_node(&g_pldmgr, pkt->orgn);
+                break;
             }
             mcp_dispatch(NODE, pkt->orgn, 0, CMD, "rpi_shutdown", "");
             char eps_sw_args[8] = {0};

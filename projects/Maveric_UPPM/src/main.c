@@ -80,9 +80,9 @@
 
 void system_init(void);
 void system_superloop(void);
-void system_ops_transition_init_safe(void);
+void system_ops_transition_safe(void);
 void system_ops_transmit_beacon(void);
-void system_ops_enable_gnc(void);
+void system_ops_check_eps(void);
 void system_cleanup(void);
 
 int1 g_superloop_running = TRUE;
@@ -158,14 +158,14 @@ void system_init(void) {
     }
     switch (*ops_stage) {
         case OPS_INIT:
-            scheduler_schedule_func_in(&g_scheduler, 5, system_ops_transition_init_safe, 1*MS_PER_MIN, 0, 1);     // 45 min
+            scheduler_schedule_func_in(&g_scheduler, 5, system_ops_transition_safe, 1*MS_PER_MIN, 0, 1);     // 45 min
             break;
         case OPS_SAFE:
-            mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_burn", "5");
+            // mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_burn", "5");
         case OPS_NOMINAL: // Fallthrough
             ax100_set_power(&g_ax100, TRUE);
             scheduler_schedule_func_in(&g_scheduler, 6, system_ops_transmit_beacon, 30000, 3*MS_PER_MIN, SCHEDULE_REPS_INFINITE);
-            scheduler_schedule_func_in(&g_scheduler, 7, system_ops_enable_gnc, 5000, 1*MS_PER_MIN, 3); // Power check -> GNC
+            scheduler_schedule_func_in(&g_scheduler, 7, system_ops_check_eps, 1*MS_PER_MIN, 1*MS_PER_MIN, SCHEDULE_REPS_INFINITE);
             break;
     }
 
@@ -188,8 +188,8 @@ void system_superloop(void) {
     scheduler_run_tasks(&g_scheduler, &g_mcpmgr);
 }
 
-void system_ops_transition_init_safe(void) {
-    sprintf(LOGBUF, "system_ops_transition_init_safe"); log_info();
+void system_ops_transition_safe(void) {
+    sprintf(LOGBUF, "system_ops_transition_safe"); log_info();
     uint8_t i;
     for (i = 0; i < 5; i++) {
         g_flashmgr.config.ops_stage = OPS_SAFE;
@@ -209,11 +209,12 @@ void system_ops_transmit_beacon(void) {
     tlm_beacon(&g_tlm, 2);
 }
 
-void system_ops_enable_gnc(void) {
-    sprintf(LOGBUF, "system_ops_enable_gnc eps=%u", g_tlm.eps_state); log_info();
-    if (g_tlm.eps_state == 2) {      // Nominal power levels
+void system_ops_check_eps(void) {
+    sprintf(LOGBUF, "system_ops_check_eps eps=%u gnc=%u", g_tlm.eps_mode, g_tlm.gnc_mode); log_info();
+    if (g_tlm.eps_mode == 2 && g_tlm.gnc_mode == 0) {                   // Nominal power levels -> enable GNC if not already
         mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "gnc_set_mode", "1");
-        scheduler_deschedule(&g_scheduler, 7);
+    } else if (g_tlm.eps_mode != 2 && g_tlm.gnc_mode != 0) {            // Critical power -> disable GNC if not already
+        mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "gnc_set_mode", "0");
     }
 }
 

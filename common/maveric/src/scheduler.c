@@ -54,13 +54,17 @@ void scheduler_run_tasks(scheduler_s* s, mcpmgr_s* mcpmgr) {
         int64_t diff = s->tasks[i].next_release - now; // >= is bugged for large values, so use subtraction instead
         if (!s->tasks[i].active || diff > 0) continue;
         switch (s->tasks[i].type) {
-            case ST_TYPE_FUNC:
+            case ST_TYPE_FUNC: {
                 schedfunc_f schedfunc = s->tasks[i].func;
                 if (schedfunc != NULL) schedfunc();
                 break;
-            case ST_TYPE_CMD:
-                mcpmgr_process_pkt(mcpmgr, s->tasks[i].cmd_ptr);
+            }
+            case ST_TYPE_CMD: {
+                mcppkt_s cmdcpy;
+                memcpy(&cmdcpy, s->tasks[i].cmd_ptr, sizeof(mcppkt_s));
+                mcpmgr_process_pkt(mcpmgr, &cmdcpy);
                 break;
+            }
         }
         if (s->tasks[i].remaining_reps > 0 && s->tasks[i].remaining_reps != SCHEDULE_REPS_INFINITE) {
             s->tasks[i].remaining_reps--;

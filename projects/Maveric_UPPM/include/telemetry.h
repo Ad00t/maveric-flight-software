@@ -14,6 +14,8 @@ typedef struct {
     uint8_t ertc_heartbeat;             // LPPM
     uint8_t mtq_heartbeat;              // LPPM
     uint8_t nvg_heartbeat;              // LPPM
+    uint8_t eps_heartbeat;              // UPPM
+    uint64_t eps_heartbeat_time;        // UPPM -- NOT TRANSMITTED
     uint8_t hn_state;                   // UPPM
     uint8_t ab_state;                   // UPPM
     // Beacon 1
@@ -27,16 +29,16 @@ typedef struct {
     float gyro_rate[3];                 // LPPM
     float mag[3];                       // LPPM
     float mtq_dipole[3];                // LPPM
-    float adcs_temp;                    // LPPM
+    float temp_adcs;                    // LPPM
     // Beacon 2                          
-    uint8_t eps_state;                  // EPS
-    uint8_t eps_pwr_out[2];             // EPS
-    float die_temp;                     // EPS
-    float batt_temp;                    // EPS
-    float batt_voltage[4];              // EPS
-    float batt_current[4];              // EPS
-    float solarcell_voltage[5];         // EPS
-    float solarcell_current[10];        // EPS
+    uint16_t i_bus;                     // EPS
+    uint16_t i_batt;                    // EPS
+    uint16_t v_bus;                     // EPS
+    uint16_t v_batt;                    // EPS
+    uint16_t v_sys;                     // EPS
+    uint16_t temp_adc;                  // EPS
+    uint16_t temp_die;                  // EPS
+    uint16_t eps_mode;                  // EPS
 } tlm_s;
 
 void tlm_init(tlm_s* tlm);

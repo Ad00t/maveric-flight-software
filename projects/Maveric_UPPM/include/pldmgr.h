@@ -36,9 +36,9 @@ typedef struct {
 } pldmgr_s;
 
 status_e pldmgr_init(pldmgr_s* self);
+status_e pldmgr_clear_node(pldmgr_s* self, uint8_t node_id);
 status_e pldmgr_clear(pldmgr_s* self);
-
-status_e pldmgr_fsm_init(uint8_t node_id, char* lcd_fn, char* cam_fn, uint8_t quantity, float focus, uint32_t exposure_us);
+status_e pldmgr_fsm_init(pldmgr_s* self, uint8_t node_id, char* lcd_fn, char* cam_fn, uint8_t quantity, float focus, uint32_t exposure_us);
 
 #endif
 

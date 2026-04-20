@@ -270,7 +270,7 @@ void mtq_check_heartbeat(mtq_s* mtq);
 // Power cycle the unit
 status_e mtq_reboot(mtq_s* mtq);
 
-// Write 1 to nvm register to power cycle, then set datetime & TLE
+// Write 1 to nvm register to power cycle, then set datetime & TLE, set GNC curr_mode
 status_e mtq_reset(mtq_s* mtq);
 
 // Read fast frame registers

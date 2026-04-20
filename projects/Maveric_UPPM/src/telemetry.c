@@ -22,10 +22,10 @@ void tlm_beacon(tlm_s* tlm, uint8_t bcn_num) {
     char msg[MCP_MAX_ARGS_LEN] = {0};
     char timebuf[32] = {0};
     sprintf(timebuf, "%Lu", tlm->time);
-    uint16_t j = sprintf(msg, "%u %s %u %u %u %u %u %u %u %u %u %u ", 
+    uint16_t j = sprintf(msg, "%u %s %u %u %u %u %u %u %u %u %u %u %u ", 
                  bcn_num, timebuf, tlm->ops_stage, 
                  tlm->lppm_rbt_cnt, tlm->lppm_rbt_cause, tlm->uppm_rbt_cnt, tlm->uppm_rbt_cause,
-                 tlm->ertc_heartbeat, tlm->mtq_heartbeat, tlm->nvg_heartbeat, tlm->hn_state, tlm->ab_state);
+                 tlm->ertc_heartbeat, tlm->mtq_heartbeat, tlm->nvg_heartbeat, tlm->eps_heartbeat, tlm->hn_state, tlm->ab_state);
 
     switch (bcn_num) {
         case 1: {
@@ -45,11 +45,13 @@ void tlm_beacon(tlm_s* tlm, uint8_t bcn_num) {
                 j += ftoa(tlm->mtq_dipole[i], &msg[j], 3, 'f');
                 j += sprintf(&msg[j], " ");
             }
-            j += ftoa(tlm->adcs_temp, &msg[j], 3, 'f');
+            j += ftoa(tlm->temp_adcs, &msg[j], 3, 'f');
             break;
         } 
 
         case 2: {
+            j += sprintf(&msg[j], "%u %u %u %u %u %u %u %u",
+                         tlm->i_bus, tlm->i_batt, tlm->v_bus, tlm->v_batt, tlm->v_sys, tlm->temp_adc, tlm->temp_die, tlm->eps_mode);
             break;
         }
     }
