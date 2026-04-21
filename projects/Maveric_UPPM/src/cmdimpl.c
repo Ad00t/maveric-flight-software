@@ -158,21 +158,26 @@ void cmdimpl_ppm_clear_bufs(mcppkt_s* pkt) {
             switch (mode) {
                 case 0: 
                     irqmgr_clear(&g_irqmgr);
-                    sprintf(res, "%u", SUCCESS);
+                    sprintf(res, "%u %u", SUCCESS, mode);
                     mcp_respond(pkt, RES, res);
                     break;
                 case 1:
                     mcpmgr_clear(&g_mcpmgr);
-                    sprintf(res, "%u", SUCCESS);
+                    sprintf(res, "%u %u", SUCCESS, mode);
                     mcp_respond(pkt, RES, res);
                     break;
                 case 2: 
                     i2cmgr_clear(&g_i2cmgr);
-                    sprintf(res, "%u", SUCCESS);
+                    sprintf(res, "%u %u", SUCCESS, mode);
+                    mcp_respond(pkt, RES, res);
+                    break;
+                case 3: 
+                    pldmgr_clear(&g_pldmgr);
+                    sprintf(res, "%u %u", SUCCESS, mode);
                     mcp_respond(pkt, RES, res);
                     break;
                 default:
-                    sprintf(res, "%u", FAILURE);
+                    sprintf(res, "%u %u", FAILURE, mode);
                     mcp_respond(pkt, RES, res);
                     break;
             }
@@ -222,31 +227,71 @@ void cmdimpl_ppm_sched_cmd(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case CMD: {
             char* p = pkt->args;
-            uint8_t sched_id = strtoul(p, &p, 10);
+
+            uint8_t sched_id        = strtoul(p, &p, 10);
             uint32_t start_delay_ms = strtoul(p, &p, 10);
-            uint32_t period_ms = strtoul(p, &p, 10);
-            uint16_t reps = strtoul(p, &p, 10);
-            uint8_t orgn = strtoul(p, &p, 10);
-            uint8_t dest = strtoul(p, &p, 10);
-            uint8_t echo = strtoul(p, &p, 10);
-            uint8_t ptype = strtoul(p, &p, 10);
-            char* mcp_id = strtok(p+1, " ");
-            char* args = strtok(NULL, "");
-            sprintf(LOGBUF, "cmdimpl_ppm_sched_cmd sid=%u del=%u per=%u rep=%u o=%u d=%u e=%u p=%u id='%s' args='%s'",
-                    sched_id, start_delay_ms, period_ms, reps, orgn, dest, echo, ptype, mcp_id, args); log_info();
+            uint32_t period_ms      = strtoul(p, &p, 10);
+            uint16_t reps           = strtoul(p, &p, 10);
+            uint8_t orgn            = strtoul(p, &p, 10);
+            uint8_t dest            = strtoul(p, &p, 10);
+            uint8_t echo            = strtoul(p, &p, 10);
+            uint8_t ptype           = strtoul(p, &p, 10);
+
+            // Skip spaces (bounded)
+            uint8_t i;
+            for (i = 0; i < MCP_MAX_ARGS_LEN && *p == ' '; i++, p++);
+
+            char* mcp_id = p;
+            char* args = NULL;
+
+            // Find first space after mcp_id (bounded)
+            char* sep = NULL;
+            for (i = 0; i < MCP_MAX_ARGS_LEN && p[i] != '\0'; i++) {
+                if (p[i] == ' ') {
+                    sep = &p[i];
+                    break;
+                }
+            }
+
+            if (sep) {
+                *sep = '\0';
+                args = sep + 1;
+
+                // Skip leading spaces in args (bounded)
+                for (i = 0; i < MCP_MAX_ARGS_LEN && *args == ' '; i++, args++);
+
+                // If args is empty, set to NULL
+                if (*args == '\0') {
+                    args = NULL;
+                }
+            }
+
+            sprintf(LOGBUF,
+                    "cmdimpl_ppm_sched_cmd sid=%u del=%Lu per=%Lu rep=%u o=%u d=%u e=%u p=%u id='%s' args='%s'",
+                    sched_id, start_delay_ms, period_ms, reps,
+                    orgn, dest, echo, ptype,
+                    mcp_id, args ? args : "(null)");
+            log_info();
+
             mcppkt_s schedcmd;
             mcppkt_create(&schedcmd, orgn, dest, echo, ptype, mcp_id, args);
-            status_e s = scheduler_schedule_cmd_in(&g_scheduler, sched_id, &schedcmd, start_delay_ms, period_ms, reps);
+
+            status_e s = scheduler_schedule_cmd_in(&g_scheduler, sched_id, &schedcmd,
+                                                   start_delay_ms, period_ms, reps);
+
             char res[32] = {0};
             uint8_t j = sprintf(res, "%u %u", s, sched_id);
             if (s == SUCCESS) {
-                j += sprintf(&res[j], " %u", g_scheduler.id_map[sched_id]->next_release);
+                j += sprintf(&res[j], " %u",
+                             g_scheduler.id_map[sched_id]->next_release);
             }
-            mcp_respond(pkt, RES, res); 
+
+            mcp_respond(pkt, RES, res);
             break;
         }
     }
 }
+ 
 
 void cmdimpl_ppm_desched(mcppkt_s* pkt) {
     switch (pkt->ptype) {
@@ -314,7 +359,7 @@ void cmdimpl_ppm_update_sched(mcppkt_s* pkt) {
             } else {
                 sprintf(res, "%u %u %Lu %u", FAILURE, sched_id, period_ms, remaining_reps);
             }
-            mcp_respond(pkt, RES, res);
+            mcp_respond(pkt, RES, (char*)res);
             break;
         }
     }
@@ -322,7 +367,7 @@ void cmdimpl_ppm_update_sched(mcppkt_s* pkt) {
 
 void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
     switch (pkt->ptype) {
-        case RES: {
+        case TLM: {
             sprintf(LOGBUF, "cmdimpl_tlm_get_data RES o=%u al=%u", pkt->orgn, pkt->args_len); log_info();
             uint8_t* p = pkt->args;
             static uint8_t sz_u16 = sizeof(uint16_t);
@@ -581,41 +626,49 @@ void cmdimpl_ax100_set_power(mcppkt_s* pkt) {
 void cmdimpl_rpi_disp_cap(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case CMD: {
-            char* p = pkt->args;
-            char* t;
+            char *p = pkt->args;
+            char *end;
 
-            t = strtok(p, " ");
+            // --- 1. Parse rpi_id ---
+            uint8_t rpi_id = (uint8_t)strtoul(p, &end, 10);
+            if (p == end) { mcp_respond(pkt, RES, "0"); break; }
+
+            // Move past space
+            if (*end == ' ') end++;
+            else { mcp_respond(pkt, RES, "0"); break; }
+
+            // --- 2. Capture lcd_display_args (next 2 tokens) ---
+            char *lcd_start = end;
+
+            // first token
+            char *t = strchr(end, ' ');
             if (!t) { mcp_respond(pkt, RES, "0"); break; }
-            uint8_t rpi_id = (uint8_t)strtoul(t, NULL, 10);
+            t++;
 
-            char* lcd_fn = strtok(NULL, " ");
-            if (!lcd_fn) { mcp_respond(pkt, RES, "0"); break; }
-
-            char* cam_fn = strtok(NULL, " ");
-            if (!cam_fn) { mcp_respond(pkt, RES, "0"); break; }
-
-            t = strtok(NULL, " ");
+            // second token
+            t = strchr(t, ' ');
             if (!t) { mcp_respond(pkt, RES, "0"); break; }
-            uint8_t quantity = (uint8_t) strtoul(t, NULL, 10);
 
-            t = strtok(NULL, " ");
-            if (!t) { mcp_respond(pkt, RES, "0"); break; }
-            float focus = strtof(t, NULL);
+            // terminate lcd args
+            *t = '\0';
+            char *lcd_display_args = lcd_start;
 
-            t = strtok(NULL, " ");
-            if (!t) { mcp_respond(pkt, RES, "0"); break; }
-            uint32_t exposure_us = (uint32_t) strtoul(t, NULL, 10);
+            // --- 3. cam_capture_args = rest of string ---
+            char *cam_capture_args = t + 1;
+            if (*cam_capture_args == '\0') {
+                mcp_respond(pkt, RES, "0");
+                break;
+            }
 
-            status_e s_fsm = pldmgr_fsm_init(&g_pldmgr, rpi_id, lcd_fn, cam_fn, quantity, focus, exposure_us); 
+            status_e s_fsm = pldmgr_fsm_init(&g_pldmgr, rpi_id, lcd_display_args, cam_capture_args); 
             if (s_fsm == FAILURE) { mcp_respond(pkt, RES, "0"); break; }
 
-            sprintf(LOGBUF, "rpi_disp_cap: %u '%s' '%s' %u %f %Lu",
-                    rpi_id, lcd_fn, cam_fn, quantity, focus, exposure_us); log_info();
+            sprintf(LOGBUF, "rpi_disp_cap: lcd='%s' cam='%s'", lcd_display_args, cam_capture_args); log_info();
             
             char eps_sw_args[8] = {0};
-            uint8_t eps_id = (rpi_id == 5 ? NODE_HOLONAV : (rpi_id == 6 ? NODE_ASTROBOARD : 0));
+            uint8_t eps_id = (rpi_id == NODE_HOLONAV ? 5 : (rpi_id == NODE_ASTROBOARD ? 6 : 0));
             if (eps_id == 0) { mcp_respond(pkt, RES, "0"); break; }
-            sprintf(eps_sw_args, "%u %u", rpi_id, 1);
+            sprintf(eps_sw_args, "%u %u", eps_id, 1);
             mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_sw", eps_sw_args); 
 
             mcppkt_s cmd_com_ping;
@@ -639,13 +692,12 @@ void cmdimpl_com_ping(mcppkt_s* pkt) {
         }
         case RES: {
             if (pkt->orgn == NODE_HOLONAV || pkt->orgn == NODE_ASTROBOARD) {
-                pld_state_e plds = g_pldmgr.state_map[pkt->orgn];
-                // if (*plds != PLDS_OFF) break;
+                sprintf(LOGBUF, "cmdimpl_com_ping RES"); log_info();
+                pld_state_e* plds = g_pldmgr.state_map[pkt->orgn];
+                if (*plds != PLDS_OFF) break;
                 *plds = PLDS_STARTED;
                 scheduler_clear_task(&g_scheduler, 10+pkt->orgn); 
-                char disp_args[MCP_MAX_ARGS_LEN] = {0};
-                sprintf(disp_args, "%s %u", g_pldmgr.lcd_fn_map[pkt->orgn], 0);
-                mcp_dispatch(NODE, pkt->orgn, 0, CMD, "lcd_display", disp_args);
+                mcp_dispatch(NODE, pkt->orgn, 0, CMD, "lcd_display", g_pldmgr.lcd_display_args_map[pkt->orgn]);
             }
             break;
         }
@@ -656,21 +708,16 @@ void cmdimpl_lcd_display(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case RES: {
             char* p = pkt->args;
+            sprintf(LOGBUF, "cmdimpl_lcd_display RES '%s'", p); log_info();
+            pld_state_e* plds = g_pldmgr.state_map[pkt->orgn];
+            if (*plds != PLDS_STARTED) break;
+            *plds = PLDS_DISPLAYED;
             uint8_t s = strtoul(p, &p, 10);
             if (s != 1) {
                 pldmgr_clear_node(&g_pldmgr, pkt->orgn);
                 break;
             }
-            *(g_pldmgr.state_map[pkt->orgn]) = PLDS_DISPLAYED;
-            char cap_args[MCP_MAX_ARGS_LEN] = {0};
-            uint8_t j = sprintf(cap_args, "%s %u ", g_pldmgr.cam_fn_map[pkt->orgn], *(g_pldmgr.quantity_map[pkt->orgn]));
-            j += ftoa(0.2, &cap_args[j], 3, 'f');
-            j += sprintf(&cap_args[j], " ");
-            j += ftoa(*(g_pldmgr.focus_map[pkt->orgn]), &cap_args[j], 3, 'f');
-            j += sprintf(&cap_args[j], " %u ", *(g_pldmgr.exposure_us_map[pkt->orgn]));
-            j += ftoa(1, &cap_args[j], 3, 'f');
-            j += sprintf(&cap_args[j], " %u", 10);
-            mcp_dispatch(NODE, pkt->orgn, 0, CMD, "cam_capture", cap_args);
+            mcp_dispatch(NODE, pkt->orgn, 0, CMD, "cam_capture", g_pldmgr.cam_capture_args_map[pkt->orgn]);
             break;
         }
     }
@@ -680,12 +727,15 @@ void cmdimpl_cam_capture(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case RES: {
             char* p = pkt->args;
+            sprintf(LOGBUF, "cmdimpl_cam_capture RES '%s'", p); log_info();
+            pld_state_e* plds = g_pldmgr.state_map[pkt->orgn];
+            if (*plds != PLDS_DISPLAYED) break;
+            *plds = PLDS_CAPTURED;
             uint8_t s = strtoul(p, &p, 10);
             if (s != 1) {
                 pldmgr_clear_node(&g_pldmgr, pkt->orgn);
                 break;
             }
-            *(g_pldmgr.state_map[pkt->orgn]) = PLDS_CAPTURED;
             mcp_dispatch(NODE, pkt->orgn, 0, CMD, "lcd_off", "");
             break;
         }
@@ -696,6 +746,7 @@ void cmdimpl_lcd_off(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case RES: {
             char* p = pkt->args;
+            sprintf(LOGBUF, "cmdimpl_lcd_off RES '%s'", p); log_info();
             uint8_t s = strtoul(p, &p, 10);
             if (s != 1) {
                 pldmgr_clear_node(&g_pldmgr, pkt->orgn);
@@ -711,6 +762,10 @@ void cmdimpl_cam_off(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case RES: {
             char* p = pkt->args;
+            sprintf(LOGBUF, "cmdimpl_cam_off RES '%s'", p); log_info();
+            pld_state_e* plds = g_pldmgr.state_map[pkt->orgn];
+            if (*plds != PLDS_CAPTURED) break;
+            *plds = PLDS_OFF;
             uint8_t s = strtoul(p, &p, 10);
             if (s != 1) {
                 pldmgr_clear_node(&g_pldmgr, pkt->orgn);
@@ -718,11 +773,12 @@ void cmdimpl_cam_off(mcppkt_s* pkt) {
             }
             mcp_dispatch(NODE, pkt->orgn, 0, CMD, "rpi_shutdown", "");
             char eps_sw_args[8] = {0};
-            sprintf(eps_sw_args, "%u %u", pkt->orgn, 0);
+            uint8_t eps_id = (pkt->orgn == NODE_HOLONAV ? 5 : (pkt->orgn == NODE_ASTROBOARD ? 6 : 0));
+            if (eps_id == 0) break;
+            sprintf(eps_sw_args, "%u %u", eps_id, 0);
             mcppkt_s cmd_eps_sw;
             mcppkt_create(&cmd_eps_sw, NODE, NODE_EPS, 0, CMD, "eps_sw", eps_sw_args);
-            scheduler_schedule_cmd_in(&g_scheduler, 10+pkt->orgn, &cmd_eps_sw, 60*MS_PER_MIN, 0, 1);
-            *(g_pldmgr.state_map[pkt->orgn]) = PLDS_OFF;
+            scheduler_schedule_cmd_in(&g_scheduler, 10+pkt->orgn, &cmd_eps_sw, 1*MS_PER_MIN, 0, 1);
             break;
         }
     }

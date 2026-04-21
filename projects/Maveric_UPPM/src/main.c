@@ -152,12 +152,15 @@ void system_init(void) {
     mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "ppm_get_time", "");
 
     // Check operations stage and schedule tasks accordingly
-    uint8_t* ops_stage = &g_flashmgr.config.ops_stage;
-    if (g_flashmgr.rbt_cnt > 100 && *ops_stage != OPS_SAFE && *ops_stage != OPS_NOMINAL) {
-        *ops_stage = OPS_SAFE;
+    config_s* cfg = &g_flashmgr.config;
+    if (g_flashmgr.rbt_cnt > 100 && cfg->ops_stage != OPS_SAFE && cfg->ops_stage != OPS_NOMINAL) {
+        cfg->ops_stage = OPS_SAFE;
+        flashmgr_config_flush(&g_flashmgr);
+        delay_ms(50);
     }
-    switch (*ops_stage) {
+    switch (cfg->ops_stage) {
         case OPS_INIT:
+            mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_rts_ctn", "7199");
             scheduler_schedule_func_in(&g_scheduler, 5, system_ops_transition_safe, 1*MS_PER_MIN, 0, 1);     // 45 min
             break;
         case OPS_SAFE:
@@ -169,8 +172,8 @@ void system_init(void) {
             break;
     }
 
-    sprintf(LOGBUF, "system initialized rs232_err=%u rbt_cnt=%u s_flashmgr=%u s_ax100=%u s_pldmgr=%u ops=%u", 
-            rs232_errors, g_flashmgr.rbt_cnt, s_flashmgr, s_ax100, s_pldmgr, *ops_stage); log_info();
+    sprintf(LOGBUF, "system initialized rs232_err=%u rbt_cnt=%u rbt_cause=%u s_flashmgr=%u s_ax100=%u s_pldmgr=%u ops=%u", 
+            rs232_errors, g_flashmgr.rbt_cnt, g_rbt_cause, s_flashmgr, s_ax100, s_pldmgr, cfg->ops_stage); log_info();
 }
 
 // Main master routine run in superloop
@@ -179,11 +182,11 @@ void system_superloop(void) {
     restart_wdt();
 
     // Handle received byte interrupts
-    mcpmgr_parse_stream(&g_mcpmgr, &g_i2cmgr.rxbufs[0], &g_mcpmgr.rcvpkts[0], FALSE); // Handle EPS commands 
-    mcpmgr_parse_stream(&g_mcpmgr, &g_irqmgr.irqbufs[HOLONAV_PORT-1], &g_mcpmgr.rcvpkts[1], FALSE); // Handle Holonav commands 
-    mcpmgr_parse_stream(&g_mcpmgr, &g_irqmgr.irqbufs[AX100_PORT-1], &g_mcpmgr.rcvpkts[2], TRUE); // Handle AX100 commands 
-    mcpmgr_parse_stream(&g_mcpmgr, &g_irqmgr.irqbufs[LPPM_PORT-1], &g_mcpmgr.rcvpkts[3], FALSE); // Handle LPPM commands
-    mcpmgr_parse_stream(&g_mcpmgr, &g_irqmgr.irqbufs[ASTROBOARD_PORT-1], &g_mcpmgr.rcvpkts[4], FALSE); // Handle Astroboard commands
+    mcpmgr_parse_stream(&g_mcpmgr, &g_i2cmgr.rxbufs[0], &g_mcpmgr.rcvpkts[0], FALSE); // Handle EPS packets 
+    mcpmgr_parse_stream(&g_mcpmgr, &g_irqmgr.irqbufs[HOLONAV_PORT-1], &g_mcpmgr.rcvpkts[1], FALSE); // Handle Holonav packets 
+    mcpmgr_parse_stream(&g_mcpmgr, &g_irqmgr.irqbufs[AX100_PORT-1], &g_mcpmgr.rcvpkts[2], TRUE); // Handle AX100 packets 
+    mcpmgr_parse_stream(&g_mcpmgr, &g_irqmgr.irqbufs[LPPM_PORT-1], &g_mcpmgr.rcvpkts[3], FALSE); // Handle LPPM packets 
+    mcpmgr_parse_stream(&g_mcpmgr, &g_irqmgr.irqbufs[ASTROBOARD_PORT-1], &g_mcpmgr.rcvpkts[4], FALSE); // Handle Astroboard packets 
    
     scheduler_run_tasks(&g_scheduler, &g_mcpmgr);
 }
@@ -220,5 +223,5 @@ void system_ops_check_eps(void) {
 
 // Cleanup routine
 void system_cleanup(void) {
-
+    reset_cpu();
 }

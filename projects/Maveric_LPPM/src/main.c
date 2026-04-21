@@ -136,7 +136,8 @@ void system_init(void) {
     
     // Submodules & services init
     status_e s_flashmgr = flashmgr_init(&g_flashmgr);
-    status_e s_mtq = mtq_init(&g_mtq, MTQ_PORT, g_flashmgr.config.paxs, g_flashmgr.config.tle);
+    config_s* cfg = &g_flashmgr.config;
+    status_e s_mtq = mtq_init(&g_mtq, MTQ_PORT, cfg->paxs, cfg->tle);
     status_e s_nvg = nvg_init(&g_nvg, NVG_PORT);
     mcpmgr_init(&g_mcpmgr);
     scheduler_init(&g_scheduler);
@@ -149,8 +150,8 @@ void system_init(void) {
     systime_str(req); // Outputs current time as string to req
     mcp_dispatch(NODE, NODE_UPPM, 0, CMD, "ppm_set_time", req);
     
-    sprintf(LOGBUF, "system initialized rs232_err=%u rbt_cnt=%u s_ertc=%u s_flashmgr=%u s_mtq=%u s_nvg=%u",
-            rs232_errors, g_flashmgr.rbt_cnt, s_ertc, s_flashmgr, s_mtq, s_nvg); log_info();
+    sprintf(LOGBUF, "system initialized rs232_err=%u rbt_cnt=%u rbt_cause=%u s_ertc=%u s_flashmgr=%u s_mtq=%u s_nvg=%u",
+            rs232_errors, g_flashmgr.rbt_cnt, g_rbt_cause, s_ertc, s_flashmgr, s_mtq, s_nvg); log_info();
 }
 
 // Master code of what runs every superloop iteration
@@ -162,8 +163,8 @@ void system_superloop(void) {
     // Do driver handling before commands so data is up to date
     mtq_parse_stream(&g_mtq, &g_irqmgr.irqbufs[MTQ_PORT-1]); // Handle magnetorquer data
     nvg_parse_stream(&g_nvg, &g_irqmgr.irqbufs[NVG_PORT-1]); // Handle naviguider data
-    mcpmgr_parse_stream(&g_mcpmgr, &g_irqmgr.irqbufs[UPPM_PORT-1], &g_mcpmgr.rcvpkts[0], FALSE); // Handle UPPM commands 
-    mcpmgr_parse_stream(&g_mcpmgr, &g_irqmgr.irqbufs[FTDI_PORT-1], &g_mcpmgr.rcvpkts[1], FALSE); // Handle FTDI commands
+    mcpmgr_parse_stream(&g_mcpmgr, &g_irqmgr.irqbufs[UPPM_PORT-1], &g_mcpmgr.rcvpkts[0], FALSE); // Handle UPPM packets 
+    mcpmgr_parse_stream(&g_mcpmgr, &g_irqmgr.irqbufs[FTDI_PORT-1], &g_mcpmgr.rcvpkts[1], FALSE); // Handle FTDI packets 
 
     // Run scheduler
     scheduler_run_tasks(&g_scheduler, &g_mcpmgr);
@@ -173,4 +174,5 @@ void system_superloop(void) {
 void system_cleanup(void) {
     mtq_destroy(&g_mtq);
     nvg_destroy(&g_nvg);
+    reset_cpu();
 }

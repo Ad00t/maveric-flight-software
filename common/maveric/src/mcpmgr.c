@@ -61,6 +61,8 @@ void mcpmgr_parse_stream(mcpmgr_s* mcpmgr, ringbuf_s* rcvbuf, mcppkt_s* pkt, int
     }
 }
 
+extern flashmgr_s g_flashmgr;
+
 void mcpmgr_process_pkt(mcpmgr_s* mcpmgr, mcppkt_s* pkt) {
     if (!mcpmgr->is_init) return;
     kiss_parser_s* p = &pkt->parser;
@@ -82,7 +84,12 @@ void mcpmgr_process_pkt(mcpmgr_s* mcpmgr, mcppkt_s* pkt) {
         sprintf(LOGBUF, "proc_pkt: acking o=%u d=%u e=%u p=%u id='%s' arglen=%u",
                 pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id, pkt->args_len); log_debug();
         // Delay immediately after receiving GS command to allow GS to switch to RX mode
-        if (NODE == NODE_UPPM && pkt->orgn == NODE_GS) delay_ms(1000);
+#if NODE == NODE_UPPM
+        if (pkt->orgn == NODE_GS) {
+            config_s* cfg = &g_flashmgr.config;
+            delay_ms(cfg->gsdelay);
+        }
+#endif
         mcp_respond(pkt, ACK, (uint8_t*) pkt->args, pkt->args_len);
     }
 

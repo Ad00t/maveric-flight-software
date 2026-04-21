@@ -60,7 +60,7 @@ void scheduler_run_tasks(scheduler_s* s, mcpmgr_s* mcpmgr) {
                 break;
             }
             case ST_TYPE_CMD: {
-                mcppkt_s cmdcpy;
+                mcppkt_s cmdcpy; // Make a local copy so each repetition gets a fresh cmd
                 memcpy(&cmdcpy, s->tasks[i].cmd_ptr, sizeof(mcppkt_s));
                 mcpmgr_process_pkt(mcpmgr, &cmdcpy);
                 break;

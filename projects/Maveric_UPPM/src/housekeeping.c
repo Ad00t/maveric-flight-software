@@ -50,8 +50,6 @@ void hk_update_tlm(void) {
 
     mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "tlm_get_data", "");
     mcp_dispatch(NODE, NODE_EPS, 0, CMD, "tlm_get_data", "");
-    mcp_dispatch(NODE, NODE_HOLONAV, 0, CMD, "tlm_get_data", "");
-    mcp_dispatch(NODE, NODE_ASTROBOARD, 0, CMD, "tlm_get_data", "");
 }
 
 void hk_ppm_reset(void) {

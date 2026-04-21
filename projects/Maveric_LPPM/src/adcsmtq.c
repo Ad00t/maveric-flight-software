@@ -157,7 +157,7 @@ status_e mtq_print_reg_data(mtq_s* mtq, mtq_reg_s* reg, char* out, uint16_t* j) 
         case T_FLOAT:
             for (i = 0; i < reg->value_len; i++) {
                 *j += sprintf(&out[*j], " ");
-                *j += ftoa(((float*)reg->value)[i], &out[*j], 6, 'f'); 
+                *j += ftoa(((float*)reg->value)[i], &out[*j], 3, 'f'); 
             } 
             break;
         case T_CHAR:

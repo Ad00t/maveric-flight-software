@@ -182,16 +182,16 @@ void cmdimpl_ppm_clear_bufs(mcppkt_s* pkt) {
             switch (mode) {
                 case 0: 
                     irqmgr_clear(&g_irqmgr);
-                    sprintf(res, "%u", SUCCESS);
+                    sprintf(res, "%u %u", SUCCESS, mode);
                     mcp_respond(pkt, RES, res);
                     break;
                 case 1:
                     mcpmgr_clear(&g_mcpmgr);
-                    sprintf(res, "%u", SUCCESS);
+                    sprintf(res, "%u %u", SUCCESS, mode);
                     mcp_respond(pkt, RES, res);
                     break;
                 default:
-                    sprintf(res, "%u", FAILURE);
+                    sprintf(res, "%u %u", FAILURE, mode);
                     mcp_respond(pkt, RES, res);
                     break;
             }
@@ -241,27 +241,66 @@ void cmdimpl_ppm_sched_cmd(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case CMD: {
             char* p = pkt->args;
-            uint8_t sched_id = strtoul(p, &p, 10);
+
+            uint8_t sched_id        = strtoul(p, &p, 10);
             uint32_t start_delay_ms = strtoul(p, &p, 10);
-            uint32_t period_ms = strtoul(p, &p, 10);
-            uint16_t reps = strtoul(p, &p, 10);
-            uint8_t orgn = strtoul(p, &p, 10);
-            uint8_t dest = strtoul(p, &p, 10);
-            uint8_t echo = strtoul(p, &p, 10);
-            uint8_t ptype = strtoul(p, &p, 10);
-            char* mcp_id = strtok(p+1, " ");
-            char* args = strtok(0, "");
-            sprintf(LOGBUF, "cmdimpl_ppm_sched_cmd sid=%u del=%u per=%u rep=%u o=%u d=%u e=%u p=%u id='%s' args='%s'",
-                    sched_id, start_delay_ms, period_ms, reps, orgn, dest, echo, ptype, mcp_id, args); log_info();
+            uint32_t period_ms      = strtoul(p, &p, 10);
+            uint16_t reps           = strtoul(p, &p, 10);
+            uint8_t orgn            = strtoul(p, &p, 10);
+            uint8_t dest            = strtoul(p, &p, 10);
+            uint8_t echo            = strtoul(p, &p, 10);
+            uint8_t ptype           = strtoul(p, &p, 10);
+
+            // Skip spaces (bounded)
+            uint8_t i;
+            for (i = 0; i < MCP_MAX_ARGS_LEN && *p == ' '; i++, p++);
+
+            char* mcp_id = p;
+            char* args = NULL;
+
+            // Find first space after mcp_id (bounded)
+            char* sep = NULL;
+            for (i = 0; i < MCP_MAX_ARGS_LEN && p[i] != '\0'; i++) {
+                if (p[i] == ' ') {
+                    sep = &p[i];
+                    break;
+                }
+            }
+
+            if (sep) {
+                *sep = '\0';
+                args = sep + 1;
+
+                // Skip leading spaces in args (bounded)
+                for (i = 0; i < MCP_MAX_ARGS_LEN && *args == ' '; i++, args++);
+
+                // If args is empty, set to NULL
+                if (*args == '\0') {
+                    args = NULL;
+                }
+            }
+
+            sprintf(LOGBUF,
+                    "cmdimpl_ppm_sched_cmd sid=%u del=%Lu per=%Lu rep=%u o=%u d=%u e=%u p=%u id='%s' args='%s'",
+                    sched_id, start_delay_ms, period_ms, reps,
+                    orgn, dest, echo, ptype,
+                    mcp_id, args ? args : "(null)");
+            log_info();
+
             mcppkt_s schedcmd;
             mcppkt_create(&schedcmd, orgn, dest, echo, ptype, mcp_id, args);
-            status_e s = scheduler_schedule_cmd_in(&g_scheduler, sched_id, &schedcmd, start_delay_ms, period_ms, reps);
+
+            status_e s = scheduler_schedule_cmd_in(&g_scheduler, sched_id, &schedcmd,
+                                                   start_delay_ms, period_ms, reps);
+
             char res[32] = {0};
             uint8_t j = sprintf(res, "%u %u", s, sched_id);
             if (s == SUCCESS) {
-                j += sprintf(&res[j], " %u", g_scheduler.id_map[sched_id]->next_release);
+                j += sprintf(&res[j], " %u",
+                             g_scheduler.id_map[sched_id]->next_release);
             }
-            mcp_respond(pkt, RES, res); 
+
+            mcp_respond(pkt, RES, res);
             break;
         }
     }
@@ -416,25 +455,29 @@ void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
             mtq_get_data(&g_mtq, MTQ_ADCS_TMP, mtq_adcs_tmp);
             float adcs_temp = (float) mtq_adcs_tmp[0] * 150 / 32768;
 
+            static uint8_t sz_u16 = sizeof(uint16_t);
+            static uint8_t sz_u32 = sizeof(uint32_t);
+            static uint8_t sz_flt = sizeof(float);
+
             uint8_t len = 0;
-            memcpy(&res[len], &g_flashmgr.rbt_cnt, sizeof(uint16_t)); len += sizeof(uint16_t);
+            memcpy(&res[len], &g_flashmgr.rbt_cnt, sz_u16); len += sz_u16;
             res[len++] = g_rbt_cause;
             res[len++] = g_ertc.heartbeat;
             res[len++] = g_mtq.heartbeat;
             res[len++] = g_nvg.heartbeat;
             res[len++] = g_gnc.gnc_mode;
-            memcpy(&res[len], &g_gnc.unexpected_safe_count, sizeof(uint16_t)); len += sizeof(uint16_t);
-            memcpy(&res[len], &g_gnc.unexpected_detumble_count, sizeof(uint16_t)); len += sizeof(uint16_t);
-            memcpy(&res[len], &g_gnc.sunspin_count, sizeof(uint16_t)); len += sizeof(uint16_t);
-            memcpy(&res[len], &mtq_stat, sizeof(uint32_t)); len += sizeof(uint32_t);
+            memcpy(&res[len], &g_gnc.unexpected_safe_count, sz_u16); len += sz_u16;
+            memcpy(&res[len], &g_gnc.unexpected_detumble_count, sz_u16); len += sz_u16;
+            memcpy(&res[len], &g_gnc.sunspin_count, sz_u16); len += sz_u16;
+            memcpy(&res[len], &mtq_stat, sz_u32); len += sz_u32;
             res[len++] = cfg->gyro_rate_src;
             res[len++] = cfg->mag_src;
             memcpy(&res[len], gyro_rate, sizeof(gyro_rate)); len += sizeof(gyro_rate);
             memcpy(&res[len], mag, sizeof(mag)); len += sizeof(mag);
             memcpy(&res[len], mtq_dipole, sizeof(mtq_dipole)); len += sizeof(mtq_dipole);
-            memcpy(&res[len], &adcs_temp, sizeof(float)); len += sizeof(float);
+            memcpy(&res[len], &adcs_temp, sz_flt); len += sz_flt;
 
-            mcp_respond(pkt, RES, res, len);
+            mcp_respond(pkt, TLM, res, len);
             break;
         }
     }
