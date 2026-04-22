@@ -194,13 +194,14 @@ void system_superloop(void) {
 void system_ops_transition_safe(void) {
     sprintf(LOGBUF, "system_ops_transition_safe"); log_info();
     uint8_t i;
+    config_s* cfg = &g_flashmgr.config;
     for (i = 0; i < 5; i++) {
-        g_flashmgr.config.ops_stage = OPS_SAFE;
+        cfg->ops_stage = OPS_SAFE;
         flashmgr_config_flush(&g_flashmgr);
         delay_ms(50);
         flashmgr_config_load_flash(&g_flashmgr);
         delay_ms(50);
-        if (g_flashmgr.config.ops_stage == OPS_SAFE)
+        if (cfg->ops_stage == OPS_SAFE)
             break;
     }
     g_superloop_running = FALSE;    // Reset so init sees ops_stage=1 and runs deploy
