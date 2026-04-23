@@ -56,6 +56,8 @@ void cmdimpl_mtq_read_ctrl(mcppkt_s* pkt);
 void cmdimpl_mtq_get_ctrl(mcppkt_s* pkt);
 void cmdimpl_mtq_read_all(mcppkt_s* pkt);
 void cmdimpl_mtq_get_all(mcppkt_s* pkt);
+void cmdimpl_mtq_read_hk(mcppkt_s* pkt);
+void cmdimpl_mtq_get_hk(mcppkt_s* pkt);
 
 void cmdimpl_nvg_heartbeat(mcppkt_s* pkt);
 void cmdimpl_nvg_reset(mcppkt_s* pkt);
@@ -65,5 +67,7 @@ void cmdimpl_nvg_get_1(mcppkt_s* pkt);
 void cmdimpl_nvg_set_1(mcppkt_s* pkt);
 void cmdimpl_nvg_start_all(mcppkt_s* pkt);
 void cmdimpl_nvg_stop_all(mcppkt_s* pkt);
+void cmdimpl_nvg_start_hk(mcppkt_s* pkt);
+void cmdimpl_nvg_stop_hk(mcppkt_s* pkt);
 
 #endif 

@@ -97,10 +97,16 @@ Args:
 status_e nvg_set_sensor(nvg_s* nvg, uint8_t id, uint16_t rate);
         
 // Starts all continuous sensors a 1 Hz.
-status_e nvg_start_all_sensors(nvg_s* nvg);
+status_e nvg_start_all(nvg_s* nvg);
         
 // Stops all continuous sensors.
-status_e nvg_stop_all_sensors(nvg_s* nvg);
+status_e nvg_stop_all(nvg_s* nvg);
+
+// Starts required hk continuous sensors a 1 Hz.
+status_e nvg_start_hk(nvg_s* nvg);
+        
+// Stops required hk continuous sensors.
+status_e nvg_stop_hk(nvg_s* nvg);
         
 // COMMAND FUNCTIONS
 
@@ -112,9 +118,6 @@ status_e nvg_power(nvg_s* nvg);
 
 // Standard reset initialization sequence 
 status_e nvg_reset(nvg_s* nvg);
-
-// Starts magnetometer sensors at continuous 1 Hz.
-status_e nvg_magnetometer_mode(nvg_s* nvg);
 
 // Naviguider sensor IDs
 
@@ -132,7 +135,6 @@ status_e nvg_magnetometer_mode(nvg_s* nvg);
 #define NVG_MAGNETOMETER_UNCAL   14
 #define NVG_GYROSCOPE_UNCAL      16
 
-#define NVG_NUM_SENSORS          13
 static const uint8_t NVG_SENSOR_IDS[] = {
     NVG_ACCELEROMETER,        
     NVG_MAGNETOMETER_CAL,     
@@ -148,6 +150,14 @@ static const uint8_t NVG_SENSOR_IDS[] = {
     NVG_MAGNETOMETER_UNCAL,
     NVG_GYROSCOPE_UNCAL
 };
+#define NVG_NUM_SENSORS          sizeof(NVG_SENSOR_IDS)
+
+static const uint8_t NVG_HK_SENSORS[] = {
+    NVG_TEMPERATURE,
+    NVG_GYROSCOPE_UNCAL,
+    NVG_MAGNETOMETER_UNCAL
+};
+#define NVG_NUM_HK_SENSORS      sizeof(NVG_HK_SENSORS)
 
 static const nvg_sensor_s NVG_INIT_SENSOR_TABLE[] = {
     { 0, 0, 0, NULL },

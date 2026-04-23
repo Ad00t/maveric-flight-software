@@ -69,7 +69,7 @@ status_e nvg_init(nvg_s* nvg, uint8_t port) {
   
     status_e s1 = nvg_power(nvg);
     status_e s2 = nvg_reset(nvg);
-    status_e s3 = nvg_start_all_sensors(nvg);
+    status_e s3 = nvg_start_hk(nvg); 
 
     sprintf(LOGBUF, "nvg_init: port=%u", nvg->port); log_info();
     return (s1 == SUCCESS && s2 == SUCCESS && s3 == SUCCESS) ? SUCCESS : FAILURE;
@@ -77,7 +77,7 @@ status_e nvg_init(nvg_s* nvg, uint8_t port) {
 
 void nvg_destroy(nvg_s* nvg) {
     if (!nvg->is_init) return;
-    nvg_stop_all_sensors(nvg);
+    nvg_stop_all(nvg);
     nvg_power(nvg);
     nvg_clear(nvg);
     uint8_t i;
@@ -227,7 +227,7 @@ status_e nvg_set_sensor(nvg_s* nvg, uint8_t id, uint16_t rate) {
     return nvg_send_cmd(nvg, buf); 
 }
 
-status_e nvg_start_all_sensors(nvg_s* nvg) {
+status_e nvg_start_all(nvg_s* nvg) {
     if (!nvg->is_init) return FAILURE;
     status_e s = SUCCESS;
     uint8_t i;
@@ -238,12 +238,34 @@ status_e nvg_start_all_sensors(nvg_s* nvg) {
     return s;
 }
         
-status_e nvg_stop_all_sensors(nvg_s* nvg) {
+status_e nvg_stop_all(nvg_s* nvg) {
     if (!nvg->is_init) return FAILURE;
     status_e s = SUCCESS;
     uint8_t i;
     for (i = 0; i < NVG_NUM_SENSORS; i++) {
         if (nvg_set_sensor(nvg, NVG_SENSOR_IDS[i], 0) == FAILURE)
+            s = FAILURE;
+    } 
+    return s;
+}
+
+status_e nvg_start_hk(nvg_s* nvg) {
+    if (!nvg->is_init) return FAILURE;
+    status_e s = SUCCESS;
+    uint8_t i;
+    for (i = 0; i < NVG_NUM_HK_SENSORS; i++) {
+        if (nvg_set_sensor(nvg, NVG_HK_SENSORS[i], 1) == FAILURE)
+            s = FAILURE;
+    } 
+    return s;
+}
+        
+status_e nvg_stop_hk(nvg_s* nvg) {
+    if (!nvg->is_init) return FAILURE;
+    status_e s = SUCCESS;
+    uint8_t i;
+    for (i = 0; i < NVG_NUM_HK_SENSORS; i++) {
+        if (nvg_set_sensor(nvg, NVG_HK_SENSORS[i], 0) == FAILURE)
             s = FAILURE;
     } 
     return s;
@@ -275,15 +297,5 @@ status_e nvg_reset(nvg_s* nvg) {
     status_e s3 = nvg_send_cmd(nvg, "M1\r");
     status_e s4 = nvg_send_cmd(nvg, "m0");
     status_e s5 = nvg_send_cmd(nvg, "D1");
-    delay_ms(50);
-    status_e s6 = nvg_send_cmd(nvg, "V0");
-    return (s1 == SUCCESS && s2 == SUCCESS && s3 == SUCCESS && s4 == SUCCESS && s5 == SUCCESS && s6 == SUCCESS) ? SUCCESS : FAILURE;
-}
-
-status_e nvg_magnetometer_mode(nvg_s* nvg) {
-    if (!nvg->is_init) return FAILURE;
-    status_e s1 = nvg_stop_all_sensors(nvg);
-    status_e s2 = nvg_set_sensor(nvg, NVG_MAGNETOMETER_UNCAL, 1);
-    status_e s3 = nvg_set_sensor(nvg, NVG_MAGNETOMETER_CAL, 1);
-    return (s1 == SUCCESS && s2 == SUCCESS && s3 == SUCCESS) ? SUCCESS : FAILURE;
+    return (s1 == SUCCESS && s2 == SUCCESS && s3 == SUCCESS && s4 == SUCCESS && s5 == SUCCESS) ? SUCCESS : FAILURE;
 }

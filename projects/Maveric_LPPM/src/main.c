@@ -105,6 +105,7 @@ void main(void) {
 // System initialization routine
 void system_init(void) {
     // Watchdog, millisecond timer, logger, rbt_cause init
+    delay_ms(2000);
     // fprintf(COM_D, "lppm init\r\n");
     setup_wdt(WDT_ON);
 	setup_timer1(TMR_INTERNAL | TMR_DIV_BY_64, 249); 

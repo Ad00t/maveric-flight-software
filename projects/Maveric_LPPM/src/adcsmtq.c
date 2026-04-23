@@ -188,7 +188,7 @@ status_e mtq_read_start(mtq_s* mtq, mtq_reg_s* reg) {
     
     uart_write_buf(mtq->port, w_buf, 4); 
     uart_write_byte(mtq->port, csum);
-    delay_ms(10);
+    delay_ms(20);
     return SUCCESS;
 }
 
@@ -266,7 +266,7 @@ status_e mtq_write_start(mtq_s* mtq, mtq_reg_s* reg, void* data) {
 
     uart_write_buf(mtq->port, w_buf, w_buf_len);
     uart_write_buf(mtq->port, &csum, 1);
-    delay_ms(10);
+    delay_ms(20);
     return SUCCESS;
 }
 
@@ -465,6 +465,17 @@ status_e mtq_read_all(mtq_s* mtq) {
     status_e s = SUCCESS;
     for (i = 0; i < MTQ_REG_TABLE_LEN; i++) {
         if (mtq_read_start(mtq, &mtq->reg_table[i]) == FAILURE)
+            s = FAILURE;
+    }
+    return s;
+}
+
+status_e mtq_read_hk(mtq_s* mtq) {
+    if (!mtq->is_init) return FAILURE;
+    uint8_t i;
+    status_e s = SUCCESS;
+    for (i = 0; i < MTQ_NUM_HK_REGS; i++) {
+        if (mtq_read_start(mtq, MTQ_HK_REGS[i]) == FAILURE)
             s = FAILURE;
     }
     return s;

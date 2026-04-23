@@ -282,6 +282,9 @@ status_e mtq_read_ctrl(mtq_s* mtq);
 // Read all available registers
 status_e mtq_read_all(mtq_s* mtq);
 
+// Read housekeeping sensors
+status_e mtq_read_hk(mtq_s* mtq);
+
 // Set date and time registers (absolute time)
 status_e mtq_set_datetime(mtq_s* mtq, rtc_time_t* rtc);
 
@@ -403,16 +406,21 @@ int1 mtq_stat_parse_tumb(uint32_t stat);
 #define MTQ_NVM                 (2 << 8) | 255
 
 static const uint16_t MTQ_FAST_FRAME_REGS[] = {
-    MTQ_CONF, MTQ_TIME, MTQ_DATE, MTQ_MTQ_USER, MTQ_STAT, MTQ_ACT_ERR, MTQ_SEN_ERR, MTQ_MTQ_USER,
-    MTQ_Q, MTQ_RATE, MTQ_LLA, MTQ_ATT_ERROR, MTQ_ATT_ERROR_RATE, MTQ_SV, MTQ_MAG, MTQ_MTQ, 
-    MTQ_ADCS_TMP, MTQ_CAL_MAG_B/*, MTQ_CAL_IMU_B*/
+    MTQ_CONF, MTQ_TIME, MTQ_DATE, MTQ_MTQ_USER, MTQ_STAT, MTQ_ACT_ERR, MTQ_SEN_ERR,
+    MTQ_Q, MTQ_RATE, MTQ_LLA, MTQ_SV, MTQ_MAG, MTQ_MTQ, 
+    MTQ_ADCS_TMP, MTQ_CAL_MAG_B, MTQ_CAL_IMU_B
 };
 #define MTQ_NUM_FAST_REGS       sizeof(MTQ_FAST_FRAME_REGS) / sizeof(uint16_t)   
 
 static const uint16_t MTQ_CTRL_FRAME_REGS[] = {
     MTQ_Q, MTQ_RATE, MTQ_LLA, MTQ_MAG, MTQ_IMU0_S, MTQ_IMU1_S, MTQ_MTQ, MTQ_MTQ_USER, 
-    MTQ_ADCS_TMP, MTQ_CAL_MAG_B/*, MTQ_CAL_IMU_B*/ 
+    MTQ_ADCS_TMP, MTQ_CAL_MAG_B, MTQ_CAL_IMU_B
 };
 #define MTQ_NUM_CTRL_REGS       sizeof(MTQ_CTRL_FRAME_REGS) / sizeof(uint16_t)   
+
+static const uint16_t MTQ_HK_REGS[] = {
+    MTQ_STAT, MTQ_RATE, MTQ_MAG, MTQ_MTQ, MTQ_ADCS_TMP, MTQ_CAL_MAG_B, MTQ_CAL_IMU_B
+};
+#define MTQ_NUM_HK_REGS         sizeof(MTQ_HK_REGS) / sizeof(uint16_t)   
 
 #endif

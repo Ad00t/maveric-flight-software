@@ -59,8 +59,7 @@ void hk_heartbeats(void) {
 }
 
 void hk_read_sensors(void) {
-    // mtq_read_ctrl(&g_mtq);
-    mtq_read_fast(&g_mtq);
+    mtq_read_hk(&g_mtq);
 }
 
 void hk_gnc_step(void) {

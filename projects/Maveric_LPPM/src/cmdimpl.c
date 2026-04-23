@@ -72,6 +72,8 @@ void cmdimpl_init(void) {
     ht_set(ht, "mtq_get_ctrl", (cmdimpl_f) cmdimpl_mtq_get_ctrl);
     ht_set(ht, "mtq_read_all", (cmdimpl_f) cmdimpl_mtq_read_all);
     ht_set(ht, "mtq_get_all", (cmdimpl_f) cmdimpl_mtq_get_all);
+    ht_set(ht, "mtq_read_hk", (cmdimpl_f) cmdimpl_mtq_read_hk);
+    ht_set(ht, "mtq_get_hk", (cmdimpl_f) cmdimpl_mtq_get_hk);
     
     ht_set(ht, "nvg_heartbeat", (cmdimpl_f) cmdimpl_nvg_heartbeat);
     ht_set(ht, "nvg_reset", (cmdimpl_f) cmdimpl_nvg_reset);
@@ -80,6 +82,8 @@ void cmdimpl_init(void) {
     ht_set(ht, "nvg_set_1", (cmdimpl_f) cmdimpl_nvg_set_1);
     ht_set(ht, "nvg_start_all", (cmdimpl_f) cmdimpl_nvg_start_all);
     ht_set(ht, "nvg_stop_all", (cmdimpl_f) cmdimpl_nvg_stop_all);
+    ht_set(ht, "nvg_start_hk", (cmdimpl_f) cmdimpl_nvg_start_hk);
+    ht_set(ht, "nvg_stop_hk", (cmdimpl_f) cmdimpl_nvg_stop_hk);
 }
 
 // COMMAND IMPLEMENTATIONS
@@ -952,6 +956,46 @@ void cmdimpl_mtq_get_all(mcppkt_s* pkt) {
     }
 }
 
+void cmdimpl_mtq_read_hk(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            sprintf(LOGBUF, "cmdimpl_mtq_read_hk"); log_info();
+            status_e s = mtq_read_hk(&g_mtq); 
+            char res[8] = {0};
+            sprintf(res, "%u", s);
+            mcp_respond(pkt, RES, res); 
+            break;
+        }
+    }
+}
+
+void cmdimpl_mtq_get_hk(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            char* p = pkt->args;
+            uint8_t page = strtoul(p, &p, 10);
+            char res[MCP_MAX_ARGS_LEN] = {0};
+            if (page > MTQ_NUM_HK_REGS / MTQ_PAGE_SIZE) {
+                sprintf(res, "%u %u", FAILURE, page);
+                mcp_respond(pkt, RES, res);
+                break;
+            }
+            uint8_t i1 = MTQ_PAGE_SIZE * page;
+            uint8_t i2 = minu8(i1 + MTQ_PAGE_SIZE, MTQ_NUM_HK_REGS);
+            sprintf(LOGBUF, "cmdimpl_mtq_get_hk pg=%u i1=%u i2=%u", page, i1, i2); log_info();
+            uint16_t j = sprintf(res, "%u %u", SUCCESS, page);
+            uint8_t i;
+            for (i = i1; i < i2; i++) {
+                mtq_reg_s* reg = &g_mtq.reg_table[i];
+                j += sprintf(&res[j], " %u,%u", reg->midx, reg->idx);
+                mtq_print_reg_data(&g_mtq, reg, res, &j);
+            }
+            mcp_respond(pkt, RES, res); 
+            break;
+        }
+    }
+}
+
 void cmdimpl_nvg_heartbeat(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case CMD: {
@@ -1053,7 +1097,7 @@ void cmdimpl_nvg_start_all(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case CMD: {
             sprintf(LOGBUF, "cmdimpl_nvg_start_all"); log_info();
-            status_e s = nvg_start_all_sensors(&g_nvg); 
+            status_e s = nvg_start_all(&g_nvg); 
             char res[8] = {0};
             sprintf(res, "%u", s);
             mcp_respond(pkt, RES, res); 
@@ -1066,7 +1110,33 @@ void cmdimpl_nvg_stop_all(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case CMD: {
             sprintf(LOGBUF, "cmdimpl_nvg_stop_all"); log_info();
-            status_e s = nvg_stop_all_sensors(&g_nvg); 
+            status_e s = nvg_stop_all(&g_nvg); 
+            char res[8] = {0};
+            sprintf(res, "%u", s);
+            mcp_respond(pkt, RES, res); 
+            break;
+        }
+    }
+}
+
+void cmdimpl_nvg_start_hk(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            sprintf(LOGBUF, "cmdimpl_nvg_start_hk"); log_info();
+            status_e s = nvg_start_hk(&g_nvg); 
+            char res[8] = {0};
+            sprintf(res, "%u", s);
+            mcp_respond(pkt, RES, res); 
+            break;
+        }
+    }
+}
+
+void cmdimpl_nvg_stop_hk(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            sprintf(LOGBUF, "cmdimpl_nvg_stop_hk"); log_info();
+            status_e s = nvg_stop_hk(&g_nvg); 
             char res[8] = {0};
             sprintf(res, "%u", s);
             mcp_respond(pkt, RES, res); 
