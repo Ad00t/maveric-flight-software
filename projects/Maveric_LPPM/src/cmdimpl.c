@@ -638,7 +638,7 @@ void cmdimpl_cfg_set_paxs(mcppkt_s* pkt) {
             status_e s = mtq_write_start(&g_mtq, MTQ_POINTING_AXIS, cfg->paxs);
             char res[8] = {0};
             sprintf(res, "%u", s);
-            mcp_respond(pkt, RES, res);
+            mcp_respond(pkt, RES, (char*)res);
             break;
         }
     }
@@ -654,7 +654,7 @@ void cmdimpl_cfg_set_tle(mcppkt_s* pkt) {
             status_e s = mtq_write_start(&g_mtq, MTQ_TLE, cfg->tle);
             char res[8] = {0};
             sprintf(res, "%u", s);
-            mcp_respond(pkt, RES, res);
+            mcp_respond(pkt, RES, (char*)res);
             break;
         }
     }
@@ -678,7 +678,7 @@ void cmdimpl_cfg_load_flash(mcppkt_s* pkt) {
             status_e s = flashmgr_config_load_flash(&g_flashmgr);
             char res[8] = {0};
             sprintf(res, "%u", s);
-            mcp_respond(pkt, RES, res);
+            mcp_respond(pkt, RES, (char*)res);
             break;
         }
     }
@@ -690,7 +690,7 @@ void cmdimpl_cfg_flush(mcppkt_s* pkt) {
             status_e s = flashmgr_config_flush(&g_flashmgr);
             char res[8] = {0};
             sprintf(res, "%u", s);
-            mcp_respond(pkt, RES, res);
+            mcp_respond(pkt, RES, (char*)res);
             break;
         }
     }

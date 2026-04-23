@@ -81,6 +81,7 @@
 void system_init(void);
 void system_superloop(void);
 void system_cleanup(void);
+void system_ops_mtq_init_part2(void);
 
 int1 g_superloop_running = TRUE;
 uint8_t g_rbt_cause = 0;
@@ -137,8 +138,7 @@ void system_init(void) {
     
     // Submodules & services init
     status_e s_flashmgr = flashmgr_init(&g_flashmgr);
-    config_s* cfg = &g_flashmgr.config;
-    status_e s_mtq = mtq_init(&g_mtq, MTQ_PORT, cfg->paxs, cfg->tle);
+    status_e s_mtq = mtq_init(&g_mtq, MTQ_PORT);
     status_e s_nvg = nvg_init(&g_nvg, NVG_PORT);
     mcpmgr_init(&g_mcpmgr);
     scheduler_init(&g_scheduler);
@@ -150,6 +150,11 @@ void system_init(void) {
     char req[32] = {0};
     systime_str(req); // Outputs current time as string to req
     mcp_dispatch(NODE, NODE_UPPM, 0, CMD, "ppm_set_time", req);
+
+    // Schedule mtq reset
+    mcppkt_s cmd_mtq_reset;
+    mcppkt_create(&cmd_mtq_reset, NODE, NODE, 0, CMD, "mtq_reset", "");
+    scheduler_schedule_cmd_in(&g_scheduler, 7, &cmd_mtq_reset, 5000, 0, 1);
     
     sprintf(LOGBUF, "system initialized rs232_err=%u rbt_cnt=%u rbt_cause=%u s_ertc=%u s_flashmgr=%u s_mtq=%u s_nvg=%u",
             rs232_errors, g_flashmgr.rbt_cnt, g_rbt_cause, s_ertc, s_flashmgr, s_mtq, s_nvg); log_info();
@@ -176,4 +181,15 @@ void system_cleanup(void) {
     mtq_destroy(&g_mtq);
     nvg_destroy(&g_nvg);
     reset_cpu();
+}
+
+void system_ops_mtq_init_part2(void) {
+    sprintf(LOGBUF, "system_ops_mtq_init_part2"); log_info();
+    config_s* cfg = &g_flashmgr.config;
+    rtc_time_t rtc;
+    systime_rtc(&rtc);
+    mtq_set_datetime(&g_mtq, &rtc);
+    mtq_set_mode(&g_mtq, MTQ_MODE_SAFE);
+    mtq_write_start(&g_mtq, MTQ_POINTING_AXIS, cfg->paxs);
+    mtq_write_start(&g_mtq, MTQ_TLE, cfg->tle);
 }

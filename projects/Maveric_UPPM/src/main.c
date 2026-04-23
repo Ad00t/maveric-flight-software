@@ -168,7 +168,8 @@ void system_init(void) {
             // mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_burn", "5");
         case OPS_NOMINAL: // Fallthrough
             ax100_set_power(&g_ax100, TRUE);
-            scheduler_schedule_func_in(&g_scheduler, BCN_SCHED_ID, system_ops_transmit_beacon, 30000, cfg->bcn_period, SCHEDULE_REPS_INFINITE);
+            scheduler_schedule_func_in(&g_scheduler, BCN_SCHED_ID, system_ops_transmit_beacon, 
+                                        30000, cfg->bcn_period, SCHEDULE_REPS_INFINITE);
             scheduler_schedule_func_in(&g_scheduler, 7, system_ops_check_eps, 1*MS_PER_MIN, 1*MS_PER_MIN, SCHEDULE_REPS_INFINITE);
             break;
     }

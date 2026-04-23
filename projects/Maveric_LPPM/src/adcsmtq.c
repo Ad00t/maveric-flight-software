@@ -60,7 +60,7 @@ int1 mtq_pkt_verify_csum(mtq_pkt_s* pkt) {
 
 // MTQ API 
 
-status_e mtq_init(mtq_s* mtq, uint8_t port, float* paxs, char* tle) {
+status_e mtq_init(mtq_s* mtq, uint8_t port) {
     mtq->is_init = TRUE;
     mtq->port = port;
     memcpy(mtq->reg_table, MTQ_INIT_REG_TABLE, sizeof(MTQ_INIT_REG_TABLE));
@@ -82,15 +82,8 @@ status_e mtq_init(mtq_s* mtq, uint8_t port, float* paxs, char* tle) {
         reg->value = calloc(reg->value_len, l);
     }
     
-    status_e s1 = mtq_reboot(mtq);
-    rtc_time_t rtc;
-    systime_rtc(&rtc);
-    status_e s2 = mtq_set_datetime(mtq, &rtc);
-    status_e s3 = mtq_set_mode(mtq, MTQ_MODE_SAFE);
-    status_e s4 = mtq_write_start(mtq, MTQ_POINTING_AXIS, paxs);
-    status_e s5 = mtq_write_start(mtq, MTQ_TLE, tle);
     sprintf(LOGBUF, "mtq_init: port=%u", mtq->port); log_info();
-    return (s1 == SUCCESS && s2 == SUCCESS && s3 == SUCCESS && s4 == SUCCESS && s5 == SUCCESS) ? SUCCESS : FAILURE;
+    return SUCCESS; 
 }
 
 void mtq_destroy(mtq_s* mtq) {
@@ -188,7 +181,7 @@ status_e mtq_read_start(mtq_s* mtq, mtq_reg_s* reg) {
     
     uart_write_buf(mtq->port, w_buf, 4); 
     uart_write_byte(mtq->port, csum);
-    delay_ms(20);
+    delay_ms(10);
     return SUCCESS;
 }
 
@@ -266,7 +259,7 @@ status_e mtq_write_start(mtq_s* mtq, mtq_reg_s* reg, void* data) {
 
     uart_write_buf(mtq->port, w_buf, w_buf_len);
     uart_write_buf(mtq->port, &csum, 1);
-    delay_ms(20);
+    delay_ms(10);
     return SUCCESS;
 }
 
@@ -279,6 +272,8 @@ status_e mtq_write_start(mtq_s* mtq, uint16_t key, void* data) {
     }
     return mtq_write_start(mtq, reg, data);
 }
+
+extern flashmgr_s g_flashmgr;
 
 void mtq_write_complete(mtq_s* mtq) {
     if (!mtq->is_init) return;
@@ -303,19 +298,29 @@ void mtq_write_complete(mtq_s* mtq) {
         sprintf(LOGBUF, "mtq_write_complete: ppm invalid register (%u,%u)", rcvpkt->midx, rcvpkt->idx); log_error();
         return;
     }
-
+    
     sprintf(LOGBUF, "mtq_write_complete: reg=(%u,%u) count=%u err=%u", 
             reg->midx, reg->idx, reg->cnt, rcvpkt->err); log_trace();
 
-    // Readback
-    mtq_read_start(mtq, reg);
+    // Reset 
+    if ((((uint16_t)reg->midx << 8) | reg->idx) == MTQ_NVM) {
+        config_s* cfg = &g_flashmgr.config;
+        rtc_time_t rtc;
+        systime_rtc(&rtc);
+        mtq_set_datetime(mtq, &rtc);
+        mtq_write_start(mtq, MTQ_POINTING_AXIS, cfg->paxs);
+        mtq_write_start(mtq, MTQ_TLE, cfg->tle);
+    } else {
+        // Readback
+        mtq_read_start(mtq, reg);
+    }
 }
 
 void mtq_parse_stream(mtq_s* mtq, ringbuf_s* irqbuf) {
     if (!mtq->is_init) return;
     mtq_pkt_s* rcvpkt = &mtq->rcvpkt;
     uint16_t iter = 0;
-    while (iter < 2*RINGBUF_MAX_CAPACITY) {
+    while (iter < 4*RINGBUF_MAX_CAPACITY) {
         uint8_t b;
         if (!rb_pop(irqbuf, 1, &b)) return;
       
@@ -389,7 +394,7 @@ status_e mtq_get_data(mtq_s* mtq, uint16_t key, void* out) {
     if (!mtq->is_init) return FAILURE;
     mtq_reg_s* reg = mtq_get_reg(mtq, key);
     if (reg == NULL) return FAILURE;
-    memcpy(out, reg->value, reg->value_len);
+    memcpy(out, reg->value, 4*reg->cnt);
     return SUCCESS;
 }
 
@@ -416,25 +421,13 @@ status_e mtq_reboot(mtq_s* mtq) {
     uint8_t req = 1;
     delay_ms(100);
     status_e s = mtq_write_start(mtq, MTQ_NVM, &req);
-    delay_ms(100);
     return s;
 }
 
 status_e mtq_reset(mtq_s* mtq) {
     if (!mtq->is_init) return FAILURE;
-    float paxs[3] = {0};
-    char tle[140] = {0};
-    status_e s1 = mtq_get_data(mtq, MTQ_POINTING_AXIS, paxs);
-    status_e s2 = mtq_get_data(mtq, MTQ_TLE, tle);
-    status_e s3 = mtq_reboot(mtq);
-    rtc_time_t rtc;
-    systime_rtc(&rtc);
-    status_e s4 = mtq_set_datetime(mtq, &rtc);
-    status_e s5 = mtq_set_mode(mtq, MTQ_MODE_SAFE);
-    status_e s6 = mtq_write_start(mtq, MTQ_POINTING_AXIS, paxs);
-    status_e s7 = mtq_write_start(mtq, MTQ_TLE, tle);
-    return (s1 == SUCCESS && s2 == SUCCESS && s3 == SUCCESS && s4 == SUCCESS 
-            && s5 == SUCCESS && s6 == SUCCESS && s7 == SUCCESS) ? SUCCESS : FAILURE;
+    status_e s = mtq_reboot(mtq);
+    return s;
 }
 
 status_e mtq_read_fast(mtq_s* mtq) {
