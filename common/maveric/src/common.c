@@ -39,6 +39,12 @@ float deg2rad(float deg) {
     return deg * (PI / 180.0f);
 }
 
+int1 is_nan_f32(float x) {
+    uint32_t u = 0;
+    memcpy(&u, &x, sizeof(u));
+    return ((u & 0x7F800000u) == 0x7F800000u) && ((u & 0x007FFFFFu) != 0);
+}
+
 //  FUNCTION: ftoa
 //  AUTHOR = TRAMPAS STERN
 //  FILE = strio.c
@@ -56,6 +62,11 @@ float deg2rad(float deg) {
 //-----------------------------------------------------------
 
 uint8_t ftoa(float x, char* str, uint8_t prec, char format) {
+    if (is_nan_f32(x)) {
+        strcpy(str, "NaN");
+        return 3;
+    }
+
     int k, fstyle;
 
     int8_t ie, i, ndig;

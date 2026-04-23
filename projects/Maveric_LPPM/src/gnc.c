@@ -68,9 +68,9 @@ void gnc_step(gnc_s* state, mtq_s* mtq, float* gyro_rate_rad) {
                         if (mtq_set_mode(mtq, MTQ_MODE_SUN_SPIN) == SUCCESS) {
                             state->expected_mode = MTQ_MODE_SUN_SPIN;
                         }
-                    } else if (gyro_rate_rad[0] < GNC_MAX_DETUMBLE_RATE 
-                                && gyro_rate_rad[1] < GNC_MAX_DETUMBLE_RATE 
-                                && gyro_rate_rad[2] < GNC_MAX_DETUMBLE_RATE) {
+                    } else if (sqrt(pow(gyro_rate_rad[0], 2) 
+                                + pow(gyro_rate_rad[1], 2)
+                                + pow(gyro_rate_rad[2], 2)) < GNC_MAX_DETUMBLE_RATE_RAD) {
                         if (mtq_set_mode(mtq, MTQ_MODE_DETUMBLING) == SUCCESS) {
                             state->expected_mode = MTQ_MODE_DETUMBLING;
                         }

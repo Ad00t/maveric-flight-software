@@ -14,48 +14,49 @@ void tlm_clear(tlm_s* tlm) {
     memset(tlm, 0, sizeof(tlm_s));
 }
 
-
-// Format a telemetry message packet for a specified beacon for transmission. Only creates the message buffer, not command or frame.
-void tlm_beacon(tlm_s* tlm, uint8_t bcn_num) {
+void tlm_beacon(tlm_s* tlm) {
     tlm->time = systime_epoch_ms();
+    memcpy(tlm->callsign, TLM_CALLSIGN, sizeof(TLM_CALLSIGN));
 
-    char msg[MCP_MAX_ARGS_LEN] = {0};
-    char timebuf[32] = {0};
-    sprintf(timebuf, "%Lu", tlm->time);
-    uint16_t j = sprintf(msg, "%u %s %u %u %u %u %u %u %u %u %u %u %u ", 
-                 bcn_num, timebuf, tlm->ops_stage, 
-                 tlm->lppm_rbt_cnt, tlm->lppm_rbt_cause, tlm->uppm_rbt_cnt, tlm->uppm_rbt_cause,
-                 tlm->ertc_heartbeat, tlm->mtq_heartbeat, tlm->nvg_heartbeat, tlm->eps_heartbeat, tlm->hn_state, tlm->ab_state);
+    uint8_t msg[MCP_MAX_ARGS_LEN] = {0};
+    uint8_t l = 0;
 
-    switch (bcn_num) {
-        case 1: {
-            uint8_t i;
-            j += sprintf(&msg[j], "%Lu %u %u %u %u %u %u ",
-                    tlm->mtq_stat, tlm->gnc_mode, tlm->unexpected_safe_count, tlm->unexpected_detumble_count, 
-                    tlm->sunspin_count, tlm->gyro_rate_src, tlm->mag_src);
-            for (i = 0; i < 3; i++) {
-                j += ftoa(tlm->gyro_rate[i], &msg[j], 3, 'f');
-                j += sprintf(&msg[j], " ");
-            }
-            for (i = 0; i < 3; i++) {
-                j += ftoa(tlm->mag[i], &msg[j], 3, 'f');
-                j += sprintf(&msg[j], " ");
-            }
-            for (i = 0; i < 3; i++) {
-                j += ftoa(tlm->mtq_dipole[i], &msg[j], 3, 'f');
-                j += sprintf(&msg[j], " ");
-            }
-            j += ftoa(tlm->temp_adcs, &msg[j], 3, 'f');
-            break;
-        } 
+    memcpy(&msg[l], tlm->callsign, sizeof(tlm->callsign)); l += sizeof(tlm->callsign); 
+    memcpy(&msg[l], &tlm->time, 8); l += 8; 
+    memcpy(&msg[l], &tlm->ops_stage, 1); l += 1; 
+    memcpy(&msg[l], &tlm->lppm_rbt_cnt, 2); l += 2; 
+    memcpy(&msg[l], &tlm->lppm_rbt_cause, 1); l += 1; 
+    memcpy(&msg[l], &tlm->uppm_rbt_cnt, 2); l += 2; 
+    memcpy(&msg[l], &tlm->uppm_rbt_cause, 1); l += 1; 
+    memcpy(&msg[l], &tlm->ertc_heartbeat, 1); l += 1; 
+    memcpy(&msg[l], &tlm->mtq_heartbeat, 1); l += 1; 
+    memcpy(&msg[l], &tlm->nvg_heartbeat, 1); l += 1; 
+    memcpy(&msg[l], &tlm->eps_heartbeat, 1); l += 1; 
+    memcpy(&msg[l], &tlm->hn_state, 1); l += 1; 
+    memcpy(&msg[l], &tlm->ab_state, 1); l += 1; 
 
-        case 2: {
-            j += sprintf(&msg[j], "%u %u %u %u %u %u %u %u",
-                         tlm->i_bus, tlm->i_batt, tlm->v_bus, tlm->v_batt, tlm->v_sys, tlm->temp_adc, tlm->temp_die, tlm->eps_mode);
-            break;
-        }
-    }
+    memcpy(&msg[l], &tlm->mtq_stat, 4); l += 4; 
+    memcpy(&msg[l], &tlm->gyro_rate_src, 1); l += 1; 
+    memcpy(&msg[l], &tlm->mag_src, 1); l += 1; 
+    memcpy(&msg[l], tlm->gyro_rate, sizeof(tlm->gyro_rate)); l += sizeof(tlm->gyro_rate); 
+    memcpy(&msg[l], tlm->mag, sizeof(tlm->mag)); l += sizeof(tlm->mag); 
+    memcpy(&msg[l], tlm->mtq_dipole, sizeof(tlm->mtq_dipole)); l += sizeof(tlm->mtq_dipole); 
+    memcpy(&msg[l], &tlm->temp_adcs, 4); l += 4; 
 
-    sprintf(LOGBUF, "tlm_beacon: %s", msg); log_info();
-    mcp_dispatch(NODE, NODE_GS, 0, TLM, "tlm_beacon", msg);
+    memcpy(&msg[l], &tlm->i_bus, 2); l += 2; 
+    memcpy(&msg[l], &tlm->i_batt, 2); l += 2; 
+    memcpy(&msg[l], &tlm->v_bus, 2); l += 2; 
+    memcpy(&msg[l], &tlm->v_batt, 2); l += 2; 
+    memcpy(&msg[l], &tlm->v_sys, 2); l += 2; 
+    memcpy(&msg[l], &tlm->temp_adc, 2); l += 2; 
+    memcpy(&msg[l], &tlm->temp_die, 2); l += 2; 
+    memcpy(&msg[l], &tlm->eps_mode, 2); l += 2; 
+
+    memcpy(&msg[l], &tlm->gnc_mode, 1); l += 1; 
+    memcpy(&msg[l], &tlm->unexpected_safe_count, 2); l += 2; 
+    memcpy(&msg[l], &tlm->unexpected_detumble_count, 2); l += 2; 
+    memcpy(&msg[l], &tlm->sunspin_count, 2); l += 2; 
+
+    sprintf(LOGBUF, "tlm_beacon: len=%u", l); log_info();
+    mcp_dispatch(NODE, NODE_GS, 0, TLM, "tlm_beacon", msg, l);
 }

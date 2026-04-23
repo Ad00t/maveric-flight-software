@@ -44,6 +44,7 @@ void cmdimpl_init() {
     ht_set(ht, "cfg_set_ll", (cmdimpl_f) cmdimpl_cfg_set_ll);
     ht_set(ht, "cfg_set_ops", (cmdimpl_f) cmdimpl_cfg_set_ops);
     ht_set(ht, "cfg_set_gsdelay", (cmdimpl_f) cmdimpl_cfg_set_gsdelay);
+    ht_set(ht, "cfg_set_bcnper", (cmdimpl_f) cmdimpl_cfg_set_bcnper);
     ht_set(ht, "cfg_load_dfl", (cmdimpl_f) cmdimpl_cfg_load_dfl);
     ht_set(ht, "cfg_load_flash", (cmdimpl_f) cmdimpl_cfg_load_flash);
     ht_set(ht, "cfg_flush", (cmdimpl_f) cmdimpl_cfg_flush);
@@ -370,37 +371,34 @@ void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
         case TLM: {
             sprintf(LOGBUF, "cmdimpl_tlm_get_data RES o=%u al=%u", pkt->orgn, pkt->args_len); log_info();
             uint8_t* p = pkt->args;
-            static uint8_t sz_u16 = sizeof(uint16_t);
-            static uint8_t sz_u32 = sizeof(uint32_t);
-            static uint8_t sz_flt = sizeof(float);
             switch (pkt->orgn) {
                 case NODE_LPPM:
-                    memcpy(&g_tlm.lppm_rbt_cnt, p, sz_u16); p += sz_u16;
-                    g_tlm.lppm_rbt_cause = *(p++);  
-                    g_tlm.ertc_heartbeat = *(p++);
-                    g_tlm.mtq_heartbeat = *(p++);
-                    g_tlm.nvg_heartbeat = *(p++);
-                    g_tlm.gnc_mode = *(p++);
-                    memcpy(&g_tlm.unexpected_safe_count, p, sz_u16); p += sz_u16;
-                    memcpy(&g_tlm.unexpected_detumble_count, p, sz_u16); p += sz_u16;
-                    memcpy(&g_tlm.sunspin_count, p, sz_u16); p += sz_u16;
-                    memcpy(&g_tlm.mtq_stat, p, sz_u32); p += sz_u32;
-                    g_tlm.gyro_rate_src = *(p++);
-                    g_tlm.mag_src = *(p++);
+                    memcpy(&g_tlm.lppm_rbt_cnt, p, 2); p += 2;
+                    memcpy(&g_tlm.lppm_rbt_cause, p, 1); p += 1;
+                    memcpy(&g_tlm.ertc_heartbeat, p, 1); p += 1;
+                    memcpy(&g_tlm.mtq_heartbeat, p, 1); p += 1;
+                    memcpy(&g_tlm.nvg_heartbeat, p, 1); p += 1;
+                    memcpy(&g_tlm.gnc_mode, p, 1); p += 1;
+                    memcpy(&g_tlm.unexpected_safe_count, p, 2); p += 2;
+                    memcpy(&g_tlm.unexpected_detumble_count, p, 2); p += 2;
+                    memcpy(&g_tlm.sunspin_count, p, 2); p += 2;
+                    memcpy(&g_tlm.mtq_stat, p, 4); p += 4;
+                    memcpy(&g_tlm.gyro_rate_src, p, 1); p += 1;
+                    memcpy(&g_tlm.mag_src, p, 1); p += 1;
                     memcpy(g_tlm.gyro_rate, p, sizeof(g_tlm.gyro_rate)); p += sizeof(g_tlm.gyro_rate);
                     memcpy(g_tlm.mag, p, sizeof(g_tlm.mag)); p += sizeof(g_tlm.mag);
                     memcpy(g_tlm.mtq_dipole, p, sizeof(g_tlm.mtq_dipole)); p += sizeof(g_tlm.mtq_dipole);
-                    memcpy(&g_tlm.temp_adcs, p, sz_flt); p += sz_flt;
+                    memcpy(&g_tlm.temp_adcs, p, 4); p += 4;
                     break;
                 case NODE_EPS:
-                    memcpy(&g_tlm.i_bus, p, sz_u16); p += sz_u16;
-                    memcpy(&g_tlm.i_batt, p, sz_u16); p += sz_u16;
-                    memcpy(&g_tlm.v_bus, p, sz_u16); p += sz_u16;
-                    memcpy(&g_tlm.v_batt, p, sz_u16); p += sz_u16;
-                    memcpy(&g_tlm.v_sys, p, sz_u16); p += sz_u16;
-                    memcpy(&g_tlm.temp_adc, p, sz_u16); p += sz_u16;
-                    memcpy(&g_tlm.temp_die, p, sz_u16); p += sz_u16;
-                    memcpy(&g_tlm.eps_mode, p, sz_u16); p += sz_u16;
+                    memcpy(&g_tlm.i_bus, p, 2); p += 2;
+                    memcpy(&g_tlm.i_batt, p, 2); p += 2;
+                    memcpy(&g_tlm.v_bus, p, 2); p += 2;
+                    memcpy(&g_tlm.v_batt, p, 2); p += 2;
+                    memcpy(&g_tlm.v_sys, p, 2); p += 2;
+                    memcpy(&g_tlm.temp_adc, p, 2); p += 2;
+                    memcpy(&g_tlm.temp_die, p, 2); p += 2;
+                    memcpy(&g_tlm.eps_mode, p, 2); p += 2;
                     g_tlm.eps_heartbeat_time = systime_epoch_ms();
                     break;
                 case NODE_HOLONAV: 
@@ -511,7 +509,7 @@ void cmdimpl_cfg_get(mcppkt_s* pkt) {
         case CMD: {
             char res[MCP_MAX_ARGS_LEN] = {0};
             config_s* cfg = &g_flashmgr.config;
-            sprintf(res, "%u %u %u", cfg->log_level, cfg->ops_stage, cfg->gsdelay);
+            sprintf(res, "%u %u %u %u", cfg->log_level, cfg->ops_stage, cfg->gs_delay, cfg->bcn_period);
             mcp_respond(pkt, RES, res);
             break;
         }
@@ -551,9 +549,29 @@ void cmdimpl_cfg_set_gsdelay(mcppkt_s* pkt) {
         case CMD: {
             char* p = pkt->args;
             config_s* cfg = &g_flashmgr.config;
-            cfg->gsdelay = strtoul(p, &p, 10);
+            cfg->gs_delay = strtoul(p, &p, 10);
             char res[8] = {0};
             sprintf(res, "%u", SUCCESS);
+            mcp_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
+void cmdimpl_cfg_set_bcnper(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            char* p = pkt->args;
+            config_s* cfg = &g_flashmgr.config;
+            cfg->bcn_period = (uint32_t) strtoul(p, &p, 10);
+            schedtask_s* st = g_scheduler.id_map[BCN_SCHED_ID]; 
+            char res[8] = {0};
+            if (st != NULL) {
+                st->period_ms = cfg->bcn_period;
+                sprintf(res, "%u %u", SUCCESS, st->period_ms);
+            } else {
+                sprintf(res, "%u", FAILURE);
+            }
             mcp_respond(pkt, RES, res);
             break;
         }

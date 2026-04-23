@@ -3,8 +3,10 @@
 
 #include <stdint.h>
 
+static char TLM_CALLSIGN[7] = "WQ2XIC";
+
 typedef struct {
-    // Generic
+    char callsign[7];                   // UPPM
     uint64_t time;                      // UPPM
     uint8_t ops_stage;                  // UPPM
     uint16_t lppm_rbt_cnt;              // LPPM
@@ -18,19 +20,15 @@ typedef struct {
     uint64_t eps_heartbeat_time;        // UPPM -- NOT TRANSMITTED
     uint8_t hn_state;                   // UPPM
     uint8_t ab_state;                   // UPPM
-    // Beacon 1
+
     uint32_t mtq_stat;                  // LPPM
-    uint8_t gnc_mode;                   // LPPM
-    uint16_t unexpected_safe_count;     // LPPM 
-    uint16_t unexpected_detumble_count; // LPPM 
-    uint16_t sunspin_count;             // LPPM 
     uint8_t gyro_rate_src;              // LPPM
     uint8_t mag_src;                    // LPPM
     float gyro_rate[3];                 // LPPM
     float mag[3];                       // LPPM
     float mtq_dipole[3];                // LPPM
     float temp_adcs;                    // LPPM
-    // Beacon 2                          
+
     uint16_t i_bus;                     // EPS
     uint16_t i_batt;                    // EPS
     uint16_t v_bus;                     // EPS
@@ -39,12 +37,17 @@ typedef struct {
     uint16_t temp_adc;                  // EPS
     uint16_t temp_die;                  // EPS
     uint16_t eps_mode;                  // EPS
+
+    uint8_t gnc_mode;                   // LPPM
+    uint16_t unexpected_safe_count;     // LPPM 
+    uint16_t unexpected_detumble_count; // LPPM 
+    uint16_t sunspin_count;             // LPPM 
 } tlm_s;
 
 void tlm_init(tlm_s* tlm);
 void tlm_clear(tlm_s* tlm);
 
-// Format a telemetry message packet for a specified beacon for transmission. Only creates the message buffer, not command or frame.
-void tlm_beacon(tlm_s* tlm, uint8_t bcn_num);
+// Format & transmit telemetry message packet 
+void tlm_beacon(tlm_s* tlm);
 
 #endif

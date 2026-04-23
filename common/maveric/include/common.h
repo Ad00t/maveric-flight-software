@@ -41,6 +41,7 @@ uint8_t minu8(uint8_t a, uint8_t b);
 float rad2deg(float rad);
 float deg2rad(float deg);
 
+int1 is_nan_f32(float x);
 uint8_t ftoa(float x, char* str, uint8_t prec, char format);
 
 #endif // !__COMMON_H__

@@ -80,7 +80,8 @@ void flashmgr_config_load_defaults(flashmgr_s* self) {
 #elif NODE == NODE_UPPM
     cfg->log_level = LL_INFO;
     cfg->ops_stage = OPS_INIT;
-    cfg->gsdelay = 1000;
+    cfg->gs_delay = 1000;
+    cfg->bcn_period = 3*MS_PER_MIN;
 #endif
     uint8_t crc_off = offsetof(config_s, crc);
     cfg->crc = compute_crc16((uint8_t*)cfg, crc_off);

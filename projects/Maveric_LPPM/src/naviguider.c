@@ -107,7 +107,7 @@ status_e nvg_send_cmd(nvg_s* nvg, char* cmd) {
     uint8_t len = strlen(cmd);
     uart_write_buf(nvg->port, cmd, len);
     sprintf(LOGBUF, "nvg_send_cmd: len=%u \"%s\"", len, cmd); log_debug();
-    delay_ms(20);
+    delay_ms(50);
     return SUCCESS;
 } 
 
@@ -262,7 +262,10 @@ void nvg_check_heartbeat(nvg_s* nvg) {
 
 status_e nvg_power(nvg_s* nvg) {
     if (!nvg->is_init) return FAILURE;
-    return nvg_send_cmd(nvg, "P");
+    delay_ms(100);
+    status_e s = nvg_send_cmd(nvg, "P");
+    delay_ms(100);
+    return s;
 }
 
 status_e nvg_reset(nvg_s* nvg) {
@@ -272,7 +275,9 @@ status_e nvg_reset(nvg_s* nvg) {
     status_e s3 = nvg_send_cmd(nvg, "M1\r");
     status_e s4 = nvg_send_cmd(nvg, "m0");
     status_e s5 = nvg_send_cmd(nvg, "D1");
-    return (s1 == SUCCESS && s2 == SUCCESS && s3 == SUCCESS && s4 == SUCCESS && s5 == SUCCESS) ? SUCCESS : FAILURE;
+    delay_ms(50);
+    status_e s6 = nvg_send_cmd(nvg, "V0");
+    return (s1 == SUCCESS && s2 == SUCCESS && s3 == SUCCESS && s4 == SUCCESS && s5 == SUCCESS && s6 == SUCCESS) ? SUCCESS : FAILURE;
 }
 
 status_e nvg_magnetometer_mode(nvg_s* nvg) {

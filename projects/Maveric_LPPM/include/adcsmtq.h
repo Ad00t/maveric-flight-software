@@ -192,7 +192,7 @@ typedef enum {
 // MTQ packet parsing struct
 
 typedef struct {
-    uint8_t data[MTQ_MAX_PKT_LEN];
+    uint8_t data[MTQ_MAX_PAYLOAD_LEN];
     // Packet parsing metadata
     mtq_fsm_e fsm;
     uint8_t i_payload;
@@ -403,13 +403,15 @@ int1 mtq_stat_parse_tumb(uint32_t stat);
 #define MTQ_NVM                 (2 << 8) | 255
 
 static const uint16_t MTQ_FAST_FRAME_REGS[] = {
-    MTQ_CONF, MTQ_TIME, MTQ_DATE, MTQ_MTQ_USER, MTQ_STAT, MTQ_ACT_ERR, MTQ_SEN_ERR,
-    MTQ_Q, MTQ_RATE, MTQ_LLA, MTQ_ATT_ERROR, MTQ_ATT_ERROR_RATE, MTQ_SV, MTQ_MAG, MTQ_MTQ, MTQ_MTQ_USER
+    MTQ_CONF, MTQ_TIME, MTQ_DATE, MTQ_MTQ_USER, MTQ_STAT, MTQ_ACT_ERR, MTQ_SEN_ERR, MTQ_MTQ_USER,
+    MTQ_Q, MTQ_RATE, MTQ_LLA, MTQ_ATT_ERROR, MTQ_ATT_ERROR_RATE, MTQ_SV, MTQ_MAG, MTQ_MTQ, 
+    MTQ_ADCS_TMP, MTQ_CAL_MAG_B/*, MTQ_CAL_IMU_B*/
 };
 #define MTQ_NUM_FAST_REGS       sizeof(MTQ_FAST_FRAME_REGS) / sizeof(uint16_t)   
 
 static const uint16_t MTQ_CTRL_FRAME_REGS[] = {
-    MTQ_Q, MTQ_RATE, MTQ_LLA, MTQ_MAG, MTQ_IMU0_S, MTQ_IMU1_S, MTQ_MTQ, MTQ_MTQ_USER
+    MTQ_Q, MTQ_RATE, MTQ_LLA, MTQ_MAG, MTQ_IMU0_S, MTQ_IMU1_S, MTQ_MTQ, MTQ_MTQ_USER, 
+    MTQ_ADCS_TMP, MTQ_CAL_MAG_B/*, MTQ_CAL_IMU_B*/ 
 };
 #define MTQ_NUM_CTRL_REGS       sizeof(MTQ_CTRL_FRAME_REGS) / sizeof(uint16_t)   
 

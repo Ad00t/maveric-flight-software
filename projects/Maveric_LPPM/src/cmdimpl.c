@@ -62,6 +62,7 @@ void cmdimpl_init(void) {
 
     ht_set(ht, "mtq_heartbeat", (cmdimpl_f) cmdimpl_mtq_heartbeat);
     ht_set(ht, "mtq_reset", (cmdimpl_f) cmdimpl_mtq_reset);
+    ht_set(ht, "mtq_set_mode", (cmdimpl_f) cmdimpl_mtq_set_mode);
     ht_set(ht, "mtq_read_1", (cmdimpl_f) cmdimpl_mtq_read_1);
     ht_set(ht, "mtq_get_1", (cmdimpl_f) cmdimpl_mtq_get_1);
     ht_set(ht, "mtq_set_1", (cmdimpl_f) cmdimpl_mtq_set_1);
@@ -431,20 +432,20 @@ void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
             float gyro_rate[4] = {0}; // Make sure these buffers have enough space for the extra value(s) the nvg reports
             switch (cfg->gyro_rate_src) {
                 case DATASRC_MTQ:
-                    mtq_get_data(&g_mtq, MTQ_RATE, gyro_rate); // rad/s
+                    mtq_get_data(&g_mtq, MTQ_CAL_IMU_B, gyro_rate); // rad/s
                     break;
                 case DATASRC_NVG:
-                    nvg_get_sensor_data(&g_nvg, NVG_GYROSCOPE_CAL, gyro_rate); // rad/s
+                    nvg_get_sensor_data(&g_nvg, NVG_GYROSCOPE_UNCAL, gyro_rate); // rad/s
                     break;
             }
 
             float mag[4] = {0};
             switch (cfg->mag_src) {
                 case DATASRC_MTQ:
-                    mtq_get_data(&g_mtq, MTQ_MAG, mag); // nT
+                    mtq_get_data(&g_mtq, MTQ_CAL_MAG_B, mag); // nT
                     break;
                 case DATASRC_NVG:
-                    nvg_get_sensor_data(&g_nvg, NVG_MAGNETOMETER_CAL, mag); // uT
+                    nvg_get_sensor_data(&g_nvg, NVG_MAGNETOMETER_UNCAL, mag); // uT
                     break;
             }
 
@@ -455,29 +456,25 @@ void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
             mtq_get_data(&g_mtq, MTQ_ADCS_TMP, mtq_adcs_tmp);
             float adcs_temp = (float) mtq_adcs_tmp[0] * 150 / 32768;
 
-            static uint8_t sz_u16 = sizeof(uint16_t);
-            static uint8_t sz_u32 = sizeof(uint32_t);
-            static uint8_t sz_flt = sizeof(float);
+            uint8_t l = 0;
+            memcpy(&res[l], &g_flashmgr.rbt_cnt, 2); l += 2;
+            memcpy(&res[l], &g_rbt_cause, 1); l += 1;
+            memcpy(&res[l], &g_ertc.heartbeat, 1); l += 1;
+            memcpy(&res[l], &g_mtq.heartbeat, 1); l += 1;
+            memcpy(&res[l], &g_nvg.heartbeat, 1); l += 1;
+            memcpy(&res[l], &g_gnc.gnc_mode, 1); l += 1;
+            memcpy(&res[l], &g_gnc.unexpected_safe_count, 2); l += 2;
+            memcpy(&res[l], &g_gnc.unexpected_detumble_count, 2); l += 2;
+            memcpy(&res[l], &g_gnc.sunspin_count, 2); l += 2;
+            memcpy(&res[l], &mtq_stat, 4); l += 4;
+            res[l++] = (uint8_t)cfg->gyro_rate_src;
+            res[l++] = (uint8_t)cfg->mag_src;
+            memcpy(&res[l], gyro_rate, sizeof(gyro_rate)); l += sizeof(gyro_rate);
+            memcpy(&res[l], mag, sizeof(mag)); l += sizeof(mag);
+            memcpy(&res[l], mtq_dipole, sizeof(mtq_dipole)); l += sizeof(mtq_dipole);
+            memcpy(&res[l], &adcs_temp, 4); l += 4;
 
-            uint8_t len = 0;
-            memcpy(&res[len], &g_flashmgr.rbt_cnt, sz_u16); len += sz_u16;
-            res[len++] = g_rbt_cause;
-            res[len++] = g_ertc.heartbeat;
-            res[len++] = g_mtq.heartbeat;
-            res[len++] = g_nvg.heartbeat;
-            res[len++] = g_gnc.gnc_mode;
-            memcpy(&res[len], &g_gnc.unexpected_safe_count, sz_u16); len += sz_u16;
-            memcpy(&res[len], &g_gnc.unexpected_detumble_count, sz_u16); len += sz_u16;
-            memcpy(&res[len], &g_gnc.sunspin_count, sz_u16); len += sz_u16;
-            memcpy(&res[len], &mtq_stat, sz_u32); len += sz_u32;
-            res[len++] = cfg->gyro_rate_src;
-            res[len++] = cfg->mag_src;
-            memcpy(&res[len], gyro_rate, sizeof(gyro_rate)); len += sizeof(gyro_rate);
-            memcpy(&res[len], mag, sizeof(mag)); len += sizeof(mag);
-            memcpy(&res[len], mtq_dipole, sizeof(mtq_dipole)); len += sizeof(mtq_dipole);
-            memcpy(&res[len], &adcs_temp, sz_flt); len += sz_flt;
-
-            mcp_respond(pkt, TLM, res, len);
+            mcp_respond(pkt, TLM, res, l);
             break;
         }
     }
@@ -714,6 +711,21 @@ void cmdimpl_mtq_reset(mcppkt_s* pkt) {
             char res[8] = {0};
             sprintf(res, "%u", s);
             mcp_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
+void cmdimpl_mtq_set_mode(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            char* p = pkt->args;
+            uint8_t mode = strtoul(p, &p, 10);
+            sprintf(LOGBUF, "cmdimpl_mtq_set_mode mode=%u", mode); log_info();
+            status_e s = mtq_set_mode(&g_mtq, mode);
+            char res[8] = {0};
+            sprintf(res, "%u %u", s, mode);
+            mcp_respond(pkt, RES, (char*) res);
             break;
         }
     }

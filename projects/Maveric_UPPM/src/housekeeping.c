@@ -46,7 +46,7 @@ void hk_update_tlm(void) {
     g_tlm.uppm_rbt_cause = g_rbt_cause;
     g_tlm.hn_state = g_pldmgr.hn_state;
     g_tlm.ab_state = g_pldmgr.ab_state;
-    g_tlm.eps_heartbeat = (systime_epoch_ms() - g_tlm.eps_heartbeat_time <= 21000);
+    g_tlm.eps_heartbeat = (systime_epoch_ms() - g_tlm.eps_heartbeat_time <= 11000);
 
     mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "tlm_get_data", "");
     mcp_dispatch(NODE, NODE_EPS, 0, CMD, "tlm_get_data", "");

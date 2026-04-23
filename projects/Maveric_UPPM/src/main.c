@@ -51,6 +51,7 @@
 #include "nodes.h"
 #define UPPER_PPM
 #define NODE                NODE_UPPM 
+#define BCN_SCHED_ID        6
 
 // Module includes (.c necessary)
 
@@ -109,7 +110,7 @@ void main(void) {
 // System initialization routine
 void system_init(void) {
     // Watchdog, millisecond timer, logger, rbt_cause init
-    delay_ms(2000);
+    delay_ms(3000);
     // fprintf(COM_C, "uppm init\r\n");
     setup_wdt(WDT_ON);
 	setup_timer1(TMR_INTERNAL | TMR_DIV_BY_64, 249); 
@@ -160,14 +161,14 @@ void system_init(void) {
     }
     switch (cfg->ops_stage) {
         case OPS_INIT:
-            mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_rts_ctn", "7199");
+            mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_rst_ctn", "7199");
             scheduler_schedule_func_in(&g_scheduler, 5, system_ops_transition_safe, 1*MS_PER_MIN, 0, 1);     // 45 min
             break;
         case OPS_SAFE:
             // mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_burn", "5");
         case OPS_NOMINAL: // Fallthrough
             ax100_set_power(&g_ax100, TRUE);
-            scheduler_schedule_func_in(&g_scheduler, 6, system_ops_transmit_beacon, 30000, 3*MS_PER_MIN, SCHEDULE_REPS_INFINITE);
+            scheduler_schedule_func_in(&g_scheduler, BCN_SCHED_ID, system_ops_transmit_beacon, 30000, cfg->bcn_period, SCHEDULE_REPS_INFINITE);
             scheduler_schedule_func_in(&g_scheduler, 7, system_ops_check_eps, 1*MS_PER_MIN, 1*MS_PER_MIN, SCHEDULE_REPS_INFINITE);
             break;
     }
@@ -204,13 +205,12 @@ void system_ops_transition_safe(void) {
         if (cfg->ops_stage == OPS_SAFE)
             break;
     }
+    mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "ppm_reset", "");
     g_superloop_running = FALSE;    // Reset so init sees ops_stage=1 and runs deploy
 }
 
 void system_ops_transmit_beacon(void) {
-    tlm_beacon(&g_tlm, 1);
-    delay_ms(1000);
-    tlm_beacon(&g_tlm, 2);
+    tlm_beacon(&g_tlm);
 }
 
 void system_ops_check_eps(void) {

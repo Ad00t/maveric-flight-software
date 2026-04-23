@@ -87,7 +87,7 @@ void mcpmgr_process_pkt(mcpmgr_s* mcpmgr, mcppkt_s* pkt) {
 #if NODE == NODE_UPPM
         if (pkt->orgn == NODE_GS) {
             config_s* cfg = &g_flashmgr.config;
-            delay_ms(cfg->gsdelay);
+            delay_ms(cfg->gs_delay);
         }
 #endif
         mcp_respond(pkt, ACK, (uint8_t*) pkt->args, pkt->args_len);
@@ -112,7 +112,7 @@ void mcpmgr_process_pkt(mcpmgr_s* mcpmgr, mcppkt_s* pkt) {
     // Find and execute cmd implementation
     cmdimpl_f cmdimpl = ht_get(&mcpmgr->cmdimpls, pkt->id);
     if (cmdimpl == NULL) {
-        sprintf(LOGBUF, "proc_pkt: mcp not recognized: '%s'", pkt->id); log_error();
+        sprintf(LOGBUF, "proc_pkt: id not recognized: '%s'", pkt->id); log_error();
         goto cleanup;
     }
     sprintf(LOGBUF, "proc_pkt: executing: o=%u d=%u e=%u p=%u id='%s' arglen=%u", 

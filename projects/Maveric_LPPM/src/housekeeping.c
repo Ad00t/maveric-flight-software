@@ -68,10 +68,10 @@ void hk_gnc_step(void) {
     config_s* cfg = &g_flashmgr.config; 
     switch (cfg->gyro_rate_src) {
         case DATASRC_MTQ:
-            mtq_get_data(&g_mtq, MTQ_RATE, gyro_rate); // rad/s
+            mtq_get_data(&g_mtq, MTQ_CAL_IMU_B, gyro_rate); // rad/s
             break;
         case DATASRC_NVG:
-            nvg_get_sensor_data(&g_nvg, NVG_GYROSCOPE_CAL, gyro_rate); // rad/s
+            nvg_get_sensor_data(&g_nvg, NVG_GYROSCOPE_UNCAL, gyro_rate); // rad/s
             break;
     }
     gnc_step(&g_gnc, &g_mtq, gyro_rate);

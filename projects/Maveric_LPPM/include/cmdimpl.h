@@ -46,6 +46,7 @@ void cmdimpl_cfg_flush(mcppkt_s* pkt);
 
 void cmdimpl_mtq_heartbeat(mcppkt_s* pkt);
 void cmdimpl_mtq_reset(mcppkt_s* pkt);
+void cmdimpl_mtq_set_mode(mcppkt_s* pkt);
 void cmdimpl_mtq_read_1(mcppkt_s* pkt);
 void cmdimpl_mtq_get_1(mcppkt_s* pkt);
 void cmdimpl_mtq_set_1(mcppkt_s* pkt);

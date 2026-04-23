@@ -82,14 +82,15 @@ status_e mtq_init(mtq_s* mtq, uint8_t port, float* paxs, char* tle) {
         reg->value = calloc(reg->value_len, l);
     }
     
+    status_e s1 = mtq_reboot(mtq);
     rtc_time_t rtc;
     systime_rtc(&rtc);
-    status_e s1 = mtq_set_datetime(mtq, &rtc);
-    status_e s2 = mtq_set_mode(mtq, MTQ_MODE_SAFE);
-    status_e s3 = mtq_write_start(mtq, MTQ_POINTING_AXIS, paxs);
-    status_e s4 = mtq_write_start(mtq, MTQ_TLE, tle);
+    status_e s2 = mtq_set_datetime(mtq, &rtc);
+    status_e s3 = mtq_set_mode(mtq, MTQ_MODE_SAFE);
+    status_e s4 = mtq_write_start(mtq, MTQ_POINTING_AXIS, paxs);
+    status_e s5 = mtq_write_start(mtq, MTQ_TLE, tle);
     sprintf(LOGBUF, "mtq_init: port=%u", mtq->port); log_info();
-    return (s1 == SUCCESS && s2 == SUCCESS && s3 == SUCCESS && s4 == SUCCESS) ? SUCCESS : FAILURE;
+    return (s1 == SUCCESS && s2 == SUCCESS && s3 == SUCCESS && s4 == SUCCESS && s5 == SUCCESS) ? SUCCESS : FAILURE;
 }
 
 void mtq_destroy(mtq_s* mtq) {
@@ -233,6 +234,15 @@ void mtq_read_complete(mtq_s* mtq) {
                  reg->midx, reg->idx, reg->cnt, rcvpkt->err); 
     mtq_print_reg_data(mtq, reg, LOGBUF, &j); 
     j += sprintf(&LOGBUF[j], " ]"); log_trace();
+
+    // if (reg->midx == 0 && reg->idx == 136) {
+    //     j = sprintf(LOGBUF, "mtq_read_complete rate: len=%u [", n_body_bytes);
+    //     uint8_t i;
+    //     for (i = 0; i < n_body_bytes; i++) {
+    //         j += sprintf(&LOGBUF[j], " %02X", rcvpkt->data[i]);
+    //     }
+    //     j += sprintf(&LOGBUF[j], " ]"); log_trace();
+    // }
 }
 
 status_e mtq_write_start(mtq_s* mtq, mtq_reg_s* reg, void* data) {
@@ -404,6 +414,7 @@ void mtq_check_heartbeat(mtq_s* mtq) {
 status_e mtq_reboot(mtq_s* mtq) {
     if (!mtq->is_init) return FAILURE;
     uint8_t req = 1;
+    delay_ms(100);
     status_e s = mtq_write_start(mtq, MTQ_NVM, &req);
     delay_ms(100);
     return s;
@@ -480,5 +491,7 @@ status_e mtq_set_mode(mtq_s* mtq, uint8_t mode) {
     if (!mtq->is_init) return FAILURE;
     uint8_t conf[4] = {0};
     conf[0] = mode | (1 << 7);
-    return mtq_write_start(mtq, MTQ_CONF, conf);
+    status_e s1 = mtq_write_start(mtq, MTQ_CONF, (void*) conf);
+    status_e s2 = mtq_read_start(mtq, MTQ_STAT);
+    return (s1 == SUCCESS && s2 == SUCCESS) ? SUCCESS : FAILURE;
 }

@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <math.h>
 
-#define GNC_MAX_DETUMBLE_RATE       2*PI
+#define GNC_MAX_DETUMBLE_RATE_RAD       2*PI
 
 // Modes for GNC Planner set mode
 typedef enum {
