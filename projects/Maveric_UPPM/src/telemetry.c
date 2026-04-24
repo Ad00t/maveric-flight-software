@@ -57,6 +57,6 @@ void tlm_beacon(tlm_s* tlm) {
     memcpy(&msg[l], &tlm->unexpected_detumble_count, 2); l += 2; 
     memcpy(&msg[l], &tlm->sunspin_count, 2); l += 2; 
 
-    sprintf(LOGBUF, "tlm_beacon: len=%u", l); log_info();
+    sprintf(LOGBUF, "tlm_beacon: len=%u ta=", l); log_info();
     mcp_dispatch(NODE, NODE_GS, 0, TLM, "tlm_beacon", msg, l);
 }

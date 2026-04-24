@@ -9,6 +9,7 @@
 #define NVG_MAX_ARG_SIZE        20
 #define NVG_MAX_PAYLOAD_LEN     7
 #define NVG_SENSOR_TABLE_LEN    21
+#define NVG_RBT_DOWNTIME        5000
 
 static char* NVG_ID_TO_TEXT[] = { 
     "NULL", "ACCELEROMETER", "MAGNETOMETER_CAL", "ORIENTATION", "GYROSCOPE_CAL", 

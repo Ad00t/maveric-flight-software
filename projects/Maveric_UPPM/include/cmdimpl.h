@@ -22,6 +22,7 @@ void cmdimpl_ppm_clear_sched(mcppkt_s* pkt);
 void cmdimpl_ppm_update_sched(mcppkt_s* pkt);
 
 void cmdimpl_tlm_get_data(mcppkt_s* pkt);
+void cmdimpl_tlm_beacon(mcppkt_s* pkt);
 
 void cmdimpl_flash_read(mcppkt_s* pkt);
 void cmdimpl_flash_write(mcppkt_s* pkt);
@@ -33,7 +34,7 @@ void cmdimpl_cfg_get(mcppkt_s* pkt);
 void cmdimpl_cfg_set_ll(mcppkt_s* pkt);
 void cmdimpl_cfg_set_ops(mcppkt_s* pkt);
 void cmdimpl_cfg_set_gsdelay(mcppkt_s* pkt);
-void cmdimpl_cfg_set_bcnper(mcppkt_s* pkt);
+void cmdimpl_cfg_set_bcnprd(mcppkt_s* pkt);
 void cmdimpl_cfg_load_dfl(mcppkt_s* pkt);
 void cmdimpl_cfg_load_flash(mcppkt_s* pkt);
 void cmdimpl_cfg_flush(mcppkt_s* pkt);

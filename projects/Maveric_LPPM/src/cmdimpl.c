@@ -66,14 +66,12 @@ void cmdimpl_init(void) {
     ht_set(ht, "mtq_read_1", (cmdimpl_f) cmdimpl_mtq_read_1);
     ht_set(ht, "mtq_get_1", (cmdimpl_f) cmdimpl_mtq_get_1);
     ht_set(ht, "mtq_set_1", (cmdimpl_f) cmdimpl_mtq_set_1);
-    ht_set(ht, "mtq_read_fast", (cmdimpl_f) cmdimpl_mtq_read_fast);
-    ht_set(ht, "mtq_get_fast", (cmdimpl_f) cmdimpl_mtq_get_fast);
-    ht_set(ht, "mtq_read_ctrl", (cmdimpl_f) cmdimpl_mtq_read_ctrl);
-    ht_set(ht, "mtq_get_ctrl", (cmdimpl_f) cmdimpl_mtq_get_ctrl);
-    ht_set(ht, "mtq_read_all", (cmdimpl_f) cmdimpl_mtq_read_all);
-    ht_set(ht, "mtq_get_all", (cmdimpl_f) cmdimpl_mtq_get_all);
+    ht_set(ht, "mtq_read_active", (cmdimpl_f) cmdimpl_mtq_read_active);
+    ht_set(ht, "mtq_get_active", (cmdimpl_f) cmdimpl_mtq_get_active);
     ht_set(ht, "mtq_read_hk", (cmdimpl_f) cmdimpl_mtq_read_hk);
     ht_set(ht, "mtq_get_hk", (cmdimpl_f) cmdimpl_mtq_get_hk);
+    ht_set(ht, "mtq_read_param", (cmdimpl_f) cmdimpl_mtq_read_param);
+    ht_set(ht, "mtq_get_param", (cmdimpl_f) cmdimpl_mtq_get_param);
     
     ht_set(ht, "nvg_heartbeat", (cmdimpl_f) cmdimpl_nvg_heartbeat);
     ht_set(ht, "nvg_reset", (cmdimpl_f) cmdimpl_nvg_reset);
@@ -473,11 +471,11 @@ void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
             memcpy(&res[l], &mtq_stat, 4); l += 4;
             res[l++] = (uint8_t)cfg->gyro_rate_src;
             res[l++] = (uint8_t)cfg->mag_src;
-            memcpy(&res[l], gyro_rate, sizeof(gyro_rate)); l += sizeof(gyro_rate);
-            memcpy(&res[l], mag, sizeof(mag)); l += sizeof(mag);
+            memcpy(&res[l], gyro_rate, 3*4); l += 3*4;      // Array is float[4], we only need the first 3
+            memcpy(&res[l], mag, 3*4); l += 3*4;
             memcpy(&res[l], mtq_dipole, sizeof(mtq_dipole)); l += sizeof(mtq_dipole);
             memcpy(&res[l], &adcs_temp, 4); l += 4;
-
+            
             mcp_respond(pkt, TLM, res, l);
             break;
         }
@@ -666,7 +664,7 @@ void cmdimpl_cfg_load_dfl(mcppkt_s* pkt) {
             flashmgr_config_load_defaults(&g_flashmgr);
             char res[8] = {0};
             sprintf(res, "%u", SUCCESS);
-            mcp_respond(pkt, RES, res);
+            mcp_respond(pkt, RES, (char*)res);
             break;
         }
     }
@@ -702,7 +700,7 @@ void cmdimpl_mtq_heartbeat(mcppkt_s* pkt) {
             mtq_check_heartbeat(&g_mtq);
             char res[8] = {0};
             sprintf(res, "%u", g_mtq.heartbeat);
-            mcp_respond(pkt, RES, res);
+            mcp_respond(pkt, RES, (char*)res);
             break;
         }
     }
@@ -836,11 +834,11 @@ void cmdimpl_mtq_set_1(mcppkt_s* pkt) {
     }
 }
 
-void cmdimpl_mtq_read_fast(mcppkt_s* pkt) {
+void cmdimpl_mtq_read_active(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case CMD: {
-            sprintf(LOGBUF, "cmdimpl_mtq_read_fast"); log_info();
-            status_e s = mtq_read_fast(&g_mtq); 
+            sprintf(LOGBUF, "cmdimpl_mtq_read_active"); log_info();
+            status_e s = mtq_read_active(&g_mtq); 
             char res[8] = {0};
             sprintf(res, "%u", s);
             mcp_respond(pkt, RES, res);
@@ -849,106 +847,26 @@ void cmdimpl_mtq_read_fast(mcppkt_s* pkt) {
     }
 }
 
-void cmdimpl_mtq_get_fast(mcppkt_s* pkt) {
+void cmdimpl_mtq_get_active(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case CMD: {
             char* p = pkt->args;
             uint8_t page = strtoul(p, &p, 10);
             char res[MCP_MAX_ARGS_LEN] = {0};
-            if (page > MTQ_NUM_FAST_REGS / MTQ_PAGE_SIZE) {
+            if (page > MTQ_NUM_ACTIVE_REGS / MTQ_PAGE_SIZE) {
                 sprintf(res, "%u %u", FAILURE, page);
                 mcp_respond(pkt, RES, res);
                 break;
             }
             uint8_t i1 = MTQ_PAGE_SIZE * page;
-            uint8_t i2 = minu8(i1 + MTQ_PAGE_SIZE, MTQ_NUM_FAST_REGS);
-            sprintf(LOGBUF, "cmdimpl_mtq_get_fast pg=%u i1=%u i2=%u", page, i1, i2); log_info();
+            uint8_t i2 = minu8(i1 + MTQ_PAGE_SIZE, MTQ_NUM_ACTIVE_REGS);
+            sprintf(LOGBUF, "cmdimpl_mtq_get_active pg=%u i1=%u i2=%u", page, i1, i2); log_info();
             uint16_t j = sprintf(res, "%u %u", SUCCESS, page);
             uint8_t i;
             for (i = i1; i < i2; i++) {
-                uint16_t key = MTQ_FAST_FRAME_REGS[i];
+                uint16_t key = MTQ_ACTIVE_REGS[i];
                 j += sprintf(&res[j], " %u,%u", key >> 8, key & 0xFF);
                 mtq_print_reg_data(&g_mtq, key, res, &j);
-            }
-            mcp_respond(pkt, RES, res); 
-            break;
-        }
-    }
-}
-
-void cmdimpl_mtq_read_ctrl(mcppkt_s* pkt) {
-    switch (pkt->ptype) {
-        case CMD: {
-            sprintf(LOGBUF, "cmdimpl_mtq_read_ctrl"); log_info();
-            status_e s = mtq_read_ctrl(&g_mtq);
-            char res[8] = {0};
-            sprintf(res, "%u", s);
-            mcp_respond(pkt, RES, res);
-            break;
-        }
-    }
-}
-
-void cmdimpl_mtq_get_ctrl(mcppkt_s* pkt) {
-    switch (pkt->ptype) {
-        case CMD: {
-            char* p = pkt->args;
-            uint8_t page = strtoul(p, &p, 10);
-            char res[MCP_MAX_ARGS_LEN] = {0};
-            if (page > MTQ_NUM_CTRL_REGS / MTQ_PAGE_SIZE) {
-                sprintf(res, "%u %u", FAILURE, page);
-                mcp_respond(pkt, RES, res);
-                break;
-            }
-            uint8_t i1 = MTQ_PAGE_SIZE * page;
-            uint8_t i2 = minu8(i1 + MTQ_PAGE_SIZE, MTQ_NUM_CTRL_REGS);
-            sprintf(LOGBUF, "cmdimpl_mtq_get_ctrl pg=%u i1=%u i2=%u", page, i1, i2); log_info();
-            uint16_t j = sprintf(res, "%u %u", SUCCESS, page);
-            uint8_t i;
-            for (i = i1; i < i2; i++) {
-                uint16_t key = MTQ_CTRL_FRAME_REGS[i];
-                j += sprintf(&res[j], " %u,%u", key >> 8, key & 0xFF);
-                mtq_print_reg_data(&g_mtq, key, res, &j);
-            }
-            mcp_respond(pkt, RES, res); 
-            break;
-        }
-    }
-}
-
-void cmdimpl_mtq_read_all(mcppkt_s* pkt) {
-    switch (pkt->ptype) {
-        case CMD: {
-            sprintf(LOGBUF, "cmdimpl_mtq_read_all"); log_info();
-            status_e s = mtq_read_all(&g_mtq); 
-            char res[8] = {0};
-            sprintf(res, "%u", s);
-            mcp_respond(pkt, RES, res); 
-            break;
-        }
-    }
-}
-
-void cmdimpl_mtq_get_all(mcppkt_s* pkt) {
-    switch (pkt->ptype) {
-        case CMD: {
-            char* p = pkt->args;
-            uint8_t page = strtoul(p, &p, 10);
-            char res[MCP_MAX_ARGS_LEN] = {0};
-            if (page > MTQ_REG_TABLE_LEN / MTQ_PAGE_SIZE) {
-                sprintf(res, "%u %u", FAILURE, page);
-                mcp_respond(pkt, RES, res);
-                break;
-            }
-            uint8_t i1 = MTQ_PAGE_SIZE * page;
-            uint8_t i2 = minu8(i1 + MTQ_PAGE_SIZE, MTQ_REG_TABLE_LEN);
-            sprintf(LOGBUF, "cmdimpl_mtq_get_all pg=%u i1=%u i2=%u", page, i1, i2); log_info();
-            uint16_t j = sprintf(res, "%u %u", SUCCESS, page);
-            uint8_t i;
-            for (i = i1; i < i2; i++) {
-                mtq_reg_s* reg = &g_mtq.reg_table[i];
-                j += sprintf(&res[j], " %u,%u", reg->midx, reg->idx);
-                mtq_print_reg_data(&g_mtq, reg, res, &j);
             }
             mcp_respond(pkt, RES, res); 
             break;
@@ -986,9 +904,50 @@ void cmdimpl_mtq_get_hk(mcppkt_s* pkt) {
             uint16_t j = sprintf(res, "%u %u", SUCCESS, page);
             uint8_t i;
             for (i = i1; i < i2; i++) {
-                mtq_reg_s* reg = &g_mtq.reg_table[i];
-                j += sprintf(&res[j], " %u,%u", reg->midx, reg->idx);
-                mtq_print_reg_data(&g_mtq, reg, res, &j);
+            uint16_t key = MTQ_HK_REGS[i];
+            j += sprintf(&res[j], " %u,%u", key >> 8, key & 0xFF);
+            mtq_print_reg_data(&g_mtq, key, res, &j);
+            }
+            mcp_respond(pkt, RES, res); 
+            break;
+        }
+    }
+}
+
+
+void cmdimpl_mtq_read_param(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            sprintf(LOGBUF, "cmdimpl_mtq_read_param"); log_info();
+            status_e s = mtq_read_param(&g_mtq);
+            char res[8] = {0};
+            sprintf(res, "%u", s);
+            mcp_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
+void cmdimpl_mtq_get_param(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            char* p = pkt->args;
+            uint8_t page = strtoul(p, &p, 10);
+            char res[MCP_MAX_ARGS_LEN] = {0};
+            if (page > MTQ_NUM_PARAM_REGS / MTQ_PAGE_SIZE) {
+                sprintf(res, "%u %u", FAILURE, page);
+                mcp_respond(pkt, RES, res);
+                break;
+            }
+            uint8_t i1 = MTQ_PAGE_SIZE * page;
+            uint8_t i2 = minu8(i1 + MTQ_PAGE_SIZE, MTQ_NUM_PARAM_REGS);
+            sprintf(LOGBUF, "cmdimpl_mtq_get_param pg=%u i1=%u i2=%u", page, i1, i2); log_info();
+            uint16_t j = sprintf(res, "%u %u", SUCCESS, page);
+            uint8_t i;
+            for (i = i1; i < i2; i++) {
+                uint16_t key = MTQ_PARAM_REGS[i];
+                j += sprintf(&res[j], " %u,%u", key >> 8, key & 0xFF);
+                mtq_print_reg_data(&g_mtq, key, res, &j);
             }
             mcp_respond(pkt, RES, res); 
             break;

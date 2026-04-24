@@ -140,25 +140,26 @@ void system_init(void) {
     systime_init(&g_irqmgr.ms, &g_rtc_time); // It doesn't look like the UPPM built in RTC works.
     
     // Submodules & services init
-    status_e s_flashmgr = flashmgr_init(&g_flashmgr);
-    status_e s_ax100 = ax100_init(&g_ax100, AX100_PORT);
-    status_e s_pldmgr = pldmgr_init(&g_pldmgr);
     mcpmgr_init(&g_mcpmgr);
     scheduler_init(&g_scheduler);
     tlm_init(&g_tlm);
+    status_e s_flashmgr = flashmgr_init(&g_flashmgr);
+    status_e s_ax100 = ax100_init(&g_ax100, AX100_PORT);
+    status_e s_pldmgr = pldmgr_init(&g_pldmgr);
     cmdimpl_init();
     hk_init();
 
     // Fetch time from LPPM
     mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "ppm_get_time", "");
 
-    // Check operations stage and schedule tasks accordingly
+    // Force switch to OPS_SAFE if we're still in OPS_INIT after 100 reboots
     config_s* cfg = &g_flashmgr.config;
-    if (g_flashmgr.rbt_cnt > 100 && cfg->ops_stage != OPS_SAFE && cfg->ops_stage != OPS_NOMINAL) {
+    if (g_flashmgr.rbt_cnt > 100 && cfg->ops_stage == OPS_INIT) {
         cfg->ops_stage = OPS_SAFE;
         flashmgr_config_flush(&g_flashmgr);
-        delay_ms(50);
     }
+
+    // Check operations stage and schedule tasks accordingly
     switch (cfg->ops_stage) {
         case OPS_INIT:
             mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_rst_ctn", "7199");
@@ -169,7 +170,7 @@ void system_init(void) {
         case OPS_NOMINAL: // Fallthrough
             ax100_set_power(&g_ax100, TRUE);
             scheduler_schedule_func_in(&g_scheduler, BCN_SCHED_ID, system_ops_transmit_beacon, 
-                                        30000, cfg->bcn_period, SCHEDULE_REPS_INFINITE);
+                                        30000, cfg->bcn_period, SCHEDULE_REPS_INFINITE); // Schedule 6
             scheduler_schedule_func_in(&g_scheduler, 7, system_ops_check_eps, 1*MS_PER_MIN, 1*MS_PER_MIN, SCHEDULE_REPS_INFINITE);
             break;
     }
@@ -195,16 +196,14 @@ void system_superloop(void) {
 
 void system_ops_transition_safe(void) {
     sprintf(LOGBUF, "system_ops_transition_safe"); log_info();
-    uint8_t i;
     config_s* cfg = &g_flashmgr.config;
+    uint8_t i;
     for (i = 0; i < 5; i++) {
         cfg->ops_stage = OPS_SAFE;
         flashmgr_config_flush(&g_flashmgr);
-        delay_ms(50);
         flashmgr_config_load_flash(&g_flashmgr);
-        delay_ms(50);
-        if (cfg->ops_stage == OPS_SAFE)
-            break;
+        if (cfg->ops_stage == OPS_SAFE) break;
+        else delay_ms(1000);
     }
     mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "ppm_reset", "");
     g_superloop_running = FALSE;    // Reset so init sees ops_stage=1 and runs deploy

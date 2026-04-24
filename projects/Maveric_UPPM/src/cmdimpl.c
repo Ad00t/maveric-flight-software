@@ -33,6 +33,7 @@ void cmdimpl_init() {
     ht_set(ht, "ppm_update_sched", (cmdimpl_f) cmdimpl_ppm_update_sched);
     
     ht_set(ht, "tlm_get_data", (cmdimpl_f) cmdimpl_tlm_get_data);
+    ht_set(ht, "tlm_beacon", (cmdimpl_f) cmdimpl_tlm_beacon);
 
     ht_set(ht, "flash_read", (cmdimpl_f) cmdimpl_flash_read);
     ht_set(ht, "flash_write", (cmdimpl_f) cmdimpl_flash_write);
@@ -44,7 +45,7 @@ void cmdimpl_init() {
     ht_set(ht, "cfg_set_ll", (cmdimpl_f) cmdimpl_cfg_set_ll);
     ht_set(ht, "cfg_set_ops", (cmdimpl_f) cmdimpl_cfg_set_ops);
     ht_set(ht, "cfg_set_gsdelay", (cmdimpl_f) cmdimpl_cfg_set_gsdelay);
-    ht_set(ht, "cfg_set_bcnper", (cmdimpl_f) cmdimpl_cfg_set_bcnper);
+    ht_set(ht, "cfg_set_bcnprd", (cmdimpl_f) cmdimpl_cfg_set_bcnprd);
     ht_set(ht, "cfg_load_dfl", (cmdimpl_f) cmdimpl_cfg_load_dfl);
     ht_set(ht, "cfg_load_flash", (cmdimpl_f) cmdimpl_cfg_load_flash);
     ht_set(ht, "cfg_flush", (cmdimpl_f) cmdimpl_cfg_flush);
@@ -372,7 +373,7 @@ void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
             sprintf(LOGBUF, "cmdimpl_tlm_get_data RES o=%u al=%u", pkt->orgn, pkt->args_len); log_info();
             uint8_t* p = pkt->args;
             switch (pkt->orgn) {
-                case NODE_LPPM:
+                case NODE_LPPM: {
                     memcpy(&g_tlm.lppm_rbt_cnt, p, 2); p += 2;
                     memcpy(&g_tlm.lppm_rbt_cause, p, 1); p += 1;
                     memcpy(&g_tlm.ertc_heartbeat, p, 1); p += 1;
@@ -390,7 +391,8 @@ void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
                     memcpy(g_tlm.mtq_dipole, p, sizeof(g_tlm.mtq_dipole)); p += sizeof(g_tlm.mtq_dipole);
                     memcpy(&g_tlm.temp_adcs, p, 4); p += 4;
                     break;
-                case NODE_EPS:
+                }
+                case NODE_EPS: {
                     memcpy(&g_tlm.i_bus, p, 2); p += 2;
                     memcpy(&g_tlm.i_batt, p, 2); p += 2;
                     memcpy(&g_tlm.v_bus, p, 2); p += 2;
@@ -401,11 +403,18 @@ void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
                     memcpy(&g_tlm.eps_mode, p, 2); p += 2;
                     g_tlm.eps_heartbeat_time = systime_epoch_ms();
                     break;
-                case NODE_HOLONAV: 
-                    break;
-                case NODE_ASTROBOARD:
-                    break;
+                }
             }  
+            break;
+        }
+    }
+}
+
+void cmdimpl_tlm_beacon(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            tlm_beacon(&g_tlm);
+            mcp_respond(pkt, RES, "1");
             break;
         }
     }
@@ -558,7 +567,7 @@ void cmdimpl_cfg_set_gsdelay(mcppkt_s* pkt) {
     }
 }
 
-void cmdimpl_cfg_set_bcnper(mcppkt_s* pkt) {
+void cmdimpl_cfg_set_bcnprd(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case CMD: {
             char* p = pkt->args;

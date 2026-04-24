@@ -3,6 +3,8 @@
 #include "uart.h"
 #include "systime.h"
 #include "common.h"
+#include "scheduler.h"
+#include "flashmgr.h"
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
@@ -63,6 +65,7 @@ int1 mtq_pkt_verify_csum(mtq_pkt_s* pkt) {
 status_e mtq_init(mtq_s* mtq, uint8_t port) {
     mtq->is_init = TRUE;
     mtq->port = port;
+    mtq->allow_comm = TRUE;
     memcpy(mtq->reg_table, MTQ_INIT_REG_TABLE, sizeof(MTQ_INIT_REG_TABLE));
     memset(mtq->reg_idx_map, 0, MTQ_MAP_COUNT * MTQ_MAX_IDX_COUNT * sizeof(mtq_reg_s*));
     mtq_pkt_init(&mtq->rcvpkt);
@@ -81,9 +84,10 @@ status_e mtq_init(mtq_s* mtq, uint8_t port) {
         reg->value_len = 4*reg->cnt / l;
         reg->value = calloc(reg->value_len, l);
     }
-    
+   
+    status_e s1 = mtq_reset(mtq);
     sprintf(LOGBUF, "mtq_init: port=%u", mtq->port); log_info();
-    return SUCCESS; 
+    return s1; 
 }
 
 void mtq_destroy(mtq_s* mtq) {
@@ -169,6 +173,7 @@ status_e mtq_print_reg_data(mtq_s* mtq, uint16_t key, char* out, uint16_t* j) {
 
 status_e mtq_read_start(mtq_s* mtq, mtq_reg_s* reg) {   
     if (!mtq->is_init) return FAILURE;
+    if (!mtq->allow_comm) return FAILURE;
     uint8_t w_buf[4];
     w_buf[0] = MTQ_HEAD_READ;
     w_buf[1] = reg->idx;
@@ -224,22 +229,24 @@ void mtq_read_complete(mtq_s* mtq) {
    
     uint16_t j = 0;
     j += sprintf(&LOGBUF[j], "mtq_read_complete: reg=(%u,%u) count=%u err=%u data=[",
-                 reg->midx, reg->idx, reg->cnt, rcvpkt->err); 
+                 rcvpkt->midx, rcvpkt->idx, rcvpkt->cnt, rcvpkt->err); 
     mtq_print_reg_data(mtq, reg, LOGBUF, &j); 
     j += sprintf(&LOGBUF[j], " ]"); log_trace();
 
-    // if (reg->midx == 0 && reg->idx == 136) {
-    //     j = sprintf(LOGBUF, "mtq_read_complete rate: len=%u [", n_body_bytes);
+    // uint16_t key = (((uint16_t)rcvpkt->midx << 8) | rcvpkt->idx);
+    // if (key == MTQ_MTQ || key == MTQ_RATE) {
+    //     j = sprintf(LOGBUF, "mtq_read_complete bytes: len=%u [", n_body_bytes);
     //     uint8_t i;
     //     for (i = 0; i < n_body_bytes; i++) {
     //         j += sprintf(&LOGBUF[j], " %02X", rcvpkt->data[i]);
     //     }
-    //     j += sprintf(&LOGBUF[j], " ]"); log_trace();
+    //     j += sprintf(&LOGBUF[j], " ]"); log_warn();
     // }
 }
 
 status_e mtq_write_start(mtq_s* mtq, mtq_reg_s* reg, void* data) {
     if (!mtq->is_init) return FAILURE;
+    if (!mtq->allow_comm) return FAILURE;
     uint8_t w_buf[MTQ_MAX_PKT_LEN] = {0};
     uint8_t n_body_bytes = 4*reg->cnt;
     uint8_t w_buf_len = 4 + n_body_bytes;
@@ -273,8 +280,6 @@ status_e mtq_write_start(mtq_s* mtq, uint16_t key, void* data) {
     return mtq_write_start(mtq, reg, data);
 }
 
-extern flashmgr_s g_flashmgr;
-
 void mtq_write_complete(mtq_s* mtq) {
     if (!mtq->is_init) return;
     mtq_pkt_s* rcvpkt = &mtq->rcvpkt;
@@ -302,19 +307,10 @@ void mtq_write_complete(mtq_s* mtq) {
     sprintf(LOGBUF, "mtq_write_complete: reg=(%u,%u) count=%u err=%u", 
             reg->midx, reg->idx, reg->cnt, rcvpkt->err); log_trace();
 
-    // Reset 
-    if ((((uint16_t)reg->midx << 8) | reg->idx) == MTQ_NVM) {
-        config_s* cfg = &g_flashmgr.config;
-        rtc_time_t rtc;
-        systime_rtc(&rtc);
-        mtq_set_datetime(mtq, &rtc);
-        mtq_write_start(mtq, MTQ_POINTING_AXIS, cfg->paxs);
-        mtq_write_start(mtq, MTQ_TLE, cfg->tle);
-    } else {
-        // Readback
-        mtq_read_start(mtq, reg);
-    }
+    // Readback
+    mtq_read_start(mtq, reg);
 }
+
 
 void mtq_parse_stream(mtq_s* mtq, ringbuf_s* irqbuf) {
     if (!mtq->is_init) return;
@@ -419,45 +415,40 @@ void mtq_check_heartbeat(mtq_s* mtq) {
 status_e mtq_reboot(mtq_s* mtq) {
     if (!mtq->is_init) return FAILURE;
     uint8_t req = 1;
-    delay_ms(100);
     status_e s = mtq_write_start(mtq, MTQ_NVM, &req);
     return s;
 }
 
+extern scheduler_s g_scheduler;
+extern flashmgr_s g_flashmgr;
+extern mtq_s g_mtq;
+
+void mtq_reset_part2(void) {
+    if (!g_mtq.is_init) return;
+    sprintf(LOGBUF, "mtq_reset_part2"); log_info();
+    g_mtq.allow_comm = TRUE;
+    config_s* cfg = &g_flashmgr.config;
+    rtc_time_t rtc;
+    systime_rtc(&rtc);
+    mtq_set_datetime(&g_mtq, &rtc);
+    mtq_write_start(&g_mtq, MTQ_POINTING_AXIS, cfg->paxs);
+    mtq_write_start(&g_mtq, MTQ_TLE, cfg->tle);
+}
+
 status_e mtq_reset(mtq_s* mtq) {
     if (!mtq->is_init) return FAILURE;
-    status_e s = mtq_reboot(mtq);
-    return s;
+    status_e s1 = mtq_reboot(&g_mtq);
+    mtq->allow_comm = FALSE;
+    status_e s2 = scheduler_schedule_func_in(&g_scheduler, 7, mtq_reset_part2, MTQ_RBT_DOWNTIME, 0, 1);
+    return (s1 == SUCCESS && s2 == SUCCESS) ? SUCCESS : FAILURE;
 }
 
-status_e mtq_read_fast(mtq_s* mtq) {
+status_e mtq_read_active(mtq_s* mtq) {
     if (!mtq->is_init) return FAILURE;
     uint8_t i;
     status_e s = SUCCESS;
-    for (i = 0; i < MTQ_NUM_FAST_REGS; i++) {
-        if (mtq_read_start(mtq, MTQ_FAST_FRAME_REGS[i]) == FAILURE)
-            s = FAILURE;
-    }
-    return s;
-}
-
-status_e mtq_read_ctrl(mtq_s* mtq) {
-    if (!mtq->is_init) return FAILURE;
-    uint8_t i;
-    status_e s = SUCCESS;
-    for (i = 0; i < MTQ_NUM_CTRL_REGS; i++) {
-        if (mtq_read_start(mtq, MTQ_CTRL_FRAME_REGS[i]) == FAILURE)
-            s = FAILURE;
-    }
-    return s;
-}
-
-status_e mtq_read_all(mtq_s* mtq) {
-    if (!mtq->is_init) return FAILURE;
-    uint8_t i;
-    status_e s = SUCCESS;
-    for (i = 0; i < MTQ_REG_TABLE_LEN; i++) {
-        if (mtq_read_start(mtq, &mtq->reg_table[i]) == FAILURE)
+    for (i = 0; i < MTQ_NUM_ACTIVE_REGS; i++) {
+        if (mtq_read_start(mtq, MTQ_ACTIVE_REGS[i]) == FAILURE)
             s = FAILURE;
     }
     return s;
@@ -469,6 +460,17 @@ status_e mtq_read_hk(mtq_s* mtq) {
     status_e s = SUCCESS;
     for (i = 0; i < MTQ_NUM_HK_REGS; i++) {
         if (mtq_read_start(mtq, MTQ_HK_REGS[i]) == FAILURE)
+            s = FAILURE;
+    }
+    return s;
+}
+
+status_e mtq_read_param(mtq_s* mtq) {
+    if (!mtq->is_init) return FAILURE;
+    uint8_t i;
+    status_e s = SUCCESS;
+    for (i = 0; i < MTQ_NUM_PARAM_REGS; i++) {
+        if (mtq_read_start(mtq, MTQ_PARAM_REGS[i]) == FAILURE)
             s = FAILURE;
     }
     return s;

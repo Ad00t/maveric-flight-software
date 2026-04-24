@@ -55,7 +55,6 @@ void nvg_pkt_clear(nvg_pkt_s* pkt) {
 }
 
 // Naviguider
-
 status_e nvg_init(nvg_s* nvg, uint8_t port) {
     nvg->is_init = TRUE;
     nvg->port = port;
@@ -67,18 +66,14 @@ status_e nvg_init(nvg_s* nvg, uint8_t port) {
         nvg->sensors[NVG_SENSOR_IDS[i]].data = (float*) calloc(nvg->sensors[NVG_SENSOR_IDS[i]].len, sizeof(float));
     }
   
-    status_e s1 = nvg_power(nvg);
-    status_e s2 = nvg_reset(nvg);
-    status_e s3 = nvg_start_hk(nvg); 
-
+    status_e s1 = nvg_reset(nvg);
     sprintf(LOGBUF, "nvg_init: port=%u", nvg->port); log_info();
-    return (s1 == SUCCESS && s2 == SUCCESS && s3 == SUCCESS) ? SUCCESS : FAILURE;
+    return (s1 == SUCCESS) ? SUCCESS : FAILURE;
 }
 
 void nvg_destroy(nvg_s* nvg) {
     if (!nvg->is_init) return;
     nvg_stop_all(nvg);
-    nvg_power(nvg);
     nvg_clear(nvg);
     uint8_t i;
     for (i = 0; i < NVG_NUM_SENSORS; i++) {
@@ -290,12 +285,23 @@ status_e nvg_power(nvg_s* nvg) {
     return s;
 }
 
+
+extern scheduler_s g_scheduler;
+extern nvg_s g_nvg;
+
+void nvg_reset_part2(void) {
+    nvg_start_hk(&g_nvg);
+}
+
 status_e nvg_reset(nvg_s* nvg) {
     if (!nvg->is_init) return FAILURE;
-    status_e s1 = nvg_send_cmd(nvg, "X");
-    status_e s2 = nvg_send_cmd(nvg, "V0");
-    status_e s3 = nvg_send_cmd(nvg, "M1\r");
-    status_e s4 = nvg_send_cmd(nvg, "m0");
-    status_e s5 = nvg_send_cmd(nvg, "D1");
-    return (s1 == SUCCESS && s2 == SUCCESS && s3 == SUCCESS && s4 == SUCCESS && s5 == SUCCESS) ? SUCCESS : FAILURE;
+    status_e s1 = nvg_power(nvg);
+    status_e s2 = nvg_send_cmd(&g_nvg, "X");
+    status_e s3 = nvg_send_cmd(&g_nvg, "V0");
+    status_e s4 = nvg_send_cmd(&g_nvg, "M1\r");
+    status_e s5 = nvg_send_cmd(&g_nvg, "m0");
+    status_e s6 = nvg_send_cmd(&g_nvg, "D1");
+    status_e s7 = scheduler_schedule_func_in(&g_scheduler, 8, nvg_reset_part2, NVG_RBT_DOWNTIME, 0, 1);
+    return (s1 == SUCCESS && s2 == SUCCESS && s3 == SUCCESS && s4 == SUCCESS && s5 == SUCCESS && s6 == SUCCESS && s7 == SUCCESS)
+            ? SUCCESS : FAILURE;
 }

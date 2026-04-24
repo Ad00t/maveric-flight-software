@@ -92,6 +92,7 @@ status_e flashmgr_config_load_flash(flashmgr_s* self) {
 	uint16_t record_size = sizeof(config_s);
     uint8_t crc_off = offsetof(config_s, crc);
     uint32_t curr_record_addr = flashmgr_find_last_record(self, CONFIG_ADDR, record_size, (uint8_t*)&self->config);
+    delay_ms(50);
     return check_crc16((uint8_t*)&self->config, crc_off, self->config.crc);
 }
 
@@ -100,5 +101,8 @@ status_e flashmgr_config_flush(flashmgr_s* self) {
     uint8_t crc_off = offsetof(config_s, crc);
 	self->config.crc = compute_crc16((uint8_t*)&self->config, crc_off);
     uint32_t curr_record_addr = flashmgr_find_last_record(self, CONFIG_ADDR, record_size, NULL);
-    return flashmgr_append_record(self, CONFIG_ADDR, curr_record_addr, (uint8_t*)&self->config, record_size);
+    delay_ms(50);
+    status_e s = flashmgr_append_record(self, CONFIG_ADDR, curr_record_addr, (uint8_t*)&self->config, record_size);
+    delay_ms(50);
+    return s;
 }

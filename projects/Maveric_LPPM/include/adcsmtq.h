@@ -3,6 +3,7 @@
 
 #include "interrupts.h"
 #include "ringbuf.h"
+#include "flashmgr.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <time.h>
@@ -16,6 +17,7 @@
 #define MTQ_MAP_COUNT           3       // 3
 #define MTQ_MAX_IDX_COUNT       256     // 256
 #define MTQ_PAGE_SIZE           5
+#define MTQ_RBT_DOWNTIME        10000
 
 // Modes for set mode
 #define MTQ_MODE_MANUAL             7 
@@ -222,6 +224,7 @@ typedef struct {
     mtq_pkt_s rcvpkt;
     uint8_t port;  
     status_e heartbeat;
+    int1 allow_comm;
     int1 is_init;
 } mtq_s;
 
@@ -270,20 +273,17 @@ void mtq_check_heartbeat(mtq_s* mtq);
 // Power cycle the unit
 status_e mtq_reboot(mtq_s* mtq);
 
-// Write 1 to nvm register to power cycle, then set datetime & TLE, set GNC curr_mode
+// Write 1 to nvm register to power cycle, then schedule setting datetime, pointing axis, TLE
 status_e mtq_reset(mtq_s* mtq);
 
-// Read fast frame registers
-status_e mtq_read_fast(mtq_s* mtq);
+// Read active frame registers
+status_e mtq_read_active(mtq_s* mtq);
 
-// Read control frame registers
-status_e mtq_read_ctrl(mtq_s* mtq);
-
-// Read all available registers
-status_e mtq_read_all(mtq_s* mtq);
-
-// Read housekeeping sensors
+// Read housekeeping registers 
 status_e mtq_read_hk(mtq_s* mtq);
+
+// Read param frame registers
+status_e mtq_read_param(mtq_s* mtq);
 
 // Set date and time registers (absolute time)
 status_e mtq_set_datetime(mtq_s* mtq, rtc_time_t* rtc);
@@ -405,22 +405,27 @@ int1 mtq_stat_parse_tumb(uint32_t stat);
 #define MTQ_IMU_BIAS            ((2 << 8) | 94)
 #define MTQ_NVM                 ((2 << 8) | 255)
 
-static const uint16_t MTQ_FAST_FRAME_REGS[] = {
-    MTQ_CONF, MTQ_TIME, MTQ_DATE, MTQ_MTQ_USER, MTQ_STAT, MTQ_ACT_ERR, MTQ_SEN_ERR,
-    MTQ_Q, MTQ_RATE, MTQ_LLA, MTQ_SV, MTQ_MAG, MTQ_MTQ, 
-    MTQ_ADCS_TMP, MTQ_CAL_MAG_B, MTQ_CAL_IMU_B
+static const uint16_t MTQ_ACTIVE_REGS[] = {
+    MTQ_TIME, MTQ_DATE, MTQ_MTQ_USER, MTQ_ACT_ERR, MTQ_SEN_ERR,
+    MTQ_Q, MTQ_LLA, MTQ_FSS_TMP1, MTQ_RATE, MTQ_MAG,
+    MTQ_SV, MTQ_MAG0_S, MTQ_FSS0_SV, MTQ_IMU0_S, MTQ_IMU1_S,
+    MTQ_PWR_VOL_5V, MTQ_PWR_CUR_5V, MTQ_PWR_VOL_3V, MTQ_PWR_CUR_5V, MTQ_CONF,
+    MTQ_FSS0_PDSUM, MTQ_MEAS_MAG_B, MTQ_MEAS_IMU_B
 };
-#define MTQ_NUM_FAST_REGS       sizeof(MTQ_FAST_FRAME_REGS) / sizeof(uint16_t)   
-
-static const uint16_t MTQ_CTRL_FRAME_REGS[] = {
-    MTQ_Q, MTQ_RATE, MTQ_LLA, MTQ_MAG, MTQ_IMU0_S, MTQ_IMU1_S, MTQ_MTQ, MTQ_MTQ_USER, 
-    MTQ_ADCS_TMP, MTQ_CAL_MAG_B, MTQ_CAL_IMU_B
-};
-#define MTQ_NUM_CTRL_REGS       sizeof(MTQ_CTRL_FRAME_REGS) / sizeof(uint16_t)   
+#define MTQ_NUM_ACTIVE_REGS       (sizeof(MTQ_ACTIVE_REGS) / sizeof(uint16_t))
 
 static const uint16_t MTQ_HK_REGS[] = {
-    MTQ_STAT, MTQ_RATE, MTQ_MAG, MTQ_MTQ, MTQ_ADCS_TMP, MTQ_CAL_MAG_B, MTQ_CAL_IMU_B
+    MTQ_STAT, MTQ_MTQ, MTQ_ADCS_TMP, MTQ_CAL_MAG_B, MTQ_CAL_IMU_B,
+    MTQ_RATE, MTQ_MAG
 };
-#define MTQ_NUM_HK_REGS         sizeof(MTQ_HK_REGS) / sizeof(uint16_t)   
+#define MTQ_NUM_HK_REGS       (sizeof(MTQ_HK_REGS) / sizeof(uint16_t))   
+
+static const uint16_t MTQ_PARAM_REGS[] = {
+    MTQ_POINTING_AXIS, MTQ_TLE, MTQ_MAG_MAT, MTQ_MAG_VEC, MTQ_MAG_INFO,
+    MTQ_MAG_STAT, MTQ_FSS_STAT, MTQ_IMU_STAT, MTQ_FSS_INFO, MTQ_IMU_INFO,
+    MTQ_MASS, MTQ_INE_TEN, MTQ_MAG0_ORIEN_BS, MTQ_FSS0_ORIEN_BS, MTQ_IMU0_ORIEN_BS,
+    MTQ_IMU1_ORIEN_BS, MTQ_IMU_BIAS, MTQ_NVM
+};
+#define MTQ_NUM_PARAM_REGS         (sizeof(MTQ_PARAM_REGS) / sizeof(uint16_t))   
 
 #endif

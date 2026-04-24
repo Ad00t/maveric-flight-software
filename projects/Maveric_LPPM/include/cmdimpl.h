@@ -50,14 +50,12 @@ void cmdimpl_mtq_set_mode(mcppkt_s* pkt);
 void cmdimpl_mtq_read_1(mcppkt_s* pkt);
 void cmdimpl_mtq_get_1(mcppkt_s* pkt);
 void cmdimpl_mtq_set_1(mcppkt_s* pkt);
-void cmdimpl_mtq_read_fast(mcppkt_s* pkt);
-void cmdimpl_mtq_get_fast(mcppkt_s* pkt);
-void cmdimpl_mtq_read_ctrl(mcppkt_s* pkt);
-void cmdimpl_mtq_get_ctrl(mcppkt_s* pkt);
-void cmdimpl_mtq_read_all(mcppkt_s* pkt);
-void cmdimpl_mtq_get_all(mcppkt_s* pkt);
+void cmdimpl_mtq_read_active(mcppkt_s* pkt);
+void cmdimpl_mtq_get_active(mcppkt_s* pkt);
 void cmdimpl_mtq_read_hk(mcppkt_s* pkt);
 void cmdimpl_mtq_get_hk(mcppkt_s* pkt);
+void cmdimpl_mtq_read_param(mcppkt_s* pkt);
+void cmdimpl_mtq_get_param(mcppkt_s* pkt);
 
 void cmdimpl_nvg_heartbeat(mcppkt_s* pkt);
 void cmdimpl_nvg_reset(mcppkt_s* pkt);
