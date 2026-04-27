@@ -425,6 +425,9 @@ void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
         case CMD: {
             sprintf(LOGBUF, "cmdimpl_tlm_get_data CMD"); log_info();
             char res[MCP_MAX_ARGS_LEN] = {0};
+            
+            uint64_t now = systime_epoch_ms();
+            uint32_t time_to_rst = g_scheduler.id_map[SCHED_ID_PPM_RST]->next_release - now;
 
             uint32_t mtq_stat = 0;
             mtq_get_data(&g_mtq, MTQ_STAT, &mtq_stat);
@@ -461,6 +464,7 @@ void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
             uint8_t l = 0;
             memcpy(&res[l], &g_flashmgr.rbt_cnt, 2); l += 2;
             memcpy(&res[l], &g_rbt_cause, 1); l += 1;
+            memcpy(&res[l], &time_to_rst, 4); l += 4;
             memcpy(&res[l], &g_ertc.heartbeat, 1); l += 1;
             memcpy(&res[l], &g_mtq.heartbeat, 1); l += 1;
             memcpy(&res[l], &g_nvg.heartbeat, 1); l += 1;
@@ -853,7 +857,7 @@ void cmdimpl_mtq_get_active(mcppkt_s* pkt) {
             char* p = pkt->args;
             uint8_t page = strtoul(p, &p, 10);
             char res[MCP_MAX_ARGS_LEN] = {0};
-            if (page > MTQ_NUM_ACTIVE_REGS / MTQ_PAGE_SIZE) {
+            if (page >= MTQ_NUM_ACTIVE_REGS / MTQ_PAGE_SIZE) {
                 sprintf(res, "%u %u", FAILURE, page);
                 mcp_respond(pkt, RES, res);
                 break;
@@ -893,7 +897,7 @@ void cmdimpl_mtq_get_hk(mcppkt_s* pkt) {
             char* p = pkt->args;
             uint8_t page = strtoul(p, &p, 10);
             char res[MCP_MAX_ARGS_LEN] = {0};
-            if (page > MTQ_NUM_HK_REGS / MTQ_PAGE_SIZE) {
+            if (page >= MTQ_NUM_HK_REGS / MTQ_PAGE_SIZE) {
                 sprintf(res, "%u %u", FAILURE, page);
                 mcp_respond(pkt, RES, res);
                 break;
@@ -934,7 +938,7 @@ void cmdimpl_mtq_get_param(mcppkt_s* pkt) {
             char* p = pkt->args;
             uint8_t page = strtoul(p, &p, 10);
             char res[MCP_MAX_ARGS_LEN] = {0};
-            if (page > MTQ_NUM_PARAM_REGS / MTQ_PAGE_SIZE) {
+            if (page >= MTQ_NUM_PARAM_REGS / MTQ_PAGE_SIZE) {
                 sprintf(res, "%u %u", FAILURE, page);
                 mcp_respond(pkt, RES, res);
                 break;

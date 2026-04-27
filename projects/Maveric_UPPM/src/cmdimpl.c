@@ -376,6 +376,7 @@ void cmdimpl_tlm_get_data(mcppkt_s* pkt) {
                 case NODE_LPPM: {
                     memcpy(&g_tlm.lppm_rbt_cnt, p, 2); p += 2;
                     memcpy(&g_tlm.lppm_rbt_cause, p, 1); p += 1;
+                    memcpy(&g_tlm.lppm_time_to_rst, p, 4); p += 4;
                     memcpy(&g_tlm.ertc_heartbeat, p, 1); p += 1;
                     memcpy(&g_tlm.mtq_heartbeat, p, 1); p += 1;
                     memcpy(&g_tlm.nvg_heartbeat, p, 1); p += 1;
@@ -573,7 +574,7 @@ void cmdimpl_cfg_set_bcnprd(mcppkt_s* pkt) {
             char* p = pkt->args;
             config_s* cfg = &g_flashmgr.config;
             cfg->bcn_period = (uint32_t) strtoul(p, &p, 10);
-            schedtask_s* st = g_scheduler.id_map[BCN_SCHED_ID]; 
+            schedtask_s* st = g_scheduler.id_map[SCHED_ID_BEACON]; 
             char res[8] = {0};
             if (st != NULL) {
                 st->period_ms = cfg->bcn_period;

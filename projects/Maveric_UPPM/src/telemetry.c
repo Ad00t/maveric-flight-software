@@ -28,6 +28,8 @@ void tlm_beacon(tlm_s* tlm) {
     memcpy(&msg[l], &tlm->lppm_rbt_cause, 1); l += 1; 
     memcpy(&msg[l], &tlm->uppm_rbt_cnt, 2); l += 2; 
     memcpy(&msg[l], &tlm->uppm_rbt_cause, 1); l += 1; 
+    memcpy(&msg[l], &tlm->lppm_time_to_rst, 4); l += 4; 
+    memcpy(&msg[l], &tlm->uppm_time_to_rst, 4); l += 4; 
     memcpy(&msg[l], &tlm->ertc_heartbeat, 1); l += 1; 
     memcpy(&msg[l], &tlm->mtq_heartbeat, 1); l += 1; 
     memcpy(&msg[l], &tlm->nvg_heartbeat, 1); l += 1; 
@@ -57,6 +59,6 @@ void tlm_beacon(tlm_s* tlm) {
     memcpy(&msg[l], &tlm->unexpected_detumble_count, 2); l += 2; 
     memcpy(&msg[l], &tlm->sunspin_count, 2); l += 2; 
 
-    sprintf(LOGBUF, "tlm_beacon: len=%u ta=", l); log_info();
+    sprintf(LOGBUF, "tlm_beacon: len=%u", l); log_info();
     mcp_dispatch(NODE, NODE_GS, 0, TLM, "tlm_beacon", msg, l);
 }

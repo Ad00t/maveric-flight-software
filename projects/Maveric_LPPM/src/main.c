@@ -50,6 +50,7 @@
 
 #include "nodes.h"
 #define NODE                NODE_LPPM 
+#define SCHED_ID_PPM_RST    3
 
 // Module includes (.c necessary)
 

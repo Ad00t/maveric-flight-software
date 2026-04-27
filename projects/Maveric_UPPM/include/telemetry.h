@@ -13,6 +13,8 @@ typedef struct {
     uint8_t lppm_rbt_cause;             // LPPM
     uint16_t uppm_rbt_cnt;              // UPPM
     uint8_t uppm_rbt_cause;             // UPPM
+    uint32_t lppm_time_to_rst;          // LPPM
+    uint32_t uppm_time_to_rst;          // UPPM
     uint8_t ertc_heartbeat;             // LPPM
     uint8_t mtq_heartbeat;              // LPPM
     uint8_t nvg_heartbeat;              // LPPM

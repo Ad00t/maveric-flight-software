@@ -24,10 +24,10 @@ void hk_init(void) {
     scheduler_schedule_func_in(&g_scheduler, 0, hk_get_ertc_time, 2000, 500, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 1, hk_log, 2500, 1000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 2, hk_systime_sync, 5000, 42000, SCHEDULE_REPS_INFINITE);
-    scheduler_schedule_func_in(&g_scheduler, 3, hk_heartbeats, 4000, 5000, SCHEDULE_REPS_INFINITE);
-    scheduler_schedule_func_in(&g_scheduler, 4, hk_read_sensors, 3000, 5000, SCHEDULE_REPS_INFINITE);
-    scheduler_schedule_func_in(&g_scheduler, 5, hk_gnc_step, 4000, 10000, SCHEDULE_REPS_INFINITE);
-    // scheduler_schedule_func_in(&g_scheduler, 6, hk_ppm_reset, 4*MS_PER_MIN, 0, 1);       // 120 min
+    scheduler_schedule_func_in(&g_scheduler, SCHED_ID_PPM_RST, hk_ppm_reset, 4*MS_PER_MIN, 0, 1);       // 120 min
+    scheduler_schedule_func_in(&g_scheduler, 4, k_heartbeats, 4000, 5000, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 5, hk_read_sensors, 3000, 5000, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 6, hk_gnc_step, 4000, 10000, SCHEDULE_REPS_INFINITE);
 }
 
 // HOUSEKEEPING FUNCTIONS
@@ -41,6 +41,11 @@ void hk_systime_sync(void) {
     char req[MCP_MAX_ARGS_LEN] = {0};
     systime_str(req);
     mcp_dispatch(NODE, NODE_UPPM, 0, CMD, "ppm_set_time", req);
+}
+
+void hk_ppm_reset(void) {
+    sprintf(LOGBUF, "SCHEDULED RESET"); log_info();
+    g_superloop_running = FALSE;
 }
 
 void hk_log(void) {
@@ -74,8 +79,4 @@ void hk_gnc_step(void) {
             break;
     }
     gnc_step(&g_gnc, &g_mtq, gyro_rate);
-}
-
-void hk_ppm_reset(void) {
-    g_superloop_running = FALSE;
 }

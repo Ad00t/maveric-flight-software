@@ -51,7 +51,8 @@
 #include "nodes.h"
 #define UPPER_PPM
 #define NODE                NODE_UPPM 
-#define BCN_SCHED_ID        6
+#define SCHED_ID_PPM_RST    3
+#define SCHED_ID_BEACON     6
 
 // Module includes (.c necessary)
 
@@ -166,10 +167,12 @@ void system_init(void) {
             scheduler_schedule_func_in(&g_scheduler, 5, system_ops_transition_safe, 1*MS_PER_MIN, 0, 1);     // 45 min
             break;
         case OPS_SAFE:
+            delay_ms(20000);
+            sprintf(LOGBUF, "DEPLOYING"); log_info();
             // mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_burn", "5");
         case OPS_NOMINAL: // Fallthrough
             ax100_set_power(&g_ax100, TRUE);
-            scheduler_schedule_func_in(&g_scheduler, BCN_SCHED_ID, system_ops_transmit_beacon, 
+            scheduler_schedule_func_in(&g_scheduler, SCHED_ID_BEACON, system_ops_transmit_beacon, 
                                         30000, cfg->bcn_period, SCHEDULE_REPS_INFINITE); // Schedule 6
             scheduler_schedule_func_in(&g_scheduler, 7, system_ops_check_eps, 1*MS_PER_MIN, 1*MS_PER_MIN, SCHEDULE_REPS_INFINITE);
             break;

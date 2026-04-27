@@ -4,7 +4,7 @@
 #include "mcppkt.h"
 #include <stdint.h>
 
-#define SCHEDULER_MAX_FUNC_TASKS        8 
+#define SCHEDULER_MAX_FUNC_TASKS        12 
 #define SCHEDULER_MAX_CMD_TASKS         4
 #define SCHEDULER_MAX_TASKS             SCHEDULER_MAX_CMD_TASKS + SCHEDULER_MAX_FUNC_TASKS
 #define SCHEDULER_MAX_IDS               32

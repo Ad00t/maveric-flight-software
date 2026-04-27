@@ -22,7 +22,7 @@ void hk_init(void) {
     scheduler_schedule_func_in(&g_scheduler, 0, hk_get_rtc_time, 2000, 500, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 1, hk_log, 2500, 1000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 2, hk_update_tlm, 5000, 10000, SCHEDULE_REPS_INFINITE);
-    // scheduler_schedule_func_in(&g_scheduler, 3, hk_ppm_reset, 4*MS_PER_MIN, 0, 1);     // 120 min
+    scheduler_schedule_func_in(&g_scheduler, SCHED_ID_PPM_RST, hk_ppm_reset, 4*MS_PER_MIN, 0, 1);     // 120 min
 }
 
 // HOUSEKEEPING FUNCTIONS
@@ -41,17 +41,20 @@ void hk_log(void) {
 }
 
 void hk_update_tlm(void) {
+    uint64_t now = systime_epoch_ms();
     g_tlm.ops_stage = g_flashmgr.config.ops_stage;
     g_tlm.uppm_rbt_cnt = g_flashmgr.rbt_cnt;
     g_tlm.uppm_rbt_cause = g_rbt_cause;
+    g_tlm.uppm_time_to_rst = (g_scheduler.id_map[SCHED_ID_PPM_RST]->next_release - now);
     g_tlm.hn_state = g_pldmgr.hn_state;
     g_tlm.ab_state = g_pldmgr.ab_state;
-    g_tlm.eps_heartbeat = (systime_epoch_ms() - g_tlm.eps_heartbeat_time <= 11000);
+    g_tlm.eps_heartbeat = (now - g_tlm.eps_heartbeat_time <= 11000);
 
     mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "tlm_get_data", "");
     mcp_dispatch(NODE, NODE_EPS, 0, CMD, "tlm_get_data", "");
 }
 
 void hk_ppm_reset(void) {
+    sprintf(LOGBUF, "SCHEDULED RESET"); log_info();
     g_superloop_running = FALSE;
 }
