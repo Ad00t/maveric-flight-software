@@ -141,7 +141,7 @@ void system_init(void) {
     mcpmgr_init(&g_mcpmgr);
     scheduler_init(&g_scheduler);
     gnc_init(&g_gnc);
-    status_e s_flashmgr = flashmgr_init(&g_flashmgr);
+    status_e s_flashmgr = flashmgr_init(&g_flashmgr, &g_scheduler);
     status_e s_mtq = mtq_init(&g_mtq, MTQ_PORT);
     status_e s_nvg = nvg_init(&g_nvg, NVG_PORT);
     cmdimpl_init();

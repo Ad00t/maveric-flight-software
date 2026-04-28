@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "flash.h"
+#include "scheduler.h"
 
 //========================================
 //    		 	Address Locations
@@ -10,6 +11,7 @@
 #define RESERVED_ADDR                   0x000000
 #define RBT_CNT_ADDR                    0x010000
 #define CONFIG_ADDR                     0x030000
+#define SCHEDULES_ADDR                  0x050000
 #define SWAP_ADDR                       0x7FF000
 #define ADDRESS_OUT_OF_BOUNDS           0x800000
 
@@ -18,7 +20,8 @@
 //========================================
 #define RESERVED_ALLOC_SIZE             0x010000
 #define RBT_CNT_ALLOC_SIZE              0x020000
-#define CONFIG_ALLOC_SIZE               0x7CF000
+#define CONFIG_ALLOC_SIZE               0x020000
+#define SCHEDULES_ALLOC_SIZE            0x7AF000
 #define SWAP_ALLOC_SIZE                 0x001000
 
 typedef enum {
@@ -54,7 +57,7 @@ typedef struct {
 } flashmgr_s;
 
 // Initialize flashmgr and config
-status_e flashmgr_init(flashmgr_s* self);
+status_e flashmgr_init(flashmgr_s* self, scheduler_s* scheduler);
 
 // Reboot counter manipulation
 status_e flashmgr_increment_rbt_cnt(flashmgr_s* self);
@@ -64,5 +67,9 @@ status_e flashmgr_reset_rbt_cnt(flashmgr_s* self);
 void flashmgr_config_load_defaults(flashmgr_s* self);
 status_e flashmgr_config_load_flash(flashmgr_s* self);
 status_e flashmgr_config_flush(flashmgr_s* self);
+
+// Flashed schedules
+status_e flashmgr_schedules_load_flash(flashmgr_s* self, scheduler_s* scheduler);
+status_e flashmgr_schedules_flush(flashmgr_s* self, scheduler_s* scheduler);
 
 #endif

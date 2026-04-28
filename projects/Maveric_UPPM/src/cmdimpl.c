@@ -353,15 +353,9 @@ void cmdimpl_ppm_update_sched(mcppkt_s* pkt) {
             uint16_t remaining_reps = strtoul(p, &p, 10);
             sprintf(LOGBUF, "cmdimpl_ppm_update_sched id=%u p=%u r=%u", sched_id, period_ms, remaining_reps); log_info();
             char res[MCP_MAX_ARGS_LEN] = {0};
-            schedtask_s* st = g_scheduler.id_map[sched_id]; 
-            if (st->id == sched_id) {
-                st->period_ms = period_ms;
-                st->remaining_reps = remaining_reps;
-                sprintf(res, "%u %u %Lu %u", SUCCESS, sched_id, period_ms, remaining_reps);
-            } else {
-                sprintf(res, "%u %u %Lu %u", FAILURE, sched_id, period_ms, remaining_reps);
-            }
-            mcp_respond(pkt, RES, (char*)res);
+            status_e s = scheduler_update_task(&g_scheduler, sched_id, period_ms, remaining_reps);
+            sprintf(res, "%u %u %Lu %u", s, sched_id, period_ms, remaining_reps);
+            mcp_respond(pkt, RES, res);
             break;
         }
     }

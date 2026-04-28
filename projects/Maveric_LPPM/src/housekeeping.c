@@ -25,7 +25,7 @@ void hk_init(void) {
     scheduler_schedule_func_in(&g_scheduler, 1, hk_log, 2500, 1000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 2, hk_systime_sync, 5000, 42000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, SCHED_ID_PPM_RST, hk_ppm_reset, 4*MS_PER_MIN, 0, 1);       // 120 min
-    scheduler_schedule_func_in(&g_scheduler, 4, k_heartbeats, 4000, 5000, SCHEDULE_REPS_INFINITE);
+    scheduler_schedule_func_in(&g_scheduler, 4, hk_heartbeats, 4000, 5000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 5, hk_read_sensors, 3000, 5000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 6, hk_gnc_step, 4000, 10000, SCHEDULE_REPS_INFINITE);
 }
@@ -37,7 +37,9 @@ void hk_get_ertc_time(void) {
 }
 
 void hk_systime_sync(void) {
+    uint64_t oldtime = systime_epoch_ms();
     systime_sync();
+    scheduler_refresh_all(&g_scheduler, oldtime);
     char req[MCP_MAX_ARGS_LEN] = {0};
     systime_str(req);
     mcp_dispatch(NODE, NODE_UPPM, 0, CMD, "ppm_set_time", req);

@@ -54,6 +54,9 @@ status_e scheduler_deschedule(scheduler_s* s, uint8_t id);
 status_e scheduler_reschedule_at(scheduler_s*, uint8_t id, rtc_time_t rtc);
 status_e scheduler_reschedule_in(scheduler_s*, uint8_t id, uint32_t start_delay_ms);
 
+// Change parameters of a schedule
+status_e scheduler_update_task(scheduler_s* s, uint8_t id, uint32_t period_ms, uint16_t remaining_reps);
+
 // Find the scheduled task with this id and clear it
 status_e scheduler_clear_task(scheduler_s* s, uint8_t id);
 
@@ -81,5 +84,8 @@ status_e scheduler_schedule_cmd_at(scheduler_s* s, uint8_t id, mcppkt_s* p, rtc_
 status_e scheduler_schedule_func_in(scheduler_s* s, uint8_t id, schedfunc_f func, uint32_t start_delay_ms, uint32_t period_ms, uint16_t reps);
 // The command version
 status_e scheduler_schedule_cmd_in(scheduler_s* s, uint8_t id, mcppkt_s* p, uint32_t start_delay_ms, uint32_t period_ms, uint16_t reps);
+
+// Writes cmd schedules into a byte string that can be written to flash
+status_e scheduler_get_flash_bytes(scheduler_s* s);
 
 #endif // !__SCHEDULER_H__

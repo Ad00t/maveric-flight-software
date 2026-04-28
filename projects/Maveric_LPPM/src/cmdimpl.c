@@ -367,14 +367,8 @@ void cmdimpl_ppm_update_sched(mcppkt_s* pkt) {
             uint16_t remaining_reps = strtoul(p, &p, 10);
             sprintf(LOGBUF, "cmdimpl_ppm_update_sched id=%u p=%u r=%u", sched_id, period_ms, remaining_reps); log_info();
             char res[MCP_MAX_ARGS_LEN] = {0};
-            schedtask_s* st = g_scheduler.id_map[sched_id]; 
-            if (st->id == sched_id) {
-                st->period_ms = period_ms;
-                st->remaining_reps = remaining_reps;
-                sprintf(res, "%u %u %Lu %u", SUCCESS, sched_id, period_ms, remaining_reps);
-            } else {
-                sprintf(res, "%u %u %Lu %u", FAILURE, sched_id, period_ms, remaining_reps);
-            }
+            status_e s = scheduler_update_task(&g_scheduler, sched_id, period_ms, remaining_reps);
+            sprintf(res, "%u %u %Lu %u", s, sched_id, period_ms, remaining_reps);
             mcp_respond(pkt, RES, res);
             break;
         }
@@ -573,7 +567,7 @@ void cmdimpl_flash_read_prot(mcppkt_s* pkt) {
             char res[32] = {0};
             sprintf(res, "%u 0x%02X%02X%02X %u", 
                     SUCCESS, make8(addr, 2), make8(addr, 1), make8(addr, 0), sp);
-            mcp_respond(pkt, RES, res);
+            mcp_respond(pkt, RES, (char*)res);
             break;
         }
     }
@@ -607,7 +601,7 @@ void cmdimpl_cfg_set_ll(mcppkt_s* pkt) {
             cfg->log_level = strtoul(p, &p, 10);
             char res[8] = {0};
             sprintf(res, "%u", SUCCESS);
-            mcp_respond(pkt, RES, res);
+            mcp_respond(pkt, RES, (char*)res);
             break;
         }
     }

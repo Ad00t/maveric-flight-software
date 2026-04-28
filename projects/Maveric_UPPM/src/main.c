@@ -144,7 +144,7 @@ void system_init(void) {
     mcpmgr_init(&g_mcpmgr);
     scheduler_init(&g_scheduler);
     tlm_init(&g_tlm);
-    status_e s_flashmgr = flashmgr_init(&g_flashmgr);
+    status_e s_flashmgr = flashmgr_init(&g_flashmgr, &g_scheduler);
     status_e s_ax100 = ax100_init(&g_ax100, AX100_PORT);
     status_e s_pldmgr = pldmgr_init(&g_pldmgr);
     cmdimpl_init();
@@ -173,7 +173,7 @@ void system_init(void) {
         case OPS_NOMINAL: // Fallthrough
             ax100_set_power(&g_ax100, TRUE);
             scheduler_schedule_func_in(&g_scheduler, SCHED_ID_BEACON, system_ops_transmit_beacon, 
-                                        30000, cfg->bcn_period, SCHEDULE_REPS_INFINITE); // Schedule 6
+                                       30000, cfg->bcn_period, SCHEDULE_REPS_INFINITE); // Schedule 6
             scheduler_schedule_func_in(&g_scheduler, 7, system_ops_check_eps, 1*MS_PER_MIN, 1*MS_PER_MIN, SCHEDULE_REPS_INFINITE);
             break;
     }

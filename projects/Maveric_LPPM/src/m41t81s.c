@@ -42,8 +42,8 @@ status_e ertc_get_time(ertc_s* ertc) {
         ertc->time.tm_year = bcdtohex(i2c_read(0)& 0xff); 	// year, w/NOACK
         i2c_stop();
         
-        int1 valid = (ertc->time.tm_hour <= 23 && ertc->time.tm_min <= 59 && ertc->time.tm_sec <= 59
-                        && ertc->time.tm_mon > 0 && ertc->time.tm_mday > 0); 
+        int1 valid = (ertc->time.tm_hour <= 23 && ertc->time.tm_min <= 59 && ertc->time.tm_sec <= 59);
+
         if (valid) {
             rtc_write(&ertc->time);
         } else {

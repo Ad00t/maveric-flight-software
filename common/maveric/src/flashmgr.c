@@ -1,20 +1,24 @@
 #include "flashmgr.h"
 #include "flash.h"
+#include "scheduler.h"
+#include "mcpmgr.h"
 #include <stdint.h>
 
 #module
 
-status_e flashmgr_init(flashmgr_s* self) {
+status_e flashmgr_init(flashmgr_s* self, scheduler_s* scheduler) {
 	memset(self, 0, sizeof(flashmgr_s));
     status_e s1 = flashmgr_increment_rbt_cnt(self);
     flashmgr_config_load_defaults(self);
     status_e s2 = flashmgr_config_load_flash(self);
-    return (s1 == SUCCESS && s2 == SUCCESS) ? SUCCESS : FAILURE;
+    status_e s3 = flashmgr_schedules_load_flash(self, scheduler);
+    // status_e s3 = SUCCESS;
+    return (s1 == SUCCESS && s2 == SUCCESS && s3 == SUCCESS) ? SUCCESS : FAILURE;
 }
 
-uint32_t flashmgr_find_last_record(flashmgr_s* self, uint32_t start_addr, uint16_t record_size, uint8_t* out) {
+uint32_t flashmgr_find_last_record(flashmgr_s* self, uint32_t start_addr, uint8_t* out, uint16_t record_size) {
     uint32_t i;
-    for (i = 0; i <= FLASH_BLOCK_SIZE - record_size; i += record_size) {
+    for (i = 0; i <= FLASH_SECTOR_SIZE - record_size; i += record_size) {
         if (CheckFlashEmpty(start_addr + i, record_size)) {
             break;
         }
@@ -31,6 +35,7 @@ uint32_t flashmgr_find_last_record(flashmgr_s* self, uint32_t start_addr, uint16
         flashRead(record_addr, record_size, out);
     }
 
+    delay_ms(50);
     return record_addr;
 }
 
@@ -46,19 +51,24 @@ status_e flashmgr_append_record(flashmgr_s* self, uint32_t start_addr, uint32_t 
         new_addr = record_addr + record_size;
     }
 
-    if (new_addr > start_addr + FLASH_BLOCK_SIZE - record_size) {
+    if (new_addr > start_addr + FLASH_SECTOR_SIZE - record_size) {
         uint16_t b = FlashAddrToBlock(start_addr);
-        flashEraseBlockByNumber(b);
+        uint8_t i;
+        for (i = 0; i < FLASH_SECTOR_SIZE / FLASH_BLOCK_SIZE; i++) {
+            flashEraseBlockByNumber(b+i);
+        }
         new_addr = start_addr;
     }
 
-    return flashWriteSafe(new_addr, record_size, new_record, start_addr,
-                          start_addr + FLASH_BLOCK_SIZE - 1);
+    status_e s = flashWriteSafe(new_addr, record_size, new_record, start_addr,
+                          start_addr + FLASH_SECTOR_SIZE - 1);
+    delay_ms(50);
+    return s;
 }
 
 status_e flashmgr_increment_rbt_cnt(flashmgr_s* self) {
     uint8_t record_size = sizeof(self->rbt_cnt);
-    uint32_t curr_record_addr = flashmgr_find_last_record(self, RBT_CNT_ADDR, record_size, (uint8_t*)&self->rbt_cnt);
+    uint32_t curr_record_addr = flashmgr_find_last_record(self, RBT_CNT_ADDR, (uint8_t*)&self->rbt_cnt, record_size);
 
 	// Increment the counter
 	self->rbt_cnt++; // Wraps to 0 automatically
@@ -91,18 +101,54 @@ status_e flashmgr_config_load_flash(flashmgr_s* self) {
     // return SUCCESS;
 	uint16_t record_size = sizeof(config_s);
     uint8_t crc_off = offsetof(config_s, crc);
-    uint32_t curr_record_addr = flashmgr_find_last_record(self, CONFIG_ADDR, record_size, (uint8_t*)&self->config);
-    delay_ms(50);
-    return check_crc16((uint8_t*)&self->config, crc_off, self->config.crc);
+    uint8_t* data_ptr = (uint8_t*)&self->config;
+    uint32_t curr_record_addr = flashmgr_find_last_record(self, CONFIG_ADDR, data_ptr, record_size);
+    return check_crc16(data_ptr, crc_off, self->config.crc);
 }
 
 status_e flashmgr_config_flush(flashmgr_s* self) {
 	uint16_t record_size = sizeof(config_s);
     uint8_t crc_off = offsetof(config_s, crc);
+    uint8_t* data_ptr = (uint8_t*)&self->config;
 	self->config.crc = compute_crc16((uint8_t*)&self->config, crc_off);
-    uint32_t curr_record_addr = flashmgr_find_last_record(self, CONFIG_ADDR, record_size, NULL);
-    delay_ms(50);
-    status_e s = flashmgr_append_record(self, CONFIG_ADDR, curr_record_addr, (uint8_t*)&self->config, record_size);
-    delay_ms(50);
+    uint32_t curr_record_addr = flashmgr_find_last_record(self, CONFIG_ADDR, NULL, record_size);
+    status_e s = flashmgr_append_record(self, CONFIG_ADDR, curr_record_addr, data_ptr, record_size);
+    return s;
+}
+
+status_e flashmgr_schedules_load_flash(flashmgr_s* self, scheduler_s* scheduler) {
+    // return SUCCESS;
+	uint16_t record_size = SCHEDULER_MAX_CMD_TASKS * (sizeof(schedtask_s) + sizeof(mcppkt_s));
+    uint8_t data_ptr[1024] = {0};
+    uint32_t curr_record_addr = flashmgr_find_last_record(self, SCHEDULES_ADDR, data_ptr, record_size);
+    if (CheckFlashEmpty(curr_record_addr, record_size)) {
+        return SUCCESS;
+    }
+    uint8_t i;
+    for (i = 0; i < SCHEDULER_MAX_CMD_TASKS; i++) {
+        uint16_t i_sched_start = i*(sizeof(schedtask_s)+sizeof(mcppkt_s)); 
+        schedtask_s* st_ptr = &scheduler->tasks[SCHEDULER_MAX_FUNC_TASKS + i]; 
+        mcppkt_s* cmd_ptr = &scheduler->cmds[i];
+        if (st_ptr->type != ST_TYPE_NONE) continue;
+        memcpy(st_ptr, &data_ptr[i_sched_start], sizeof(schedtask_s));
+        memcpy(cmd_ptr, &data_ptr[i_sched_start+sizeof(schedtask_s)], sizeof(mcppkt_s));
+        st_ptr->cmd_ptr = cmd_ptr; // Update pointer to cmd in schedtask
+        if (st_ptr->type == ST_TYPE_NONE) continue;
+        scheduler->id_map[st_ptr->id] = st_ptr; // Update pointer to schedtask in id map
+    }
+    return SUCCESS;
+}
+
+status_e flashmgr_schedules_flush(flashmgr_s* self, scheduler_s* scheduler) {
+	uint16_t record_size = SCHEDULER_MAX_CMD_TASKS * (sizeof(schedtask_s) + sizeof(mcppkt_s));
+    uint32_t curr_record_addr = flashmgr_find_last_record(self, SCHEDULES_ADDR, NULL, record_size);
+    uint8_t data_ptr[1024] = {0};
+    uint8_t i;
+    for (i = 0; i < SCHEDULER_MAX_CMD_TASKS; i++) {
+        uint16_t i_sched_start = i*(sizeof(schedtask_s)+sizeof(mcppkt_s)); 
+        memcpy(&data_ptr[i_sched_start], &scheduler->tasks[SCHEDULER_MAX_FUNC_TASKS + i], sizeof(schedtask_s));
+        memcpy(&data_ptr[i_sched_start+sizeof(schedtask_s)], &scheduler->cmds[i], sizeof(mcppkt_s));
+    }
+    status_e s = flashmgr_append_record(self, SCHEDULES_ADDR, curr_record_addr, data_ptr, record_size);
     return s;
 }
