@@ -66,6 +66,7 @@ typedef struct {
 
 static const mtq_reg_s MTQ_INIT_REG_TABLE[] = {
     // Table 6-2. User Register (0)
+    
     // /* FACT */             { 0, 1, 0, T_UINT16, NULL, 0 },
     /* SNID */             { 1, 3, 0, T_CHAR,   NULL, 0 },
     /* CONF */             { 4, 1, 0, T_UINT8,  NULL, 0 },
@@ -98,15 +99,17 @@ static const mtq_reg_s MTQ_INIT_REG_TABLE[] = {
     /* ATT_ERROR_RATE */   { 145, 3, 0, T_FLOAT, NULL, 0 },
     /* ADCS_TMP */         { 148, 1, 0, T_INT16, NULL, 0 },
     /* PWR_VOL_5V */       { 149, 1, 0, T_FLOAT, NULL, 0 },
-    /* PWR_CUR_5V */         { 150, 1, 0, T_FLOAT, NULL, 0 },
-    /* PWR_VOL_3V */         { 151, 1, 0, T_FLOAT, NULL, 0 },
-    /* PWR_CUR_3V  */         { 152, 1, 0, T_FLOAT, NULL, 0 },
+    /* PWR_CUR_5V */       { 150, 1, 0, T_FLOAT, NULL, 0 },
+    /* PWR_VOL_3V */       { 151, 1, 0, T_FLOAT, NULL, 0 },
+    /* PWR_CUR_3V  */      { 152, 1, 0, T_FLOAT, NULL, 0 },
     /* FSS_TMP1 */         { 153, 1, 0, T_INT16, NULL, 0 },
     /* FSS_TMP2 */         { 154, 1, 0, T_INT16, NULL, 0 },
     /* FSS_TMP3 */         { 155, 1, 0, T_INT16, NULL, 0 },
     /* SV */               { 156, 3, 0, T_FLOAT, NULL, 0 },
     /* MAG */              { 159, 3, 0, T_FLOAT, NULL, 0 },
+
     // Table 6-3. Sensor/Actuator Register (1)
+
     /* MAG_MAT */          { 0, 9, 1, T_FLOAT, NULL, 0 },
     /* MAG_VEC */          { 9, 3, 1, T_FLOAT, NULL, 0 },
     /* MAG_STAT */         { 12, 1, 1, T_UINT8, NULL, 0 },
@@ -145,7 +148,9 @@ static const mtq_reg_s MTQ_INIT_REG_TABLE[] = {
     /* CAL_MAG_B */        { 133, 3, 1, T_FLOAT, NULL, 0 },
     /* MEAS_IMU_B */       { 136, 3, 1, T_FLOAT, NULL, 0 },
     /* CAL_IMU_B */        { 139, 3, 1, T_FLOAT, NULL, 0 },
+
     // Table 6-4. Parameter Register (2)
+
     /* MASS */             { 0, 1, 2, T_FLOAT, NULL, 0 },
     /* INE_TEN */          { 1, 9, 2, T_FLOAT, NULL, 0 },
     /* POS_HB_B */         { 10, 3, 2, T_FLOAT, NULL, 0 },
@@ -175,9 +180,23 @@ static const mtq_reg_s MTQ_INIT_REG_TABLE[] = {
     // /* GNSS */             { 93, 1, 2, T_UINT8, NULL, 0 },
     /* IMU_BIAS */         { 94, 3, 2, T_FLOAT, NULL, 0 },
     /* NVM */              { 255, 1, 2, T_UINT8, NULL, 0 },
+
     // Mythical Table 3
+    
     /* PID_KP */           { 0, 1, 3, T_FLOAT, NULL, 0 },
+    /* PID_KD */           { 1, 1, 3, T_FLOAT, NULL, 0 },
+    /* PID_KI */           { 2, 1, 3, T_FLOAT, NULL, 0 },
+    /* PID_INT_LIMIT */    { 3, 1, 3, T_FLOAT, NULL, 0 },
+    /* EKF_P */            { 4, 7, 3, T_FLOAT, NULL, 0 },
+    /* EKF_Q */            { 11, 7, 3, T_FLOAT, NULL, 0 },
     /* EKF_R_MAG */        { 18, 3, 3, T_FLOAT, NULL, 0 },
+    /* EKF_R_SUN */        { 21, 3, 3, T_FLOAT, NULL, 0 },
+    /* EKF_R_IMU */        { 24, 3, 3, T_FLOAT, NULL, 0 },
+    /* EKF_R_STR */        { 27, 4, 3, T_FLOAT, NULL, 0 },
+    /* MTQ_LIMIT */        { 31, 3, 3, T_FLOAT, NULL, 0 },
+    /* STEER_KE */         { 78, 1, 3, T_FLOAT, NULL, 0 },
+    /* STEER_REF_W */      { 79, 1, 3, T_FLOAT, NULL, 0 },
+    /* STEER_WEIGHT */     { 80, 5, 3, T_FLOAT, NULL, 0 },
     /* LOCK */             { 254, 2, 3, T_CHAR, NULL, 0 }
 };
 
