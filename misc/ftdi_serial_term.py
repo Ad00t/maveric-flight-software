@@ -366,6 +366,7 @@ def read_serial():
 
 def send_pkt_str(pktstr):
     pktstr = pktstr.strip()
+    if (len(pktstr) < 5): return
     spl = pktstr.split(' ')
     ba, cnt = mcpmgr.send_pkt_serial(
             int(spl[0]), int(spl[1]), int(spl[2]), int(spl[3]),

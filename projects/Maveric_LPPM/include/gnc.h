@@ -11,7 +11,8 @@
 typedef enum {
     GNC_MODE_SAFE = 0,
     GNC_MODE_AUTO = 1,
-    GNC_MODE_MANUAL = 2
+    GNC_MODE_MANUAL = 2,
+    GNC_MODE_OFF = 3
 } gnc_mode_e;
 
 typedef struct {

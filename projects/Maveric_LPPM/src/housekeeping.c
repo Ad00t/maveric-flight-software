@@ -24,7 +24,7 @@ void hk_init(void) {
     scheduler_schedule_func_in(&g_scheduler, 0, hk_get_ertc_time, 2000, 500, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 1, hk_log, 2500, 1000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 2, hk_systime_sync, 10000, 5*MS_PER_MIN, SCHEDULE_REPS_INFINITE);
-    scheduler_schedule_func_in(&g_scheduler, SCHED_ID_PPM_RST, hk_ppm_reset, 4*MS_PER_MIN, 0, 1);       // 120 min
+    scheduler_schedule_func_in(&g_scheduler, SCHED_ID_PPM_RST, hk_ppm_reset, 120*MS_PER_MIN, 0, 1);       // 120 min
     scheduler_schedule_func_in(&g_scheduler, 4, hk_heartbeats, 4000, 5000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 5, hk_read_sensors, 3000, 5000, SCHEDULE_REPS_INFINITE);
     scheduler_schedule_func_in(&g_scheduler, 6, hk_gnc_step, 4000, 10000, SCHEDULE_REPS_INFINITE);

@@ -40,6 +40,7 @@ void gnc_step(gnc_s* state, mtq_s* mtq, float* gyro_rate_rad) {
     switch (state->gnc_mode) {
         
         // Logic for GNC Safe mode transition and monitoring
+        case GNC_MODE_OFF:
         case GNC_MODE_SAFE:
             // Force ADCS to SAFE and take no further actions
             if (current_mode != MTQ_MODE_SAFE) {
