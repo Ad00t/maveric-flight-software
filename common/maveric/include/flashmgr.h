@@ -54,6 +54,7 @@ typedef struct {
 typedef struct {
     config_s config;
     uint16_t rbt_cnt;
+    int1 flash_scheds_loaded;
 } flashmgr_s;
 
 // Initialize flashmgr and config

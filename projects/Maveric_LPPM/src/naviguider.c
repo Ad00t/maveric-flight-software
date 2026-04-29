@@ -285,11 +285,11 @@ status_e nvg_power(nvg_s* nvg) {
     return s;
 }
 
-
 extern scheduler_s g_scheduler;
 extern nvg_s g_nvg;
 
 void nvg_reset_part2(void) {
+    sprintf(LOGBUF, "nvg_reset_part2"); log_info();
     nvg_start_hk(&g_nvg);
 }
 

@@ -11,9 +11,7 @@ status_e flashmgr_init(flashmgr_s* self, scheduler_s* scheduler) {
     status_e s1 = flashmgr_increment_rbt_cnt(self);
     flashmgr_config_load_defaults(self);
     status_e s2 = flashmgr_config_load_flash(self);
-    status_e s3 = flashmgr_schedules_load_flash(self, scheduler);
-    // status_e s3 = SUCCESS;
-    return (s1 == SUCCESS && s2 == SUCCESS && s3 == SUCCESS) ? SUCCESS : FAILURE;
+    return (s1 == SUCCESS && s2 == SUCCESS) ? SUCCESS : FAILURE;
 }
 
 uint32_t flashmgr_find_last_record(flashmgr_s* self, uint32_t start_addr, uint8_t* out, uint16_t record_size) {
@@ -117,9 +115,10 @@ status_e flashmgr_config_flush(flashmgr_s* self) {
 }
 
 status_e flashmgr_schedules_load_flash(flashmgr_s* self, scheduler_s* scheduler) {
-    // return SUCCESS;
-	uint16_t record_size = SCHEDULER_MAX_CMD_TASKS * (sizeof(schedtask_s) + sizeof(mcppkt_s));
-    uint8_t data_ptr[1024] = {0};
+#if NODE == NODE_UPPM
+    if (self->flash_scheds_loaded) return FAILURE;
+    uint16_t record_size = SCHEDULER_MAX_CMD_TASKS * (sizeof(schedtask_s) + sizeof(mcppkt_s));
+    uint8_t data_ptr[SCHEDULER_MAX_CMD_TASKS*256] = {0};
     uint32_t curr_record_addr = flashmgr_find_last_record(self, SCHEDULES_ADDR, data_ptr, record_size);
     if (CheckFlashEmpty(curr_record_addr, record_size)) {
         return SUCCESS;
@@ -136,13 +135,16 @@ status_e flashmgr_schedules_load_flash(flashmgr_s* self, scheduler_s* scheduler)
         if (st_ptr->type == ST_TYPE_NONE) continue;
         scheduler->id_map[st_ptr->id] = st_ptr; // Update pointer to schedtask in id map
     }
+    self->flash_scheds_loaded = TRUE;
+#endif
     return SUCCESS;
 }
 
 status_e flashmgr_schedules_flush(flashmgr_s* self, scheduler_s* scheduler) {
-	uint16_t record_size = SCHEDULER_MAX_CMD_TASKS * (sizeof(schedtask_s) + sizeof(mcppkt_s));
+#if NODE == NODE_UPPM
+    uint16_t record_size = SCHEDULER_MAX_CMD_TASKS * (sizeof(schedtask_s) + sizeof(mcppkt_s));
     uint32_t curr_record_addr = flashmgr_find_last_record(self, SCHEDULES_ADDR, NULL, record_size);
-    uint8_t data_ptr[1024] = {0};
+    uint8_t data_ptr[SCHEDULER_MAX_CMD_TASKS*256] = {0};
     uint8_t i;
     for (i = 0; i < SCHEDULER_MAX_CMD_TASKS; i++) {
         uint16_t i_sched_start = i*(sizeof(schedtask_s)+sizeof(mcppkt_s)); 
@@ -151,4 +153,6 @@ status_e flashmgr_schedules_flush(flashmgr_s* self, scheduler_s* scheduler) {
     }
     status_e s = flashmgr_append_record(self, SCHEDULES_ADDR, curr_record_addr, data_ptr, record_size);
     return s;
+#endif
+    return SUCCESS;
 }

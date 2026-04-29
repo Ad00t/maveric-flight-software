@@ -171,6 +171,52 @@ status_e mtq_print_reg_data(mtq_s* mtq, uint16_t key, char* out, uint16_t* j) {
     return mtq_print_reg_data(mtq, reg, out, j);
 }
 
+void mtq_payload_from_str(mtq_s* mtq, mtq_reg_s* reg, char* p, uint8_t* data) {
+    uint8_t i;
+    uint8_t l = MTQ_REG_TYPE_SIZES[reg->type];
+    switch (reg->type) {
+        case T_UINT8:
+            for (i = 0; i < reg->value_len; i++) {
+                uint8_t val = strtoul(p, &p, 10);
+                memcpy(&data[i*l], &val, l);
+            }
+            break;
+        case T_INT8: 
+            for (i = 0; i < reg->value_len; i++) {
+                int8_t val = strtol(p, &p, 10);
+                memcpy(&data[i*l], &val, l);
+            }
+            break;
+        case T_UINT16:
+            for (i = 0; i < reg->value_len; i++) {
+                uint16_t val = strtoul(p, &p, 10);
+                memcpy(&data[i*l], &val, l);
+            }
+            break;
+        case T_INT16:
+            for (i = 0; i < reg->value_len; i++) {
+                int16_t val = strtol(p, &p, 10);
+                memcpy(&data[i*l], &val, l);
+            }
+            break;
+        case T_UINT32:
+            for (i = 0; i < reg->value_len; i++) {
+                uint32_t val = strtoul(p, &p, 10);
+                memcpy(&data[i*l], &val, l);
+            }
+            break;
+        case T_FLOAT:
+            for (i = 0; i < reg->value_len; i++) {
+                float val = strtof(p, &p);
+                memcpy(&data[i*l], &val, l);
+            }
+            break;
+        case T_CHAR:
+            memcpy(data, p+1, strlen(p+1)); // Skip 1 space
+            break;
+    }
+}
+
 status_e mtq_read_start(mtq_s* mtq, mtq_reg_s* reg) {   
     if (!mtq->is_init) return FAILURE;
     if (!mtq->allow_comm) return FAILURE;
@@ -308,7 +354,9 @@ void mtq_write_complete(mtq_s* mtq) {
             reg->midx, reg->idx, reg->cnt, rcvpkt->err); log_trace();
 
     // Readback
-    mtq_read_start(mtq, reg);
+    if (reg->midx != 3) {
+        mtq_read_start(mtq, reg);
+    }
 }
 
 

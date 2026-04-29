@@ -64,8 +64,10 @@ void cmdimpl_init(void) {
     ht_set(ht, "mtq_reset", (cmdimpl_f) cmdimpl_mtq_reset);
     ht_set(ht, "mtq_set_mode", (cmdimpl_f) cmdimpl_mtq_set_mode);
     ht_set(ht, "mtq_read_1", (cmdimpl_f) cmdimpl_mtq_read_1);
+    ht_set(ht, "mtq_read_lock", (cmdimpl_f) cmdimpl_mtq_read_lock);
     ht_set(ht, "mtq_get_1", (cmdimpl_f) cmdimpl_mtq_get_1);
     ht_set(ht, "mtq_set_1", (cmdimpl_f) cmdimpl_mtq_set_1);
+    ht_set(ht, "mtq_set_lock", (cmdimpl_f) cmdimpl_mtq_set_lock);
     ht_set(ht, "mtq_read_active", (cmdimpl_f) cmdimpl_mtq_read_active);
     ht_set(ht, "mtq_get_active", (cmdimpl_f) cmdimpl_mtq_get_active);
     ht_set(ht, "mtq_read_hk", (cmdimpl_f) cmdimpl_mtq_read_hk);
@@ -212,7 +214,7 @@ void cmdimpl_ppm_get_sched(mcppkt_s* pkt) {
             char res[MCP_MAX_ARGS_LEN] = {0};
             schedtask_s* st = g_scheduler.id_map[sched_id]; 
             if (st->id == sched_id) {
-                sprintf(res, "%u %u %u %u %u %u %u", 
+                sprintf(res, "%u %u %u %u %u %u %Lu", 
                         SUCCESS, st->id, st->active, st->type, st->period_ms, st->remaining_reps, st->next_release);
             } else {
                 sprintf(res, "%u %u", FAILURE, sched_id);
@@ -587,7 +589,7 @@ void cmdimpl_cfg_get(mcppkt_s* pkt) {
             char tlebuf[140] = {0};
             memcpy(tlebuf, cfg->tle, sizeof(tlebuf));
             j += sprintf(&res[j], " %s", tlebuf); // Doesn't compile with just cfg->tle for some reason
-            mcp_respond(pkt, RES, res);
+            mcp_respond(pkt, RES, (char*)res);
             break;
         }
     }
@@ -748,6 +750,26 @@ void cmdimpl_mtq_read_1(mcppkt_s* pkt) {
     }
 }
 
+void cmdimpl_mtq_read_lock(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            char* p = pkt->args;
+            uint8_t midx = strtoul(p, &p, 10);
+            uint8_t idx = strtoul(p, &p, 10);
+            sprintf(LOGBUF, "cmdimpl_mtq_read_lock midx=%u idx=%u", midx, idx); log_info();
+            uint16_t key = (uint16_t) midx << 8 | idx;
+
+            char pwd[8] = MTQ_LOCK_PWD;
+            status_e s1 = mtq_write_start(&g_mtq, MTQ_LOCK, pwd);
+            status_e s2 = mtq_read_start(&g_mtq, key);
+            char res[16] = {0};
+            sprintf(res, "%u %u %u %u", s1, s2, midx, idx);
+            mcp_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
 void cmdimpl_mtq_get_1(mcppkt_s* pkt) {
     switch (pkt->ptype) {
         case CMD: {
@@ -780,52 +802,37 @@ void cmdimpl_mtq_set_1(mcppkt_s* pkt) {
                 mcp_respond(pkt, RES, res);
                 break;
             }
-            uint8_t i;
             uint8_t data[MTQ_MAX_PAYLOAD_LEN] = {0};
-            uint8_t l = MTQ_REG_TYPE_SIZES[reg->type];
-            switch (reg->type) {
-                case T_UINT8:
-                    for (i = 0; i < reg->value_len; i++) {
-                        uint8_t val = strtoul(p, &p, 10);
-                        memcpy(&data[i*l], &val, l);
-                    }
-                    break;
-                case T_INT8: 
-                    for (i = 0; i < reg->value_len; i++) {
-                        int8_t val = strtol(p, &p, 10);
-                        memcpy(&data[i*l], &val, l);
-                    }
-                    break;
-                case T_UINT16:
-                    for (i = 0; i < reg->value_len; i++) {
-                        uint16_t val = strtoul(p, &p, 10);
-                        memcpy(&data[i*l], &val, l);
-                    }
-                    break;
-                case T_INT16:
-                    for (i = 0; i < reg->value_len; i++) {
-                        int16_t val = strtol(p, &p, 10);
-                        memcpy(&data[i*l], &val, l);
-                    }
-                    break;
-                case T_UINT32:
-                    for (i = 0; i < reg->value_len; i++) {
-                        uint32_t val = strtoul(p, &p, 10);
-                        memcpy(&data[i*l], &val, l);
-                    }
-                    break;
-                case T_FLOAT:
-                    for (i = 0; i < reg->value_len; i++) {
-                        float val = strtof(p, &p);
-                        memcpy(&data[i*l], &val, l);
-                    }
-                    break;
-                case T_CHAR:
-                    memcpy(data, p+1, strlen(p+1)); // Skip 1 space
-                    break;
-            }
+            mtq_payload_from_str(&g_mtq, reg, p, data);
             status_e s = mtq_write_start(&g_mtq, reg, data);
             sprintf(res, "%u %u %u", s, midx, idx);
+            mcp_respond(pkt, RES, res); 
+            break;
+        }
+    }
+}
+
+void cmdimpl_mtq_set_lock(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            char* p = pkt->args;
+            uint8_t midx = strtoul(p, &p, 10);
+            uint8_t idx = strtoul(p, &p, 10);
+            sprintf(LOGBUF, "cmdimpl_mtq_set_lock midx=%u idx=%u", midx, idx); log_info();
+            uint16_t key = ((uint16_t) midx << 8) | idx;
+            mtq_reg_s* reg = mtq_get_reg(&g_mtq, key);
+            char res[16] = {0};
+            if (reg == NULL) {
+                sprintf(res, "%u %u %u", FAILURE, midx, idx);
+                mcp_respond(pkt, RES, res);
+                break;
+            }
+            uint8_t data[MTQ_MAX_PAYLOAD_LEN] = {0};
+            mtq_payload_from_str(&g_mtq, reg, p, data);
+            char pwd[8] = MTQ_LOCK_PWD;
+            status_e s1 = mtq_write_start(&g_mtq, MTQ_LOCK, pwd);
+            status_e s2 = mtq_write_start(&g_mtq, reg, data);
+            sprintf(res, "%u %u %u %u", s1, s2, midx, idx);
             mcp_respond(pkt, RES, res); 
             break;
         }
@@ -902,9 +909,9 @@ void cmdimpl_mtq_get_hk(mcppkt_s* pkt) {
             uint16_t j = sprintf(res, "%u %u", SUCCESS, page);
             uint8_t i;
             for (i = i1; i < i2; i++) {
-            uint16_t key = MTQ_HK_REGS[i];
-            j += sprintf(&res[j], " %u,%u", key >> 8, key & 0xFF);
-            mtq_print_reg_data(&g_mtq, key, res, &j);
+                uint16_t key = MTQ_HK_REGS[i];
+                j += sprintf(&res[j], " %u,%u", key >> 8, key & 0xFF);
+                mtq_print_reg_data(&g_mtq, key, res, &j);
             }
             mcp_respond(pkt, RES, res); 
             break;
@@ -1011,17 +1018,17 @@ void cmdimpl_nvg_get_1(mcppkt_s* pkt) {
             char* p = pkt->args;
             uint8_t sensor_id = strtoul(p, &p, 10);  
             sprintf(LOGBUF, "cmdimpl_nvg_get_1 sid=%u", sensor_id); log_info();
-            float data[8] = {0}; 
+            float data[10] = {0}; 
             status_e s = nvg_get_sensor_data(&g_nvg, sensor_id, data); 
             if (s == SUCCESS) {
                 char res[MCP_MAX_ARGS_LEN] = {0};
                 nvg_sensor_s* sensor = &g_nvg.sensors[sensor_id];
                 uint16_t j = sprintf(res, "%u %u ", s, sensor_id);
-                j += ftoa(sensor->ts, &res[j], 6, 'f');
+                j += ftoa(sensor->ts, &res[j], 3, 'f');
                 uint8_t i;
                 for (i = 0; i < sensor->len; i++) {
                     j += sprintf(&res[j], " ");
-                    j += ftoa(data[i], &res[j], 6, 'f');
+                    j += ftoa(data[i], &res[j], 3, 'f');
                 }
                 mcp_respond(pkt, RES, res); 
             } else {

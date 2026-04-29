@@ -14,10 +14,11 @@
 #define MTQ_MAX_PAYLOAD_LEN     MTQ_MAX_PKT_LEN - MTQ_HEADER_LEN - MTQ_CSUM_LEN
 #define MTQ_HEAD_READ           0xC9
 #define MTQ_HEAD_WRITE          0xC8
-#define MTQ_MAP_COUNT           3       // 3
+#define MTQ_MAP_COUNT           4       // 3
 #define MTQ_MAX_IDX_COUNT       256     // 256
 #define MTQ_PAGE_SIZE           4
 #define MTQ_RBT_DOWNTIME        10000
+#define MTQ_LOCK_PWD            "20231116"
 
 // Modes for set mode
 #define MTQ_MODE_MANUAL             7 
@@ -173,7 +174,11 @@ static const mtq_reg_s MTQ_INIT_REG_TABLE[] = {
     // /* STR1_ORIEN_BS */    { 89, 4, 2, T_FLOAT, NULL, 0 },
     // /* GNSS */             { 93, 1, 2, T_UINT8, NULL, 0 },
     /* IMU_BIAS */         { 94, 3, 2, T_FLOAT, NULL, 0 },
-    /* NVM */              { 255, 1, 2, T_UINT8, NULL, 0 }
+    /* NVM */              { 255, 1, 2, T_UINT8, NULL, 0 },
+    // Mythical Table 3
+    /* PID_KP */           { 0, 1, 3, T_FLOAT, NULL, 0 },
+    /* EKF_R_MAG */        { 18, 3, 3, T_FLOAT, NULL, 0 },
+    /* LOCK */             { 254, 2, 3, T_CHAR, NULL, 0 }
 };
 
 #define MTQ_REG_TABLE_LEN       sizeof(MTQ_INIT_REG_TABLE) / sizeof(mtq_reg_s)   
@@ -244,6 +249,8 @@ mtq_reg_s* mtq_get_reg(mtq_s* mtq, uint16_t key);
 // Print out formatted space separated contents of a register to out buffer, updating p
 status_e mtq_print_reg_data(mtq_s* mtq, mtq_reg_s* reg, char* out, uint16_t* j);
 status_e mtq_print_reg_data(mtq_s* mtq, uint16_t key, char* out, uint16_t* j);
+
+void mtq_payload_from_str(mtq_s* mtq, mtq_reg_s* reg, char* p, uint8_t* data);
 
 // Send register read command to mtq
 status_e mtq_read_start(mtq_s* mtq, mtq_reg_s* reg);
@@ -404,6 +411,7 @@ int1 mtq_stat_parse_tumb(uint32_t stat);
 #define MTQ_GNSS                ((2 << 8) | 93)
 #define MTQ_IMU_BIAS            ((2 << 8) | 94)
 #define MTQ_NVM                 ((2 << 8) | 255)
+#define MTQ_LOCK                ((3 << 8) | 254)
 
 static const uint16_t MTQ_ACTIVE_REGS[] = {
     MTQ_TIME, MTQ_DATE, MTQ_ACT_ERR, MTQ_SEN_ERR,

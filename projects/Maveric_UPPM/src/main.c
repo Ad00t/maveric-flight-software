@@ -54,6 +54,10 @@
 #define SCHED_ID_PPM_RST    3
 #define SCHED_ID_BEACON     6
 
+#define EPS_MODE_CRITICAL   0
+#define EPS_MODE_SAFE       1
+#define EPS_MODE_NOMINAL    2
+
 // Module includes (.c necessary)
 
 #include <time.h>
@@ -164,12 +168,11 @@ void system_init(void) {
     switch (cfg->ops_stage) {
         case OPS_INIT:
             mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_rst_ctn", "7199");
-            scheduler_schedule_func_in(&g_scheduler, 5, system_ops_transition_safe, 1*MS_PER_MIN, 0, 1);     // 45 min
+            scheduler_schedule_func_in(&g_scheduler, 5, system_ops_transition_safe, 2*MS_PER_MIN, 0, 1);     // 45 min
             break;
         case OPS_SAFE:
-            delay_ms(20000);
             sprintf(LOGBUF, "DEPLOYING"); log_info();
-            // mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_burn", "5");
+            mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_burn", "3");
         case OPS_NOMINAL: // Fallthrough
             ax100_set_power(&g_ax100, TRUE);
             scheduler_schedule_func_in(&g_scheduler, SCHED_ID_BEACON, system_ops_transmit_beacon, 
@@ -218,9 +221,9 @@ void system_ops_transmit_beacon(void) {
 
 void system_ops_check_eps(void) {
     sprintf(LOGBUF, "system_ops_check_eps eps=%u gnc=%u", g_tlm.eps_mode, g_tlm.gnc_mode); log_info();
-    if (g_tlm.eps_mode == 2 && g_tlm.gnc_mode == 0) {                   // Nominal power levels -> enable GNC if not already
+    if (g_tlm.eps_mode >= EPS_MODE_SAFE && g_tlm.gnc_mode == 0) {               // Safe power levels -> enable GNC if not already
         mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "gnc_set_mode", "1");
-    } else if (g_tlm.eps_mode != 2 && g_tlm.gnc_mode != 0) {            // Critical power -> disable GNC if not already
+    } else if (g_tlm.eps_mode == EPS_MODE_CRITICAL && g_tlm.gnc_mode != 0) {    // Critical power -> disable GNC if not already
         mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "gnc_set_mode", "0");
     }
 }

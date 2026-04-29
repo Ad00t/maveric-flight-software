@@ -79,6 +79,7 @@ void ppm_set_time_from_str(char* args) {
     memcpy(&g_rtc_time, &time, sizeof(rtc_time_t));
     systime_sync(); // Since Lower PPM is source of truth for timing, this sync should be the only sync in Upper PPM
     scheduler_refresh_all(&g_scheduler, oldtime);
+    flashmgr_schedules_load_flash(&g_flashmgr, &g_scheduler);
 }
 
 // COMMAND IMPLEMENTATIONS
@@ -197,7 +198,7 @@ void cmdimpl_ppm_get_sched(mcppkt_s* pkt) {
             char res[MCP_MAX_ARGS_LEN] = {0};
             schedtask_s* st = g_scheduler.id_map[sched_id]; 
             if (st->id == sched_id) {
-                sprintf(res, "%u %u %u %u %u %u %u", 
+                sprintf(res, "%u %u %u %u %u %u %Lu", 
                         SUCCESS, st->id, st->active, st->type, st->period_ms, st->remaining_reps, st->next_release);
             } else {
                 sprintf(res, "%u %u", FAILURE, sched_id);
