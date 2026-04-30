@@ -11,6 +11,7 @@ status_e flashmgr_init(flashmgr_s* self, scheduler_s* scheduler) {
     status_e s1 = flashmgr_increment_rbt_cnt(self);
     flashmgr_config_load_defaults(self);
     status_e s2 = flashmgr_config_load_flash(self);
+    if (s2 == FAILURE) flashmgr_config_load_defaults(self);
     return (s1 == SUCCESS && s2 == SUCCESS) ? SUCCESS : FAILURE;
 }
 
@@ -87,7 +88,7 @@ void flashmgr_config_load_defaults(flashmgr_s* self) {
     memcpy(cfg->tle, dfl_tle, sizeof(dfl_tle));
 #elif NODE == NODE_UPPM
     cfg->log_level = LL_INFO;
-    cfg->ops_stage = OPS_INIT;
+    cfg->ops_stage = OPS_SAFE;
     cfg->gs_delay = 1000;
     cfg->bcn_period = 3*MS_PER_MIN;
 #endif
@@ -117,32 +118,37 @@ status_e flashmgr_config_flush(flashmgr_s* self) {
 status_e flashmgr_schedules_load_flash(flashmgr_s* self, scheduler_s* scheduler) {
 #if NODE == NODE_UPPM
     if (self->flash_scheds_loaded) return FAILURE;
-    uint16_t record_size = SCHEDULER_MAX_CMD_TASKS * (sizeof(schedtask_s) + sizeof(mcppkt_s));
+    uint16_t record_size = SCHEDULER_MAX_CMD_TASKS * (sizeof(schedtask_s) + sizeof(mcppkt_s)) + 2;
     uint8_t data_ptr[SCHEDULER_MAX_CMD_TASKS*256] = {0};
     uint32_t curr_record_addr = flashmgr_find_last_record(self, SCHEDULES_ADDR, data_ptr, record_size);
     if (CheckFlashEmpty(curr_record_addr, record_size)) {
         return SUCCESS;
     }
-    uint8_t i;
-    for (i = 0; i < SCHEDULER_MAX_CMD_TASKS; i++) {
-        uint16_t i_sched_start = i*(sizeof(schedtask_s)+sizeof(mcppkt_s)); 
-        schedtask_s* st_ptr = &scheduler->tasks[SCHEDULER_MAX_FUNC_TASKS + i]; 
-        mcppkt_s* cmd_ptr = &scheduler->cmds[i];
-        if (st_ptr->type != ST_TYPE_NONE) continue;
-        memcpy(st_ptr, &data_ptr[i_sched_start], sizeof(schedtask_s));
-        memcpy(cmd_ptr, &data_ptr[i_sched_start+sizeof(schedtask_s)], sizeof(mcppkt_s));
-        st_ptr->cmd_ptr = cmd_ptr; // Update pointer to cmd in schedtask
-        if (st_ptr->type == ST_TYPE_NONE) continue;
-        scheduler->id_map[st_ptr->id] = st_ptr; // Update pointer to schedtask in id map
+    uint16_t crc = make16(data_ptr[record_size-1], data_ptr[record_size-2]);
+    status_e s = check_crc16(data_ptr, record_size-2, crc);
+    if (s == SUCCESS) {
+        uint8_t i;
+        for (i = 0; i < SCHEDULER_MAX_CMD_TASKS; i++) {
+            uint16_t i_sched_start = i*(sizeof(schedtask_s)+sizeof(mcppkt_s)); 
+            schedtask_s* st_ptr = &scheduler->tasks[SCHEDULER_MAX_FUNC_TASKS + i]; 
+            mcppkt_s* cmd_ptr = &scheduler->cmds[i];
+            if (st_ptr->type != ST_TYPE_NONE) continue;
+            memcpy(st_ptr, &data_ptr[i_sched_start], sizeof(schedtask_s));
+            memcpy(cmd_ptr, &data_ptr[i_sched_start+sizeof(schedtask_s)], sizeof(mcppkt_s));
+            st_ptr->cmd_ptr = cmd_ptr; // Update pointer to cmd in schedtask
+            if (st_ptr->type == ST_TYPE_NONE) continue;
+            scheduler->id_map[st_ptr->id] = st_ptr; // Update pointer to schedtask in id map
+        }
     }
     self->flash_scheds_loaded = TRUE;
+    return s;
 #endif
     return SUCCESS;
 }
 
 status_e flashmgr_schedules_flush(flashmgr_s* self, scheduler_s* scheduler) {
 #if NODE == NODE_UPPM
-    uint16_t record_size = SCHEDULER_MAX_CMD_TASKS * (sizeof(schedtask_s) + sizeof(mcppkt_s));
+    uint16_t record_size = SCHEDULER_MAX_CMD_TASKS * (sizeof(schedtask_s) + sizeof(mcppkt_s)) + 2;
     uint32_t curr_record_addr = flashmgr_find_last_record(self, SCHEDULES_ADDR, NULL, record_size);
     uint8_t data_ptr[SCHEDULER_MAX_CMD_TASKS*256] = {0};
     uint8_t i;
@@ -151,6 +157,9 @@ status_e flashmgr_schedules_flush(flashmgr_s* self, scheduler_s* scheduler) {
         memcpy(&data_ptr[i_sched_start], &scheduler->tasks[SCHEDULER_MAX_FUNC_TASKS + i], sizeof(schedtask_s));
         memcpy(&data_ptr[i_sched_start+sizeof(schedtask_s)], &scheduler->cmds[i], sizeof(mcppkt_s));
     }
+    uint16_t crc = compute_crc16(data_ptr, record_size-2);
+    data_ptr[record_size-2] = make8(crc, 0);
+    data_ptr[record_size-1] = make8(crc, 1);
     status_e s = flashmgr_append_record(self, SCHEDULES_ADDR, curr_record_addr, data_ptr, record_size);
     return s;
 #endif

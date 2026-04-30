@@ -54,10 +54,6 @@
 #define SCHED_ID_PPM_RST    3
 #define SCHED_ID_BEACON     6
 
-#define EPS_MODE_CRITICAL   0
-#define EPS_MODE_SAFE       1
-#define EPS_MODE_NOMINAL    2
-
 // Module includes (.c necessary)
 
 #include <time.h>
@@ -87,6 +83,7 @@
 void system_init(void);
 void system_superloop(void);
 void system_ops_transition_safe(void);
+void system_ops_deploy(void);
 void system_ops_transmit_beacon(void);
 void system_ops_check_eps(void);
 void system_cleanup(void);
@@ -166,19 +163,21 @@ void system_init(void) {
 
     // Check operations stage and schedule tasks accordingly
     switch (cfg->ops_stage) {
-        case OPS_INIT:
+        case OPS_INIT: {
             mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_rst_ctn", "7199");
             scheduler_schedule_func_in(&g_scheduler, 5, system_ops_transition_safe, 45*MS_PER_MIN, 0, 1);     // 45 min
             break;
-        case OPS_SAFE:
-            sprintf(LOGBUF, "DEPLOYING"); log_info();
-            mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_burn", "3");
-        case OPS_NOMINAL: // Fallthrough
+        }
+        case OPS_SAFE: {
+            scheduler_schedule_func_in(&g_scheduler, 8, system_ops_deploy, 30000, 0, 1);
+        } // Fallthrough
+        case OPS_NOMINAL: { 
             ax100_set_power(&g_ax100, TRUE);
             scheduler_schedule_func_in(&g_scheduler, SCHED_ID_BEACON, system_ops_transmit_beacon, 
-                                       30000, cfg->bcn_period, SCHEDULE_REPS_INFINITE); // Schedule 6
+                                       2*MS_PER_MIN, cfg->bcn_period, SCHEDULE_REPS_INFINITE); // Schedule 6
             scheduler_schedule_func_in(&g_scheduler, 7, system_ops_check_eps, 1*MS_PER_MIN, 1*MS_PER_MIN, SCHEDULE_REPS_INFINITE);
             break;
+        }
     }
 
     sprintf(LOGBUF, "system initialized rs232_err=%u rbt_cnt=%u rbt_cause=%u s_flashmgr=%u s_ax100=%u s_pldmgr=%u ops=%u", 
@@ -215,17 +214,22 @@ void system_ops_transition_safe(void) {
     g_superloop_running = FALSE;    // Reset so init sees ops_stage=1 and runs deploy
 }
 
+void system_ops_deploy(void) {
+    sprintf(LOGBUF, "DEPLOYING"); log_info();
+    mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_burn", "3");
+}
+
 void system_ops_transmit_beacon(void) {
     tlm_beacon(&g_tlm);
 }
 
 void system_ops_check_eps(void) {
     sprintf(LOGBUF, "system_ops_check_eps eps=%u gnc=%u", g_tlm.eps_mode, g_tlm.gnc_mode); log_info();
-    if (g_tlm.gnc_mode == 3) return;
-    if (g_tlm.eps_mode >= EPS_MODE_SAFE && g_tlm.gnc_mode == 0) {               
+    if (g_tlm.gnc_mode == 3) return; // In manual off state
+    if (g_tlm.eps_mode >= 1 && g_tlm.gnc_mode == 0) {               
         // Safe power levels -> enable GNC if not already
         mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "gnc_set_mode", "1");
-    } else if (g_tlm.eps_mode == EPS_MODE_CRITICAL && g_tlm.gnc_mode != 0) {    
+    } else if (g_tlm.eps_mode == 0 && g_tlm.gnc_mode != 0) {    
         // Critical power -> disable GNC if not already
         mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "gnc_set_mode", "0");
     }

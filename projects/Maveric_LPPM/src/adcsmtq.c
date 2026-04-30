@@ -66,23 +66,26 @@ status_e mtq_init(mtq_s* mtq, uint8_t port) {
     mtq->is_init = TRUE;
     mtq->port = port;
     mtq->allow_comm = TRUE;
-    memcpy(mtq->reg_table, MTQ_INIT_REG_TABLE, sizeof(MTQ_INIT_REG_TABLE));
-    memset(mtq->reg_idx_map, 0, MTQ_MAP_COUNT * MTQ_MAX_IDX_COUNT * sizeof(mtq_reg_s*));
+    memcpy(mtq->table0, MTQ_INIT_TABLE0, sizeof(MTQ_INIT_TABLE0));
+    memcpy(mtq->table1, MTQ_INIT_TABLE1, sizeof(MTQ_INIT_TABLE1));
+    memcpy(mtq->table2, MTQ_INIT_TABLE2, sizeof(MTQ_INIT_TABLE2));
+    memcpy(mtq->table3, MTQ_INIT_TABLE3, sizeof(MTQ_INIT_TABLE3));
+    memset(mtq->table_map, 0, sizeof(mtq->table_map));
+    mtq->table_map[0] = mtq->table0;
+    mtq->table_map[1] = mtq->table1;
+    mtq->table_map[2] = mtq->table2;
+    mtq->table_map[3] = mtq->table3;
     mtq_pkt_init(&mtq->rcvpkt);
 
-    // Init indices, register space
-    uint8_t i;
-    for (i = 0; i < MTQ_REG_TABLE_LEN; i++) {
-        mtq_reg_s* reg = &mtq->reg_table[i];
-       
-        // Populate idx map
-        if (reg->midx < MTQ_MAP_COUNT && reg->idx < MTQ_MAX_IDX_COUNT)
-            mtq->reg_idx_map[reg->midx][reg->idx] = reg;
-
-        // Allocate register data space
-        uint8_t l = MTQ_REG_TYPE_SIZES[reg->type];
-        reg->value_len = 4*reg->cnt / l;
-        reg->value = calloc(reg->value_len, l);
+    // Init register space
+    uint8_t i, j;
+    for (i = 0; i < MTQ_MAP_COUNT; i++) {
+        for (j = 0; j < MTQ_TABLE_LENS[i]; j++) {
+            mtq_reg_s* reg = &((mtq->table_map[i])[j]);
+            uint8_t l = MTQ_REG_TYPE_SIZES[reg->type];
+            reg->value_len = 4*reg->cnt / l;
+            reg->value = calloc(reg->value_len, l);
+        }
     }
    
     status_e s1 = mtq_reset(mtq);
@@ -93,10 +96,13 @@ status_e mtq_init(mtq_s* mtq, uint8_t port) {
 void mtq_destroy(mtq_s* mtq) {
     if (!mtq->is_init) return;
     mtq_clear(mtq);
-    uint8_t i;
-    for (i = 0; i < MTQ_REG_TABLE_LEN; i++) {
-        if (mtq->reg_table[i].value != NULL)
-            free(mtq->reg_table[i].value);
+    uint8_t i, j;
+    for (i = 0; i < MTQ_MAP_COUNT; i++) {
+        for (j = 0; j < MTQ_TABLE_LENS[i]; j++) {
+            mtq_reg_s* reg = &((mtq->table_map[i])[j]);
+            if (reg->value != NULL)
+                free(reg->value);
+        }
     }
     mtq->is_init = FALSE; 
     sprintf(LOGBUF, "mtq_destroy"); log_info();
@@ -104,14 +110,15 @@ void mtq_destroy(mtq_s* mtq) {
 
 void mtq_clear(mtq_s* mtq) {
     if (!mtq->is_init) return;
-    uint8_t i;
-    for (i = 0; i < MTQ_REG_TABLE_LEN; i++) {
-        if (mtq->reg_table[i].value != NULL)
-            memset(mtq->reg_table[i].value, 0, 4 * mtq->reg_table[i].cnt);
+    uint8_t i, j;
+    for (i = 0; i < MTQ_MAP_COUNT; i++) {
+        for (j = 0; j < MTQ_TABLE_LENS[i]; j++) {
+            mtq_reg_s* reg = &((mtq->table_map[i])[j]);
+            if (reg->value != NULL)
+                memset(reg->value, 0, 4*reg->cnt);
+        }
     }
     mtq_pkt_clear(&mtq->rcvpkt);
-    memset(mtq->reg_idx_map, 0, MTQ_MAP_COUNT * MTQ_MAX_IDX_COUNT * sizeof(mtq_reg_s*));
-    memset(mtq->reg_table, 0, sizeof(MTQ_INIT_REG_TABLE));
     sprintf(LOGBUF, "mtq_clear"); log_info();
 }
 
@@ -119,9 +126,16 @@ mtq_reg_s* mtq_get_reg(mtq_s* mtq, uint8_t midx, uint8_t idx) {
     if (!mtq->is_init) return NULL;
     if (midx >= MTQ_MAP_COUNT || idx >= MTQ_MAX_IDX_COUNT)
         return NULL;
-    mtq_reg_s* reg = mtq->reg_idx_map[midx][idx];
-    if (reg != NULL && (reg->midx != midx || reg->idx != idx))
-        return NULL;
+    mtq_reg_s* table = mtq->table_map[midx];
+    mtq_reg_s* reg = NULL;
+    uint8_t j;
+    for (j = 0; j < MTQ_TABLE_LENS[midx]; j++) {
+        mtq_reg_s* tr = &table[j];
+        if (tr->midx == midx && tr->idx == idx) {
+            reg = tr;
+            break;
+        }
+    }
     return reg;
 }
 

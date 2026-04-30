@@ -64,7 +64,7 @@ typedef struct {
                 len: Length of data in bytes.
 */
 
-static const mtq_reg_s MTQ_INIT_REG_TABLE[] = {
+static const mtq_reg_s MTQ_INIT_TABLE0[] = {
     // Table 6-2. User Register (0)
     
     // /* FACT */              { 0, 1, 0, T_UINT16, NULL, 0 },
@@ -106,8 +106,10 @@ static const mtq_reg_s MTQ_INIT_REG_TABLE[] = {
     /* FSS_TMP2 */          { 154, 1, 0, T_INT16, NULL, 0 },
     /* FSS_TMP3 */          { 155, 1, 0, T_INT16, NULL, 0 },
     /* SV */                { 156, 3, 0, T_FLOAT, NULL, 0 },
-    /* MAG */               { 159, 3, 0, T_FLOAT, NULL, 0 },
+    /* MAG */               { 159, 3, 0, T_FLOAT, NULL, 0 }
+};
 
+static const mtq_reg_s MTQ_INIT_TABLE1[] = {
     // Table 6-3. Sensor/Actuator Register (1)
 
     /* MAG_MAT */           { 0, 9, 1, T_FLOAT, NULL, 0 },
@@ -147,8 +149,10 @@ static const mtq_reg_s MTQ_INIT_REG_TABLE[] = {
     /* MEAS_MAG_B */        { 130, 3, 1, T_FLOAT, NULL, 0 },
     /* CAL_MAG_B */         { 133, 3, 1, T_FLOAT, NULL, 0 },
     /* MEAS_IMU_B */        { 136, 3, 1, T_FLOAT, NULL, 0 },
-    /* CAL_IMU_B */         { 139, 3, 1, T_FLOAT, NULL, 0 },
+    /* CAL_IMU_B */         { 139, 3, 1, T_FLOAT, NULL, 0 }
+};
 
+static const mtq_reg_s MTQ_INIT_TABLE2[] = {
     // Table 6-4. Parameter Register (2)
 
     /* MASS */              { 0, 1, 2, T_FLOAT, NULL, 0 },
@@ -179,8 +183,10 @@ static const mtq_reg_s MTQ_INIT_REG_TABLE[] = {
     // /* STR1_ORIEN_BS */     { 89, 4, 2, T_FLOAT, NULL, 0 },
     // /* GNSS */              { 93, 1, 2, T_UINT8, NULL, 0 },
     /* IMU_BIAS */          { 94, 3, 2, T_FLOAT, NULL, 0 },
-    /* NVM */               { 255, 1, 2, T_UINT8, NULL, 0 },
+    /* NVM */               { 255, 1, 2, T_UINT8, NULL, 0 }
+};
 
+static const mtq_reg_s MTQ_INIT_TABLE3[] = {
     // Mythical Table 3
     
     /* PID_KP */            { 0, 1, 3, T_FLOAT, NULL, 0 },
@@ -200,7 +206,11 @@ static const mtq_reg_s MTQ_INIT_REG_TABLE[] = {
     /* LOCK */              { 254, 2, 3, T_CHAR, NULL, 0 }
 };
 
-#define MTQ_REG_TABLE_LEN       sizeof(MTQ_INIT_REG_TABLE) / sizeof(mtq_reg_s)   
+#define MTQ_TABLE0_LEN       (uint8_t)(sizeof(MTQ_INIT_TABLE0) / sizeof(mtq_reg_s))   
+#define MTQ_TABLE1_LEN       (uint8_t)(sizeof(MTQ_INIT_TABLE1) / sizeof(mtq_reg_s))   
+#define MTQ_TABLE2_LEN       (uint8_t)(sizeof(MTQ_INIT_TABLE2) / sizeof(mtq_reg_s))   
+#define MTQ_TABLE3_LEN       (uint8_t)(sizeof(MTQ_INIT_TABLE3) / sizeof(mtq_reg_s))   
+static const uint8_t MTQ_TABLE_LENS[] = { MTQ_TABLE0_LEN, MTQ_TABLE1_LEN, MTQ_TABLE2_LEN, MTQ_TABLE3_LEN };
 
 // Packet parsing FSM states
 
@@ -243,8 +253,11 @@ int1 mtq_pkt_verify_csum(mtq_pkt_s* pkt);
 // MTQ global manager
 
 typedef struct {
-    mtq_reg_s reg_table[MTQ_REG_TABLE_LEN]; 
-    mtq_reg_s* reg_idx_map[MTQ_MAP_COUNT][MTQ_MAX_IDX_COUNT];
+    mtq_reg_s table0[MTQ_TABLE0_LEN];
+    mtq_reg_s table1[MTQ_TABLE1_LEN];
+    mtq_reg_s table2[MTQ_TABLE2_LEN];
+    mtq_reg_s table3[MTQ_TABLE3_LEN];
+    mtq_reg_s* table_map[MTQ_MAP_COUNT];
     mtq_pkt_s rcvpkt;
     uint8_t port;  
     status_e heartbeat;
