@@ -858,7 +858,7 @@ void cmdimpl_mtq_get_active(mcppkt_s* pkt) {
             char* p = pkt->args;
             uint8_t page = strtoul(p, &p, 10);
             char res[MCP_MAX_ARGS_LEN] = {0};
-            if (page >= MTQ_NUM_ACTIVE_REGS / MTQ_PAGE_SIZE) {
+            if (page > floor((float)MTQ_NUM_ACTIVE_REGS / MTQ_PAGE_SIZE)) {
                 sprintf(res, "%u %u", FAILURE, page);
                 mcp_respond(pkt, RES, res);
                 break;
@@ -898,7 +898,7 @@ void cmdimpl_mtq_get_hk(mcppkt_s* pkt) {
             char* p = pkt->args;
             uint8_t page = strtoul(p, &p, 10);
             char res[MCP_MAX_ARGS_LEN] = {0};
-            if (page >= MTQ_NUM_HK_REGS / MTQ_PAGE_SIZE) {
+            if (page > floor((float)MTQ_NUM_HK_REGS / MTQ_PAGE_SIZE)) {
                 sprintf(res, "%u %u", FAILURE, page);
                 mcp_respond(pkt, RES, res);
                 break;
@@ -939,7 +939,7 @@ void cmdimpl_mtq_get_param(mcppkt_s* pkt) {
             char* p = pkt->args;
             uint8_t page = strtoul(p, &p, 10);
             char res[MCP_MAX_ARGS_LEN] = {0};
-            if (page >= MTQ_NUM_PARAM_REGS / MTQ_PAGE_SIZE) {
+            if (page > floor((float)MTQ_NUM_PARAM_REGS / MTQ_PAGE_SIZE)) {
                 sprintf(res, "%u %u", FAILURE, page);
                 mcp_respond(pkt, RES, res);
                 break;

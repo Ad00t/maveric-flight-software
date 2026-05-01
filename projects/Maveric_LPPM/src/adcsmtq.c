@@ -66,10 +66,10 @@ status_e mtq_init(mtq_s* mtq, uint8_t port) {
     mtq->is_init = TRUE;
     mtq->port = port;
     mtq->allow_comm = TRUE;
-    memcpy(mtq->table0, MTQ_INIT_TABLE0, sizeof(MTQ_INIT_TABLE0));
-    memcpy(mtq->table1, MTQ_INIT_TABLE1, sizeof(MTQ_INIT_TABLE1));
-    memcpy(mtq->table2, MTQ_INIT_TABLE2, sizeof(MTQ_INIT_TABLE2));
-    memcpy(mtq->table3, MTQ_INIT_TABLE3, sizeof(MTQ_INIT_TABLE3));
+    memcpy(mtq->table0, MTQ_INIT_TABLE0, sizeof(mtq->table0));
+    memcpy(mtq->table1, MTQ_INIT_TABLE1, sizeof(mtq->table1));
+    memcpy(mtq->table2, MTQ_INIT_TABLE2, sizeof(mtq->table2));
+    memcpy(mtq->table3, MTQ_INIT_TABLE3, sizeof(mtq->table3));
     memset(mtq->table_map, 0, sizeof(mtq->table_map));
     mtq->table_map[0] = mtq->table0;
     mtq->table_map[1] = mtq->table1;
@@ -80,8 +80,9 @@ status_e mtq_init(mtq_s* mtq, uint8_t port) {
     // Init register space
     uint8_t i, j;
     for (i = 0; i < MTQ_MAP_COUNT; i++) {
+        mtq_reg_s* table = mtq->table_map[i];
         for (j = 0; j < MTQ_TABLE_LENS[i]; j++) {
-            mtq_reg_s* reg = &((mtq->table_map[i])[j]);
+            mtq_reg_s* reg = &(table[j]);
             uint8_t l = MTQ_REG_TYPE_SIZES[reg->type];
             reg->value_len = 4*reg->cnt / l;
             reg->value = calloc(reg->value_len, l);
@@ -98,8 +99,9 @@ void mtq_destroy(mtq_s* mtq) {
     mtq_clear(mtq);
     uint8_t i, j;
     for (i = 0; i < MTQ_MAP_COUNT; i++) {
+        mtq_reg_s* table = mtq->table_map[i];
         for (j = 0; j < MTQ_TABLE_LENS[i]; j++) {
-            mtq_reg_s* reg = &((mtq->table_map[i])[j]);
+            mtq_reg_s* reg = &(table[j]);
             if (reg->value != NULL)
                 free(reg->value);
         }
@@ -112,8 +114,9 @@ void mtq_clear(mtq_s* mtq) {
     if (!mtq->is_init) return;
     uint8_t i, j;
     for (i = 0; i < MTQ_MAP_COUNT; i++) {
+        mtq_reg_s* table = mtq->table_map[i];
         for (j = 0; j < MTQ_TABLE_LENS[i]; j++) {
-            mtq_reg_s* reg = &((mtq->table_map[i])[j]);
+            mtq_reg_s* reg = &(table[j]);
             if (reg->value != NULL)
                 memset(reg->value, 0, 4*reg->cnt);
         }
@@ -130,7 +133,7 @@ mtq_reg_s* mtq_get_reg(mtq_s* mtq, uint8_t midx, uint8_t idx) {
     mtq_reg_s* reg = NULL;
     uint8_t j;
     for (j = 0; j < MTQ_TABLE_LENS[midx]; j++) {
-        mtq_reg_s* tr = &table[j];
+        mtq_reg_s* tr = &(table[j]);
         if (tr->midx == midx && tr->idx == idx) {
             reg = tr;
             break;
@@ -232,8 +235,7 @@ void mtq_payload_from_str(mtq_s* mtq, mtq_reg_s* reg, char* p, uint8_t* data) {
 }
 
 status_e mtq_read_start(mtq_s* mtq, mtq_reg_s* reg) {   
-    if (!mtq->is_init) return FAILURE;
-    if (!mtq->allow_comm) return FAILURE;
+    if (!mtq->is_init || !mtq->allow_comm) return FAILURE;
     uint8_t w_buf[4];
     w_buf[0] = MTQ_HEAD_READ;
     w_buf[1] = reg->idx;
@@ -305,8 +307,7 @@ void mtq_read_complete(mtq_s* mtq) {
 }
 
 status_e mtq_write_start(mtq_s* mtq, mtq_reg_s* reg, void* data) {
-    if (!mtq->is_init) return FAILURE;
-    if (!mtq->allow_comm) return FAILURE;
+    if (!mtq->is_init || !mtq->allow_comm) return FAILURE;
     uint8_t w_buf[MTQ_MAX_PKT_LEN] = {0};
     uint8_t n_body_bytes = 4*reg->cnt;
     uint8_t w_buf_len = 4 + n_body_bytes;
@@ -378,7 +379,7 @@ void mtq_parse_stream(mtq_s* mtq, ringbuf_s* irqbuf) {
     if (!mtq->is_init) return;
     mtq_pkt_s* rcvpkt = &mtq->rcvpkt;
     uint16_t iter = 0;
-    while (iter < 4*RINGBUF_MAX_CAPACITY) {
+    while (iter < 6*RINGBUF_MAX_CAPACITY) {
         uint8_t b;
         if (!rb_pop(irqbuf, 1, &b)) return;
       
@@ -476,8 +477,8 @@ void mtq_check_heartbeat(mtq_s* mtq) {
 
 status_e mtq_reboot(mtq_s* mtq) {
     if (!mtq->is_init) return FAILURE;
-    uint8_t req = 1;
-    status_e s = mtq_write_start(mtq, MTQ_NVM, &req);
+    uint8_t req[4] = { 1, 0, 0, 0 };
+    status_e s = mtq_write_start(mtq, MTQ_NVM, req);
     return s;
 }
 
@@ -499,6 +500,7 @@ void mtq_reset_part2(void) {
 
 status_e mtq_reset(mtq_s* mtq) {
     if (!mtq->is_init) return FAILURE;
+    sprintf(LOGBUF, "mtq_reset"); log_info();
     status_e s1 = mtq_reboot(&g_mtq);
     mtq->allow_comm = FALSE;
     status_e s2 = scheduler_schedule_func_in(&g_scheduler, 7, mtq_reset_part2, MTQ_RBT_DOWNTIME, 0, 1);

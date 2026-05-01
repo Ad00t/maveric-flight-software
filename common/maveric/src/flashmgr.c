@@ -139,6 +139,10 @@ status_e flashmgr_schedules_load_flash(flashmgr_s* self, scheduler_s* scheduler)
             if (st_ptr->type == ST_TYPE_NONE) continue;
             scheduler->id_map[st_ptr->id] = st_ptr; // Update pointer to schedtask in id map
         }
+        sprintf(LOGBUF, "flashmgr_schedules_load_flash: success len=%u crc=%u", record_size, crc); log_info();
+    } else {
+        sprintf(LOGBUF, "flashmgr_schedules_load_flash: crc check failed: len=%u crc=%u compcrc=%u",
+                record_size, crc, compute_crc16(data_ptr, record_size-2)); log_error();
     }
     self->flash_scheds_loaded = TRUE;
     return s;
@@ -161,6 +165,11 @@ status_e flashmgr_schedules_flush(flashmgr_s* self, scheduler_s* scheduler) {
     data_ptr[record_size-2] = make8(crc, 0);
     data_ptr[record_size-1] = make8(crc, 1);
     status_e s = flashmgr_append_record(self, SCHEDULES_ADDR, curr_record_addr, data_ptr, record_size);
+    if (s == SUCCESS) {
+        sprintf(LOGBUF, "flashmgr_schedules_flush: append success len=%u crc=%u", record_size, crc); log_info();
+    } else {
+        sprintf(LOGBUF, "flashmgr_schedules_flush: append failure len=%u crc=%u", record_size, crc); log_error();
+    }
     return s;
 #endif
     return SUCCESS;

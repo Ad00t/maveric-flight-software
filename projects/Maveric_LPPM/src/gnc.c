@@ -12,6 +12,8 @@ void gnc_init(gnc_s* gnc) {
 }
 
 void gnc_step(gnc_s* state, mtq_s* mtq, float* gyro_rate_rad) {
+    if (!mtq->is_init || !mtq->allow_comm) return;
+
     // Extract Mode and Flags from STAT
     uint32_t stat = 0;
     mtq_get_data(mtq, MTQ_STAT, &stat);
@@ -29,6 +31,9 @@ void gnc_step(gnc_s* state, mtq_s* mtq, float* gyro_rate_rad) {
         // Track the unexpected transition
         if (current_mode == MTQ_MODE_SAFE) {
             state->unexpected_safe_count++;
+            state->expected_mode = MTQ_MODE_SAFE;
+            mtq_reset(mtq);
+            return;
         } else if (current_mode == MTQ_MODE_DETUMBLING) {
             state->unexpected_detumble_count++;
         }

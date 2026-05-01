@@ -206,10 +206,10 @@ static const mtq_reg_s MTQ_INIT_TABLE3[] = {
     /* LOCK */              { 254, 2, 3, T_CHAR, NULL, 0 }
 };
 
-#define MTQ_TABLE0_LEN       (uint8_t)(sizeof(MTQ_INIT_TABLE0) / sizeof(mtq_reg_s))   
-#define MTQ_TABLE1_LEN       (uint8_t)(sizeof(MTQ_INIT_TABLE1) / sizeof(mtq_reg_s))   
-#define MTQ_TABLE2_LEN       (uint8_t)(sizeof(MTQ_INIT_TABLE2) / sizeof(mtq_reg_s))   
-#define MTQ_TABLE3_LEN       (uint8_t)(sizeof(MTQ_INIT_TABLE3) / sizeof(mtq_reg_s))   
+#define MTQ_TABLE0_LEN       (sizeof(MTQ_INIT_TABLE0) / sizeof(mtq_reg_s))   
+#define MTQ_TABLE1_LEN       (sizeof(MTQ_INIT_TABLE1) / sizeof(mtq_reg_s))   
+#define MTQ_TABLE2_LEN       (sizeof(MTQ_INIT_TABLE2) / sizeof(mtq_reg_s))   
+#define MTQ_TABLE3_LEN       (sizeof(MTQ_INIT_TABLE3) / sizeof(mtq_reg_s))   
 static const uint8_t MTQ_TABLE_LENS[] = { MTQ_TABLE0_LEN, MTQ_TABLE1_LEN, MTQ_TABLE2_LEN, MTQ_TABLE3_LEN };
 
 // Packet parsing FSM states
@@ -448,16 +448,15 @@ int1 mtq_stat_parse_tumb(uint32_t stat);
 static const uint16_t MTQ_ACTIVE_REGS[] = {
     MTQ_TIME, MTQ_DATE, MTQ_ACT_ERR, MTQ_SEN_ERR,
     MTQ_Q, MTQ_LLA, MTQ_MTQ_USER, MTQ_FSS_TMP1, 
-    MTQ_SV, MTQ_RATE, MTQ_MAG, MTQ_CONF,
-    MTQ_MAG0_S, MTQ_FSS0_SV, MTQ_IMU0_S, MTQ_IMU1_S,
-    MTQ_PWR_VOL_5V, MTQ_PWR_CUR_5V, MTQ_PWR_VOL_3V, MTQ_PWR_CUR_5V, 
-    MTQ_FSS0_PDSUM, MTQ_MEAS_MAG_B, MTQ_MEAS_IMU_B
+    MTQ_SV, MTQ_MAG0_S, MTQ_FSS0_SV, MTQ_IMU0_S,
+    MTQ_IMU1_S, MTQ_FSS0_PDSUM, MTQ_PWR_VOL_5V, MTQ_PWR_CUR_5V, 
+    MTQ_PWR_VOL_3V, MTQ_PWR_CUR_3V
 };
 #define MTQ_NUM_ACTIVE_REGS       (sizeof(MTQ_ACTIVE_REGS) / sizeof(uint16_t))
 
 static const uint16_t MTQ_HK_REGS[] = {
     MTQ_STAT, MTQ_MTQ, MTQ_CAL_MAG_B, MTQ_CAL_IMU_B,
-    MTQ_ADCS_TMP, MTQ_RATE, MTQ_MAG
+    MTQ_ADCS_TMP, MTQ_RATE, MTQ_MAG, MTQ_CONF
 };
 #define MTQ_NUM_HK_REGS       (sizeof(MTQ_HK_REGS) / sizeof(uint16_t))   
 
@@ -465,7 +464,7 @@ static const uint16_t MTQ_PARAM_REGS[] = {
     MTQ_POINTING_AXIS, MTQ_MAG_MAT, MTQ_MAG_VEC, MTQ_MAG_INFO,
     MTQ_MAG_STAT, MTQ_IMU_STAT, MTQ_FSS_STAT, MTQ_FSS_INFO, 
     MTQ_MASS, MTQ_INE_TEN, MTQ_MAG0_ORIEN_BS, MTQ_FSS0_ORIEN_BS,
-    MTQ_IMU0_ORIEN_BS, MTQ_IMU1_ORIEN_BS, MTQ_IMU_INFO, MTQ_IMU_BIAS
+    MTQ_IMU0_ORIEN_BS, MTQ_IMU1_ORIEN_BS 
 };
 #define MTQ_NUM_PARAM_REGS         (sizeof(MTQ_PARAM_REGS) / sizeof(uint16_t))   
 
