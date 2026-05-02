@@ -164,8 +164,9 @@ void system_init(void) {
     // Check operations stage and schedule tasks accordingly
     switch (cfg->ops_stage) {
         case OPS_INIT: {
+            scheduler_schedule_func_in(&g_scheduler, 5, system_ops_transition_safe, 3*MS_PER_MIN, 0, 1);     // 45 min
             mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_rst_ctn", "7199");
-            scheduler_schedule_func_in(&g_scheduler, 5, system_ops_transition_safe, 45*MS_PER_MIN, 0, 1);     // 45 min
+            mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "gnc_set_mode", "0");
             break;
         }
         case OPS_SAFE: {
@@ -201,6 +202,7 @@ void system_superloop(void) {
 
 void system_ops_transition_safe(void) {
     sprintf(LOGBUF, "system_ops_transition_safe"); log_info();
+    mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "ppm_reset", "");
     config_s* cfg = &g_flashmgr.config;
     uint8_t i;
     for (i = 0; i < 5; i++) {
@@ -210,7 +212,6 @@ void system_ops_transition_safe(void) {
         if (cfg->ops_stage == OPS_SAFE) break;
         else delay_ms(1000);
     }
-    mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "ppm_reset", "");
     g_superloop_running = FALSE;    // Reset so init sees ops_stage=1 and runs deploy
 }
 

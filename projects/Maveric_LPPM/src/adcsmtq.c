@@ -379,7 +379,7 @@ void mtq_parse_stream(mtq_s* mtq, ringbuf_s* irqbuf) {
     if (!mtq->is_init) return;
     mtq_pkt_s* rcvpkt = &mtq->rcvpkt;
     uint16_t iter = 0;
-    while (iter < 6*RINGBUF_MAX_CAPACITY) {
+    while (iter < 4*RINGBUF_MAX_CAPACITY) {
         uint8_t b;
         if (!rb_pop(irqbuf, 1, &b)) return;
       
@@ -494,7 +494,7 @@ void mtq_reset_part2(void) {
     rtc_time_t rtc;
     systime_rtc(&rtc);
     mtq_set_datetime(&g_mtq, &rtc);
-    mtq_write_start(&g_mtq, MTQ_POINTING_AXIS, cfg->paxs);
+    mtq_write_start(&g_mtq, MTQ_POINTING_AXIS, (void*)cfg->paxs);
     mtq_write_start(&g_mtq, MTQ_TLE, cfg->tle);
 }
 

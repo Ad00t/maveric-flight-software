@@ -1,4 +1,6 @@
 #include "hashtable.h"
+#include "logger.h"
+#include "common.h"
 #include <stdint.h>
 #include <string.h>
 
@@ -32,16 +34,17 @@ void ht_clear(hashtable_s* ht) {
     }
 }
 
-int1 ht_set(hashtable_s* ht, char* key, void* value) {
-    if (ht->size >= MAX_HASHTABLE_SIZE) return 0;
+status_e ht_set(hashtable_s* ht, char* key, uint32_t value) {
+    if (ht->size >= MAX_HASHTABLE_SIZE) return FAILURE;
    
     uint16_t h = generate_hash(key);
     uint16_t start = h;
     int32_t first_tombstone = -1;
+
     while (ht->table[h].state != HT_EMPTY) {
         if (ht->table[h].state == HT_OCCUPIED && strncmp(ht->table[h].key, key, MAX_HASHKEY_SIZE) == 0) {
             ht->table[h].value = value;
-            return 0; 
+            return FAILURE; 
         }
 
         if (ht->table[h].state == HT_TOMBSTONE && first_tombstone == -1) {
@@ -49,7 +52,7 @@ int1 ht_set(hashtable_s* ht, char* key, void* value) {
         }
 
         h = (h + 1) % MAX_HASHTABLE_SIZE;
-        if (h == start) return 0;
+        if (h == start) return SUCCESS;
     }
 
     uint16_t insert_pos = (first_tombstone != -1) ? first_tombstone : h;
@@ -58,43 +61,45 @@ int1 ht_set(hashtable_s* ht, char* key, void* value) {
     ht->table[insert_pos].value = value;
     ht->table[insert_pos].state = HT_OCCUPIED;
     ht->size++;
-    return 1;
+    // sprintf(LOGBUF, "ht_set: '%s' '%s' %u %u %u %Lu", key, ht->table[insert_pos].key, h, insert_pos, ht->size, value); log_warn();
+    return SUCCESS;
 }
 
-int1 ht_delete(hashtable_s* ht, char* key) {
-    if (ht->size == 0) return 0;
+status_e ht_delete(hashtable_s* ht, char* key) {
+    if (ht->size == 0) return FAILURE;
 
     uint16_t h = generate_hash(key);
     uint16_t start = h;
     while (ht->table[h].state == HT_TOMBSTONE 
             || (ht->table[h].state == HT_OCCUPIED && strncmp(ht->table[h].key, key, MAX_HASHKEY_SIZE) != 0)) {
         h = (h + 1) % MAX_HASHTABLE_SIZE;
-        if (h == start) return 0;
+        if (h == start) return FAILURE;
     }
 
     if (ht->table[h].state == HT_EMPTY)
-        return 0;
+        return FAILURE;
 
     memset(ht->table[h].key, 0, MAX_HASHKEY_SIZE);
     ht->table[h].value = NULL;
     ht->table[h].state = HT_TOMBSTONE; 
     ht->size--;
-    return 1;
+    return SUCCESS;
 }
 
-void* ht_get(hashtable_s* ht, char* key) {
-    if (ht->size == 0) return NULL;
-    
+status_e ht_get(hashtable_s* ht, char* key, uint32_t* out) {
     uint16_t h = generate_hash(key);
     uint16_t start = h;
-    while (ht->table[h].state == HT_TOMBSTONE 
-            || (ht->table[h].state == HT_OCCUPIED && strncmp(ht->table[h].key, key, MAX_HASHKEY_SIZE) != 0)) {
+
+    while (ht->table[h].state != HT_EMPTY) {
+        if (ht->table[h].state == HT_OCCUPIED &&
+            strncmp(ht->table[h].key, key, MAX_HASHKEY_SIZE) == 0) {
+            *out = ht->table[h].value;
+            return SUCCESS;
+        }
+
         h = (h + 1) % MAX_HASHTABLE_SIZE;
-        if (h == start) return NULL;
+        if (h == start) break;
     }
 
-    if (ht->table[h].state == HT_EMPTY)
-        return NULL;
-
-    return ht->table[h].value;
+    return FAILURE;
 }

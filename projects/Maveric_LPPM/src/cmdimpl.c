@@ -23,67 +23,67 @@
 void cmdimpl_init(void) {
     hashtable_s* ht = &g_mcpmgr.cmdimpls;
 
-    ht_set(ht, "com_ping", (cmdimpl_f) cmdimpl_com_ping);
+    ht_set(ht, "com_ping", (uint32_t) cmdimpl_com_ping);
     
-    ht_set(ht, "ppm_reset", (cmdimpl_f) cmdimpl_ppm_reset);
-    ht_set(ht, "ppm_get_time", (cmdimpl_f) cmdimpl_ppm_get_time);
-    ht_set(ht, "ppm_set_time", (cmdimpl_f) cmdimpl_ppm_set_time);
-    ht_set(ht, "ppm_delay", (cmdimpl_f) cmdimpl_ppm_delay);
-    ht_set(ht, "ppm_clear_bufs", (cmdimpl_f) cmdimpl_ppm_clear_bufs);
+    ht_set(ht, "ppm_reset", (uint32_t) cmdimpl_ppm_reset);
+    ht_set(ht, "ppm_get_time", (uint32_t) cmdimpl_ppm_get_time);
+    ht_set(ht, "ppm_set_time", (uint32_t) cmdimpl_ppm_set_time);
+    ht_set(ht, "ppm_delay", (uint32_t) cmdimpl_ppm_delay);
+    ht_set(ht, "ppm_clear_bufs", (uint32_t) cmdimpl_ppm_clear_bufs);
 
-    ht_set(ht, "ppm_get_sched", (cmdimpl_f) cmdimpl_ppm_get_sched);
-    ht_set(ht, "ppm_get_all_scheds", (cmdimpl_f) cmdimpl_ppm_get_all_scheds);
-    ht_set(ht, "ppm_sched_cmd", (cmdimpl_f) cmdimpl_ppm_sched_cmd);
-    ht_set(ht, "ppm_desched", (cmdimpl_f) cmdimpl_ppm_desched);
-    ht_set(ht, "ppm_resched", (cmdimpl_f) cmdimpl_ppm_resched);
-    ht_set(ht, "ppm_clear_sched", (cmdimpl_f) cmdimpl_ppm_clear_sched);
-    ht_set(ht, "ppm_update_sched", (cmdimpl_f) cmdimpl_ppm_update_sched);
+    ht_set(ht, "ppm_get_sched", (uint32_t) cmdimpl_ppm_get_sched);
+    ht_set(ht, "ppm_get_all_scheds", (uint32_t) cmdimpl_ppm_get_all_scheds);
+    ht_set(ht, "ppm_sched_cmd", (uint32_t) cmdimpl_ppm_sched_cmd);
+    ht_set(ht, "ppm_desched", (uint32_t) cmdimpl_ppm_desched);
+    ht_set(ht, "ppm_resched", (uint32_t) cmdimpl_ppm_resched);
+    ht_set(ht, "ppm_clear_sched", (uint32_t) cmdimpl_ppm_clear_sched);
+    ht_set(ht, "ppm_update_sched", (uint32_t) cmdimpl_ppm_update_sched);
 
-    ht_set(ht, "tlm_get_data", (cmdimpl_f) cmdimpl_tlm_get_data);
+    ht_set(ht, "tlm_get_data", (uint32_t) cmdimpl_tlm_get_data);
     
-    ht_set(ht, "gnc_get_mode", (cmdimpl_f) cmdimpl_gnc_get_mode);
-    ht_set(ht, "gnc_set_mode", (cmdimpl_f) cmdimpl_gnc_set_mode);
-    ht_set(ht, "gnc_get_cnts", (cmdimpl_f) cmdimpl_gnc_get_cnts);
+    ht_set(ht, "gnc_get_mode", (uint32_t) cmdimpl_gnc_get_mode);
+    ht_set(ht, "gnc_set_mode", (uint32_t) cmdimpl_gnc_set_mode);
+    ht_set(ht, "gnc_get_cnts", (uint32_t) cmdimpl_gnc_get_cnts);
     
-    ht_set(ht, "flash_read", (cmdimpl_f) cmdimpl_flash_read);
-    ht_set(ht, "flash_write", (cmdimpl_f) cmdimpl_flash_write);
-    ht_set(ht, "flash_erase", (cmdimpl_f) cmdimpl_flash_erase);
-    ht_set(ht, "flash_unprot", (cmdimpl_f) cmdimpl_flash_unprot);
-    ht_set(ht, "flash_read_prot", (cmdimpl_f) cmdimpl_flash_read_prot);
+    ht_set(ht, "flash_read", (uint32_t) cmdimpl_flash_read);
+    ht_set(ht, "flash_write", (uint32_t) cmdimpl_flash_write);
+    ht_set(ht, "flash_erase", (uint32_t) cmdimpl_flash_erase);
+    ht_set(ht, "flash_unprot", (uint32_t) cmdimpl_flash_unprot);
+    ht_set(ht, "flash_read_prot", (uint32_t) cmdimpl_flash_read_prot);
     
-    ht_set(ht, "cfg_get", (cmdimpl_f) cmdimpl_cfg_get);
-    ht_set(ht, "cfg_set_ll", (cmdimpl_f) cmdimpl_cfg_set_ll);
-    ht_set(ht, "cfg_set_datasrc", (cmdimpl_f) cmdimpl_cfg_set_datasrc);
-    ht_set(ht, "cfg_set_paxs", (cmdimpl_f) cmdimpl_cfg_set_paxs);
-    ht_set(ht, "cfg_set_tle", (cmdimpl_f) cmdimpl_cfg_set_tle);
-    ht_set(ht, "cfg_load_dfl", (cmdimpl_f) cmdimpl_cfg_load_dfl);
-    ht_set(ht, "cfg_load_flash", (cmdimpl_f) cmdimpl_cfg_load_flash);
-    ht_set(ht, "cfg_flush", (cmdimpl_f) cmdimpl_cfg_flush);
+    ht_set(ht, "cfg_get", (uint32_t) cmdimpl_cfg_get);
+    ht_set(ht, "cfg_set_ll", (uint32_t) cmdimpl_cfg_set_ll);
+    ht_set(ht, "cfg_set_datasrc", (uint32_t) cmdimpl_cfg_set_datasrc);
+    ht_set(ht, "cfg_set_paxs", (uint32_t) cmdimpl_cfg_set_paxs);
+    ht_set(ht, "cfg_set_tle", (uint32_t) cmdimpl_cfg_set_tle);
+    ht_set(ht, "cfg_load_dfl", (uint32_t) cmdimpl_cfg_load_dfl);
+    ht_set(ht, "cfg_load_flash", (uint32_t) cmdimpl_cfg_load_flash);
+    ht_set(ht, "cfg_flush", (uint32_t) cmdimpl_cfg_flush);
 
-    ht_set(ht, "mtq_heartbeat", (cmdimpl_f) cmdimpl_mtq_heartbeat);
-    ht_set(ht, "mtq_reset", (cmdimpl_f) cmdimpl_mtq_reset);
-    ht_set(ht, "mtq_set_mode", (cmdimpl_f) cmdimpl_mtq_set_mode);
-    ht_set(ht, "mtq_read_1", (cmdimpl_f) cmdimpl_mtq_read_1);
-    ht_set(ht, "mtq_read_lock", (cmdimpl_f) cmdimpl_mtq_read_lock);
-    ht_set(ht, "mtq_get_1", (cmdimpl_f) cmdimpl_mtq_get_1);
-    ht_set(ht, "mtq_set_1", (cmdimpl_f) cmdimpl_mtq_set_1);
-    ht_set(ht, "mtq_set_lock", (cmdimpl_f) cmdimpl_mtq_set_lock);
-    ht_set(ht, "mtq_read_active", (cmdimpl_f) cmdimpl_mtq_read_active);
-    ht_set(ht, "mtq_get_active", (cmdimpl_f) cmdimpl_mtq_get_active);
-    ht_set(ht, "mtq_read_hk", (cmdimpl_f) cmdimpl_mtq_read_hk);
-    ht_set(ht, "mtq_get_hk", (cmdimpl_f) cmdimpl_mtq_get_hk);
-    ht_set(ht, "mtq_read_param", (cmdimpl_f) cmdimpl_mtq_read_param);
-    ht_set(ht, "mtq_get_param", (cmdimpl_f) cmdimpl_mtq_get_param);
+    ht_set(ht, "mtq_heartbeat", (uint32_t) cmdimpl_mtq_heartbeat);
+    ht_set(ht, "mtq_reset", (uint32_t) cmdimpl_mtq_reset);
+    ht_set(ht, "mtq_set_mode", (uint32_t) cmdimpl_mtq_set_mode);
+    ht_set(ht, "mtq_read_1", (uint32_t) cmdimpl_mtq_read_1);
+    ht_set(ht, "mtq_read_lock", (uint32_t) cmdimpl_mtq_read_lock);
+    ht_set(ht, "mtq_get_1", (uint32_t) cmdimpl_mtq_get_1);
+    ht_set(ht, "mtq_set_1", (uint32_t) cmdimpl_mtq_set_1);
+    ht_set(ht, "mtq_set_lock", (uint32_t) cmdimpl_mtq_set_lock);
+    ht_set(ht, "mtq_read_active", (uint32_t) cmdimpl_mtq_read_active);
+    ht_set(ht, "mtq_get_active", (uint32_t) cmdimpl_mtq_get_active);
+    ht_set(ht, "mtq_read_hk", (uint32_t) cmdimpl_mtq_read_hk);
+    ht_set(ht, "mtq_get_hk", (uint32_t) cmdimpl_mtq_get_hk);
+    ht_set(ht, "mtq_read_param", (uint32_t) cmdimpl_mtq_read_param);
+    ht_set(ht, "mtq_get_param", (uint32_t) cmdimpl_mtq_get_param);
     
-    ht_set(ht, "nvg_heartbeat", (cmdimpl_f) cmdimpl_nvg_heartbeat);
-    ht_set(ht, "nvg_reset", (cmdimpl_f) cmdimpl_nvg_reset);
-    ht_set(ht, "nvg_power", (cmdimpl_f) cmdimpl_nvg_power);
-    ht_set(ht, "nvg_get_1", (cmdimpl_f) cmdimpl_nvg_get_1);
-    ht_set(ht, "nvg_set_1", (cmdimpl_f) cmdimpl_nvg_set_1);
-    ht_set(ht, "nvg_start_all", (cmdimpl_f) cmdimpl_nvg_start_all);
-    ht_set(ht, "nvg_stop_all", (cmdimpl_f) cmdimpl_nvg_stop_all);
-    ht_set(ht, "nvg_start_hk", (cmdimpl_f) cmdimpl_nvg_start_hk);
-    ht_set(ht, "nvg_stop_hk", (cmdimpl_f) cmdimpl_nvg_stop_hk);
+    ht_set(ht, "nvg_heartbeat", (uint32_t) cmdimpl_nvg_heartbeat);
+    ht_set(ht, "nvg_reset", (uint32_t) cmdimpl_nvg_reset);
+    ht_set(ht, "nvg_power", (uint32_t) cmdimpl_nvg_power);
+    ht_set(ht, "nvg_get_1", (uint32_t) cmdimpl_nvg_get_1);
+    ht_set(ht, "nvg_set_1", (uint32_t) cmdimpl_nvg_set_1);
+    ht_set(ht, "nvg_start_all", (uint32_t) cmdimpl_nvg_start_all);
+    ht_set(ht, "nvg_stop_all", (uint32_t) cmdimpl_nvg_stop_all);
+    ht_set(ht, "nvg_start_hk", (uint32_t) cmdimpl_nvg_start_hk);
+    ht_set(ht, "nvg_stop_hk", (uint32_t) cmdimpl_nvg_stop_hk);
 }
 
 // COMMAND IMPLEMENTATIONS
@@ -135,6 +135,9 @@ void cmdimpl_ppm_set_time(mcppkt_s* pkt) {
             time.tm_hour = strtoul(p, &p, 10);
             time.tm_min = strtoul(p, &p, 10);
             time.tm_sec = strtoul(p, &p, 10);
+
+            if (time.tm_year >= 100) 
+                time.tm_year = 26;
             
             uint64_t oldtime = systime_epoch_ms();
             ertc_set_time(&g_ertc, time);
@@ -633,7 +636,7 @@ void cmdimpl_cfg_set_paxs(mcppkt_s* pkt) {
             cfg->paxs[0] = strtof(p, &p);
             cfg->paxs[1] = strtof(p, &p);
             cfg->paxs[2] = strtof(p, &p);
-            status_e s = mtq_write_start(&g_mtq, MTQ_POINTING_AXIS, cfg->paxs);
+            status_e s = mtq_write_start(&g_mtq, MTQ_POINTING_AXIS, (void*)cfg->paxs);
             char res[8] = {0};
             sprintf(res, "%u", s);
             mcp_respond(pkt, RES, (char*)res);

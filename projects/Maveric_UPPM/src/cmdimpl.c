@@ -18,47 +18,47 @@
 void cmdimpl_init() {
     hashtable_s* ht = &g_mcpmgr.cmdimpls;
     
-    ht_set(ht, "ppm_reset", (cmdimpl_f) cmdimpl_ppm_reset);
-    ht_set(ht, "ppm_get_time", (cmdimpl_f) cmdimpl_ppm_get_time);
-    ht_set(ht, "ppm_set_time", (cmdimpl_f) cmdimpl_ppm_set_time);
-    ht_set(ht, "ppm_delay", (cmdimpl_f) cmdimpl_ppm_delay);
-    ht_set(ht, "ppm_clear_bufs", (cmdimpl_f) cmdimpl_ppm_clear_bufs);
+    ht_set(ht, "ppm_reset", (uint32_t) cmdimpl_ppm_reset);
+    ht_set(ht, "ppm_get_time", (uint32_t) cmdimpl_ppm_get_time);
+    ht_set(ht, "ppm_set_time", (uint32_t) cmdimpl_ppm_set_time);
+    ht_set(ht, "ppm_delay", (uint32_t) cmdimpl_ppm_delay);
+    ht_set(ht, "ppm_clear_bufs", (uint32_t) cmdimpl_ppm_clear_bufs);
     
-    ht_set(ht, "ppm_get_sched", (cmdimpl_f) cmdimpl_ppm_get_sched);
-    ht_set(ht, "ppm_get_all_scheds", (cmdimpl_f) cmdimpl_ppm_get_all_scheds);
-    ht_set(ht, "ppm_sched_cmd", (cmdimpl_f) cmdimpl_ppm_sched_cmd);
-    ht_set(ht, "ppm_desched", (cmdimpl_f) cmdimpl_ppm_desched);
-    ht_set(ht, "ppm_resched", (cmdimpl_f) cmdimpl_ppm_resched);
-    ht_set(ht, "ppm_clear_sched", (cmdimpl_f) cmdimpl_ppm_clear_sched);
-    ht_set(ht, "ppm_update_sched", (cmdimpl_f) cmdimpl_ppm_update_sched);
+    ht_set(ht, "ppm_get_sched", (uint32_t) cmdimpl_ppm_get_sched);
+    ht_set(ht, "ppm_get_all_scheds", (uint32_t) cmdimpl_ppm_get_all_scheds);
+    ht_set(ht, "ppm_sched_cmd", (uint32_t) cmdimpl_ppm_sched_cmd);
+    ht_set(ht, "ppm_desched", (uint32_t) cmdimpl_ppm_desched);
+    ht_set(ht, "ppm_resched", (uint32_t) cmdimpl_ppm_resched);
+    ht_set(ht, "ppm_clear_sched", (uint32_t) cmdimpl_ppm_clear_sched);
+    ht_set(ht, "ppm_update_sched", (uint32_t) cmdimpl_ppm_update_sched);
     
-    ht_set(ht, "tlm_get_data", (cmdimpl_f) cmdimpl_tlm_get_data);
-    ht_set(ht, "tlm_beacon", (cmdimpl_f) cmdimpl_tlm_beacon);
+    ht_set(ht, "tlm_get_data", (uint32_t) cmdimpl_tlm_get_data);
+    ht_set(ht, "tlm_beacon", (uint32_t) cmdimpl_tlm_beacon);
 
-    ht_set(ht, "flash_read", (cmdimpl_f) cmdimpl_flash_read);
-    ht_set(ht, "flash_write", (cmdimpl_f) cmdimpl_flash_write);
-    ht_set(ht, "flash_erase", (cmdimpl_f) cmdimpl_flash_erase);
-    ht_set(ht, "flash_unprot", (cmdimpl_f) cmdimpl_flash_unprot);
-    ht_set(ht, "flash_read_prot", (cmdimpl_f) cmdimpl_flash_read_prot);
+    ht_set(ht, "flash_read", (uint32_t) cmdimpl_flash_read);
+    ht_set(ht, "flash_write", (uint32_t) cmdimpl_flash_write);
+    ht_set(ht, "flash_erase", (uint32_t) cmdimpl_flash_erase);
+    ht_set(ht, "flash_unprot", (uint32_t) cmdimpl_flash_unprot);
+    ht_set(ht, "flash_read_prot", (uint32_t) cmdimpl_flash_read_prot);
 
-    ht_set(ht, "cfg_get", (cmdimpl_f) cmdimpl_cfg_get);
-    ht_set(ht, "cfg_set_ll", (cmdimpl_f) cmdimpl_cfg_set_ll);
-    ht_set(ht, "cfg_set_ops", (cmdimpl_f) cmdimpl_cfg_set_ops);
-    ht_set(ht, "cfg_set_gsdelay", (cmdimpl_f) cmdimpl_cfg_set_gsdelay);
-    ht_set(ht, "cfg_set_bcnprd", (cmdimpl_f) cmdimpl_cfg_set_bcnprd);
-    ht_set(ht, "cfg_load_dfl", (cmdimpl_f) cmdimpl_cfg_load_dfl);
-    ht_set(ht, "cfg_load_flash", (cmdimpl_f) cmdimpl_cfg_load_flash);
-    ht_set(ht, "cfg_flush", (cmdimpl_f) cmdimpl_cfg_flush);
+    ht_set(ht, "cfg_get", (uint32_t) cmdimpl_cfg_get);
+    ht_set(ht, "cfg_set_ll", (uint32_t) cmdimpl_cfg_set_ll);
+    ht_set(ht, "cfg_set_ops", (uint32_t) cmdimpl_cfg_set_ops);
+    ht_set(ht, "cfg_set_gsdelay", (uint32_t) cmdimpl_cfg_set_gsdelay);
+    ht_set(ht, "cfg_set_bcnprd", (uint32_t) cmdimpl_cfg_set_bcnprd);
+    ht_set(ht, "cfg_load_dfl", (uint32_t) cmdimpl_cfg_load_dfl);
+    ht_set(ht, "cfg_load_flash", (uint32_t) cmdimpl_cfg_load_flash);
+    ht_set(ht, "cfg_flush", (uint32_t) cmdimpl_cfg_flush);
     
-    ht_set(ht, "ax100_get_power", (cmdimpl_f) cmdimpl_ax100_get_power);
-    ht_set(ht, "ax100_set_power", (cmdimpl_f) cmdimpl_ax100_set_power);
+    ht_set(ht, "ax100_get_power", (uint32_t) cmdimpl_ax100_get_power);
+    ht_set(ht, "ax100_set_power", (uint32_t) cmdimpl_ax100_set_power);
 
-    ht_set(ht, "rpi_disp_cap", (cmdimpl_f) cmdimpl_rpi_disp_cap);
-    ht_set(ht, "com_ping", (cmdimpl_f) cmdimpl_com_ping);
-    ht_set(ht, "lcd_display", (cmdimpl_f) cmdimpl_lcd_display);
-    ht_set(ht, "cam_capture", (cmdimpl_f) cmdimpl_cam_capture);
-    ht_set(ht, "lcd_off", (cmdimpl_f) cmdimpl_lcd_off);
-    ht_set(ht, "cam_off", (cmdimpl_f) cmdimpl_cam_off);
+    ht_set(ht, "rpi_disp_cap", (uint32_t) cmdimpl_rpi_disp_cap);
+    ht_set(ht, "com_ping", (uint32_t) cmdimpl_com_ping);
+    ht_set(ht, "lcd_display", (uint32_t) cmdimpl_lcd_display);
+    ht_set(ht, "cam_capture", (uint32_t) cmdimpl_cam_capture);
+    ht_set(ht, "lcd_off", (uint32_t) cmdimpl_lcd_off);
+    ht_set(ht, "cam_off", (uint32_t) cmdimpl_cam_off);
     
 }
 
@@ -75,6 +75,9 @@ void ppm_set_time_from_str(char* args) {
     time.tm_min = strtoul(p, &p, 10);
     time.tm_sec = strtoul(p, &p, 10);
 
+    if (time.tm_year >= 100) 
+        time.tm_year = 26;
+            
     uint64_t oldtime = systime_epoch_ms();
     memcpy(&g_rtc_time, &time, sizeof(rtc_time_t));
     systime_sync(); // Since Lower PPM is source of truth for timing, this sync should be the only sync in Upper PPM
@@ -541,8 +544,9 @@ void cmdimpl_cfg_set_ops(mcppkt_s* pkt) {
             char* p = pkt->args;
             config_s* cfg = &g_flashmgr.config;
             cfg->ops_stage = strtoul(p, &p, 10);
+            status_e s = flashmgr_config_flush(&g_flashmgr);
             char res[8] = {0};
-            sprintf(res, "%u", SUCCESS);
+            sprintf(res, "%u %u", cfg->ops_stage);
             mcp_respond(pkt, RES, res);
             break;
         }
@@ -569,11 +573,12 @@ void cmdimpl_cfg_set_bcnprd(mcppkt_s* pkt) {
             char* p = pkt->args;
             config_s* cfg = &g_flashmgr.config;
             cfg->bcn_period = (uint32_t) strtoul(p, &p, 10);
+            status_e s = flashmgr_config_flush(&g_flashmgr);
             schedtask_s* st = g_scheduler.id_map[SCHED_ID_BEACON]; 
-            char res[8] = {0};
+            char res[16] = {0};
             if (st != NULL) {
                 st->period_ms = cfg->bcn_period;
-                sprintf(res, "%u %u", SUCCESS, st->period_ms);
+                sprintf(res, "%u %u", s, st->period_ms);
             } else {
                 sprintf(res, "%u", FAILURE);
             }

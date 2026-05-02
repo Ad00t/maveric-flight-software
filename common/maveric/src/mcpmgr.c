@@ -110,14 +110,16 @@ void mcpmgr_process_pkt(mcpmgr_s* mcpmgr, mcppkt_s* pkt) {
     } 
    
     // Find and execute cmd implementation
-    cmdimpl_f cmdimpl = ht_get(&mcpmgr->cmdimpls, pkt->id);
-    if (cmdimpl == NULL) {
+    uint32_t raw = 0;
+    if (ht_get(&mcpmgr->cmdimpls, pkt->id, &raw) == SUCCESS) {
+        sprintf(LOGBUF, "proc_pkt: executing: o=%u d=%u e=%u p=%u id='%s' arglen=%u", 
+                pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id, pkt->args_len); log_info();
+        cmdimpl_f f;
+        memcpy(&f, &raw, sizeof(f));
+        f(pkt);
+    } else {
         sprintf(LOGBUF, "proc_pkt: id not recognized: '%s'", pkt->id); log_error();
-        goto cleanup;
     }
-    sprintf(LOGBUF, "proc_pkt: executing: o=%u d=%u e=%u p=%u id='%s' arglen=%u", 
-            pkt->orgn, pkt->dest, pkt->echo, pkt->ptype, pkt->id, pkt->args_len); log_info();
-    cmdimpl(pkt);
 
 cleanup:
     mcppkt_clear(pkt);
