@@ -546,7 +546,7 @@ void cmdimpl_cfg_set_ops(mcppkt_s* pkt) {
             cfg->ops_stage = strtoul(p, &p, 10);
             status_e s = flashmgr_config_flush(&g_flashmgr);
             char res[8] = {0};
-            sprintf(res, "%u %u", cfg->ops_stage);
+            sprintf(res, "%u %u", s, cfg->ops_stage);
             mcp_respond(pkt, RES, res);
             break;
         }
