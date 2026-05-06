@@ -701,7 +701,7 @@ void cmdimpl_rpi_disp_cap(mcppkt_s* pkt) {
 
             mcppkt_s cmd_com_ping;
             mcppkt_create(&cmd_com_ping, NODE, rpi_id, 0, CMD, "com_ping", "");
-            status_e s_sched = scheduler_schedule_cmd_in(&g_scheduler, 10+rpi_id, &cmd_com_ping, 1*MS_PER_MIN, 30000, 3);
+            status_e s_sched = scheduler_schedule_cmd_in(&g_scheduler, 10+rpi_id, &cmd_com_ping, 30000, 30000, 3);
 
             char res[8] = {0};
             sprintf(res, "%u", s_sched);
@@ -806,7 +806,7 @@ void cmdimpl_cam_off(mcppkt_s* pkt) {
             sprintf(eps_sw_args, "%u %u", eps_id, 0);
             mcppkt_s cmd_eps_sw;
             mcppkt_create(&cmd_eps_sw, NODE, NODE_EPS, 0, CMD, "eps_sw", eps_sw_args);
-            scheduler_schedule_cmd_in(&g_scheduler, 10+pkt->orgn, &cmd_eps_sw, 1*MS_PER_MIN, 0, 1);
+            scheduler_schedule_cmd_in(&g_scheduler, 10+pkt->orgn, &cmd_eps_sw, 30000, 0, 1);
             break;
         }
     }

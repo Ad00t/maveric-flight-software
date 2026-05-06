@@ -238,5 +238,6 @@ void system_ops_check_eps(void) {
 
 // Cleanup routine
 void system_cleanup(void) {
+    ax100_set_power(&g_ax100, FALSE);
     reset_cpu();
 }
