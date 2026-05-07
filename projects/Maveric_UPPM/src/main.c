@@ -164,7 +164,7 @@ void system_init(void) {
     // Check operations stage and schedule tasks accordingly
     switch (cfg->ops_stage) {
         case OPS_INIT: {
-            scheduler_schedule_func_in(&g_scheduler, 5, system_ops_transition_safe, 3*MS_PER_MIN, 0, 1);     // 45 min
+            scheduler_schedule_func_in(&g_scheduler, 5, system_ops_transition_safe, cfg->deploy_time, 0, 1);     // 45 min
             mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_rst_ctn", "7199");
             mcp_dispatch(NODE, NODE_LPPM, 0, CMD, "gnc_set_mode", "0");
             break;

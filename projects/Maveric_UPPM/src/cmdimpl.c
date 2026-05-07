@@ -46,6 +46,7 @@ void cmdimpl_init() {
     ht_set(ht, "cfg_set_ops", (uint32_t) cmdimpl_cfg_set_ops);
     ht_set(ht, "cfg_set_gsdelay", (uint32_t) cmdimpl_cfg_set_gsdelay);
     ht_set(ht, "cfg_set_bcnprd", (uint32_t) cmdimpl_cfg_set_bcnprd);
+    ht_set(ht, "cfg_set_dpltm", (uint32_t) cmdimpl_cfg_set_dpltm);
     ht_set(ht, "cfg_load_dfl", (uint32_t) cmdimpl_cfg_load_dfl);
     ht_set(ht, "cfg_load_flash", (uint32_t) cmdimpl_cfg_load_flash);
     ht_set(ht, "cfg_flush", (uint32_t) cmdimpl_cfg_flush);
@@ -517,7 +518,8 @@ void cmdimpl_cfg_get(mcppkt_s* pkt) {
         case CMD: {
             char res[MCP_MAX_ARGS_LEN] = {0};
             config_s* cfg = &g_flashmgr.config;
-            sprintf(res, "%u %u %u %u", cfg->log_level, cfg->ops_stage, cfg->gs_delay, cfg->bcn_period);
+            sprintf(res, "%u %u %u %Lu %Lu", 
+                    cfg->log_level, cfg->ops_stage, cfg->gs_delay, cfg->bcn_period, cfg->deploy_time);
             mcp_respond(pkt, RES, res);
             break;
         }
@@ -582,6 +584,20 @@ void cmdimpl_cfg_set_bcnprd(mcppkt_s* pkt) {
             } else {
                 sprintf(res, "%u", FAILURE);
             }
+            mcp_respond(pkt, RES, res);
+            break;
+        }
+    }
+}
+
+void cmdimpl_cfg_set_dpltm(mcppkt_s* pkt) {
+    switch (pkt->ptype) {
+        case CMD: {
+            char* p = pkt->args;
+            config_s* cfg = &g_flashmgr.config;
+            cfg->deploy_time = strtoul(p, &p, 10);
+            char res[8] = {0};
+            sprintf(res, "%u %u", SUCCESS, cfg->deploy_time);
             mcp_respond(pkt, RES, res);
             break;
         }

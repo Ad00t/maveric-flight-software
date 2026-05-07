@@ -11,6 +11,7 @@ status_e flashmgr_init(flashmgr_s* self, scheduler_s* scheduler) {
     status_e s1 = flashmgr_increment_rbt_cnt(self);
     flashmgr_config_load_defaults(self);
     status_e s2 = flashmgr_config_load_flash(self);
+    // status_e s2 = SUCCESS;
     if (s2 == FAILURE) flashmgr_config_load_defaults(self);
     return (s1 == SUCCESS && s2 == SUCCESS) ? SUCCESS : FAILURE;
 }
@@ -91,6 +92,7 @@ void flashmgr_config_load_defaults(flashmgr_s* self) {
     cfg->ops_stage = OPS_SAFE;
     cfg->gs_delay = 1000;
     cfg->bcn_period = 3*MS_PER_MIN;
+    cfg->deploy_time = 45*MS_PER_MIN;
 #endif
     uint8_t crc_off = offsetof(config_s, crc);
     cfg->crc = compute_crc16((uint8_t*)cfg, crc_off);

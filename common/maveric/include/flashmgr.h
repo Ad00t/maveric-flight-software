@@ -47,6 +47,7 @@ typedef struct {
     ops_stage_e ops_stage;
     uint16_t gs_delay;
     uint32_t bcn_period;
+    uint32_t deploy_time;
 #endif
     uint16_t crc;
 } config_s;

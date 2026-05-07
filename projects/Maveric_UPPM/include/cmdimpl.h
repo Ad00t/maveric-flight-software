@@ -35,6 +35,7 @@ void cmdimpl_cfg_set_ll(mcppkt_s* pkt);
 void cmdimpl_cfg_set_ops(mcppkt_s* pkt);
 void cmdimpl_cfg_set_gsdelay(mcppkt_s* pkt);
 void cmdimpl_cfg_set_bcnprd(mcppkt_s* pkt);
+void cmdimpl_cfg_set_dpltm(mcppkt_s* pkt);
 void cmdimpl_cfg_load_dfl(mcppkt_s* pkt);
 void cmdimpl_cfg_load_flash(mcppkt_s* pkt);
 void cmdimpl_cfg_flush(mcppkt_s* pkt);
