@@ -217,7 +217,7 @@ void system_ops_transition_safe(void) {
 
 void system_ops_deploy(void) {
     sprintf(LOGBUF, "DEPLOYING"); log_info();
-    mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_burn", "3");
+    mcp_dispatch(NODE, NODE_EPS, 0, CMD, "eps_burn", "5");
 }
 
 void system_ops_transmit_beacon(void) {
