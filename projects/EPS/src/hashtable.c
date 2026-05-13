@@ -83,7 +83,7 @@ int1 ht_delete(hashtable_s* ht, char* key) {
 }
 
 void* ht_get(hashtable_s* ht, char* key) {
-    fprintf(COM_A,"3\n\r");
+    //fprintf(COM_A,"3\n\r");
     if (ht->size == 0) return NULL;
     
     uint16_t h = generate_hash(key);

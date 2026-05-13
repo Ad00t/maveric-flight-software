@@ -115,19 +115,21 @@ void kiss_apply_byte_check(uint8_t* message, uint16_t messageLength, uint8_t* fr
 void kiss_remove_byte_check(uint8_t* buf, uint16_t frameLength, uint8_t* msg, uint16_t* msgLength, uint16_t frameStartIdx) {
 	uint16_t len = frameLength;
 	uint16_t spot = 0;
-
+    uint8_t  b;
+    
 	uint16_t i;
 	for (i = frameStartIdx; i < frameLength; i++) {
-		if (buf[i] == FESC) {
+        b = buf[i];
+		if (b == FESC) {
 			len--;
 			i++;
 
-			if (buf[i] == TFESC) {
+			if (b == TFESC) {
 				msg[spot] = FESC;
-			} else if (buf[i] == TFEND) {
+			} else if (b == TFEND) {
 				msg[spot] = FEND;
 			} else {
-				msg[spot] = buf[i];
+				msg[spot] = b;
 			}
 		} else {
 			msg[spot] = buf[i];

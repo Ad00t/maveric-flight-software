@@ -46,8 +46,12 @@ void cmdimpl_init(void) {
     char cmd_eps_housekeeping[] = "eps_hk";
     char cmd_eps_switch[] = "eps_sw";
     char cmd_eps_cut[] = "eps_cut";
-    char cmd_eps_state[] = "eps_state";
+    char cmd_eps_burn[] = "eps_burn";
+    char cmd_eps_rst[] = "eps_rst_ctn";
     char cmd_eps_mode[] = "eps_mode";
+    char cmd_eps_switch_time[] = "eps_sw_t";
+
+    char cmd_tlm_get_data[] = "tlm_get_data";
     
     
     ht_set(ht, cmd_ppm_set_time, (cmdimpl_f) cmdimpl_ppm_set_time);
@@ -59,10 +63,12 @@ void cmdimpl_init(void) {
     ht_set(ht, cmd_eps_housekeeping, (cmdimpl_f) cmdimpl_eps_housekeeping);
     ht_set(ht, cmd_eps_switch, (cmdimpl_f) cmdimpl_eps_switch);
     ht_set(ht, cmd_eps_cut, (cmdimpl_f) cmdimpl_eps_cut);
-    ht_set(ht, cmd_eps_state, (cmdimpl_f) cmdimpl_eps_state);
+    ht_set(ht, cmd_eps_burn, (cmdimpl_f) cmdimpl_eps_burn);
+    ht_set(ht, cmd_eps_rst, (cmdimpl_f) cmdimpl_eps_rst);
     ht_set(ht, cmd_eps_mode, (cmdimpl_f) cmdimpl_eps_mode);
-
-    //ht_set(ht, "tlm_get_data", (cmdimpl_f) cmdimpl_tlm_get_data);
+    ht_set(ht, cmd_eps_switch_time, (cmdimpl_f) cmdimpl_eps_switch_time);
+    
+    ht_set(ht, cmd_tlm_get_data, (cmdimpl_f) cmdimpl_tlm_get_data);
 
     //ht_set(ht, "mtq_get_conf", (cmdimpl_f) cmdimpl_mtq_get_conf);
     //ht_set(ht, "mtq_set_conf", (cmdimpl_f) cmdimpl_mtq_set_conf);
@@ -137,7 +143,7 @@ void cmdimpl_ppm_delay(cmdpkt_s* pkt) {
         cmd_dispatch(NODE, pkt->orgn, pkt->echo, ACK, cmd_ppm_delay, cmd_empty);
         delay_ms(delay);
     } else {
-        cmd_dispatch(NODE, pkt->orgn, pkt->echo, NACK, cmd_ppm_delay, cmd_empty);
+        cmd_dispatch(NODE, pkt->orgn, pkt->echo, TLM, cmd_ppm_delay, cmd_empty);
     }
 }
 
@@ -156,7 +162,7 @@ void cmdimpl_ppm_clear_bufs(cmdpkt_s* pkt) {
 }
 
 void cmdimpl_eps_housekeeping(cmdpkt_s* pkt){
-if (pkt->ptype != REQ) return;
+    if (pkt->ptype != REQ) return;
 
     extern int16 I_BUS;
     extern int16 I_BAT;
@@ -211,9 +217,9 @@ if (pkt->ptype != REQ) return;
     
     char* p = pkt->args;
     char cmd_eps_housekeeping[] = "eps_hk";
-    char eps_ans_hk[] = ""; 
+    //char eps_ans_hk[] = ""; 
     int16 hk_values[48];
-    fprintf(COM_A,"V BUS %Lu\n\r", V_BUS);
+    //fprintf(COM_A,"V BUS %Lu\n\r", V_BUS);
     hk_values[0] = I_BUS;
     hk_values[1] = I_BAT;
     hk_values[2] = V_BUS;
@@ -262,16 +268,16 @@ if (pkt->ptype != REQ) return;
     hk_values[45] = VSIN3;
     hk_values[46] = ISIN3;
     hk_values[47] = PSIN3;
-    fprintf(COM_A,"V BUS %02x\n\r", hk_values[2]);
-    char *charPtr = (char *)hk_values;
-    fprintf(COM_A,charPtr);
+    //fprintf(COM_A,"V BUS %02x\n\r", hk_values[2]);
+    //char *charPtr = (char *)hk_values;
+    //fprintf(COM_A,charPtr);
 //    memcpy(eps_ans_hk, hk_values, 96);
     //char *eps_ans_hk = (char *)hk_values;
-    cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, cmd_eps_housekeeping, hk_values,96);
+    cmd_dispatch(NODE, pkt->orgn, pkt->echo, TLM, cmd_eps_housekeeping, hk_values,96);
 }
 
 void cmdimpl_eps_switch(cmdpkt_s* pkt){
-if (pkt->ptype != REQ) return;
+    if (pkt->ptype != REQ) return;
     char* p = pkt->args;
     char cmd_eps_switch[] = "eps_sw";
 	//unsigned int8 add;
@@ -333,7 +339,7 @@ if (pkt->ptype != REQ) return;
 }
 
 void cmdimpl_eps_cut(cmdpkt_s* pkt){
-if (pkt->ptype != REQ) return;
+    if (pkt->ptype != REQ) return;
     char* p = pkt->args;
     char cmd_eps_cut[] = "eps_cut";
     char cmd_ans_cut[] = "";
@@ -409,27 +415,272 @@ if (pkt->ptype != REQ) return;
 	}
 }
 
-void cmdimpl_eps_state(cmdpkt_s* pkt){
-if (pkt->ptype != REQ) return;
+void cmdimpl_eps_burn(cmdpkt_s* pkt){
+    if (pkt->ptype != REQ) return;
     char* p = pkt->args;
-    uint8_t eps_in_state = strtoul(p, &p, 10);
-  
+    char cmd_eps_burn[] = "eps_burn";
+    char cmd_ans_burn[] = "";
+    
+    extern unsigned int8 SW1;
+    extern unsigned int8 SW2;
+    extern unsigned int8 SW3;
+    extern unsigned int8 SW4;
+    
+    unsigned int8 sw_state[8]; 
+	//unsigned int8 add;
+    int16 shunt_voltage, bus_voltage, power, current;
+	unsigned int8 add0, add1, add2, add3;
+    unsigned int8 sw_state_00, sw_state_01;
+    unsigned int8 sw_state_10, sw_state_11;
+    unsigned int8 sw_state_20, sw_state_21;
+    unsigned int8 sw_state_30, sw_state_31;
+    
+	int pin0, sw_pin0, dp_pin0, dp_flag0;
+    int pin1, sw_pin1, dp_pin1, dp_flag1;
+    int pin2, sw_pin2, dp_pin2, dp_flag2;
+    int pin3, sw_pin3, dp_pin3, dp_flag3;
+    
+    uint8_t cut_time = strtoul(p, &p, 10);
+    
+    restart_wdt();
+    
+    pin0 = PIN_E8;
+	sw_pin0 = PIN_B9;
+	dp_pin0 = PIN_B13;
+	add0 =  INA226_ADDRESS_12;
+    output_low(dp_pin0);
+    
+    output_high(pin0);
+	delay_ms(100);
+	sw_state_00 = input(sw_pin0);
+
+	delay_ms(1000*cut_time);
+		
+	sw_state_01 = input(sw_pin0);
+	ina226_read_data(add0, &shunt_voltage, &bus_voltage, &power, &current);
+		
+	output_low(pin0);
+	SW1 = sw_state_01;	
+    
+	delay_ms(100);
+    fprintf(COM_A, "Shunt voltage: %Ld, Bus voltage: %Ld, Power: %Ld, Current: %Ld\n\r", shunt_voltage, bus_voltage, power, current);
+    //sprintf(cmd_ans_burn,"1: %2X %2X %Ld %Ld %d %d\n\r", pin0, dp_pin0, bus_voltage, current, sw_state_00, sw_state_01);
+	//fprintf(COM_A,cmd_ans_burn);
+    //cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, cmd_eps_burn, cmd_ans_burn);
+    //cmd_ans_burn = "";
+    
+    restart_wdt();
+    pin1 = PIN_E9;
+    sw_pin1 = PIN_B10;
+	dp_pin1 = PIN_B12;
+	add1 =  INA226_ADDRESS_13;
+    output_low(dp_pin1);
+    
+    output_high(pin1);
+	delay_ms(100);
+	sw_state_10 = input(sw_pin1);
+
+	delay_ms(1000*cut_time);
+		
+	sw_state_11 = input(sw_pin1);
+    
+    
+	ina226_read_data(add1, &shunt_voltage, &bus_voltage, &power, &current);
+	output_low(pin1);
+	SW2 = sw_state_11;	
+	delay_ms(100);
+    
+    fprintf(COM_A, "Shunt voltage: %Ld, Bus voltage: %Ld, Power: %Ld, Current: %Ld\n\r", shunt_voltage, bus_voltage, power, current);
+    //sprintf(cmd_ans_burn,"2: %2X %2X %Ld %Ld %d %d\n\r", pin1, dp_pin1, bus_voltage, current, sw_state_10, sw_state_11);
+	//fprintf(COM_A,cmd_ans_burn);
+    
+    restart_wdt();
+    pin2 = PIN_E8;
+	sw_pin2 = PIN_B9;
+	dp_pin2 = PIN_B13;
+	add2 =  INA226_ADDRESS_12;
+    output_high(dp_pin2);
+    
+    output_high(pin2);
+	delay_ms(100);
+	sw_state_20 = input(sw_pin2);
+
+	delay_ms(1000*cut_time);
+		
+	sw_state_21 = input(sw_pin2);
+	ina226_read_data(add2, &shunt_voltage, &bus_voltage, &power, &current);
+		
+	output_low(pin2);
+	SW3 = sw_state_21;	
+	delay_ms(100);
+    
+    fprintf(COM_A, "Shunt voltage: %Ld, Bus voltage: %Ld, Power: %Ld, Current: %Ld\n\r", shunt_voltage, bus_voltage, power, current);
+    //sprintf(cmd_ans_burn,"3: %2X %2X %Ld %Ld %d %d\n\r", pin2, dp_pin2, bus_voltage, current, sw_state_20, sw_state_21);
+	//fprintf(COM_A,cmd_ans_burn);
+   
+    restart_wdt();
+    pin3 = PIN_E9;
+    sw_pin3 = PIN_B10;
+	dp_pin3 = PIN_B12;
+	add3 =  INA226_ADDRESS_13;
+    output_high(dp_pin3);
+    
+    output_high(pin3);
+	delay_ms(100);
+	sw_state_30 = input(sw_pin3);
+
+	delay_ms(1000*cut_time);
+		
+	sw_state_31 = input(sw_pin3);
+	ina226_read_data(add3, &shunt_voltage, &bus_voltage, &power, &current);
+		
+	output_low(pin3);
+	SW4 = sw_state_31;	
+	delay_ms(100);
+    
+    fprintf(COM_A, "Shunt voltage: %Ld, Bus voltage: %Ld, Power: %Ld, Current: %Ld\n\r", shunt_voltage, bus_voltage, power, current);
+    
+    sw_state[0]=sw_state_00;
+    sw_state[1]=sw_state_01;
+    sw_state[2]=sw_state_10;
+    sw_state[3]=sw_state_11;
+    sw_state[4]=sw_state_20;
+    sw_state[5]=sw_state_21;
+    sw_state[6]=sw_state_30;
+    sw_state[7]=sw_state_31;
+    
+    //sprintf(cmd_ans_burn,"4: %2X %2X %Ld %Ld %d %d\n\r", pin3, dp_pin3, bus_voltage, current, sw_state_30, sw_state_31);
+	//fprintf(COM_A,cmd_ans_burn);
+   
+    //sprintf(cmd_ans_burn,"%d %d %d %d %d %d %d %d\n\r", sw_state_00, sw_state_01, sw_state_10, sw_state_11, sw_state_20, sw_state_21, sw_state_30, sw_state_31);
+	//fprintf(COM_A,cmd_ans_burn);
+    cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, cmd_eps_burn, sw_state, 8);
+}
+
+void cmdimpl_eps_rst(cmdpkt_s* pkt){
+    if (pkt->ptype != REQ) return;
+    
+    char* p = pkt->args;
+    char cmd_eps_rst[] = "eps_rst_ctn";
+    
+    extern unsigned int16 counter_reset;
+    
+    unsigned int16 eps_rst_ctn = strtoul(p, &p, 10);
+    
+    counter_reset = eps_rst_ctn;
+    
+    cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, cmd_eps_rst, counter_reset, 2);
 }
 
 void cmdimpl_eps_mode(cmdpkt_s* pkt){
-if (pkt->ptype != REQ) return;
-    char* p = pkt->args;
-    uint8_t eps_in_mode = strtoul(p, &p, 10);
-}
-/*
-void cmdimpl_tlm_get_data(cmdpkt_s* pkt) {
     if (pkt->ptype != REQ) return;
-    sprintf(LOGBUF, "cmdimpl_tlm_get_data REQ"); log_info();
-    char args[CMD_MAX_ARGS_LEN] = {0};
-    sprintf(args, "%u %u", g_flashmgr.rbt_cnt, g_rbt_cause);
-    cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, "tlm_get_data", args);
+    char* p = pkt->args;
+    char cmd_eps_mode[] = "eps_mode";
+    
+    extern uint8_t eps_mode;
+    cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, cmd_eps_mode, eps_mode, 1);
 }
 
+void cmdimpl_eps_switch_time(cmdpkt_s* pkt){
+    if (pkt->ptype != REQ) return;
+    
+    extern uint8_t sw_flag;
+    extern uint8_t sw_number;
+    extern unsigned int16 sw_counter, sw_end;
+    
+    char* p = pkt->args;
+    char cmd_eps_switch_time[] = "eps_sw_t";
+	//unsigned int8 add;
+    int pin;
+    char cmd_ans_switch_time[];
+    
+    uint8_t eps_output = strtoul(p, &p, 10);
+    uint8_t eps_time = strtoul(p, &p, 10);
+    
+    sw_flag = 1;
+    sw_number = eps_output;
+    sw_counter = 0;
+    sw_end = eps_time;
+    
+    switch(eps_output)
+	{
+		case 1:
+			pin = EPS_SW1;
+			//add =  INA226_ADDRESS_1;
+			break;
+		case 2:
+			pin = EPS_SW2;
+			//add =  INA226_ADDRESS_2;
+			break;
+		case 3:
+			pin = EPS_SW3;
+			//add =  INA226_ADDRESS_3;
+			break;
+		case 4:
+			pin = EPS_SW4;
+			//add =  INA226_ADDRESS_4;
+			break;
+		case 5:
+			pin = EPS_SW5;
+			//add =  INA226_ADDRESS_5;
+			break;
+		case 6:
+			pin = PIN_D6;
+			//add =  INA226_ADDRESS_6;
+			break;
+		default:
+			pin = 0;
+            cmd_ans_switch_time = "0";
+			break;
+	}
+
+	if (pin)
+	{
+        output_high(pin);
+        cmd_ans_switch_time = "1"; 
+	}
+    else{
+        cmd_ans_switch_time = "0";
+    }
+    
+    cmd_dispatch(NODE, pkt->orgn, pkt->echo, RES, cmd_eps_switch_time, cmd_ans_switch_time);
+}
+
+void cmdimpl_tlm_get_data(cmdpkt_s* pkt) {
+    if (pkt->ptype != REQ) return;
+    
+    extern int16 I_BUS_TLM;
+    extern int16 I_BAT_TLM;
+    extern int16 V_BUS_TLM;
+    extern int16 V_BAT_TLM;
+    extern int16 V_SYS_TLM;
+    extern int16 TS_ADC_TLM;
+    extern int16 T_DIE_TLM;
+    extern uint8_t eps_mode;
+    
+    char* p = pkt->args;
+    char cmd_eps_housekeeping[] = "tlm_get_data";
+    char eps_ans_hk[] = ""; 
+    
+    int16 tlm_values[8];
+    //fprintf(COM_A,"V BUS %Lu\n\r", V_BUS);
+    tlm_values[0] = I_BUS_TLM;
+    tlm_values[1] = I_BAT_TLM;
+    tlm_values[2] = V_BUS_TLM;
+    tlm_values[3] = V_BAT_TLM;
+    tlm_values[4] = V_SYS_TLM;
+    tlm_values[5] = TS_ADC_TLM;
+    tlm_values[6] = T_DIE_TLM;
+    tlm_values[7] = (int16)eps_mode;
+    
+    //fprintf(COM_A,"V BUS %02x\n\r", tlm_values[2]);
+    //char *charPtr = (char *)hk_values;
+    //fprintf(COM_A,charPtr);
+    
+    cmd_dispatch(NODE, pkt->orgn, pkt->echo, TLM, cmd_eps_housekeeping, tlm_values,16);
+}
+
+/*
 void cmdimpl_mtq_get_conf(cmdpkt_s* pkt) {
     if (pkt->ptype != REQ) return;
     uint8_t conf[4] = {0};

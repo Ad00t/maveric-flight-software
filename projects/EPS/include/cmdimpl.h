@@ -17,9 +17,12 @@ void cmdimpl_ppm_clear_bufs(cmdpkt_s* pkt);
 void cmdimpl_eps_housekeeping(cmdpkt_s* pkt);
 void cmdimpl_eps_switch(cmdpkt_s* pkt);
 void cmdimpl_eps_cut(cmdpkt_s* pkt);
-void cmdimpl_eps_state(cmdpkt_s* pkt);
+void cmdimpl_eps_burn(cmdpkt_s* pkt);
+void cmdimpl_eps_rst(cmdpkt_s* pkt);
 void cmdimpl_eps_mode(cmdpkt_s* pkt);
-//void cmdimpl_tlm_get_data(cmdpkt_s* pkt);
+void cmdimpl_eps_switch_time(cmdpkt_s* pkt);
+
+void cmdimpl_tlm_get_data(cmdpkt_s* pkt);
 
 //void cmdimpl_mtq_get_conf(cmdpkt_s* pkt);
 //void cmdimpl_mtq_set_conf(cmdpkt_s* pkt);

@@ -136,13 +136,14 @@
 //System Functions
 void eps_init(void);
 void eps_superloop(void);
+void sw_off(void);
 
 //void eps_cleanup(void);
 
 //The Functions here shall be part of the commands
 unsigned int16 tick_difference(unsigned int16 current, unsigned int16 previous);
 void power_set_test(int pin, unsigned int8 add);
-//void power_io(unsigned int8 eps_output, unsigned int8 eps_state);
+void power_io(unsigned int8 eps_output, unsigned int8 eps_state);
 void cut_wire(unsigned int8 cut_output, unsigned int8 cut_state, unsigned int8 cut_time);
 void eps_housekeeping(void);
 //void eps_housekeeping(unsigned char *hk_bbq,unsigned char *hk_ina);
@@ -157,9 +158,13 @@ cmdmgr_s g_cmdmgr = {0};            // Commands manager
 uint8_t i2c_frame[FRAME_MAX_SIZE] = {0};
 
 uint8_t eps_state = 0;
-uint8_t eps_mode = 0;
+uint8_t eps_mode = 3;
 
 unsigned int16 current_tick, previous_tick, counter_reset;
+
+uint8_t sw_flag = 0;
+uint8_t sw_number = 0;
+unsigned int16 sw_counter, sw_end;
 
 int16 I_BUS;
 int16 I_BAT;
@@ -211,6 +216,19 @@ int16 PSIN2;
 int16 VSIN3;
 int16 ISIN3;
 int16 PSIN3;
+
+int16 I_BUS_TLM;
+int16 I_BAT_TLM;
+int16 V_BUS_TLM;
+int16 V_BAT_TLM;
+int16 V_SYS_TLM;
+int16 TS_ADC_TLM;
+int16 T_DIE_TLM;
+
+unsigned int8 SW1 = 2;
+unsigned int8 SW2 = 2;
+unsigned int8 SW3 = 2;
+unsigned int8 SW4 = 2;
 
 void main(void)
 {	
@@ -380,6 +398,7 @@ void main(void)
 }
 
 void eps_init(void) {
+    
     // Watchdog, millisecond timer, logger, rbt_cause init
     setup_wdt(WDT_ON);
 	setup_timer1(TMR_INTERNAL | TMR_DIV_BY_64, 0x00FA); 
@@ -395,12 +414,15 @@ void eps_init(void) {
     cmdmgr_init(&g_cmdmgr);	
     cmdimpl_init();	
     
+    
     //Start EPS Manager
     //sprintf(LOGBUF, "system initialized"); log_info();
-    delay_ms(1000);
+    delay_ms(1500);
 	
     int1 bq_bit = bq25672_init();
 	bq25672_update();
+    //power_set_test(PIN_E8, INA226_ADDRESS_12);
+    //power_set_test(PIN_E9, INA226_ADDRESS_13);
     //Calibrate INA226 sensors
     i2c_write_16(INA226_ADDRESS_8, INA226_REG_CALIBRATION, 0x1400);
 	i2c_write_16(INA226_ADDRESS_7, INA226_REG_CALIBRATION, 0x1400);
@@ -415,8 +437,7 @@ void eps_init(void) {
     i2c_write_16(INA226_ADDRESS_9, INA226_REG_CALIBRATION, 0x1400);
 	i2c_write_16(INA226_ADDRESS_10, INA226_REG_CALIBRATION, 0x1400);
     i2c_write_16(INA226_ADDRESS_11, INA226_REG_CALIBRATION, 0x1400);
-	
-	
+
     //Turning off the switchable Power supply
     //3.3V Bus
 	//N/A
@@ -424,26 +445,29 @@ void eps_init(void) {
 	//N/A
 	//5V Input 6
 	//output_low(PIN_D6);
-    output_low(EPS_SW6);
+    
+    sw_off();
+    //output_low(EPS_SW6);
 	//5V Input 5
-	output_low(EPS_SW5);
+	//output_low(EPS_SW5);
 	//5V Input 4
-	output_low(EPS_SW4);
+	//output_low(EPS_SW4);
 	//3.3V Input 3
-	output_low(EPS_SW3);
+	//output_low(EPS_SW3);
 	//3.3V Input 2
-	output_low(EPS_SW2);
+	//output_low(EPS_SW2);
 	//3.3V Input 1
-	output_low(EPS_SW1);
+	//output_low(EPS_SW1);
 	// 5V Burn circuit 1
-	output_low(EPS_BR1);
+	//output_low(EPS_BR1);
 	// 5V Burn circuit 2
-	output_low(EPS_BR2);
+	//output_low(EPS_BR2);
     
     
     //Sending Starting Message to UART port
+    delay_ms(600);
     fprintf(COM_A,"EPS_USC_SERC %X\n\r", bq_bit);	
-	delay_ms(1000);
+	delay_ms(400);
     
     //time conditions for the eps.
     counter_reset = 0;
@@ -472,21 +496,56 @@ void eps_superloop(void) {
     if(previous_tick > current_tick){
         previous_tick = current_tick;
     }
-    if(tick_difference(current_tick, previous_tick) > 1500) {
+    
+    
+    
+    if(tick_difference(current_tick, previous_tick) > 2000) {
         previous_tick = current_tick;
         eps_housekeeping();
         counter_reset += 1;
         fprintf(COM_A,"Current tick %Lu\n\r", counter_reset);
+        
+        if(sw_flag){
+            sw_counter += 1;
+            if (sw_counter==sw_end){
+                power_io(sw_number, 0);
+                sw_flag =0;
+                sw_number=0;
+            }
+            else if(counter_reset == 7199){
+                counter_reset = 0;
+            }
+        }
+        
         //the number is to match the tick counter to around 2 hours
-        if (counter_reset == 10986){
+        if (counter_reset == 7200){
             //placeholder for a reset
             fprintf(COM_A,"EPS_USC_SERC Reset\n\r");	
             counter_reset = 0;
+            reset_cpu();
         }
         
     }
 }
 
+void sw_off(void){
+    output_low(EPS_SW6);
+	//5V Input 5
+	output_low(EPS_SW5);
+	//5V Input 4
+	output_low(EPS_SW4);
+	//3.3V Input 3
+	output_low(EPS_SW3);
+	//3.3V Input 2
+	output_low(EPS_SW2);
+	//3.3V Input 1
+	output_low(EPS_SW1);
+	// 5V Burn circuit 1
+	output_low(EPS_BR1);
+	// 5V Burn circuit 2
+	output_low(EPS_BR2);
+}
+            
 unsigned int16 tick_difference(unsigned int16 current, unsigned int16 previous) {
     return (current - previous);
 }
@@ -552,7 +611,7 @@ void power_set_test(int pin, unsigned int8 add)
 	delay_ms(100);
 	printf("Done!\n\r");
 }
-/*
+
 void power_io(unsigned int8 eps_output, unsigned int8 eps_state)
 {
 
@@ -590,11 +649,6 @@ void power_io(unsigned int8 eps_output, unsigned int8 eps_state)
 			add =  INA226_ADDRESS_6;
 			break;
 		default:
-#ifdef DEVELOP
-				printf("EPS Output Error\n\r");
-#else
-				printf("0\n");
-#endif
 			pin = 0;
 			break;
 	}
@@ -611,22 +665,10 @@ void power_io(unsigned int8 eps_output, unsigned int8 eps_state)
 				output_high(pin);
 				break;
 			default:
-#ifdef DEVELOP
-				printf("EPS State Error\n\r");
-#else
-				printf("0\n");
-#endif
 				break;
 		}
-#ifdef DEVELOP
-		ina226_read_data(add, &shunt_voltage, &bus_voltage, &power, &current);
-		printf("Shunt voltage: %Ld, Bus voltage: %Ld, Power: %Ld, Current: %Ld\n\r", shunt_voltage, bus_voltage, power, current);
-#else
-		printf("1\n");
-#endif
 	}
 }
-*/
 
 void cut_wire(unsigned int8 cut_output, unsigned int8 cut_state, unsigned int8 cut_time)
 {
@@ -764,25 +806,49 @@ void eps_housekeeping(void)
     extern int16 ISIN3;
     extern int16 PSIN3;
     
+    extern int16 I_BUS_TLM;
+    extern int16 I_BAT_TLM;
+    extern int16 V_BUS_TLM;
+    extern int16 V_BAT_TLM;
+    extern int16 V_SYS_TLM;
+    extern int16 TS_ADC_TLM;
+    extern int16 T_DIE_TLM;
+    
+    extern unsigned int8 SW1;
+    extern unsigned int8 SW2;
+    extern unsigned int8 SW3;
+    extern unsigned int8 SW4;
+    
+    extern uint8_t eps_mode;
+    bq25672_update();
+    I_BUS = 0;
     bq25672_get(BQ_ADDR,0x31,&I_BUS);
+    I_BAT = 0;
     bq25672_get(BQ_ADDR,0x33,&I_BAT);
+    V_BUS = 0;
     bq25672_get(BQ_ADDR,0x35,&V_BUS);
+    V_AC1 = 0;
     bq25672_get(BQ_ADDR,0x37,&V_AC1);
+    V_AC2 = 0;
     bq25672_get(BQ_ADDR,0x39,&V_AC2);
+    V_BAT = 0;
     bq25672_get(BQ_ADDR,0x3B,&V_BAT);
+    V_SYS = 0;
     bq25672_get(BQ_ADDR,0x3D,&V_SYS);
+    TS_ADC = 0;
     bq25672_get(BQ_ADDR,0x3F,&TS_ADC); //Recall multiply by 0.0976563
+    T_DIE = 0;
     bq25672_get(BQ_ADDR,0x41,&T_DIE); //Recall multiply by 0.5
     
     ina226_read_data(INA226_ADDRESS_8, &shunt_voltage, &V3V3, &P3V3, &I3V3);
     ina226_read_data(INA226_ADDRESS_7, &shunt_voltage, &V5V0, &P5V0, &I5V0);
     
-    ina226_read_data(INA226_ADDRESS_1, &shunt_voltage, &VOUT1, &POUT1, &IOUT1);
-    ina226_read_data(INA226_ADDRESS_2, &shunt_voltage, &VOUT2, &POUT2, &IOUT2);
-    ina226_read_data(INA226_ADDRESS_3, &shunt_voltage, &VOUT3, &POUT3, &IOUT3);
-    ina226_read_data(INA226_ADDRESS_4, &shunt_voltage, &VOUT4, &POUT4, &IOUT4);
-    ina226_read_data(INA226_ADDRESS_5, &shunt_voltage, &VOUT5, &POUT5, &IOUT5);
-    ina226_read_data(INA226_ADDRESS_6, &shunt_voltage, &VOUT6, &POUT6, &IOUT6);
+    ina226_read_data(INA226_ADDRESS_1, &shunt_voltage, &VOUT1, &POUT1, &IOUT1);    
+    ina226_read_data(INA226_ADDRESS_2, &shunt_voltage, &VOUT2, &POUT2, &IOUT2);    
+    ina226_read_data(INA226_ADDRESS_3, &shunt_voltage, &VOUT3, &POUT3, &IOUT3);    
+    ina226_read_data(INA226_ADDRESS_4, &shunt_voltage, &VOUT4, &POUT4, &IOUT4);    
+    ina226_read_data(INA226_ADDRESS_5, &shunt_voltage, &VOUT5, &POUT5, &IOUT5);    
+    ina226_read_data(INA226_ADDRESS_6, &shunt_voltage, &VOUT6, &POUT6, &IOUT6);    
     
     ina226_read_data(INA226_ADDRESS_12, &shunt_voltage, &VBRN1, &PBRN1, &IBRN1);
     ina226_read_data(INA226_ADDRESS_13, &shunt_voltage, &VBRN2, &PBRN2, &IBRN2);
@@ -790,7 +856,63 @@ void eps_housekeeping(void)
     ina226_read_data(INA226_ADDRESS_9, &shunt_voltage, &VSIN1, &PSIN1, &ISIN1);
     ina226_read_data(INA226_ADDRESS_10, &shunt_voltage, &VSIN2, &PSIN2, &ISIN2);
     ina226_read_data(INA226_ADDRESS_11, &shunt_voltage, &VSIN3, &PSIN3, &ISIN3);
-}
+    
+    
+    I_BUS_TLM = I_BUS;
+    I_BAT_TLM = I_BAT;
+    V_BUS_TLM = V_BUS;
+    V_BAT_TLM = V_BAT;
+    V_SYS_TLM = V_SYS;
+    TS_ADC_TLM = TS_ADC;
+    T_DIE_TLM = T_DIE;
+    
+    fprintf(COM_A,"hk,");
+    fprintf(COM_A,"%Ld,",I_BUS);
+    fprintf(COM_A,"%Ld,",I_BAT);
+    fprintf(COM_A,"%Ld,",V_BUS);
+    fprintf(COM_A,"%Ld,",V_AC1);
+    fprintf(COM_A,"%Ld,",V_AC2);
+    fprintf(COM_A,"%Ld,",V_BAT);
+    fprintf(COM_A,"%Ld,",V_SYS);
+    fprintf(COM_A,"%Ld,",TS_ADC);
+    fprintf(COM_A,"%Ld,",T_DIE);
+    
+    fprintf(COM_A,"%Ld,%Ld,%Ld,", V3V3, P3V3, I3V3);
+    fprintf(COM_A,"%Ld,%Ld,%Ld,",V5V0, P5V0, I5V0);
+    
+    fprintf(COM_A,"%Ld,%Ld,%Ld,", VOUT1, POUT1, IOUT1);
+    fprintf(COM_A,"%Ld,%Ld,%Ld,", VOUT2, POUT2, IOUT2);
+    fprintf(COM_A,"%Ld,%Ld,%Ld,", VOUT3, POUT3, IOUT3);
+    fprintf(COM_A,"%Ld,%Ld,%Ld,", VOUT4, POUT4, IOUT4);
+    fprintf(COM_A,"%Ld,%Ld,%Ld,", VOUT5, POUT5, IOUT5);
+    fprintf(COM_A,"%Ld,%Ld,%Ld,", VOUT6, POUT6, IOUT6);
+    
+    fprintf(COM_A,"%Ld,%Ld,%Ld,", VBRN1, PBRN1, IBRN1);
+    fprintf(COM_A,"%Ld,%Ld,%Ld,", VBRN2, PBRN2, IBRN2);
+    
+    fprintf(COM_A,"%Ld,%Ld,%Ld,", VSIN1, PSIN1, ISIN1);
+    fprintf(COM_A,"%Ld,%Ld,%Ld,", VSIN2, PSIN2, ISIN2);
+    fprintf(COM_A,"%Ld,%Ld,%Ld\n\r", VSIN3, PSIN3, ISIN3);
+    
+    fprintf(COM_A,"sw, %d, %d, %d, %d\n\r", SW1, SW2, SW3, SW4);
+    
+    
+    //emergency condition
+    if ((V_BAT < 6500) && (V_BUS < 6500)){
+       eps_mode = 0;
+       if (V_BAT > 5000){
+           sw_off();
+       } 
+    }
+    else if (V_BAT < 7200 && (V_BUS < 6500)){
+        eps_mode = 1;
+    }
+    else{
+      eps_mode = 2;
+    }
+    
+    fprintf(COM_A,"mode: %d\n\r", eps_mode);
+}   
 /*
 void eps_housekeeping(unsigned char *hk_bbq,unsigned char *hk_ina)
 {

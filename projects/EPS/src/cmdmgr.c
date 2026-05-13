@@ -63,7 +63,7 @@ void cmdmgr_parse_stream(cmdmgr_s* cmdmgr, ringbuf_s* rcvbuf, cmdpkt_s* pkt, int
 }
 
 void cmdmgr_process_cmd(cmdmgr_s* cmdmgr, cmdpkt_s* pkt) {
-    fprintf(COM_A,"2\n\r");
+    //fprintf(COM_A,"2\n\r");
     if (!cmdmgr->is_init) return;
     kiss_parser_s* p = &pkt->parser;
 

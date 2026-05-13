@@ -152,7 +152,6 @@ void cmdpkt_dispatch(cmdpkt_s* pkt) {
     }
 #elif NODE == NODE_EPS
     // uart_write_buf(EPS_PORT, frame, frame_len);
-    fprintf(COM_A, "[EPS] eps route \n\r");
     switch (pkt->dest) {
         case NODE_FTDI:
             //rb_push_n(&g_i2cmgr.i2cbufs[2], frame, frame_len);
@@ -198,21 +197,21 @@ void cmdpkt_dispatch(cmdpkt_s* pkt) {
 void cmd_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, uint8_t* args, uint8_t args_len) {
     cmdpkt_s pkt = {0};
     cmdpkt_create(&pkt, orgn, dest, echo, ptype, id, args, args_len);
-    fprintf(COM_A, "package created 1\n\r");
+    //fprintf(COM_A, "package created 1\n\r");
     cmdpkt_dispatch(&pkt);
 }
 
 void cmd_dispatch(uint8_t orgn, uint8_t dest, uint8_t echo, cmdpkt_type_e ptype, char* id, char* args) {
     cmdpkt_s pkt = {0};
     cmdpkt_create(&pkt, orgn, dest, echo, ptype, id, args);
-    fprintf(COM_A, "package created 2\n\r");
+    //fprintf(COM_A, "package created 2\n\r");
     cmdpkt_dispatch(&pkt);
 }
 
 // Public helpers 
 
 cmdpkt_type_e stat2ack(status_e s) {
-    return (s == SUCCESS ? ACK : NACK);
+    return (s == SUCCESS ? ACK : TLM);
 }
 
 void cmd_respond(cmdpkt_s* pkt, cmdpkt_type_e type, char* res) {

@@ -18,7 +18,8 @@ typedef enum {
     REQ = 1,
     RES = 2,
     ACK = 3,
-    NACK = 4,
+    NACK = 3,
+    TLM = 5,
 } cmdpkt_type_e;
 
 typedef struct {

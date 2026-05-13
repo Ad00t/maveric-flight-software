@@ -5,8 +5,10 @@
         <group>
             <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/src/interrupt.c</file>
             <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/src/i2c.c</file>
+            <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/src/hashtable.c</file>
             <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/include/cmdimpl.h</file>
             <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/src/main.c</file>
+            <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/include/ina226.h</file>
             <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/src/cmdimpl.c</file>
             <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/src/framer.c</file>
             <file>file:/C:/USC/The%20Last%20Cruzade/SERC/maveric-flight-software/projects/EPS/include/cmdpkt.h</file>
