@@ -13,6 +13,12 @@ MAVERIC is a science and technology demonstration mission carrying:
 
 MAVERIC's bus and heritage subsystems build on earlier SERC CubeSat missions (Aeneas, Dodona, Mayflower-Caerus), with this codebase representing a ground-up modular redesign of that legacy flight software to support MAVERIC's new hardware and mission requirements.
 
+<img width="689" height="919" alt="integration" src="https://github.com/user-attachments/assets/c0df3f7a-1bfd-4ad7-b2db-6688648300fb" />
+
+<img width="1225" height="919" alt="ppm_stack" src="https://github.com/user-attachments/assets/313b6c3e-ee5d-423c-ae45-dbd42c7726a0" />
+
+[Image downlink demo](https://github.com/user-attachments/assets/02346964-bb8c-4e5a-8b98-4424ea7559a7)
+
 ## System Architecture
 
 The spacecraft runs on two [PIC24FJ256GA110](https://www.microchip.com/wwwproducts/en/PIC24FJ256GA110) microcontrollers (256 KB flash), split across an **upper** and **lower** payload processor module (PPM). Flight software is built and deployed as two separate standalone embedded applications, one per PPM, communicating over an internal packet-based link.
